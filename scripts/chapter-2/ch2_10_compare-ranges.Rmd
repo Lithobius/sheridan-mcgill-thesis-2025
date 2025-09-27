@@ -1,0 +1,8 @@
+---
+title: "ch2_range-compare"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+placeholder for literature vs obisgbif vs edna

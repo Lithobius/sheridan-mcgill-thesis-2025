@@ -1,0 +1,8 @@
+---
+title: "ch2-by-yearqc"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+placeholder for by-year qcs

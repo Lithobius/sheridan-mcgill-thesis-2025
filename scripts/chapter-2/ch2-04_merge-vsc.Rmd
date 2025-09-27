@@ -1,0 +1,8 @@
+---
+title: "ch2-04-mergeyearsandnormalize"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+placeholder for year merging and vsc etc

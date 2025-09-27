@@ -1,0 +1,9 @@
+---
+title: "ch2-pcoa"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+for pcoa
