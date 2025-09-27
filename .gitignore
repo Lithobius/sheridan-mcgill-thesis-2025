@@ -48,3 +48,4 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 .DS_Store
+processeddata/bigdata/20250813_obis-gbif_region-peco-bysite_unfiltered.csv
