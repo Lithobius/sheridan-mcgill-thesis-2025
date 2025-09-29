@@ -179,8 +179,8 @@ ggplot(obisgbif_mifish_plot, aes(x = axis_1, y = axis_2)) +
 ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site.png')),
        device = 'png', dpi=300, height = 8, width= 13,  units = "in")
 
-#ggsave(filename = here(pcoa, '20230423_peco_pcoa-site.pdf'),
-#       device = 'pdf', dpi=300, height = 8, width= 13,  units = "in")
+ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site.pdf')),
+       device = 'pdf', dpi=300, height = 8, width= 13,  units = "in")
 
 # centroids of clusters
 obisgbif_centroid <- obisgbif_mifish_plot %>%

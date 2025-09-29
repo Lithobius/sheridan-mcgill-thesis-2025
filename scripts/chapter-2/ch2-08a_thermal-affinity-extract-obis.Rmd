@@ -1,0 +1,153 @@
+---
+title: "ch2-extract-thermal-affinity"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+placeholder for extracting / calculating cti data
+extract more code from cti-obis
+
+This script scrapes data from OBIS based on species lists.
+Data cleaning includes: date, basis of record, animals of interest
+
+```{r setup, include=FALSE}
+library(robis)
+library(obistools)
+library(tidyverse)
+library(here)
+
+# here filepaths
+obisdata <- here('rawdata', 'bigdata', 'obis_cti')
+datefield <- '20250927_'
+
+# species list
+mifish_edna <- read_csv(here('processeddata', 'peco', '2021-24_edna',
+                             '20250711_peco-combined_12s_asvmatrix_fish.csv')) %>%
+  filter(rank == 'species') %>%
+  select(found_taxa) %>%
+  distinct() %>%
+  arrange(found_taxa) %>%
+  # not in obis, freshwater!
+  filter(!(found_taxa %in% c('Barbatula barbatula', 'Rhinichthys cataractae',
+                             'Lavinia exilicauda')))
+```
+# functions
+```{r checklist function}
+# requires robis to be loaded
+
+# takes a dataframe that has our shapefiles loaded in with two main columns:
+# wkt from st_as_txt() and region
+obis_occur_sp <- function(species_df) {
+  # make blank object
+  search <- tibble()
+  sp_list <- species_df$found_taxa
+  # loop by region
+  for (i in 1:length(sp_list)) {
+    #region_geo <- region_df$wkt
+    print(paste0('searching for ', sp_list[i]))
+   found_sp <-  occurrence(sp_list[i],
+               startdate = '1945-01-01') %>%
+  janitor::clean_names() %>%
+  relocate(scientific_name) %>%
+  filter(!is.na(decimal_longitude))
+    message('done')
+    
+    search <- bind_rows(search, found_sp)
+  }
+  return(search)
+}
+```
+
+# extract species
+
+I often get errors when I try to download large amounts of data on this connection in general so I will split the data into chunks, merge them, and clean up memory afterwards. This way if (when) I have to restart, it will be a much smaller portion of the total.
+```{r scrape_species}
+sp_chunk1 <- mifish_edna[1:30,]
+sp_chunk2 <- mifish_edna[31:45,]
+sp_chunk3 <- mifish_edna[46:60,]
+sp_chunk4 <- mifish_edna[61:90,]
+sp_chunk5 <- mifish_edna[91:139,]
+
+sp_chunk_obis1 <- obis_occur_sp(sp_chunk1)
+saveRDS(sp_chunk_obis1, here(obisdata, paste0(datefield, 'obis_spchunk1.RDS')))
+sp_chunk_obis1 <- readRDS(here(obisdata, '20250927_obis_spchunk1.RDS'))
+
+sp_chunk_obis2 <- obis_occur_sp(sp_chunk2)
+saveRDS(sp_chunk_obis2, here(obisdata, paste0(datefield, 'obis_spchunk2.RDS')))
+sp_chunk_obis2 <- readRDS(here(obisdata, '20250927_obis_spchunk2.RDS'))
+
+sp_chunk_obis3 <- obis_occur_sp(sp_chunk3)
+saveRDS(sp_chunk_obis3, here(obisdata, paste0(datefield, 'obis_spchunk3.RDS')))
+sp_chunk_obis3 <- readRDS(here(obisdata, '20250927_obis_spchunk3.RDS'))
+
+sp_chunk_obis4 <- obis_occur_sp(sp_chunk4)
+saveRDS(sp_chunk_obis4, here(obisdata, paste0(datefield, 'obis_spchunk4.RDS')))
+sp_chunk_obis4 <- readRDS(here(obisdata, '20250927_obis_spchunk4.RDS'))
+
+sp_chunk_obis5 <- obis_occur_sp(sp_chunk5)
+saveRDS(sp_chunk_obis5, here(obisdata, paste0(datefield, 'obis_spchunk5.RDS')))
+sp_chunk_obis4 <- readRDS(here(obisdata, '20250927_obis_spchunk5.RDS'))
+
+sp_chunk_obisall <- sp_chunk_obis1 %>%
+  bind_rows(sp_chunk_obis2) %>%
+  bind_rows(sp_chunk_obis2_2) %>%
+  bind_rows(sp_chunk_obis3) %>%
+  bind_rows(sp_chunk_obis4) %>%
+  bind_rows(sp_chunk_obis5)
+
+saveRDS(sp_chunk_obisall, here(obisdata, paste0(datefield, 'obis_cti-raw.RDS')))
+
+# remove the separate chunks from the environment
+rm(sp_chunk_obis1, sp_chunk_obis2,
+   sp_chunk_obis3, sp_chunk_obis4,
+   sp_chunk_obis5)
+
+# load in combined data
+sp_chunk_obisall <- readRDS(here(obisdata, paste0(datefield, 'obis_cti-raw.RDS'))) %>%
+  janitor::remove_empty()
+
+glimpse(sp_chunk_obisall)
+```
+
+# clean obis data
+
+REASSESS AFTER HERE AND MERGE SCRIPTS
+
+```{r reduce dataset}
+#smaller dataset with only name, coordinates, and a few taxonomic levels to filter
+obis_sub <- sp_chunk_obisall %>%
+  filter(!is.na(decimal_latitude)) %>%
+  #filter(!is.na(eventDate)) %>%
+  #filter(marine == "TRUE") %>%
+  filter(occurrence_status %in% c('Present', 'present', 'presence', 
+                                  'PRESENT', 'P', 'Q', 'NA',  NA_character_)) %>%
+  #filter(basis_of_record == "Human observation" | basis_of_record == "HumanObservation" | basis_of_record == "PreservedSpecimen" | basis_of_record == "MaterialSample" | basis_of_record == 'LivingSpecimen' | is.na(basis_of_record)) %>%
+  select(scientific_name, marine, brackish, water_body, depth,
+         decimal_latitude, decimal_longitude, date_year,
+         event_date, order, family, genus,
+         basis_of_record, aphia_id, flags) %>%
+  mutate(depth = case_when(depth < 0 ~ 0,
+                           is.na(depth) ~ 0,
+                           TRUE ~ depth)) %>%
+  # parse dates
+  #separate_longer_delim(event_date, '/') %>%
+  mutate(event_date = str_replace_all(event_date, "T", " ")) %>%
+  mutate(event_date = str_replace_all(event_date, "/.*$", "")) %>%
+  mutate(event_date = str_remove_all(event_date, '-0700$|-0800$|-0300|-0400|-02:30')) %>%
+  mutate(event_date = str_remove_all(event_date, '-08:00$|-03:00$|-04:00$|-07:00$|\\+00:00$|\\+02:00$|\\+12$|\\+09:00|\\+01:00|\\+10:00|\\+11:00|000\\+1100')) %>%
+    #mutate(event_date = case_when(str_detect(event_date, "^[0-9]{2}$") ~ paste0(date_year, '-', event_date),
+                                #TRUE ~ event_date)) %>%
+  mutate(lubri_date = lubridate::parse_date_time(event_date, c('ymd', 'ym', 'y',
+                                                               'ymdHMS', 'ymdHM',
+                                                               'ymHM', 'ymHMS', 
+                                                               'yHMS', 'yHM', 'md'))) %>%
+  mutate(month = lubridate::month(lubri_date)) %>%
+  mutate(lubri_year = lubridate::year(lubri_date)) %>%
+  filter(lubri_year == date_year) %>%
+  mutate(summer = ifelse(month %in% c(6,7,8), 't', 'f')) %>%
+  distinct()
+
+which(is.na(obis_sub$lubri_date))
+obis_sub[1916034,]
+```

@@ -1,8 +1,0 @@
----
-title: "ch2-ctiextract"
-author: "Kate Sheridan"
-date: "`r Sys.Date()`"
-output: html_document
----
-
-placeholder for extracting / calculating cti data
