@@ -5,4 +5,551 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-all the cti models here
+Model thermal affinities as function of region values;
+sst, extreme temps, upwelling
+
+Note throughout this script CTI and STI are used as shorthand for thermal affinity of the community and species thermal affinity.
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(matrixStats)
+library(nlme)
+library(ggeffects)
+
+# here filepaths
+obisdata = here('rawdata', 'bigdata', 'obis_cti')
+dataedna <- here('processeddata', 'peco', '2021-24_edna')
+plotout <- here('output', 'thermalaffinity', 'models')
+datefield <- '20250928_'
+
+pal_2or <- c("Juneau Region, Alaska" = "#00496F",
+             "Southeast Alaska" = "#03587B",
+             "Haida Gwaii, British Columbia" = "#076787",
+             "Central Coast British Columbia" = "#0B7693",
+             "North Vancouver Island, British Columbia" = "#0F85A0",
+             "Inner Coast, British Columbia" = "#469989",
+             "Pacific Rim Park, British Columbia" = "#7EAE73",
+             "Puget Sound & Padilla Bay, Washington" = "#B5C25C",
+             "Willapa Bay, Washington" = "#EDD746",
+             "Yaquina Bay, Oregon" = "#EDC334",
+             "Coos Bay, Oregon" = "#EDB123",
+             "Humboldt Bay, California" = "#ED9E11",
+             "Bodega Bay, California" = "#ED8B00",
+             "San Fransisco Bay, California" = "#E97809",
+             "Morro Bay, California" = "#E56512",
+             "Los Angeles, California" = "#E1531B",
+             "San Diego region, California" = "#DD4124")
+```
+
+```{r loadin}
+regions <- read_csv(here(dataedna, '20240925_peco_region-name-plotting.csv'))[-1] %>%
+  rename(region_label = region_name_label)
+
+
+region_order <- regions %>%
+  select(region_lat_name, region_name, region_label, avg_region_lat) %>% 
+  distinct() %>%
+  arrange(-avg_region_lat)
+
+site_order <- regions %>%
+  select(site_code, decimal_latitude) %>%
+  arrange(decimal_latitude)
+
+edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
+                             '20250711_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+  filter(rank == 'species') %>%
+  rename(region_label = region_name_label) %>%
+  # remove below threshold
+  filter(relabund_vst_taxa > 3) %>%
+  # problematic sample
+  filter(!(sample_id %in% c('pecoe-0207')))
+
+
+# STIs
+
+sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
+                          '20250803_sti_errdap_pathfinder.csv')) %>%
+  rename(found_taxa = scientific_name) 
+
+# environment
+region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
+                                   '20250713_mean-summer-sst_by-region.csv')) 
+
+region_temps <- region_environment %>%
+  filter(year %in% c(2021, 2022, 2023, 2024)) %>%
+  distinct() %>%
+  select(!avg_region_lat) 
+
+site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
+                                   '20250713_summer-sst-summary-stats_by-site.csv'))
+
+
+site_temps <- site_environment %>%
+  filter(year %in% c(2021, 2022, 2023, 2024)) %>%
+  select(!c(decimal_latitude, decimal_longitude))%>%
+  select(!c(avg_region_lat))
+
+
+# do i use this?
+#w_sitenames <- edna_peco %>%
+#  select(site_code, location_name, decimal_latitude, decimal_longitude,
+#         region_name, region_label, region_code) %>%
+#  distinct()
+#write_csv(w_sitenames,here('site_names.csv'))
+```
+
+## thermal affinities
+
+get the values needed for the model; same as in 09a thermal-affinity
+
+```{r calculate cti and sti}
+# CTI
+cti_peco <- edna_peco %>%
+  select(!asv) %>%
+  distinct() %>%
+  left_join(sti_obis) %>%
+  filter(!is.na(max_temp)) %>%
+  # temporary until I merge [1]
+  janitor::remove_empty() %>%
+  group_by(site_code, year) %>%
+  # weighted mean and SD from matrixStats package
+  summarise(cti = weightedMean(sti_value, relabund_vst_taxa),
+            ctdiv = weightedSd(sti_value, relabund_vst_taxa),
+            ctr = weightedMean(temp_q_span95, relabund_vst_taxa),
+            # 95% in most of the papers
+            tbiasmax = weightedMean(temp_95, relabund_vst_taxa),
+            tbiasmin = weightedMean(temp_05, relabund_vst_taxa),
+            # 90 for comparison, maybe?
+            tbiasmax90 = weightedMean(temp_90, relabund_vst_taxa),
+            tbiasmin10 = weightedMean(temp_10, relabund_vst_taxa),
+            ctr90 = weightedMean(temp_q_span, relabund_vst_taxa),) %>%
+  ungroup() %>%
+  left_join(regions) %>%
+  select(!c(decimal_latitude, decimal_longitude, samples, sites)) %>%
+  distinct() %>%
+  left_join(site_order)
+
+
+cti_environment <- cti_peco %>%
+  select(!c(region_code, region_code_label, region_lat_name, avg_region_lat)) %>%
+  rename(
+         cti_value = cti) %>%
+  left_join(region_temps) %>%
+  mutate(sitegroup = fct_reorder(as_factor(site_code), year, .fun = first)) 
+
+# STI
+sti_peco <- edna_peco %>%
+  select(!c(region_code,  decimal_latitude, decimal_longitude,
+            extraction_blank, library,
+            seagrass_presence, seagrass_notes, describe_transect,
+            notes, collection_time_24h, notes_about_sample,
+            extraction_notes, organization_participants, reads_adjust,
+            filtration_comments, dna_extraction_date, biological_observations,
+            collection_method, treatment, evalue, identity_percentage,
+            relabund_wis_taxa, relabund_wis_motu, pcr_blank, bsaredo,
+            lab_notes, reads_adjust_fieldlab, reads_raw, reads_adjust_field,
+            reads_adjust_lab, kingdom, phylum, rain, asv)) %>%
+  left_join(sti_obis) %>%
+  filter(!is.na(max_temp)) %>%
+  # temporary until I merge [1]
+  janitor::remove_empty() %>%
+  left_join(regions) %>%
+  select(!c(decimal_latitude, decimal_longitude, samples, avg_region_lat,
+            sites, region_code_label, region_code, region_lat_name)) %>%
+  distinct() %>%
+  relocate(sti_value, region_label)
+  
+sti_environment <- sti_peco %>%
+  left_join(region_temps)
+```
+
+
+
+
+# CTI
+
+## 95
+
+```{r cti-sst ctis region}
+region_list <- unique(regions$region_name)
+
+region_output <- {}
+
+fixed_output <- {}
+
+random_output <- {}
+
+# loop to run model for every region
+for (i in 1:length(region_list)) {
+  print(region_list[i])
+  
+  region_subset <- cti_environment %>%
+    filter(region_name == region_list[i])
+  
+  region_model <- lme(cti_value ~ region_temp95,random=~1|site_code,
+                      data=region_subset)
+  
+  region_sd <- region_model$sigma
+  
+  model_summary <- summary(region_model)
+  
+  ttable <- data.frame(model_summary$tTable) %>%
+    mutate(region_name = region_list[i]) %>%
+    mutate(aic = model_summary$AIC) %>%
+    rownames_to_column('term') %>%
+    janitor::clean_names() %>%
+    rename(intercept = value) %>%
+    mutate(sd = region_sd)
+  
+  region_output <- region_output %>%
+    bind_rows(ttable)
+  
+  random_effects <- data.frame(ranef(region_model)) %>%
+    rownames_to_column('site_code') %>%
+    janitor::clean_names() %>%
+    rename(intercept = "x_intercept") %>%
+    mutate(region_name = region_list[i])
+  
+  random_output <- random_output %>%
+    bind_rows(random_effects)
+}
+
+cti_95_out <- region_output
+
+cti_95_out %>%
+  filter(term == 'region_temp95') %>%
+  mutate(std_positive = intercept + std_error,
+         std_negative = intercept - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  left_join(region_order)%>%
+  mutate(region_label = factor(region_label, 
+                               levels = region_order$region_label)) %>%
+  ggplot(aes(x = intercept,
+             y = fct_rev(region_label))) +
+  geom_vline(xintercept = 0,
+             color = "grey50",
+             size = .75,
+             linetype = "dashed") +
+  geom_errorbar(aes(xmin = std_negative,
+                    xmax = std_positive)) +
+  geom_point(aes(fill = significant),
+             size = 1.5,
+             shape = 21) +
+  scale_fill_manual(values = c('white', 'black')) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text = element_text(size = 5),
+        axis.title.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = 'none')
+
+
+ggsave(here(plotout, paste0(datefield, 'cti-sst95_all-regions.pdf')),
+       height = 2.5,
+       width = 4,
+       units = 'in')
+```
+
+## 75
+
+```{r cti-sst ctis region}
+region_list <- unique(regions$region_name)
+
+region_output <- {}
+
+fixed_output <- {}
+
+random_output <- {}
+
+# loop to run for all regions
+for (i in 1:length(region_list)) {
+  print(region_list[i])
+  
+  region_subset <- cti_environment %>%
+    filter(region_name == region_list[i])
+  
+  region_model <- lme(cti_value ~ region_temp75,
+                      random=~1|site_code,
+                      data=region_subset)
+  
+  region_sd <- region_model$sigma
+  
+  model_summary <- summary(region_model)
+  
+  ttable <- data.frame(model_summary$tTable) %>%
+    mutate(region_name = region_list[i]) %>%
+    mutate(aic = model_summary$AIC) %>%
+    rownames_to_column('term') %>%
+    janitor::clean_names() %>%
+    mutate(sd = region_sd)
+  
+  region_output <- region_output %>%
+    bind_rows(ttable)
+  
+  random_effects <- data.frame(ranef(region_model)) %>%
+    rownames_to_column('site_code') %>%
+    janitor::clean_names() %>%
+    mutate(region_name = region_list[i])
+  
+  random_output <- random_output %>%
+    bind_rows(random_effects)
+}
+
+cti_75_out <- region_output
+
+cti_75_out %>%
+  filter(term == 'region_temp75') %>%
+  mutate(std_positive = value + std_error,
+         std_negative = value - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  left_join(region_order)%>%
+  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
+  ggplot(aes(x = value,
+             y = fct_rev(region_label))) +
+  geom_vline(xintercept = 0,
+             color = "grey50",
+             size = .75,
+             linetype = "dashed") +
+  geom_errorbar(aes(xmin = std_negative,
+                    xmax = std_positive)) +
+  geom_point(aes(fill = significant),
+             size = 1.5,
+             shape = 21) +
+  scale_fill_manual(values = c('white', 'black')) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text = element_text(size = 5),
+        axis.title.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = 'none')
+
+# pdf version 
+ggsave(here(plotout, paste0(datefield, 'cti-sst75_all-regions.pdf')),
+       height = 2.5, width = 4, units = 'in')
+```
+
+
+### significant 75th
+
+```{r significant}
+cti_75_sig <- cti_75_out %>%
+    filter(term == 'region_temp75') %>%
+  mutate(std_positive = value + std_error,
+         std_negative = value - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  filter(significant == 'yes')
+
+sig_list <- unique(cti_75_sig$region_name)
+
+# for each significant region, 
+# make a plot with stixsst + line for predicted values
+for (i in 1:length(sig_list)) {
+  print(sig_list[i])
+  
+    region_subset <- cti_environment %>%
+    filter(region_name == sig_list[i])
+  
+  region_model <- lme(cti_value ~ region_temp75, 
+                      random=~1|site_code, 
+                      data=region_subset)
+  
+  # make a ggpredict plot object
+  region_y <- ggpredict(region_model) %>% 
+    plot()
+  
+  # subset sti values
+  sti_4plot <- sti_peco %>%
+    left_join(cti_environment) %>%
+    filter(region_name == sig_list[i]) 
+  
+  # add sti and cti to ggpredict plot
+  region_y +
+    # points for sti vs sst
+    geom_point(data = sti_4plot,
+               aes(y = sti_value,
+                 x = region_temp75,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    # points for cti vs temp, red diamonds
+  geom_point(data = sti_4plot,
+             aes(y = cti_value,
+                 x = region_temp75),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  scale_color_manual(values = pal_2or) +
+   # scale_x_continuous(limits = c(14,15.75)) +
+    facet_wrap('site_code') +
+  labs(x = '75th percentile Summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 4))
+  
+  # pdf for figures
+  ggsave(here(plotout, paste0(datefield, 'sti-sst75_sig-region-',
+                                     sig_list[i], '.pdf')),
+         height = 2,
+         width = 3,
+         units = 'in')
+  
+}
+```
+
+## mean sst
+
+```{r cti-sst ctis region}
+region_list <- unique(regions$region_name)
+
+region_output <- {}
+
+fixed_output <- {}
+
+random_output <- {}
+
+for (i in 1:length(region_list)) {
+  print(region_list[i])
+  
+  region_subset <- cti_environment %>%
+    filter(region_name == region_list[i]) 
+  
+  region_model <- lme(cti_value ~ sst_mean,random=~1|site_code,
+                      data=region_subset)
+  
+  region_sd <- region_model$sigma
+  
+  model_summary <- summary(region_model)
+  
+  ttable <- data.frame(model_summary$tTable) %>%
+    mutate(region_name = region_list[i]) %>%
+    mutate(aic = model_summary$AIC) %>%
+    rownames_to_column('term') %>%
+    janitor::clean_names() %>%
+    mutate(sd = region_sd)
+  
+  region_output <- region_output %>%
+    bind_rows(ttable)
+  
+  random_effects <- data.frame(ranef(region_model)) %>%
+    rownames_to_column('site_code') %>%
+    janitor::clean_names() %>%
+    mutate(region_name = region_list[i])
+  
+  random_output <- random_output %>%
+    bind_rows(random_effects)
+}
+
+cti_mean_out <- region_output
+
+cti_mean_out %>%
+  filter(term == 'sst_mean') %>%
+  mutate(std_positive = value + std_error,
+         std_negative = value - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  left_join(region_order)%>%
+  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
+  ggplot(aes(x = value,
+             y = fct_rev(region_label))) +
+  geom_vline(xintercept = 0,
+             color = "grey50",
+             size = .75,
+             linetype = "dashed") +
+  geom_errorbar(aes(xmin = std_negative,
+                    xmax = std_positive)) +
+  geom_point(aes(fill = significant),
+             size = 1.5,
+             shape = 21) +
+  scale_fill_manual(values = c('white', 'black')) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = 'none')
+
+# pdf version 
+ggsave(here(plotout, paste0(datefield, 'cti-sstmean_all-regions.pdf')),
+       height = 2.5, width = 4, units = 'in')
+```
+
+### mean significant
+
+```{r}
+cti_mean_sig <- cti_mean_out %>%
+    filter(term == 'sst_mean') %>%
+  mutate(std_positive = value + std_error,
+         std_negative = value - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  filter(significant == 'yes')
+
+sig_list <- unique(cti_mean_sig$region_name)
+
+# for each significant region, 
+# make a plot with stixsst + line for predicted values
+for (i in 1:length(sig_list)) {
+  print(sig_list[i])
+  
+    region_subset <- cti_environment %>%
+    filter(region_name == sig_list[i])
+  
+  region_model <- lme(cti_value ~ sst_mean, 
+                      random=~1|site_code, 
+                      data=region_subset)
+  
+  # make a ggpredict plot object
+  region_y <- ggpredict(region_model) %>% 
+    plot()
+  
+  # subset sti values
+  sti_4plot <- sti_peco %>%
+    left_join(cti_environment) %>%
+    filter(region_name == sig_list[i]) 
+  
+  # add sti and cti to ggpredict plot
+  region_y +
+    # points for sti vs sst
+    geom_point(data = sti_4plot,
+               aes(y = sti_value,
+                 x = sst_mean,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    # points for cti vs temp, red diamonds
+  geom_point(data = sti_4plot,
+             aes(y = cti_value,
+                 x = sst_mean),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  scale_color_manual(values = pal_2or) +
+   # scale_x_continuous(limits = c(14,15.75)) +
+    facet_wrap('site_code') +
+  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 4))
+  
+  # pdf for figures
+  ggsave(here(plotout, paste0(datefield, 'sti-sstmean_sig-region-',
+                                     sig_list[i], '.pdf')),
+         height = 2,
+         width = 3,
+         units = 'in')
+  
+}
+```
+
+
+
+```{r}
+
+```
+
