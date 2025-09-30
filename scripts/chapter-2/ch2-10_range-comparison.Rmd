@@ -1,0 +1,783 @@
+---
+title: "Range comparison"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Comparison of eDNA to literature
+
+This script contains the overlap plots that calculate the difference between the highest and lowest latitude of each as well as prevalence plots that map overlap to different metrics of detectability. 
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(ggpubr)
+
+# here filepath
+bigdata <- here('processeddata','bigdata')
+dataedna <- here('processeddata', 'peco', '2021-24_edna')
+# save in
+ranges <- here::here("output", "rangecomparison")
+
+datefield <- '20250927_'
+
+# palette
+pal_2or <- c("Juneau Region, Alaska" = "#00496F",
+             "Southeast Alaska" = "#03587B",
+             "Haida Gwaii, British Columbia" = "#076787",
+             "Central Coast British Columbia" = "#0B7693",
+             "North Vancouver Island, British Columbia" = "#0F85A0",
+             "Inner Coast, British Columbia" = "#469989",
+             "Pacific Rim Park, British Columbia" = "#7EAE73",
+             "Puget Sound & Padilla Bay, Washington" = "#B5C25C",
+             "Willapa Bay, Washington" = "#EDD746",
+             "Yaquina Bay, Oregon" = "#EDC334",
+             "Coos Bay, Oregon" = "#EDB123",
+             "Humboldt Bay, California" = "#ED9E11",
+             "Bodega Bay, California" = "#ED8B00",
+             "San Fransisco Bay, California" = "#E97809",
+             "Morro Bay, California" = "#E56512",
+             "Los Angeles, California" = "#E1531B",
+             "San Diego region, California" = "#DD4124")
+```
+
+```{r load-in}
+regions <- read_csv(here(dataedna, '20240925_peco_region-name-plotting.csv'))[-1] %>%
+  rename(region_label = region_name_label)
+
+region_order <- regions %>%
+  select(region_lat_name, region_name, region_label, avg_region_lat) %>% 
+  distinct() %>%
+  arrange(-avg_region_lat)
+
+site_order <- regions %>%
+  select(site_code, decimal_latitude) %>%
+  arrange(decimal_latitude)
+
+# edna
+mifish_edna <- read_csv(here(dataedna,
+                             '20250711_peco-combined_12s_asvmatrix_fish.csv'))[-1]%>%
+  filter(rank == 'species') %>%
+    filter(relabund_vst_taxa > 3) %>%
+  rename(region_label = region_name_label) %>%
+  filter(!(sample_id %in% c('pecoe-0207'))) %>%
+    # fish with no records
+  filter(!(found_taxa %in% c(#'Alosa sapidissima', 
+                             'Tautogolabrus adspersus',
+                             'Squalius cephalus',
+                             # freshwater
+                             'Barbatula barbatula', 'Gobio gobio',
+                             'Gambusia affinis', 'Rhinichthys cataractae'#,
+                             # makes inf in model?
+                             #'Spirinchus starksi',
+                             #'Cynoscion parvipinnis'
+                             ))) #%>%
+  # species-genus-family for ? might not need this anymore
+  #mutate(sgf = paste0(found_taxa, '-', genus, '-', family))
+
+edna_fish_range <- mifish_edna %>%
+  select(found_taxa, common_name, taxa_max, taxa_min, taxa_median) %>%
+  distinct() %>%
+  rename(edna_max = taxa_max,
+         edna_min = taxa_min,
+         edna_median = taxa_median) %>%
+  rename(species = found_taxa)
+
+# set an order for plotting; here mean of range found
+fish_order <- mifish_edna %>%
+  select(found_taxa, common_name, taxa_median) %>%
+  distinct() %>%
+  arrange(taxa_median) 
+
+# literature
+fish_lit <- read_csv(here('rawdata', 'peco', '20250626_range-from-literature.csv')) %>%
+  rename(lit_max = max_lat,
+         lit_min = min_lat,
+         species = found_taxa) %>%
+  select(!c(min_long, max_long)) 
+
+# habitat
+fish_seagrass <- read_csv(here('processeddata', 'traits', '20250626_fish_seagrass-traits.csv')) %>%
+  select(species, seagrass_yes, seagrass_maybe) %>%
+  mutate(seagrass_yes = ifelse(seagrass_yes %in% c('x'), 'yes', NA_character_)) %>%
+  mutate(seagrass_maybe = ifelse(seagrass_maybe %in% c('x'), 'maybe', "unknown")) %>%
+  mutate(seagrass = coalesce(seagrass_yes, seagrass_maybe))
+
+```
+
+```{r summary stats}
+# ranges for all three methods
+all_range <- edna_fish_range %>%
+  left_join(fish_lit) %>%
+  # complicated to get around NAs for now
+  mutate(farther_north = ifelse(lit_max >= 60, 'north', 'not')) %>%
+  mutate(farther_south = ifelse(lit_min <= 31.5, 'south', 'xnot'))%>%
+  mutate(lit_max = ifelse(lit_max >= 60, 60, lit_max)) %>%
+  mutate(lit_min = ifelse(lit_min <= 31.5, 31.5, lit_min)) %>%
+    # absolute min, max, range (what is 100%)
+  mutate(abs_max_type = case_when(edna_max >= lit_max ~ 'edna',
+                                    is.na(lit_max) ~ 'unknown',
+                                  lit_max >= edna_max~ 'lit')) %>%
+    mutate(abs_min_type = case_when(edna_min <= lit_min ~ 'edna',
+                                    is.na(lit_min) ~ 'unknown',
+                                  lit_min <= edna_min  ~ 'lit')) %>%
+  mutate(abs_max = case_when(abs_max_type == 'edna' ~ edna_max,
+                             abs_max_type == 'lit' ~ lit_max)) %>%
+  mutate(abs_min = case_when(abs_min_type == 'edna' ~ edna_min,
+                             abs_min_type == 'lit' ~ lit_min)) %>%
+    mutate(edna_span = edna_max - edna_min,
+         lit_span = lit_max - lit_min) %>%
+  mutate(lit_edge_s = ifelse(lit_min < 32.8, 'yes', 'no'),
+         lit_edge_n = ifelse(lit_max > 58.5, 'yes', 'no')) %>%
+  left_join(fish_seagrass) %>%
+  filter(!is.na(lit_max))
+
+# offset
+range_offset <- all_range %>%
+  # latitude of obis/gbif compared to eDNA
+  # positive = higher, negative = lower
+  mutate(edna_lit_n = lit_max - edna_max) %>%
+  mutate(edna_lit_s = lit_min - edna_min) %>%
+  relocate(edna_lit_n, edna_lit_s, .before = edna_max)
+
+
+samplesite <- mifish_edna %>% 
+  select(sample_id, year, site_code) %>%
+  distinct() %>%
+  left_join(regions) %>%
+  select(!c(samples, sites)) %>%
+  # calculate how many samples per site
+  # by year and total
+  group_by(year) %>%
+  add_count(site_code, name = 'n_samplesite_year') %>%
+  ungroup() %>%
+  relocate(n_samplesite_year, .before = region_code) 
+
+
+prevalence_sp <- mifish_edna %>%
+  filter(rank == 'species') %>%
+  select(sample_id, site_code, year, found_taxa, common_name,
+         relabund_vst_taxa) %>%
+  distinct() %>%
+  # how many sites was it found in that year?
+  add_count(found_taxa, site_code, year, name='n_spsite_year') %>%
+  left_join(samplesite) %>%
+  mutate(prev_year = n_spsite_year / n_samplesite_year) %>%
+  relocate(prev_year, 
+           .before = found_taxa) %>%
+  # we'll measure means of prevalance by year across sites
+  # and mean relative abundance
+  select(found_taxa, common_name, prev_year,
+         relabund_vst_taxa) %>%
+  group_by(found_taxa) %>%
+  mutate(mean_prev_year = mean(prev_year)) %>%
+  mutate(mean_relabund = mean(relabund_vst_taxa)) %>%
+  ungroup() %>%
+  select(found_taxa, common_name, mean_prev_year, mean_relabund) %>%
+  distinct() %>%
+  left_join(range_offset) %>%
+  filter(!is.na(lit_max)) %>%
+  left_join(fish_seagrass)%>%
+  mutate(seagrass = ifelse(is.na(seagrass), 'unknown', seagrass))
+
+# csv output for table
+prev_sp_csv <- prevalence_sp %>%
+  select(found_taxa, common_name, mean_prev_year, 
+         edna_lit_n, edna_lit_s, farther_north, farther_south) %>%
+  # round digits
+  mutate(mean_prev_year = round(mean_prev_year, digits = 4),
+         edna_lit_n = round(edna_lit_n, digits = 4),
+         edna_lit_s = round(edna_lit_s, digits = 4)) %>%
+  distinct() %>%
+  # collapse domain columns
+  mutate(Extends_past_domain = case_when(farther_north == 'north' & farther_south == 'south' ~ 'Both',
+                             farther_north == 'north' & farther_south == 'xnot' ~ 'North',
+                             farther_north == 'not' & farther_south == 'south' ~ 'South',
+                             farther_north == 'not' & farther_south == 'xnot' ~ 'No')) %>%
+  select(!c(farther_north, farther_south)) %>%
+  arrange(found_taxa) %>%
+  # simplify for later
+  rename(Species = found_taxa,
+         Mean_prevalence = mean_prev_year,
+         Northern_offset = edna_lit_n,
+         Southern_offset = edna_lit_s)
+
+# offset stats for table
+write_csv(prev_sp_csv, here(ranges,
+                            paste0(datefield, 'offset_literature.csv')))
+```
+
+
+
+```{r figure version}
+ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_n, 
+                 x = mean_prev_year,
+                  colour = as.factor(farther_north)),
+             size = 2) +
+      scale_colour_manual(values = c("grey80", "black")) +
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_n, x = mean_prev_year)) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(-30,30)) +
+  labs(y = NULL,
+       x = NULL,
+       title = 'North') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20),
+        legend.position = 'none')
+
+ggsave(filename = here(ranges, 
+                       paste0(datefield,
+                              'lit-offset-prevalence_domain_n_figvers.pdf')),
+       height = 5,
+       width = 8,
+       units = 'in')
+
+ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_s, 
+                 x = mean_prev_year,
+                  colour = as.factor(farther_south)),
+             
+             size = 2) +
+      scale_color_manual(values = c("grey80", "black"))+
+  geom_hline(yintercept = 0) +
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_s, x = mean_prev_year)) +
+  scale_y_continuous(limits = c(-30,30)) +
+  labs(y = "Degrees latitude difference between Literature & eDNA",
+       x = NULL,
+       title = 'South') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20),
+        legend.position = 'none')
+
+
+ggsave(filename = here(ranges, paste0(datefield,
+                                                  'lit-offset-prevalence_domain_s_figvers.pdf')),
+       height = 5,
+       width = 8,
+       units = 'in')
+
+
+# domain separate
+
+ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_n, 
+                 x = mean_prev_year),
+             colour = 'black',
+             size = 2) +
+  facet_grid(~ farther_north) +
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_n, x = mean_prev_year)) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(-30,30)) +
+  labs(y = NULL,
+       x = NULL,
+       title = 'North') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20),
+        legend.position = 'none')
+
+ggsave(filename = here(ranges, paste0(datefield, 'lit-offset-prevalence_north-separate-figureversion.png')),
+       height = 1000,
+       width = 2500,
+       units = 'px')
+
+ggsave(filename = here(ranges, paste0(datefield, 'lit-offset-prevalence_north-separate-figureversion.pdf')),
+       height = 5,
+       width = 7,
+       units = 'in')
+
+ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_s, 
+                 x = mean_prev_year),
+             colour = 'black',
+             size = 2) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(-30,30)) +
+  facet_grid(~ farther_south) +
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_s, x = mean_prev_year)) +
+  labs(y = NULL,
+       x = NULL,
+       title = 'South') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20),
+        legend.title = element_blank(),
+        legend.position = 'none')
+
+
+ggsave(filename = here(ranges, paste0(datefield, 'lit-offset-prevalence_south-separate-figureversion.png')),
+       height = 1000,
+       width = 2500,
+       units = 'px')
+
+ggsave(filename = here(ranges, paste0(datefield, 'lit-offset-prevalence_south-separate-figureversion.pdf')),
+       height = 5,
+       width = 7,
+       units = 'in')
+
+
+# VST
+vst_n <- ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_n, x = mean_relabund),
+             colour = 'black',
+             size = 2) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(-30,30)) +
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_n, x = mean_relabund)) +
+  labs(
+       x = NULL,
+       y = NULL,
+       title = 'North') +
+  theme_bw()+
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20))
+
+vst_s <- ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_s, x = mean_relabund),
+             colour = 'black',
+             size = 2) +
+  geom_hline(yintercept = 0) +
+  geom_smooth(method = lm, colour = 'grey50',
+              aes(y = edna_lit_s, x = mean_relabund)) +
+  scale_y_continuous(limits = c(-30,30)) +
+  labs(y = NULL,
+       x = NULL,
+       title = 'South') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20))
+
+vst_both <- ggarrange(vst_n, vst_s)%>%
+  annotate_figure(
+                  bottom = text_grob('Mean VST abundance', size = 20)) + 
+  bgcolor('white')
+
+
+vst_both
+
+ggsave(vst_both, filename = here(ranges, paste0(datefield, 'lit-offset-vst_figvers.png')),
+       height = 1000,
+       width = 2500,
+       units = 'px')
+
+ggsave(vst_both, filename = here(ranges, paste0(datefield, 'lit-offset-vst_figvers.pdf')),
+       height = 9,
+       width = 18,
+       units = 'in')
+
+
+# habitat figure version
+
+## prevalence seagrass
+prev_n2 <- ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_n, 
+                 x = mean_prev_year,
+                  alpha = as.factor(seagrass),
+                 shape = as.factor(seagrass)),
+             colour = 'black',
+             size = 2) +
+      scale_alpha_manual(values = c(.5, .1, 1),
+                     labels = c('Association with habitats near eelgrass', 
+                                'Unknown', 'Associated with eelgrass')
+                     ) +
+          scale_shape_manual(values = c(16, 16, 17),
+                     labels = c('Association with habitats near eelgrass', 
+                                'Unknown', 'Associated with eelgrass')
+                     )+
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_n, x = mean_prev_year)) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(-30,30)) +
+  labs(y = NULL,
+       x = NULL,
+       title = 'North') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20))
+
+prev_s2 <- ggplot(prevalence_sp) +
+  geom_point(aes(y = edna_lit_s, 
+                 x = mean_prev_year,
+                  shape = as.factor(seagrass),
+                 alpha = as.factor(seagrass)),
+             colour = 'black',
+             size = 2) +
+      scale_alpha_manual(values = c(.5, .1, 1),
+                     labels = c('Association with habitats near eelgrass', 
+                                'Unknown', 'Associated with eelgrass')
+                     )+
+        scale_shape_manual(values = c(16, 16, 17),
+                     labels = c('Association with habitats near eelgrass', 
+                                'Unknown', 'Associated with eelgrass')
+                     )+
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(limits = c(-30,30)) +
+  geom_smooth(method = lm, 
+              colour = 'grey50',
+              aes(y = edna_lit_s, x = mean_prev_year)) +
+  labs(y = NULL,
+       x = NULL,
+       title = 'South') +
+  theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 14),
+        title = element_text(size = 20),
+        legend.title = element_blank())
+
+
+
+prev_both2 <- ggarrange(prev_n2, prev_s2, common.legend = TRUE) %>%
+  annotate_figure(
+                  bottom = text_grob('Mean yearly prevalence', size = 20)) + 
+  bgcolor('white')
+
+ggsave(prev_both2, filename = here(ranges, paste0(datefield, 'lit-offset-prevalence_seagrass_figvers.pdf')),
+       height = 6,
+       width = 12,
+       units = 'in')
+
+prev_both2
+
+```
+
+
+# Models
+
+```{r models}
+#lm(offset~prevalence + habitat_category) (all the data, check residuals after model fit)
+# note one category here is 'reference', that's 'maybe'
+# to get all separate use LMM linear mixed model or constrained least squares
+seagrass_n_lm <- lm(edna_lit_n ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp)
+
+summary(seagrass_n_lm)
+hist(seagrass_n_lm$residuals)
+qqnorm(seagrass_n_lm$residuals)
+qqline(seagrass_n_lm$residuals)
+
+seagrass_s_lm <- lm(edna_lit_s ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp)
+
+summary(seagrass_s_lm)
+hist(seagrass_s_lm$residuals)
+qqnorm(seagrass_s_lm$residuals)
+qqline(seagrass_s_lm$residuals)
+
+glimpse(prevalence_sp)
+
+seagrass_s_lm2 <- lm(edna_lit_s ~ relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp)
+summary(seagrass_s_lm2)
+
+
+ggplot(prevalence_sp) +
+  geom_boxplot(aes(x = as.factor(seagrass), 
+                   y = edna_lit_s)) +
+  theme_bw()
+
+
+ggplot(prevalence_sp) +
+  geom_violin(aes(x = as.factor(seagrass), 
+                   y = edna_lit_s)) +
+      theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20))
+
+ggsave(here(ranges, paste0(datefield, 'eelgrass_violin_s.png')),
+       width = 1250,
+       height = 1500,
+       units = 'px')
+
+# seagrass only
+seagrass_n_lm2 <- lm(edna_lit_n ~ relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp)
+summary(seagrass_n_lm2)
+
+
+ggplot(prevalence_sp) +
+  geom_boxplot(aes(x = as.factor(seagrass), 
+                   y = edna_lit_n)) +
+  theme_bw()
+
+
+ggplot(prevalence_sp) +
+  geom_violin(aes(x = as.factor(seagrass), 
+                   y = edna_lit_n)) +
+    theme_bw() +
+  theme(axis.text = element_text(size = 20),
+        axis.title.y = element_text(size = 18),
+        title = element_text(size = 20))
+
+ggsave(here(ranges, paste0(datefield, 'eelgrass_violin_n.png')),
+       width = 1250,
+       height = 1500,
+       units = 'px')
+
+
+
+# seagrass_n_lm3 <- lm(edna_lit_n ~ feas_feas, 
+#                     data = prevalence_sp)
+# summary(seagrass_n_lm3)
+# 
+# 
+# ggplot(prevalence_sp) +
+#   geom_boxplot(aes(x = feas_feas, 
+#                    y = edna_lit_n)) +
+#   theme_bw()
+# 
+# 
+# seagrass_s_lm3 <- lm(edna_lit_s ~ feas_feas, 
+#                     data = prevalence_sp)
+# summary(seagrass_s_lm3)
+# 
+# 
+# ggplot(prevalence_sp) +
+#   geom_boxplot(aes(x = feas_feas, 
+#                    y = edna_lit_s)) +
+#   theme_bw()
+# 
+# 
+# ggplot(prevalence_sp) +
+#   geom_violin(aes(x = as.factor(seagrass), 
+#                    y = edna_lit_n)) +
+#   theme_bw()
+
+```
+
+## Domain edge separate
+
+```{r domain separate}
+prevalence_sp_n_edge <- prevalence_sp %>%
+  filter(farther_north == 'north')
+
+prevalence_sp_n_within <- prevalence_sp %>%
+  filter(farther_north == 'not')
+
+prevalence_sp_s_edge <- prevalence_sp %>%
+  filter(farther_south == 'south')
+
+prevalence_sp_s_within <- prevalence_sp %>%
+  filter(farther_south == 'xnot')
+
+seagrass_n_edge_lm <- lm(edna_lit_n ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp_n_edge)
+
+summary(seagrass_n_edge_lm)
+hist(seagrass_n_edge_lm$residuals)
+qqnorm(seagrass_n_edge_lm$residuals)
+qqline(seagrass_n_edge_lm$residuals)
+
+seagrass_n_within_lm <- lm(edna_lit_n ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp_n_within)
+
+summary(seagrass_n_within_lm)
+hist(seagrass_n_within_lm$residuals)
+qqnorm(seagrass_n_within_lm$residuals)
+qqline(seagrass_n_within_lm$residuals)
+
+seagrass_s_edge_lm <- lm(edna_lit_s ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp_s_edge)
+
+summary(seagrass_s_edge_lm)
+hist(seagrass_s_edge_lm$residuals)
+qqnorm(seagrass_s_edge_lm$residuals)
+qqline(seagrass_s_edge_lm$residuals)
+
+seagrass_s_within_lm <- lm(edna_lit_s ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
+                    data = prevalence_sp_s_within)
+
+summary(seagrass_s_within_lm)
+hist(seagrass_s_within_lm$residuals)
+qqnorm(seagrass_s_within_lm$residuals)
+qqline(seagrass_s_within_lm$residuals)
+
+
+```
+
+# poisson
+
+```{r}
+north_poisson <- prevalence_sp %>%
+  filter(farther_north == 'north') %>%
+  mutate(edna_lit_n = ifelse(edna_max == max(edna_max) & lit_max == 60,0, edna_lit_n))
+south_poisson <- prevalence_sp %>%
+  filter(farther_south == 'south')%>%
+  mutate(edna_lit_s = ifelse(edna_min == max(edna_min) & lit_min == 32,0, edna_lit_s))
+
+prevalence_n_poisson <- glm(edna_lit_n ~ mean_prev_year,
+                            family = "poisson",
+                            data = north_poisson)
+
+summary(prevalence_n_poisson)
+hist(prevalence_n_poisson$residuals)
+qqnorm(prevalence_n_poisson$residuals)
+qqline(prevalence_n_poisson$residuals)
+
+plot(prevalence_n_poisson)
+
+
+prevalence_s_poisson <- glm(abs(edna_lit_s) ~ mean_prev_year,
+                            family = "poisson",
+                            data = south_poisson)
+
+summary(prevalence_s_poisson)
+hist(prevalence_s_poisson$residuals)
+qqnorm(prevalence_s_poisson$residuals)
+qqline(prevalence_s_poisson$residuals)
+
+plot(prevalence_s_poisson)
+```
+
+
+
+# range edges
+
+```{r}
+rangehist_data <- all_range %>%
+  select(species, common_name, lit_min, lit_max) %>%
+  pivot_longer(cols = c(lit_min, lit_max),
+               names_to = 'type') %>%
+  filter(value > 32 & value < 60) %>%
+  distinct() %>%
+  pivot_wider(names_from = 'type')
+
+rangehist_data %>%
+  select(!lit_min) %>%
+  filter(!is.na(lit_max)) %>%
+  ggplot() +
+  geom_histogram(aes(lit_max),
+                 alpha = .7) +
+  scale_x_continuous(limits = c(31.5,60))+
+  scale_y_continuous(limits = c(0,15))+
+  coord_flip() +
+  labs(title = 'Cool range edge', y = '') +
+  theme_bw() +
+  theme(panel.grid = element_blank())
+
+ggsave(here(ranges, paste0(datefield, 'cool-edge_hist.png')))
+
+ggsave(here(ranges, paste0(datefield, 'cool-edge_hist.pdf')),
+       height = 15, width = 4, units = 'in', 
+       device = 'pdf')
+
+
+rangehist_data %>%
+  select(!lit_max) %>%
+  filter(!is.na(lit_min)) %>%
+  ggplot() +
+  geom_histogram(aes(lit_min),
+                 alpha = .7) +
+  coord_flip() +
+  scale_x_continuous(limits = c(31.5,60))+
+  scale_y_continuous(limits = c(0,15))+
+  labs(title = 'Warm range edge', y = '')+
+  theme_bw() +
+  theme(panel.grid = element_blank())
+
+ggsave(here(ranges, paste0(datefield, 'warm-edge_hist.png')))
+
+ggsave(here(ranges, paste0(datefield, 'warm-edge_hist.pdf')),
+       height = 15, width = 4, units = 'in', 
+       device = 'pdf')
+```
+
+# prevalence vs habitat
+
+```{r prev-habitat}
+prevalence_sp %>%
+  ggplot() +
+  geom_point(aes(x = mean_prev_year,
+                 y = found_taxa,
+                 colour = seagrass)) +
+  theme_bw()
+
+prevalence_sp %>%
+  ggplot() +
+  geom_boxplot(aes(x = mean_prev_year,
+                 y = seagrass,
+                 colour = seagrass)) +
+  theme_bw()
+
+# make sure your variable is a factor for ANOVA
+prevalence_sp <- prevalence_sp %>%
+  mutate(seagrass = as.factor(seagrass))
+
+# anova: is there a difference in means between groups?
+seagrass_type_aov <- aov(mean_prev_year ~ seagrass, 
+                    data = prevalence_sp)
+
+summary(seagrass_type_aov)
+report::report(seagrass_type_aov)
+
+# tukey; which group?
+library(multcomp)
+seagrass_aov_posttest <- glht(seagrass_type_aov,
+                                        linfct = mcp(seagrass = "Tukey"))
+
+summary(seagrass_aov_posttest)
+plot(seagrass_aov_posttest)
+
+
+TukeyHSD(seagrass_type_aov)
+plot(TukeyHSD(seagrass_type_aov))
+
+#install.packages('ggstatsplot')
+
+ggstatsplot::ggbetweenstats(data = prevalence_sp,
+                            x = seagrass,
+                            y = mean_prev_year,
+                            type = 'parametric',
+                            var.equal = TRUE,
+                            plot.type = 'box',
+                            pairwise.display = 'significant',
+                            pairwise.comparisons = TRUE,
+                            centrality.plotting = FALSE,
+                            bf.message = FALSE) +
+  labs(y = 'Mean prevalence per year',
+       x = '') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 10))
+
+ggsave(here(ranges, paste0(datefield, 'seagrass-anova.png')),
+       height = 900,
+       width = 900,
+       units = 'px')
+
+
+prevalence_sp %>%
+  dplyr::select(found_taxa, common_name, seagrass) %>%
+  distinct() %>%
+  add_count(seagrass) %>%
+  dplyr::select(seagrass, n) %>%
+  distinct()
+
+mifish_edna %>% dplyr::select(sample_id) %>% distinct()
+
+toBibtex(citation("nlme"))
+```
+

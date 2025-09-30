@@ -547,9 +547,247 @@ for (i in 1:length(sig_list)) {
 }
 ```
 
+# upwelling
+
+The California Current system is often defined by upwelling in different parts of the year and regions. The effects of upwelling may be different than simple sst though sst and upwelling are correlated.
+
+```{r prep upwelling}
+beuti_raw <- read_csv(here("rawdata", "upwelling", 
+                            "20250515beuti-1degdaily_peco-summer.csv"))
+
+beuti_index_year <- beuti_raw %>%
+  group_by(year, latitude) %>%
+  mutate(beuti_year = mean(beuti)) %>%
+  ungroup() %>%
+  select(!c(timestamps, month, beuti)) %>%
+  distinct() %>%
+  rename(beuti_lat = latitude)
+
+beuti_cti_peco <- cti_peco %>%
+  # filter to region/site within the index
+  filter(avg_region_lat <= max(beuti_index_year$beuti_lat)) %>%
+  # match latitude, don't round!
+  # keep the site within the latitude it is in
+  # remove decimals as a character and turn it back to a number
+  # lol
+  mutate(beuti_lat = as.character(avg_region_lat)) %>%
+  mutate(beuti_lat = str_remove_all(beuti_lat, "\\.[0-9]*$")) %>%
+  mutate(beuti_lat = as.numeric(beuti_lat)) %>%
+  # join beuti!
+  left_join(beuti_index_year) %>%
+  relocate(beuti_year) %>%
+  select(!c(region_lat_name)) %>%
+  rename(cti_value = cti) %>%
+  left_join(region_temps) %>%
+  mutate(sitegroup = fct_reorder(as_factor(site_code), year, .fun = first)) 
 
 
-```{r}
-
+beuti_sti_peco <- sti_peco %>%
+  left_join(region_order) %>%
+  #filter(region_name %in% beuti_cti_peco$region_name) %>%
+  # filter to region/site within the index
+  filter(avg_region_lat <= max(beuti_index_year$beuti_lat)) %>%
+  # match latitude, don't round!
+  # keep the site within the latitude it is in
+  # remove decimals as a character and turn it back to a number
+  # lol
+  mutate(beuti_lat = as.character(avg_region_lat)) %>%
+  mutate(beuti_lat = str_remove_all(beuti_lat, "\\.[0-9]*$")) %>%
+  mutate(beuti_lat = as.numeric(beuti_lat)) %>%
+  # join beuti!
+  left_join(beuti_index_year) %>%
+  relocate(beuti_year)
 ```
+
+
+```{r upwelling plots}
+# region cti vs upwelling
+ggplot(beuti_cti_peco) +
+  geom_point(aes(x = beuti_year, 
+                y = cti_value,
+                group = year,
+                color = as.factor(year))) +
+  scale_color_manual(values = c('#015B58FF', '#2C6184FF', '#89689DFF', '#BA7999FF')) +
+  facet_wrap('region_name', scales = 'free') +
+    labs(color = NULL,x = 'BEUTI upwelling index', y = 'Community Thermal Index', title = 'CTI vs BEUTI upwelling index') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+ggsave(here(plotout, paste0(datefield, 'ctivsbeauti-year_facet.png')),
+        height = 2000,
+       width = 3000,
+       unit = 'px')
+
+
+# region beuti vs sst
+ggplot(beuti_cti_peco) +
+  geom_point(aes(x = beuti_year, 
+                y = sst_mean,
+                group = year,
+                color = as.factor(region_label))) +
+  scale_color_manual(values = pal_2or) +
+    labs(color = NULL,x = 'BEUTI upwelling index', y = 'Mean summer SST') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+ggsave(here(plotout, paste0(datefield, 'sstvsbeauti-region.png')),
+        height = 2000,
+       width = 3000,
+       unit = 'px')
+```
+
+
+```{r cti-beuti ctis region}
+region_list <- unique(beuti_cti_peco$region_name)
+
+region_output <- {}
+
+fixed_output <- {}
+
+random_output <- {}
+
+for (i in 1:length(region_list)) {
+  print(region_list[i])
+  
+  region_subset <- beuti_cti_peco %>%
+    filter(region_name == region_list[i]) #%>%
+    #filter(year > 2021)
+  
+  region_model <- lme(cti_value ~ beuti_year,random=~1|site_code,
+                      data=region_subset)
+  
+  region_sd <- region_model$sigma
+  
+  model_summary <- summary(region_model)
+  
+  ttable <- data.frame(model_summary$tTable) %>%
+    mutate(region_name = region_list[i]) %>%
+    mutate(aic = model_summary$AIC) %>%
+    rownames_to_column('term') %>%
+    janitor::clean_names() %>%
+    mutate(sd = region_sd)
+  
+  region_output <- region_output %>%
+    bind_rows(ttable)
+  
+  random_effects <- data.frame(ranef(region_model)) %>%
+    rownames_to_column('site_code') %>%
+    janitor::clean_names() %>%
+    mutate(region_name = region_list[i])
+  
+  random_output <- random_output %>%
+    bind_rows(random_effects)
+}
+
+
+cti_upwelling_out <- region_output
+
+region_output %>%
+  filter(term == 'beuti_year') %>%
+  mutate(std_positive = value + std_error,
+         std_negative = value - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  left_join(region_order)%>%
+  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
+  ggplot(aes(x = value,
+             y = fct_rev(region_label))) +
+  geom_vline(xintercept = 0,
+             color = "grey50",
+             size = .75,
+             linetype = "dashed") +
+  geom_errorbar(aes(xmin = std_negative,
+                    xmax = std_positive)) +
+  
+  geom_point(aes(fill = significant),
+             shape = 21) +
+  scale_fill_manual(values = c('white', 'black')) +
+  labs(x = 'Effect size') +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        legend.position = 'none',
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 10))
+
+
+ggsave(here(plotout, paste0(datefield, 'cti-beuti_all-regions.png')),
+       width = 1200,
+       height = 750,
+       units = 'px')
+```
+
+
+```{r significant plot}
+beuti_sig <- cti_upwelling_out %>%
+    filter(term == 'beuti_year') %>%
+  mutate(std_positive = value + std_error,
+         std_negative = value - std_error,
+         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  filter(significant == 'yes')
+
+sig_list <- unique(beuti_sig$region_name)
+
+# for each significant region, 
+# make a plot with stixsst + line for predicted values
+for (i in 1:length(sig_list)) {
+  print(sig_list[i])
+  
+    region_subset <- beuti_cti_peco %>%
+    filter(region_name == sig_list[i])
+  
+  region_model <- lme(cti_value ~ beuti_year, 
+                      random=~1|site_code, 
+                      data=region_subset)
+  
+  # make a ggpredict plot object
+  region_y <- ggpredict(region_model) %>% 
+    plot()
+  
+  # subset sti values
+  sti_4plot <- sti_peco %>%
+    left_join(beuti_cti_peco) %>%
+    filter(region_name == sig_list[i]) 
+  
+  # add sti and cti to ggpredict plot
+  region_y +
+    # points for sti vs sst
+    geom_point(data = sti_4plot,
+               aes(y = sti_value,
+                 x = beuti_year,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    # points for cti vs temp, red diamonds
+  geom_point(data = sti_4plot,
+             aes(y = cti_value,
+                 x = beuti_year),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  scale_color_manual(values = pal_2or) +
+   # scale_x_continuous(limits = c(14,15.75)) +
+    facet_wrap('site_code') +
+  labs(x = 'BEUTI Upwelling index', y = 'Thermal affinity',
+       title = NULL)+
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 4))
+  
+  # pdf for figures
+  ggsave(here(plotout, paste0(datefield, 'sti-upwelling_sig-region-',
+                                     sig_list[i], '.pdf')),
+         height = 2,
+         width = 3,
+         units = 'in')
+  
+}
+```
+
+
+
+
+
 
