@@ -564,61 +564,45 @@ cti_peco %>%
 
 ```{r whichfish}
 whichfish <- sti_peco %>%
-  select(site_code, temp_95, sti_value, region_label, found_taxa) %>%
-  distinct() %>% 
-  left_join(cti_environment_site_distinct) %>%
-  #filter(!region_last5_temp95 == 'NaN') %>%
-  mutate(below_95_95 = ifelse(temp_95 > site_last5_temp95, 'x', NA_character_)) %>%
-  mutate(below_75_95 = ifelse(temp_95 > site_last5_temp75, 'x', NA_character_)) %>%
-  mutate(below_mean_95 = ifelse(temp_95 > site_last5_meansst, 'x', NA_character_)) %>%
-  mutate(below_95_sti = ifelse(sti_value > site_last5_temp95, 'x', NA_character_)) %>%
-  mutate(below_75_sti = ifelse(sti_value > site_last5_temp75, 'x', NA_character_)) %>%
-  mutate(below_mean_sti = ifelse(sti_value > site_last5_meansst, 'x', NA_character_)) %>%
-  mutate(safe = ifelse(is.na(below_mean_sti) & is.na(below_75_sti) & is.na(below_95_sti) & 
-                         is.na(below_mean_95) & is.na(below_75_95) & is.na(below_95_95), 'x', NA_character_))
-
-
-safefish <- whichfish %>%
-  filter(safe == 'x') %>%
-  select(region_label, found_taxa) %>%
-  distinct()
-
-verydangerfish <- whichfish %>%
-  filter(is.na(safe)) %>%
-  filter(below_mean_95 == 'x' | below_mean_sti == 'x') %>%
-  select(found_taxa, region_label, below_mean_95, below_mean_sti) %>%
-  distinct()
-
-sortadangerfish <- whichfish %>%
-  filter(is.na(safe)) %>%
-  filter(below_75_95 == 'x' | below_75_sti == 'x') %>%
-  select(found_taxa, region_label, below_75_95, below_75_sti) %>%
-  distinct()
-
-notverydangerfish <- whichfish %>%
-  filter(is.na(safe)) %>%
-  filter(below_95_sti == 'x' | below_95_95 == 'x') %>%
-  select(found_taxa, region_label, below_95_95, below_95_sti) %>%
-  distinct()
-
-
-whichfish2 <- sti_peco %>%
   select(site_code, temp_95, sti_value, region_label, found_taxa, common_name) %>%
   distinct() %>% 
   left_join(cti_environment_site_distinct) %>%
   #filter(!region_last5_temp95 == 'NaN') %>%
-  mutate(dangerlevel = case_when(
-                                 temp_95 < site_last5_meansst ~ '4 highest',
+  mutate(dangerlevel = case_when(temp_95 < site_last5_meansst ~ '4 highest',
                                  temp_95 < site_last5_temp75 ~ '3 high',
-                                 temp_95 < site_last5_temp95 ~ '3 uncomfortable',
+                                 temp_95 < site_last5_temp95 ~ '2 uncomfortable',
                                  TRUE ~ '1 safe')) %>%
   relocate(found_taxa, common_name, dangerlevel) %>%
   select(!c(site_code)) %>%
   distinct()
 
 
-write_csv(whichfish2, here(dataedna, '20250713_fishatrisk.csv'))
-#whichfish2 <- read_csv(here(dataedna, '20250713_fishatrisk.csv'))
+write_csv(whichfish, here(dataedna, '20250713_fishatrisk.csv'))
+
+fish_for_table <- sti_peco %>%
+  select(site_code, region_lat_name, temp_95, sti_value, region_label, found_taxa, common_name) %>%
+  distinct() %>% 
+  left_join(cti_environment_site_distinct) %>%
+  mutate(dangerlevel = case_when(temp_95 < site_last5_meansst ~ '4 highest',
+                                 temp_95 < site_last5_temp75 ~ '3 high',
+                                 temp_95 < site_last5_temp95 ~ '2 uncomfortable',
+                                 TRUE ~ '1 safe')) %>%
+  filter(dangerlevel == '4 highest') %>%
+  group_by(region_label) %>%
+  mutate(region_mean_meansst = mean(site_last5_meansst)) %>%
+  ungroup() %>%
+    relocate(found_taxa, common_name, temp_95, region_mean_meansst) %>%
+  select(!c(dangerlevel, sti_value, site_code, site_last5_meansst,
+            site_last5_temp75, site_last5_temp95, decimal_latitude)) %>%
+  distinct() %>%
+  arrange(region_lat_name, found_taxa) %>%
+  select(!region_lat_name) %>%
+  mutate(temp_95 = round(temp_95, digits = 4),
+         region_mean_meansst = round(region_mean_meansst, digits = 4))
+  
+
+write_csv(fish_for_table, here(dataedna, paste0(datefield, 'fishatrisk-table.csv')))
+
 ```
 
 ## Which sites have the most vulnerable species?

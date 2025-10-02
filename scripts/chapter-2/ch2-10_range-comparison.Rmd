@@ -465,11 +465,8 @@ prev_both2
 
 
 # Models
-
+LM 
 ```{r models}
-#lm(offset~prevalence + habitat_category) (all the data, check residuals after model fit)
-# note one category here is 'reference', that's 'maybe'
-# to get all separate use LMM linear mixed model or constrained least squares
 seagrass_n_lm <- lm(edna_lit_n ~ mean_prev_year + relevel(as.factor(seagrass), ref = 'yes'), 
                     data = prevalence_sp)
 
@@ -536,36 +533,6 @@ ggsave(here(ranges, paste0(datefield, 'eelgrass_violin_n.png')),
        width = 1250,
        height = 1500,
        units = 'px')
-
-
-
-# seagrass_n_lm3 <- lm(edna_lit_n ~ feas_feas, 
-#                     data = prevalence_sp)
-# summary(seagrass_n_lm3)
-# 
-# 
-# ggplot(prevalence_sp) +
-#   geom_boxplot(aes(x = feas_feas, 
-#                    y = edna_lit_n)) +
-#   theme_bw()
-# 
-# 
-# seagrass_s_lm3 <- lm(edna_lit_s ~ feas_feas, 
-#                     data = prevalence_sp)
-# summary(seagrass_s_lm3)
-# 
-# 
-# ggplot(prevalence_sp) +
-#   geom_boxplot(aes(x = feas_feas, 
-#                    y = edna_lit_s)) +
-#   theme_bw()
-# 
-# 
-# ggplot(prevalence_sp) +
-#   geom_violin(aes(x = as.factor(seagrass), 
-#                    y = edna_lit_n)) +
-#   theme_bw()
-
 ```
 
 ## Domain edge separate
@@ -655,10 +622,10 @@ plot(prevalence_s_poisson)
 
 
 # range edges
-
+put these alongside figure 5
 ```{r}
 rangehist_data <- all_range %>%
-  select(species, common_name, lit_min, lit_max) %>%
+  dplyr::select(species, common_name, lit_min, lit_max) %>%
   pivot_longer(cols = c(lit_min, lit_max),
                names_to = 'type') %>%
   filter(value > 32 & value < 60) %>%
@@ -666,7 +633,7 @@ rangehist_data <- all_range %>%
   pivot_wider(names_from = 'type')
 
 rangehist_data %>%
-  select(!lit_min) %>%
+  dplyr::select(!lit_min) %>%
   filter(!is.na(lit_max)) %>%
   ggplot() +
   geom_histogram(aes(lit_max),
@@ -686,7 +653,7 @@ ggsave(here(ranges, paste0(datefield, 'cool-edge_hist.pdf')),
 
 
 rangehist_data %>%
-  select(!lit_max) %>%
+  dplyr::select(!lit_max) %>%
   filter(!is.na(lit_min)) %>%
   ggplot() +
   geom_histogram(aes(lit_min),
