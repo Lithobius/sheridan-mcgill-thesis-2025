@@ -6,3 +6,17 @@ output: html_document
 ---
 
 placeholder for year merging and vsc etc
+
+```{r setup}
+library(tidyverse)
+library(here)
+
+motu2asvs <- read_csv(here('rawdata', 'peco', 
+                           'fastq', 'allyears', 
+                           '20250528_peco-combined_12s_lulu_motu2asv.csv'))
+```
+
+```{r}
+motu2asvs %>% distinct(motu_lulu)
+```
+
