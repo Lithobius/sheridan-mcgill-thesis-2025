@@ -558,6 +558,15 @@ cti_peco %>%
             maximum = max(cti),
             sd_cti = sd(cti),
             mean_cti = mean(cti))
+
+cti_peco %>%
+  filter(region_name %in% c('CA_SD', 'CA_LA')) %>%
+  #select(cti) %>%
+  distinct() %>%
+  summarise(minimum = min(cti),
+            maximum = max(cti),
+            sd_cti = sd(cti),
+            mean_cti = mean(cti))
 ```
 
 ## Which fish are most in 'danger'?
