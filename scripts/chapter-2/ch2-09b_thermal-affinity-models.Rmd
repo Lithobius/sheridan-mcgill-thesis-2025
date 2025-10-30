@@ -136,8 +136,14 @@ cti_environment <- cti_peco %>%
   select(!c(region_code, region_code_label, region_lat_name, avg_region_lat)) %>%
   rename(
          cti_value = cti) %>%
-  left_join(region_temps) %>%
-  mutate(sitegroup = fct_reorder(as_factor(site_code), year, .fun = first)) 
+  left_join(site_temps) %>%
+  #left_join(region_temps) %>%
+  mutate(sitegroup = fct_reorder(as_factor(site_code), year, .fun = first)) %>%
+  # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean)) %>%
+  ungroup() %>%
+  mutate(sst_mean = coalesce(sst_mean, region_mean))
 
 # STI
 sti_peco <- edna_peco %>%
@@ -162,7 +168,13 @@ sti_peco <- edna_peco %>%
   relocate(sti_value, region_label)
   
 sti_environment <- sti_peco %>%
-  left_join(region_temps)
+  left_join(site_temps) %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean)) %>%
+  ungroup() %>%
+  mutate(sst_mean = coalesce(sst_mean, region_mean))
+  #left_join(region_temps)
 ```
 
 
