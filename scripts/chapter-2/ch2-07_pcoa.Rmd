@@ -993,12 +993,20 @@ mifish_all_plot <- mifish_all_clusters %>%
          region_name, year) %>%
   distinct() %>%
   left_join(regions) %>%
-  select(!c(site_code, decimal_latitude, decimal_longitude)) %>%
-  distinct()
+  select(!c(decimal_latitude, decimal_longitude, sites, samples)) %>%
+  mutate(regionyear = paste0(region_label, ' - ', as.character(year))) %>%
+  distinct() 
 
 # MB only has 2 points
 mb_line <- mifish_all_plot %>%
   filter(region_code == "CA_MB")
+
+region_order3 <- mifish_edna %>%
+  select(region_label, year) %>%
+  distinct() %>%
+  mutate(regionyear = paste0(region_label, ' - ', as.character(year))) %>%
+  left_join(region_order2) %>%
+  arrange(-region_lat_name, -year)
 
 # centroids for clusters
 mifish_centroid <- mifish_all_plot %>%
@@ -1115,14 +1123,14 @@ ggsave(filename = here(pcoa_out, paste0(datefield,
 
 ggplot(obisgbif_unfilter_plot) +
   geom_point(aes(y = axis_1, 
-                 x = factor(region_label, levels = region_order2$region_label),
+                 x = factor(regionyear, levels = region_order3$regionyear),
                  fill = region_label),
              shape = 21,
              colour = 'black',
              alpha = .6,
              size = 1) +
   geom_boxplot(aes(y = axis_1, 
-                 x = factor(region_label, levels = region_order2$region_label),
+                 x = factor(regionyear, levels = region_order3$regionyear),
                  fill = region_label),
                colour = 'black',
                alpha = .6,
@@ -1152,14 +1160,14 @@ ggsave(filename = here(pcoa_out, paste0(datefield,
 ```{r pdf version for combined plot}
 ggplot(mifish_all_plot) +
   geom_point(aes(y = axis_1, 
-                 x = factor(region_label, levels = region_order2$region_label),
+                 x = factor(regionyear, levels = region_order3$regionyear),
                  fill = region_label),
              shape = 21,
              colour = 'black',
-             alpha = .6,
+             alpha = .8,
              size = 1) +
   geom_boxplot(aes(y = axis_1, 
-                 x = factor(region_label, levels = region_order2$region_label),
+                 x = factor(regionyear, levels = region_order3$regionyear),
                  fill = region_label),
                colour = 'black',
                alpha = .6) +
@@ -1179,7 +1187,7 @@ ggplot(mifish_all_plot) +
 
 ggsave(filename = here(pcoa_out, paste0(datefield, 
                                     'peco_pc1xlat-siteyear-motu_pa_boxplot-site.pdf')),
-       device = 'pdf', height = 6, width= 10,  units = "in")
+       device = 'pdf', height = 10, width= 10,  units = "in")
 
 ```
 
