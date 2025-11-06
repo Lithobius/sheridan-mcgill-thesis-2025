@@ -313,3 +313,58 @@ ggsave(filename =  here('output', 'maps',
 ```
 
 Those are the most basic maps!
+
+```{r blue vers}
+# 7693B8
+# 262F3C
+wcsf_map_blue <- ggplot(land_t) +
+  geom_sf(fill = 'white', 
+          color = '#262F3C') +
+  xlim(min(-145, 
+    na.rm = T), 
+    max(-115, na.rm = T)) +
+  ylim(min(28, na.rm = T), 
+       max(61, na.rm = T)) + 
+  theme_classic() +
+    theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = .5),
+        axis.ticks.y = element_blank(),
+        panel.background = element_rect(fill = '#7693B8'))
+
+wcsf_map_blue
+
+# save blank maps
+ggsave(wcsf_map_blue, filename =  here('output', 'maps', 
+                                 'westcoast_blank-blue.png'), 
+       device = "png", 
+       dpi = 300, 
+       width = 6, 
+       height = 8, 
+       units = "in")
+
+wcsf_map_blue + geom_point(data = all_centroids, 
+                      aes(x = lon, 
+                          y = lat,
+                          fill = factor(region_label,
+                                        levels = region_by_lat$region_label)),
+                      color = 'black',
+                      shape = 21,
+                      size = 2.5, 
+                      alpha = .95)+
+    xlim(min(-136, 
+    na.rm = T), 
+    max(-115, na.rm = T)) +
+  ylim(min(32.45, na.rm = T), 
+       max(58.6, na.rm = T)) + 
+  scale_fill_manual(values = pal_2or) +
+  theme(legend.position = 'none')
+
+ggsave(filename =  here('output', 'maps', 
+                                 paste0(datefield, 'map_edna_2021-24_centroids-blue.png')), 
+       device = "png", dpi = 300, width = 6, height = 7, units = "in")
+
+```
+
