@@ -10,19 +10,26 @@ sst, extreme temps, upwelling
 
 Note throughout this script CTI and STI are used as shorthand for thermal affinity of the community and species thermal affinity.
 
+lmer for mixed effect models, blme when it is singular. no p values reported for singular models.
+
 
 ```{r setup, include=FALSE}
+#install.packages('optimx')
 library(tidyverse)
 library(here)
 library(matrixStats)
-library(nlme)
+#library(nlme) # remove if i remove?
+library(lme4)
+library(blme)
+library(lmerTest)
+library(optimx)
 library(ggeffects)
 
 # here filepaths
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 plotout <- here('output', 'thermalaffinity', 'models')
-datefield <- '20251030_'
+datefield <- '20251107_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -44,7 +51,7 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 ```
 
 ```{r loadin}
-regions <- read_csv(here(dataedna, '20240925_peco_region-name-plotting.csv'))[-1] %>%
+regions <- read_csv(here(dataedna, '20251107_peco_region-name-plotting.csv'))[-1] %>%
   rename(region_label = region_name_label)
 
 
@@ -58,14 +65,13 @@ site_order <- regions %>%
   arrange(decimal_latitude)
 
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
-                             '20250711_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+                             '20251107_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
   filter(rank == 'species') %>%
   rename(region_label = region_name_label) %>%
   # remove below threshold
   filter(relabund_vst_taxa > 3) %>%
   # problematic sample
   filter(!(sample_id %in% c('pecoe-0207')))
-
 
 # STIs
 
@@ -154,8 +160,9 @@ sti_peco <- edna_peco %>%
             extraction_notes, organization_participants, reads_adjust,
             filtration_comments, dna_extraction_date, biological_observations,
             collection_method, treatment, evalue, identity_percentage,
-            relabund_wis_taxa, relabund_wis_motu, pcr_blank, bsaredo,
-            lab_notes, reads_adjust_fieldlab, reads_raw, reads_adjust_field,
+            relabund_wis_taxa, relabund_wis_motu, pcr_blank, 
+            #bsaredo, lab_notes, 
+            reads_adjust_fieldlab, reads_raw, reads_adjust_field,
             reads_adjust_lab, kingdom, phylum, rain, asv)) %>%
   left_join(sti_obis) %>%
   filter(!is.na(max_temp)) %>%
@@ -212,20 +219,34 @@ for (i in 1:length(region_list)) {
   region_subset <- cti_environment %>%
     filter(region_name == region_list[i])
   
-  region_model <- lme(cti_value ~ site_temp95,random=~1|site_code,
-                      data=region_subset)
+  #region_model <- lme(cti_value ~ site_temp95,random=~1|site_code,
+  #                    data=region_subset)
+  region_model <- lmer(cti_value ~ site_temp95 + (1 | site_code), 
+                       data = region_subset)
   
-  region_sd <- region_model$sigma
+  singular <- isSingular(region_model)
+  
+  if (singular == TRUE){
+    print('Model is singular')
+      region_model <- blmer(cti_value ~ site_temp95 + (1 | site_code), 
+                       data = region_subset)
+  }
   
   model_summary <- summary(region_model)
   
-  ttable <- data.frame(model_summary$tTable) %>%
+  #pr_t is the same as the anova result now
+  #modelanova <- anova(region_model)
+  
+  region_sd <- model_summary$sigma
+  
+  ttable <- data.frame(model_summary$coefficients) %>%
     mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AIC) %>%
+    mutate(aic = model_summary$AICtab) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
-    rename(intercept = value) %>%
-    mutate(sd = region_sd)
+    rename(intercept = estimate) %>%
+    mutate(sd = region_sd) %>%
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -233,11 +254,53 @@ for (i in 1:length(region_list)) {
   random_effects <- data.frame(ranef(region_model)) %>%
     rownames_to_column('site_code') %>%
     janitor::clean_names() %>%
-    rename(intercept = "x_intercept") %>%
+    #rename(intercept = "x_intercept") %>%
     mutate(region_name = region_list[i])
   
   random_output <- random_output %>%
     bind_rows(random_effects)
+  
+    # make a ggpredict plot object
+  region_y <- ggpredict(region_model) %>% 
+    plot()
+  
+  # subset sti values
+  sti_4plot <- sti_peco %>%
+    left_join(cti_environment) %>%
+    filter(region_name == region_list[i]) 
+  
+  # add sti and cti to ggpredict plot
+  region_y +
+    # points for sti vs sst
+    geom_point(data = sti_4plot,
+               aes(y = sti_value,
+                 x = site_temp95,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    # points for cti vs temp, red diamonds
+  geom_point(data = sti_4plot,
+             aes(y = cti_value,
+                 x = site_temp95),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  scale_color_manual(values = pal_2or) +
+   # scale_x_continuous(limits = c(14,15.75)) +
+  labs(x = '95th percentile Summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 4),
+        axis.title = element_text(size = 4))
+  
+  # pdf for figures
+  ggsave(here(plotout, paste0(datefield, 'sti-sst95_region-',
+                                     region_list[i], '.pdf')),
+         height = 2,
+         width = 2,
+         units = 'in')
 }
 
 cti_95_out <- region_output
@@ -246,7 +309,8 @@ cti_95_out %>%
   filter(term == 'site_temp95') %>%
   mutate(std_positive = intercept + std_error,
          std_negative = intercept - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+         significant = ifelse(pr_t < .05, 'yes', 'no')
+         ) %>%
   left_join(region_order)%>%
   mutate(region_label = factor(region_label, 
                                levels = region_order$region_label)) %>%
@@ -261,7 +325,8 @@ cti_95_out %>%
   geom_point(aes(fill = significant),
              size = 1.5,
              shape = 21) +
-  scale_fill_manual(values = c('white', 'black')) +
+  #scale_fill_manual(values = c('white', 'black')) +
+  scale_fill_manual(values = c('white', 'black', 'grey50')) +
   theme_bw() +
   theme(axis.title.y = element_blank(),
         axis.text = element_text(size = 5),
@@ -297,20 +362,29 @@ for (i in 1:length(region_list)) {
   region_subset <- cti_environment %>%
     filter(region_name == region_list[i])
   
-  region_model <- lme(cti_value ~ site_temp75,
-                      random=~1|site_code,
-                      data=region_subset)
+  region_model <- lmer(cti_value ~ site_temp75 + (1 | site_code), 
+                       data = region_subset)
   
-  region_sd <- region_model$sigma
+  singular <- isSingular(region_model)
+  
+  if (singular == TRUE){
+    print('Model is singular')
+      region_model <- blmer(cti_value ~ site_temp75 + (1 | site_code), 
+                       data = region_subset)
+  }
   
   model_summary <- summary(region_model)
   
-  ttable <- data.frame(model_summary$tTable) %>%
+  region_sd <- model_summary$sigma
+  
+  ttable <- data.frame(model_summary$coefficients) %>%
     mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AIC) %>%
+    mutate(aic = model_summary$AICtab) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
-    mutate(sd = region_sd)
+    rename(intercept = estimate) %>%
+    mutate(sd = region_sd) %>%
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -318,78 +392,21 @@ for (i in 1:length(region_list)) {
   random_effects <- data.frame(ranef(region_model)) %>%
     rownames_to_column('site_code') %>%
     janitor::clean_names() %>%
+    #rename(intercept = "x_intercept") %>%
     mutate(region_name = region_list[i])
   
   random_output <- random_output %>%
     bind_rows(random_effects)
-}
-
-cti_75_out <- region_output
-
-cti_75_out %>%
-  filter(term == 'site_temp75') %>%
-  mutate(std_positive = value + std_error,
-         std_negative = value - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
-  left_join(region_order)%>%
-  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
-  ggplot(aes(x = value,
-             y = fct_rev(region_label))) +
-  geom_vline(xintercept = 0,
-             color = "grey50",
-             size = .75,
-             linetype = "dashed") +
-  geom_errorbar(aes(xmin = std_negative,
-                    xmax = std_positive)) +
-  geom_point(aes(fill = significant),
-             size = 1.5,
-             shape = 21) +
-  scale_fill_manual(values = c('white', 'black')) +
-  theme_bw() +
-  theme(axis.title.y = element_blank(),
-        axis.text = element_text(size = 5),
-        axis.title.x = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.position = 'none')
-
-# pdf version 
-ggsave(here(plotout, paste0(datefield, 'cti-sst75_all-regions.pdf')),
-       height = 2.5, width = 4, units = 'in')
-```
-
-
-### significant 75th
-
-```{r significant}
-cti_75_sig <- cti_75_out %>%
-    filter(term == 'site_temp75') %>%
-  mutate(std_positive = value + std_error,
-         std_negative = value - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
-  filter(significant == 'yes')
-
-sig_list <- unique(cti_75_sig$region_name)
-
-# for each significant region, 
-# make a plot with stixsst + line for predicted values
-for (i in 1:length(sig_list)) {
-  print(sig_list[i])
   
-    region_subset <- cti_environment %>%
-    filter(region_name == sig_list[i])
   
-  region_model <- lme(cti_value ~ site_temp75, 
-                      random=~1|site_code, 
-                      data=region_subset)
-  
-  # make a ggpredict plot object
+    # make a ggpredict plot object
   region_y <- ggpredict(region_model) %>% 
     plot()
   
   # subset sti values
   sti_4plot <- sti_peco %>%
     left_join(cti_environment) %>%
-    filter(region_name == sig_list[i]) 
+    filter(region_name == region_list[i]) 
   
   # add sti and cti to ggpredict plot
   region_y +
@@ -410,22 +427,54 @@ for (i in 1:length(sig_list)) {
              fill = 'red') +
   scale_color_manual(values = pal_2or) +
    # scale_x_continuous(limits = c(14,15.75)) +
-    facet_wrap('site_code') +
+    #facet_wrap('site_code') +
   labs(x = '75th percentile Summer SST', y = 'Thermal affinity',
        title = NULL)+
   theme_bw() +
   theme(legend.position = 'none',
-        axis.text = element_text(size = 8),
+        axis.text = element_text(size = 4),
         axis.title = element_text(size = 4))
   
   # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-sst75_sig-region-',
-                                     sig_list[i], '.pdf')),
+  ggsave(here(plotout, paste0(datefield, 'sti-sst75_region-',
+                                     region_list[i], '.pdf')),
          height = 2,
-         width = 3,
+         width = 2,
          units = 'in')
-  
 }
+
+cti_75_out <- region_output
+
+cti_75_out %>%
+  filter(term == 'site_temp75') %>%
+  mutate(std_positive = intercept + std_error,
+         std_negative = intercept - std_error,
+         significant = ifelse(pr_t < .05, 'yes', 'no')
+         ) %>%
+  left_join(region_order)%>%
+  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
+  ggplot(aes(x = intercept,
+             y = fct_rev(region_label))) +
+  geom_vline(xintercept = 0,
+             color = "grey50",
+             size = .75,
+             linetype = "dashed") +
+  geom_errorbar(aes(xmin = std_negative,
+                    xmax = std_positive)) +
+  geom_point(aes(fill = significant),
+             size = 1.5,
+             shape = 21) +
+  scale_fill_manual(values = c('white', 'black', 'grey50')) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text = element_text(size = 5),
+        axis.title.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = 'none')
+
+# pdf version 
+ggsave(here(plotout, paste0(datefield, 'cti-sst75_all-regions.pdf')),
+       height = 2.5, width = 4, units = 'in')
 ```
 
 ## mean sst
@@ -445,19 +494,29 @@ for (i in 1:length(region_list)) {
   region_subset <- cti_environment %>%
     filter(region_name == region_list[i]) 
   
-  region_model <- lme(cti_value ~ sst_mean,random=~1|site_code,
-                      data=region_subset)
+  region_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = region_subset)
   
-  region_sd <- region_model$sigma
+  singular <- isSingular(region_model)
+  
+  if (singular == TRUE){
+    print('Model is singular')
+      region_model <- blmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = region_subset)
+  }
   
   model_summary <- summary(region_model)
   
-  ttable <- data.frame(model_summary$tTable) %>%
+  region_sd <- model_summary$sigma
+  
+  ttable <- data.frame(model_summary$coefficients) %>%
     mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AIC) %>%
+    mutate(aic = model_summary$AICtab) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
-    mutate(sd = region_sd)
+    rename(intercept = estimate) %>%
+    mutate(sd = region_sd) %>%
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -465,133 +524,14 @@ for (i in 1:length(region_list)) {
   random_effects <- data.frame(ranef(region_model)) %>%
     rownames_to_column('site_code') %>%
     janitor::clean_names() %>%
+    #rename(intercept = "x_intercept") %>%
     mutate(region_name = region_list[i])
   
   random_output <- random_output %>%
     bind_rows(random_effects)
-}
-
-cti_mean_out <- region_output
-
-cti_mean_out %>%
-  filter(term == 'sst_mean') %>%
-  mutate(std_positive = value + std_error,
-         std_negative = value - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
-  left_join(region_order)%>%
-  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
-  ggplot(aes(x = value,
-             y = fct_rev(region_label))) +
-  geom_vline(xintercept = 0,
-             color = "grey50",
-             size = .75,
-             linetype = "dashed") +
-  geom_errorbar(aes(xmin = std_negative,
-                    xmax = std_positive)) +
-  geom_point(aes(fill = significant),
-             size = 1.5,
-             shape = 21) +
-  scale_fill_manual(values = c('white', 'black')) +
-  theme_bw() +
-  theme(axis.title.y = element_blank(),
-        axis.text.y = element_text(size = 5),
-        axis.title.x = element_blank(),
-        panel.grid.minor = element_blank(),
-        legend.position = 'none')
-
-# pdf version 
-ggsave(here(plotout, paste0(datefield, 'cti-sstmean_all-regions.pdf')),
-       height = 2.5, width = 4, units = 'in')
-```
-
-### mean significant
-
-```{r}
-cti_mean_sig <- cti_mean_out %>%
-    filter(term == 'sst_mean') %>%
-  mutate(std_positive = value + std_error,
-         std_negative = value - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
-  filter(significant == 'yes')
-
-sig_list <- unique(cti_mean_sig$region_name)
-
-# for each significant region, 
-# make a plot with stixsst + line for predicted values
-for (i in 1:length(sig_list)) {
-  print(sig_list[i])
   
-    region_subset <- cti_environment %>%
-    filter(region_name == sig_list[i])
-  
-  region_model <- lme(cti_value ~ sst_mean, 
-                      random=~1|site_code, 
-                      data=region_subset)
-  
-  # make a ggpredict plot object
-  region_y <- ggpredict(region_model) %>% 
-    plot()
-  
-  # subset sti values
-  sti_4plot <- sti_peco %>%
-    left_join(cti_environment) %>%
-    filter(region_name == sig_list[i]) 
-  
-  # add sti and cti to ggpredict plot
-  region_y +
-    # points for sti vs sst
-    geom_point(data = sti_4plot,
-               aes(y = sti_value,
-                 x = sst_mean,
-                 color = region_label,
-                 size = relabund_vst_taxa),
-             alpha = .35) +
-    scale_size(range = c(.1,3)) +
-    # points for cti vs temp, red diamonds
-  geom_point(data = sti_4plot,
-             aes(y = cti_value,
-                 x = sst_mean),
-             shape = 23,
-             size = 3,
-             fill = 'red') +
-  scale_color_manual(values = pal_2or) +
-   # scale_x_continuous(limits = c(14,15.75)) +
-    facet_wrap('site_code') +
-  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
-       title = NULL)+
-  theme_bw() +
-  theme(legend.position = 'none',
-        axis.text = element_text(size = 8),
-        axis.title = element_text(size = 4))
-  
-  # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-sstmean_sig-region-',
-                                     sig_list[i], '.pdf')),
-         height = 2,
-         width = 3,
-         units = 'in')
-  
-}
-```
-### scatter plots with models for all regions
-
-
-```{r}
-
-
-# for each significant region, 
-# make a plot with stixsst + line for predicted values
-for (i in 1:length(region_list)) {
-  print(region_list[i])
-  
-  region_subset <- cti_environment %>%
-    filter(region_name == region_list[i])
-  
-  region_model <- lme(cti_value ~ sst_mean, 
-                      random=~1|site_code, 
-                      data=region_subset)
-  
-  # make a ggpredict plot object
+  # plot
+    # make a ggpredict plot object
   region_y <- ggpredict(region_model) %>% 
     plot()
   
@@ -620,7 +560,7 @@ for (i in 1:length(region_list)) {
   scale_color_manual(values = pal_2or) +
    # scale_x_continuous(limits = c(14,15.75)) +
     #facet_wrap('site_code') +
-  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
+  labs(x = 'Mean summer SST', y = 'Thermal affinity',
        title = NULL)+
   theme_bw() +
   theme(legend.position = 'none',
@@ -634,8 +574,77 @@ for (i in 1:length(region_list)) {
          width = 2,
          units = 'in')
   
+  # plot of lines per site 
+  pred_pop <- predict(region_model, re.form = NA) ## whole population level
+  region_subset$pred_group <- predict(region_model) ## group level
+  
+  
+  
+  ggplot(data = region_subset, 
+       mapping = aes(x = sst_mean, y = cti_value)) + 
+    geom_point(data = sti_4plot,
+             aes(y = cti_value,
+                 x = sst_mean),
+             shape = 23,
+             size = 2,
+             fill = 'red') +
+  geom_line(aes(y = pred_group,
+                color = region_label,
+                linetype = site_code)) + 
+  scale_color_manual(values = pal_2or) +
+  geom_line(mapping = aes(y = pred_pop), colour = "black") + 
+  theme(legend.position = "bottom") +
+  labs(x = 'Mean summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 4),
+        axis.title = element_text(size = 4))
+
+    # pdf for figures
+  ggsave(here(plotout, paste0(datefield, 'sti-sstmean_line-region-',
+                                     region_list[i], '.pdf')),
+         height = 3,
+         width = 5.5,
+         units = 'in')
 }
+
+cti_mean_out <- region_output
+
+cti_mean_out %>%
+  filter(term == 'sst_mean') %>%
+  mutate(std_positive = intercept + std_error,
+         std_negative = intercept - std_error,
+         significant = ifelse(pr_t < .05, 'yes', 'no')
+         ) %>%
+  left_join(region_order)%>%
+  mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
+  ggplot(aes(x = intercept,
+             y = fct_rev(region_label))) +
+  geom_vline(xintercept = 0,
+             color = "grey50",
+             size = .75,
+             linetype = "dashed") +
+  geom_errorbar(aes(xmin = std_negative,
+                    xmax = std_positive)) +
+  geom_point(aes(fill = significant),
+             size = 1.5,
+             shape = 21) +
+  scale_fill_manual(values = c('white', 'black', 'grey50')) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.position = 'none')
+
+# pdf version 
+ggsave(here(plotout, paste0(datefield, 'cti-sstmean_all-regions.pdf')),
+       height = 2.5, width = 4, units = 'in')
+
 ```
+### scatter plots with models for all regions
+
 
 
 
@@ -736,7 +745,7 @@ ggsave(here(plotout, paste0(datefield, 'sstvsbeauti-region.png')),
 
 
 ```{r cti-beuti ctis region}
-region_list <- unique(beuti_cti_peco$region_name)
+region_list_upwell <- unique(beuti_cti_peco$region_name)
 
 region_output <- {}
 
@@ -744,26 +753,36 @@ fixed_output <- {}
 
 random_output <- {}
 
-for (i in 1:length(region_list)) {
-  print(region_list[i])
+for (i in 1:length(region_list_upwell)) {
+  print(region_list_upwell[i])
   
   region_subset <- beuti_cti_peco %>%
-    filter(region_name == region_list[i]) #%>%
+    filter(region_name == region_list_upwell[i]) #%>%
     #filter(year > 2021)
   
-  region_model <- lme(cti_value ~ beuti_year,random=~1|site_code,
-                      data=region_subset)
+region_model <- lmer(cti_value ~ beuti_year + (1 | site_code), 
+                       data = region_subset)
   
-  region_sd <- region_model$sigma
+  singular <- isSingular(region_model)
+  
+  if (singular == TRUE){
+    print('Model is singular')
+      region_model <- blmer(cti_value ~ beuti_year + (1 | site_code), 
+                       data = region_subset)
+  }
   
   model_summary <- summary(region_model)
   
-  ttable <- data.frame(model_summary$tTable) %>%
-    mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AIC) %>%
+  region_sd <- model_summary$sigma
+  
+  ttable <- data.frame(model_summary$coefficients) %>%
+    mutate(region_name = region_list_upwell[i]) %>%
+    mutate(aic = model_summary$AICtab) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
-    mutate(sd = region_sd)
+    rename(intercept = estimate) %>%
+    mutate(sd = region_sd) %>%
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -771,10 +790,56 @@ for (i in 1:length(region_list)) {
   random_effects <- data.frame(ranef(region_model)) %>%
     rownames_to_column('site_code') %>%
     janitor::clean_names() %>%
-    mutate(region_name = region_list[i])
+    #rename(intercept = "x_intercept") %>%
+    mutate(region_name = region_list_upwell[i])
   
   random_output <- random_output %>%
     bind_rows(random_effects)
+  
+  # plot
+    # make a ggpredict plot object
+  region_y <- ggpredict(region_model) %>% 
+    plot()
+  
+  # subset sti values
+  sti_4plot <- beuti_sti_peco %>%
+    left_join(beuti_cti_peco) %>%
+    filter(region_name == region_list_upwell[i]) 
+  
+  # add sti and cti to ggpredict plot
+  region_y +
+    # points for sti vs sst
+    geom_point(data = sti_4plot,
+               aes(y = sti_value,
+                 x = beuti_year,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    # points for cti vs temp, red diamonds
+  geom_point(data = sti_4plot,
+             aes(y = cti_value,
+                 x = beuti_year),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  scale_color_manual(values = pal_2or) +
+   # scale_x_continuous(limits = c(14,15.75)) +
+    #facet_wrap('site_code') +
+  labs(x = 'BEUTI upwelling index', y = 'Thermal affinity',
+       title = NULL)+
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 4),
+        axis.title = element_text(size = 4))
+  
+  # pdf for figures
+  ggsave(here(plotout, paste0(datefield, 'sti-upwelling_region-',
+                                     region_list[i], '.pdf')),
+         height = 2,
+         width = 2,
+         units = 'in')
+  
 }
 
 
@@ -782,12 +847,12 @@ cti_upwelling_out <- region_output
 
 region_output %>%
   filter(term == 'beuti_year') %>%
-  mutate(std_positive = value + std_error,
-         std_negative = value - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
+  mutate(std_positive = intercept + std_error,
+         std_negative = intercept - std_error,
+         significant = ifelse(pr_t < .05, 'yes', 'no')) %>%
   left_join(region_order)%>%
   mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
-  ggplot(aes(x = value,
+  ggplot(aes(x = intercept,
              y = fct_rev(region_label))) +
   geom_vline(xintercept = 0,
              color = "grey50",
@@ -814,73 +879,6 @@ ggsave(here(plotout, paste0(datefield, 'cti-beuti_all-regions.png')),
 ```
 
 
-```{r significant plot}
-beuti_sig <- cti_upwelling_out %>%
-    filter(term == 'beuti_year') %>%
-  mutate(std_positive = value + std_error,
-         std_negative = value - std_error,
-         significant = ifelse(p_value < .05, 'yes', 'no')) %>%
-  filter(significant == 'yes')
-
-sig_list <- unique(beuti_sig$region_name)
-
-# for each significant region, 
-# make a plot with stixsst + line for predicted values
-for (i in 1:length(sig_list)) {
-  print(sig_list[i])
-  
-    region_subset <- beuti_cti_peco %>%
-    filter(region_name == sig_list[i])
-  
-  region_model <- lme(cti_value ~ beuti_year, 
-                      random=~1|site_code, 
-                      data=region_subset)
-  
-  # make a ggpredict plot object
-  region_y <- ggpredict(region_model) %>% 
-    plot()
-  
-  # subset sti values
-  sti_4plot <- sti_peco %>%
-    left_join(beuti_cti_peco) %>%
-    filter(region_name == sig_list[i]) 
-  
-  # add sti and cti to ggpredict plot
-  region_y +
-    # points for sti vs sst
-    geom_point(data = sti_4plot,
-               aes(y = sti_value,
-                 x = beuti_year,
-                 color = region_label,
-                 size = relabund_vst_taxa),
-             alpha = .35) +
-    scale_size(range = c(.1,3)) +
-    # points for cti vs temp, red diamonds
-  geom_point(data = sti_4plot,
-             aes(y = cti_value,
-                 x = beuti_year),
-             shape = 23,
-             size = 3,
-             fill = 'red') +
-  scale_color_manual(values = pal_2or) +
-   # scale_x_continuous(limits = c(14,15.75)) +
-    facet_wrap('site_code') +
-  labs(x = 'BEUTI Upwelling index', y = 'Thermal affinity',
-       title = NULL)+
-  theme_bw() +
-  theme(legend.position = 'none',
-        axis.text = element_text(size = 8),
-        axis.title = element_text(size = 4))
-  
-  # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-upwelling_sig-region-',
-                                     sig_list[i], '.pdf')),
-         height = 2,
-         width = 3,
-         units = 'in')
-  
-}
-```
 
 
 
@@ -1138,20 +1136,156 @@ hgmean_y +
 
 ```
 
-```{r}
-hg_sites <- site_environment %>%
-  filter(region_name == 'BC_HG') %>%
-  select(site_code, decimal_latitude, decimal_longitude)
 
-ggplot(hg_sites) +
-  geom_point(aes(x = decimal_longitude,
-                 y = decimal_latitude)) +
-  geom_text(aes(x = decimal_longitude,
-                y = decimal_latitude,
-                label = site_code)) +
-  theme_bw()
+
+test hg with tutorial 
+
+```{r}
+## fit a LMM with a random effect on the intercept
+## i.e. thermal limits vary by Class
+mod5 <- lmer(cti_value ~ sst_mean + (1 | site_code), data = hg_subset)
+summary(mod5)["call"] ## check model formula
+broom.mixed::tidy(mod5)
+
+help('isSingular')
+
+isSingular(mod5)
+prc <- rePCA(mod5)
+prc$site_code
+summary(rePCA(mod5))
+
+plot(prc$site_code)
+screeplot(prc$site_code)
+
+## plot random effects
+## how much did thermal tolerance vary across classes?
+## make dot and whisker plots of group means and CIs from the model
+rand_effs <- broom.mixed::tidy(mod5, ## get tidy to provide random effects
+                  effects = "ran_vals")
+
+ggplot(data = rand_effs, 
+       mapping = aes(x = level, y = estimate))+ 
+  geom_pointrange(mapping = aes(ymin = estimate - 1.96 * std.error,
+                                ymax = estimate + 1.96 * std.error), 
+                  colour = "blue") + 
+  geom_hline(yintercept = 0, lty = 2) + ## geom_hline b/c coord_flip() next
+  coord_flip()
+
+
+## plot fitted model over data
+## first predict thermal tolerance for each row of data, at each level
+pred_pop <- predict(mod5, re.form = NA) ## whole population level
+pred_group <- predict(mod5) ## group level
+
+## now plot
+ggplot(data = hg_subset, 
+       mapping = aes(x = sst_mean, y = cti_value, 
+                     colour = site_code)) + 
+  #geom_point(mapping = aes(y = thermal_limit)) + 
+  geom_line(mapping = aes(y = pred_group)) + 
+ # geom_line(mapping = aes(y = pred_pop), colour = "black") + 
+  theme(legend.position = "bottom")
+
+
+
 ```
 
 
+```{r}
+test_subset <- cti_environment %>%
+    filter(region_name == "CA_MB") 
 
+## fit a LMM with a random effect on the intercept
+## i.e. thermal limits vary by Class
+mod5 <- lmer(cti_value ~ sst_mean + (1 | site_code), data = test_subset)
+summary(mod5)["call"] ## check model formula
+broom.mixed::tidy(mod5)
+
+isSingular(mod5)
+
+plot.lme(mod5) 
+
+## plot random effects
+## how much did thermal tolerance vary across classes?
+## make dot and whisker plots of group means and CIs from the model
+rand_effs <- broom.mixed::tidy(mod5, ## get tidy to provide random effects
+                  effects = "ran_vals")
+
+ggplot(data = rand_effs, 
+       mapping = aes(x = level, y = estimate))+ 
+  geom_pointrange(mapping = aes(ymin = estimate - 1.96 * std.error,
+                                ymax = estimate + 1.96 * std.error), 
+                  colour = "blue") + 
+  geom_hline(yintercept = 0, lty = 2) + ## geom_hline b/c coord_flip() next
+  coord_flip()
+
+
+## plot fitted model over data
+## first predict thermal tolerance for each row of data, at each level
+pred_pop <- predict(mod5, re.form = NA) ## whole population level
+pred_group <- predict(mod5) ## group level
+
+## now plot
+ggplot(data = test_subset, 
+       mapping = aes(x = sst_mean, y = cti_value, 
+                     colour = site_code)) + 
+  #geom_point(mapping = aes(y = thermal_limit)) + 
+  geom_line(mapping = aes(y = pred_group)) + 
+  geom_line(mapping = aes(y = pred_pop), colour = "black") + 
+  theme(legend.position = "bottom")
+
+```
+```{r}
+regions_2 <- region_order %>%
+  filter(!(region_name %in% c('CA_HB')))
+
+region_list2 <- unique(regions_2$region_name)
+
+for (i in 1:length(region_list)) {
+  print(region_list[i])
+  
+    region_subset <- cti_environment %>%
+    filter(region_name == region_list[i])
+  
+  region_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = region_subset)
+  
+  print(isSingular(region_model))
+}
+```
+
+```{r}
+hg_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = hg_subset)
+
+hg_b_model <- blmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = hg_subset)
+
+rand_effs <- broom.mixed::tidy(hg_b_model, ## get tidy to provide random effects
+                  effects = "ran_vals")
+
+ggplot(data = rand_effs, 
+       mapping = aes(x = level, y = estimate))+ 
+  geom_pointrange(mapping = aes(ymin = estimate - 1.96 * std.error,
+                                ymax = estimate + 1.96 * std.error), 
+                  colour = "blue") + 
+  geom_hline(yintercept = 0, lty = 2) + ## geom_hline b/c coord_flip() next
+  coord_flip()
+
+## plot fitted model over data
+## first predict thermal tolerance for each row of data, at each level
+pred_pop <- predict(hg_b_model, re.form = NA) ## whole population level
+pred_group <- predict(hg_b_model) ## group level
+
+## now plot
+ggplot(data = hg_subset, 
+       mapping = aes(x = sst_mean, y = cti_value, 
+                     colour = site_code)) + 
+  #geom_point(mapping = aes(y = thermal_limit)) + 
+  geom_line(mapping = aes(y = pred_group)) + 
+  geom_line(mapping = aes(y = pred_pop), colour = "black") + 
+  theme(legend.position = "bottom")
+
+
+```
 

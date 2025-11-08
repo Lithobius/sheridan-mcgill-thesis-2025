@@ -1,0 +1,1549 @@
+sample_id,year,sequenced,missing,missing_status,lowreads,in_miseq,fish_miseq,treatment,site_code,region_code
+exblank-2021-001,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-002,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-003,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-005a,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-005b,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-006,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-007,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-008,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-009,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-010,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-011,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-012,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-013,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-014,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-015,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-016,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-018,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2021-019,2021,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2021-020,2021,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2022-024,2022,yes,missing,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2022-025,2022,yes,missing,NA,no,no,no,Extraction blank,NA,NA
+exblank-2022-026,2022,yes,missing,NA,no,no,no,Extraction blank,NA,NA
+exblank-2022-027,2022,yes,missing,NA,< 25,no,no,Extraction blank,NA,NA
+exblank-2022-028,2022,yes,missing,NA,< 100,no,no,Extraction blank,NA,NA
+exblank-2022-029,2022,yes,missing,NA,no,no,no,Extraction blank,NA,NA
+exblank-2022-031,2022,yes,missing,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2022-032,2022,yes,missing,dropped during sequencing,NA,no,no,Extraction blank,NA,NA
+exblank-2022-033,2022,yes,missing,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2022-034,2022,yes,missing,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2022-035,2022,yes,missing,NA,no,no,no,Extraction blank,NA,NA
+exblank-2022-036,2022,yes,missing,dropped during sequencing,NA,no,no,Extraction blank,NA,NA
+exblank-2022-037,2022,yes,missing,NA,no,no,no,Extraction blank,NA,NA
+exblank-2022-038,2022,yes,missing,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2023-41,2023,yes,in dataset,NA,no,no,no,Extraction blank,NA,NA
+exblank-2023-42,2023,yes,missing,dropped during merge step,< 5,no,no,Extraction blank,NA,NA
+exblank-2023-43,2023,yes,missing,dropped during sequencing,NA,no,no,Extraction blank,NA,NA
+exblank-2023-44,2023,yes,in dataset,NA,no,no,no,Extraction blank,NA,NA
+exblank-2023-45,2023,yes,in dataset,NA,no,no,no,Extraction blank,NA,NA
+exblank-2023-46,2023,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2023-47,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-48,2023,yes,in dataset,NA,< 5,no,no,Extraction blank,NA,NA
+exblank-2023-49,2023,yes,missing,NA,< 5,no,no,Extraction blank,NA,NA
+exblank-2023-50,2023,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2023-51,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-52,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-53,2023,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2023-54,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-55,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-56,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-57,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank-2023-58,2023,yes,in dataset,NA,< 5,no,no,Extraction blank,NA,NA
+exblank-2023-59,2023,yes,in dataset,NA,< 50,no,no,Extraction blank,NA,NA
+exblank-2023-60,2023,yes,in dataset,NA,NA,no,no,Extraction blank,NA,NA
+exblank-2023-61,2023,yes,missing,dropped before filterandtrim,NA,no,no,Extraction blank,NA,NA
+exblank_2024_062,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_063,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_064,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_065,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_066,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_067,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_068,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_069,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_070,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_071,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_072,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_073,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_074,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_075,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_076,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_077,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_078,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_079,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_080,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_081,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_082,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_083,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_084,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_085,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_086,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_087,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_088,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+exblank_2024_089,NA,no,missing,Not sequenced,NA,no,no,Extraction blank,NA,NA
+negpcr-2021-bsa-redos,2021,no,missing,Not sequenced,NA,no,no,PCR blank,NA,NA
+negpcr-2021-p04,2021,yes,missing,dropped before filterandtrim,NA,no,no,PCR blank,NA,NA
+negpcr-2021-p05,2021,no,missing,Not sequenced,NA,no,no,PCR blank,NA,NA
+negpcr-2021-p08,2021,no,missing,Not sequenced,NA,no,no,PCR blank,NA,NA
+negpcr-2022-1,2022,no,missing,Not sequenced,NA,no,no,PCR blank,NA,NA
+negpcr-2022-2,2022,no,missing,Not sequenced,NA,no,no,PCR blank,NA,NA
+negpcr-2022-3,2022,no,missing,Not sequenced,NA,no,no,PCR blank,NA,NA
+negpcr-2023-1,2023,yes,missing,dropped during merge step,< 5,no,no,PCR blank,NA,NA
+negpcr-2023-2,2023,yes,missing,dropped before filterandtrim,NA,no,no,PCR blank,NA,NA
+negpcr-2023-3,2023,yes,in dataset,NA,NA,no,no,PCR blank,NA,NA
+negpcr-2023-4,2023,yes,missing,dropped before filterandtrim,NA,no,no,PCR blank,NA,NA
+negpcr-2024-1,NA,yes,missing,NA,NA,no,no,PCR blank,NA,NA
+negpcr-2024-2,NA,yes,missing,NA,NA,no,no,PCR blank,NA,NA
+negpcr-2024-3,NA,yes,in dataset,NA,< 5,no,no,PCR blank,NA,NA
+negpcr-2024-4,NA,yes,in dataset,NA,< 5,no,no,PCR blank,NA,NA
+pecoe-0001,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_E,CA_NCa
+pecoe-0002,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_E,CA_NCa
+pecoe-0003,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_E,CA_NCa
+pecoe-0004,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_E,CA_NCa
+pecoe-0005,2021,yes,missing,no fish,no,yes,yes,Field blank,NC_E,CA_NCa
+pecoe-0006,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,NC_F,CA_NCa
+pecoe-0007,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_F,CA_NCa
+pecoe-0008,2021,no,missing,Not sequenced,NA,no,no,Sample,NC_F,CA_NCa
+pecoe-0009,2021,no,missing,Not sequenced,NA,no,no,Sample,NC_F,CA_NCa
+pecoe-0010,2021,no,missing,Not sequenced,NA,no,no,Sample,NC_F,CA_NCa
+pecoe-0011,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0012,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0013,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0014,2021,yes,missing,no fish,no,yes,yes,Field blank,NC_WP,CA_NCa
+pecoe-0015,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0016,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_B,CA_NCa
+pecoe-0017,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_B,CA_NCa
+pecoe-0018,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_B,CA_NCa
+pecoe-0019,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_B,CA_NCa
+pecoe-0020,2021,yes,missing,dropped during sequencing,NA,no,no,Field blank,NC_B,CA_NCa
+pecoe-0021,2021,yes,in dataset,NA,no,no,no,Sample,NC_D,CA_NCa
+pecoe-0022,2021,yes,missing,dropped during sequencing,NA,no,no,Field blank,NC_D,CA_NCa
+pecoe-0023,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_D,CA_NCa
+pecoe-0024,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_D,CA_NCa
+pecoe-0025,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_D,CA_NCa
+pecoe-0026,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_FP,OR_YB
+pecoe-0027,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,YB_FP,OR_YB
+pecoe-0028,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_FP,OR_YB
+pecoe-0030,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_FP,OR_YB
+pecoe-0031,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0032,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0033,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0034,2021,yes,missing,no fish,< 5,yes,yes,Field blank,YB_SBS,OR_YB
+pecoe-0035,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0036,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0037,2021,yes,in dataset,NA,no,no,no,Field blank,YB_SBN,OR_YB
+pecoe-0038,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0039,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0040,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0041,2021,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,YB_FP,OR_YB
+pecoe-0042,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0043,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_BV,OR_YB
+pecoe-0044,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_BV,OR_YB
+pecoe-0045,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_BV,OR_YB
+pecoe-0046,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0047,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0048,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0049,2021,yes,missing,no fish,NA,yes,yes,Field blank,YB_IF,OR_YB
+pecoe-0050,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0051,2021,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,HG_MDD,BC_HGa
+pecoe-0052,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_MDD,BC_HGa
+pecoe-0053,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_MDD,BC_HGa
+pecoe-0054,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_MDD,BC_HGa
+pecoe-0055,2021,yes,in dataset,NA,NA,yes,yes,Sample,HG_MDD,BC_HGa
+pecoe-0056,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0057,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0058,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0059,2021,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,HG_RI,BC_HGa
+pecoe-0060,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0061,2021,yes,missing,no fish,no,yes,yes,Field blank,HG_LIE,BC_HGa
+pecoe-0062,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0063,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0064,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0065,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0066,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0067,2021,yes,missing,no fish,no,yes,no,Field blank,HG_SB,BC_HGa
+pecoe-0068,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0069,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0070,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0071,2021,yes,missing,dropped during sequencing,NA,no,no,Field blank,HG_DSD,BC_HGa
+pecoe-0072,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_DSD,BC_HGa
+pecoe-0073,2021,yes,missing,no fish,no,yes,no,Sample,HG_DSD,BC_HGa
+pecoe-0074,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_DSD,BC_HGa
+pecoe-0075,2021,yes,in dataset,NA,no,yes,yes,Sample,HG_DSD,BC_HGa
+pecoe-0076,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_K,BC_PP
+pecoe-0077,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_K,BC_PP
+pecoe-0078,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_K,BC_PP
+pecoe-0079,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_K,BC_PP
+pecoe-0080,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_K,BC_PP
+pecoe-0081,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_O,BC_PP
+pecoe-0082,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_O,BC_PP
+pecoe-0083,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_O,BC_PP
+pecoe-0084,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_O,BC_PP
+pecoe-0085,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_O,BC_PP
+pecoe-0086,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_M,BC_PP
+pecoe-0087,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_M,BC_PP
+pecoe-0088,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_M,BC_PP
+pecoe-0089,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_M,BC_PP
+pecoe-0090,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_M,BC_PP
+pecoe-0091,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_S,BC_PP
+pecoe-0092,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_S,BC_PP
+pecoe-0093,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_S,BC_PP
+pecoe-0094,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_S,BC_PP
+pecoe-0095,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_S,BC_PP
+pecoe-0096,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_MI,BC_PP
+pecoe-0097,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_MI,BC_PP
+pecoe-0098,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_MI,BC_PP
+pecoe-0099,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_MI,BC_PP
+pecoe-0100,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_MI,BC_PP
+pecoe-0101,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_EB,BC_PP
+pecoe-0102,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_EB,BC_PP
+pecoe-0103,2021,no,missing,Not sequenced,NA,no,no,Field blank,PP_EB,BC_PP
+pecoe-0104,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_EB,BC_PP
+pecoe-0105,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_EB,BC_PP
+pecoe-0106,2021,yes,in dataset,NA,no,yes,yes,Field blank,WB_DP,WA_WB
+pecoe-0107,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0108,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0109,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0110,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0111,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,WB_BC,WA_WB
+pecoe-0112,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_CO,WA_WB
+pecoe-0113,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_CO,WA_WB
+pecoe-0114,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_CO,WA_WB
+pecoe-0115,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_CO,WA_WB
+pecoe-0116,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,WB_WR,WA_WB
+pecoe-0117,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0118,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0119,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0120,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0121,2021,yes,missing,no fish,NA,no,no,Field blank,WB_SB,WA_WB
+pecoe-0122,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_SB,WA_WB
+pecoe-0123,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_SB,WA_WB
+pecoe-0124,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_SB,WA_WB
+pecoe-0125,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_SB,WA_WB
+pecoe-0126,2021,yes,missing,no fish,< 100,yes,yes,Field blank,WB_BC,WA_WB
+pecoe-0127,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0128,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0129,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0130,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0131,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0132,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0133,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0134,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0135,2021,yes,missing,dropped during sequencing,NA,yes,no,Field blank,SE_NZ,AK_SE
+pecoe-0136,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0137,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0138,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0139,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0140,2021,yes,missing,dropped during sequencing,NA,no,no,Field blank,SE_RF,AK_SE
+pecoe-0141,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NF,AK_SE
+pecoe-0142,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NF,AK_SE
+pecoe-0143,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NF,AK_SE
+pecoe-0144,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NF,AK_SE
+pecoe-0145,2021,yes,missing,dropped before filterandtrim,NA,yes,no,Field blank,SE_NF,AK_SE
+pecoe-0146,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0147,2021,yes,in dataset,NA,no,no,no,Sample,SE_SH,AK_SE
+pecoe-0148,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0149,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0150,2021,yes,in dataset,NA,no,yes,no,Field blank,SE_SH,AK_SE
+pecoe-0151,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0152,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0153,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0154,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0155,2021,yes,missing,no fish,no,yes,no,Field blank,SE_NS,AK_SE
+pecoe-0161,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0162,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,SD_FI,CA_SD
+pecoe-0163,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0164,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0165,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0166,2021,yes,missing,dropped before filterandtrim,NA,yes,no,Field blank,SD_CV,CA_SD
+pecoe-0167,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0168,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0169,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0170,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0171,2021,yes,missing,no fish,< 50,yes,no,Field blank,SD_SI,CA_SD
+pecoe-0172,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0173,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0174,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0175,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0176,2021,yes,missing,dropped during sequencing,NA,no,no,Field blank,SD_SDL,CA_SD
+pecoe-0177,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0178,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0179,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0180,2021,yes,in dataset,NA,no,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0181,2021,yes,missing,no fish,NA,no,no,Field blank,JN_FC,AK_JN
+pecoe-0182,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0183,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0184,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0185,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0186,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0187,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0188,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0189,2021,yes,in dataset,NA,no,yes,yes,Field blank,JN_SB,AK_JN
+pecoe-0190,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0191,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0192,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0193,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0194,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0195,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,JN_AN,AK_JN
+pecoe-0196,2021,yes,in dataset,NA,no,yes,no,Field blank,JN_EC,AK_JN
+pecoe-0197,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0198,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0199,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0200,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0201,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0202,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0203,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0204,2021,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0205,2021,yes,missing,no fish,< 100,yes,yes,Field blank,JN_BC,AK_JN
+pecoe-0206,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0207,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0208,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0209,2021,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0210,2021,yes,in dataset,NA,no,yes,yes,Field blank,SE_GK,AK_SE
+pecoe-0211,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0212,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0213,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0214,2021,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0215,2021,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,WB_PA,WA_WB
+pecoe-0216,2021,yes,in dataset,NA,< 5,yes,yes,Field blank,PS_BV,WA_PSa
+pecoe-0217,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0218,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0219,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0220,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0221,2021,yes,missing,no fish,NA,yes,yes,Field blank,PS_SH,WA_PSa
+pecoe-0222,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0223,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0224,2021,yes,in dataset,NA,no,yes,no,Sample,PS_SH,WA_PSa
+pecoe-0225,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0226,2021,yes,missing,dropped before filterandtrim,NA,yes,no,Field blank,LA_JD,CA_LA
+pecoe-0227,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_JD,CA_LA
+pecoe-0228,2021,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-0229,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_JD,CA_LA
+pecoe-0230,2021,yes,in dataset,NA,no,yes,no,Sample,LA_JD,CA_LA
+pecoe-0231,2021,yes,in dataset,NA,no,yes,yes,Field blank,LA_LN,CA_LA
+pecoe-0232,2021,yes,missing,dropped during sequencing,NA,yes,no,Sample,LA_LN,CA_LA
+pecoe-0233,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_LN,CA_LA
+pecoe-0234,2021,yes,in dataset,NA,no,yes,no,Sample,LA_LN,CA_LA
+pecoe-0235,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_LN,CA_LA
+pecoe-0236,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,LA_UN,CA_LA
+pecoe-0237,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0238,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0239,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0240,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0241,2021,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,LA_MS,CA_LA
+pecoe-0242,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0243,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0244,2021,yes,in dataset,NA,no,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0245,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0280,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0281,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0282,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0283,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0284,2021,yes,in dataset,NA,no,yes,yes,Field blank,CC_CHP,BC_CC
+pecoe-0285,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0286,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,CC_PBA,BC_CC
+pecoe-0287,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0288,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0289,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0290,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0291,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0292,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0293,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0294,2021,yes,missing,no fish,no,yes,yes,Field blank,CC_KIS2,BC_CC
+pecoe-0295,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0296,2021,yes,in dataset,NA,no,yes,yes,Field blank,CC_GOG1,BC_CC
+pecoe-0297,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0298,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0299,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0300,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0301,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0302,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0303,2021,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0304,2021,yes,in dataset,NA,no,yes,yes,Field blank,CC_FAN3,BC_CC
+pecoe-0305,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0306,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0307,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0308,2021,yes,in dataset,NA,no,yes,no,Sample,IC_GOW,BC_IC
+pecoe-0309,2021,yes,in dataset,NA,no,yes,yes,Field blank,IC_GOW,BC_IC
+pecoe-0310,2021,yes,missing,no fish,NA,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0311,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0312,2021,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,IC_SMB,BC_IC
+pecoe-0324,2021,yes,missing,dropped during sequencing,NA,yes,no,Field blank,MB_TD,CA_MB
+pecoe-0325,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_TD,CA_MB
+pecoe-0326,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_TD,CA_MB
+pecoe-0327,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_TD,CA_MB
+pecoe-0328,2021,no,missing,Not sequenced,NA,no,no,Sample,MB_TD,CA_MB
+pecoe-0329,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0330,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0331,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0332,2021,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0333,2021,yes,missing,dropped during sequencing,NA,yes,no,Field blank,MB_CB,CA_MB
+pecoe-0335,2021,yes,missing,dropped during sequencing,NA,no,no,Field blank,NC_PS,CA_NCb
+pecoe-0336,2021,yes,in dataset,NA,no,yes,no,Sample,NC_PS,CA_NCb
+pecoe-0337,2021,yes,in dataset,NA,no,yes,no,Sample,NC_PS,CA_NCb
+pecoe-0338,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_PS,CA_NCb
+pecoe-0339,2021,yes,in dataset,NA,no,yes,no,Sample,NC_PS,CA_NCb
+pecoe-0340,2021,yes,missing,dropped before filterandtrim,NA,yes,no,Field blank,NC_PM,CA_NCb
+pecoe-0341,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_PM,CA_NCb
+pecoe-0342,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_PM,CA_NCb
+pecoe-0343,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_PM,CA_NCb
+pecoe-0344,2021,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-0345,2021,yes,missing,dropped during merge step,< 5,yes,yes,Field blank,NC_RB,CA_NCb
+pecoe-0346,2021,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-0347,2021,yes,in dataset,NA,no,yes,no,Sample,NC_RB,CA_NCb
+pecoe-0348,2021,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-0349,2021,yes,in dataset,NA,no,yes,no,Sample,NC_RB,CA_NCb
+pecoe-0351,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0352,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0353,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0354,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0355,2021,yes,missing,no fish,< 25,yes,yes,Field blank,PS_IC,WA_PSb
+pecoe-0356,2021,yes,in dataset,NA,no,yes,yes,Field blank,PS_NC,WA_PSb
+pecoe-0357,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0358,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0359,2021,yes,in dataset,NA,< 25,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0360,2021,yes,missing,dropped during sequencing,NA,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0361,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0362,2021,yes,in dataset,NA,no,yes,yes,Field blank,PS_FB,WA_PSb
+pecoe-0363,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0364,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0365,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0366,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0367,2021,yes,in dataset,NA,no,yes,no,Field blank,PS_BH,WA_PSb
+pecoe-0368,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0369,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0370,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0371,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0372,2021,yes,in dataset,NA,no,yes,no,Field blank,PS_FJ,WA_PSb
+pecoe-0373,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0374,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0375,2021,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0377,2021,yes,in dataset,NA,no,yes,yes,Sample,YB_BV,OR_YB
+pecoe-0378,2021,yes,in dataset,NA,no,yes,no,Field blank,YB_BV,OR_YB
+pecoe-0379,2021,yes,in dataset,NA,no,yes,no,Field blank,NC_DE,CA_NCc
+pecoe-0380,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_DE,CA_NCc
+pecoe-0381,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_DE,CA_NCc
+pecoe-0382,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_DE,CA_NCc
+pecoe-0383,2021,yes,in dataset,NA,no,yes,yes,Sample,NC_DE,CA_NCc
+pecoe-0384,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_E,BC_PP
+pecoe-0385,2021,yes,in dataset,NA,no,yes,yes,Field blank,PP_E,BC_PP
+pecoe-0386,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_E,BC_PP
+pecoe-0387,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_E,BC_PP
+pecoe-0388,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_E,BC_PP
+pecoe-0389,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,PP_C,BC_PP
+pecoe-0390,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_C,BC_PP
+pecoe-0391,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_C,BC_PP
+pecoe-0392,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_C,BC_PP
+pecoe-0393,2021,yes,in dataset,NA,no,yes,yes,Field blank,PP_C,BC_PP
+pecoe-0394,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_JJ,BC_PP
+pecoe-0395,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_JJ,BC_PP
+pecoe-0396,2021,yes,in dataset,NA,no,yes,yes,Field blank,PP_JJ,BC_PP
+pecoe-0397,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_JJ,BC_PP
+pecoe-0398,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_JJ,BC_PP
+pecoe-0399,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0400,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0401,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0402,2021,yes,in dataset,NA,no,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0403,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Field blank,PP_HI,BC_PP
+pecoe-0404,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_SI,BC_PP
+pecoe-0405,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_SI,BC_PP
+pecoe-0406,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_SI,BC_PP
+pecoe-0407,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_SI,BC_PP
+pecoe-0408,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_SI,BC_PP
+pecoe-0409,2021,no,missing,Not sequenced,NA,yes,yes,Field blank,PP_G,BC_PP
+pecoe-0410,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_G,BC_PP
+pecoe-0411,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_G,BC_PP
+pecoe-0412,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_G,BC_PP
+pecoe-0413,2021,no,missing,Not sequenced,NA,yes,yes,Sample,PP_G,BC_PP
+pecoe-0419,2021,yes,in dataset,NA,no,yes,yes,Field blank,NV_BI,BC_NV
+pecoe-0420,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0421,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0422,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0423,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0424,2021,yes,in dataset,NA,no,yes,yes,Field blank,NV_KH,BC_NV
+pecoe-0425,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KH,BC_NV
+pecoe-0426,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KH,BC_NV
+pecoe-0427,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KH,BC_NV
+pecoe-0428,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KH,BC_NV
+pecoe-0429,2021,yes,in dataset,NA,no,yes,yes,Field blank,NV_KC,BC_NV
+pecoe-0430,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0431,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0432,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0433,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0434,2021,yes,in dataset,NA,no,yes,yes,Field blank,NV_JL,BC_NV
+pecoe-0435,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_JL,BC_NV
+pecoe-0436,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_JL,BC_NV
+pecoe-0437,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_JL,BC_NV
+pecoe-0438,2021,yes,in dataset,NA,no,yes,yes,Sample,NV_JL,BC_NV
+pecoe-0439,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0440,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0441,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0442,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0443,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0444,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0445,2021,yes,in dataset,NA,no,yes,yes,Field blank,IC_SHS,BC_IC
+pecoe-0446,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0447,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0448,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0449,2021,yes,in dataset,NA,no,yes,yes,Field blank,IC_OPB,BC_IC
+pecoe-0450,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0451,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0452,2021,yes,missing,dropped before filterandtrim,NA,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0453,2021,yes,in dataset,NA,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0454,2021,yes,in dataset,NA,no,yes,yes,Field blank,IC_MAB,BC_IC
+pecoe-0455,2021,yes,missing,no fish,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0456,2022,yes,in dataset,NA,< 50,yes,yes,Field blank,SE_GK,AK_SE
+pecoe-0457,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0458,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0459,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0460,2022,yes,missing,NA,NA,yes,yes,Sample,SE_GK,AK_SE
+pecoe-0461,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,SE_NS,AK_SE
+pecoe-0462,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0463,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0464,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0465,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_NS,AK_SE
+pecoe-0466,2022,yes,missing,no fish,NA,yes,yes,Field blank,SE_SH,AK_SE
+pecoe-0467,2022,yes,missing,no fish,< 5,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0468,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0469,2022,yes,missing,no fish,< 5,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0470,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_SH,AK_SE
+pecoe-0471,2022,yes,missing,NA,NA,yes,yes,Field blank,SE_NZ,AK_SE
+pecoe-0472,2022,yes,in dataset,NA,< 25,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0473,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0474,2022,yes,missing,no fish,< 25,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0475,2022,yes,missing,no fish,< 5,yes,yes,Sample,SE_NZ,AK_SE
+pecoe-0476,2022,yes,missing,no fish,NA,yes,yes,Field blank,SE_RF,AK_SE
+pecoe-0477,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0478,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0479,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0480,2022,yes,in dataset,NA,no,yes,yes,Sample,SE_RF,AK_SE
+pecoe-0481,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,PS_FJ,WA_PSb
+pecoe-0482,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0483,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0484,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0485,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FJ,WA_PSb
+pecoe-0486,2022,yes,in dataset,NA,no,yes,yes,Field blank,PS_FB,WA_PSb
+pecoe-0487,2022,yes,missing,NA,NA,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0488,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0489,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0490,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_FB,WA_PSb
+pecoe-0491,2022,yes,missing,no fish,NA,yes,yes,Field blank,PS_NC,WA_PSb
+pecoe-0492,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0493,2022,yes,missing,dropped during merge step,< 5,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0494,2022,yes,missing,NA,NA,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0495,2022,yes,missing,dropped during merge step,< 5,yes,yes,Sample,PS_NC,WA_PSb
+pecoe-0496,2022,yes,missing,dropped during merge step,< 5,yes,yes,Field blank,PS_IC,WA_PSb
+pecoe-0497,2022,yes,missing,NA,NA,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0498,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0499,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0500,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_IC,WA_PSb
+pecoe-0501,2022,yes,missing,no fish,NA,yes,yes,Field blank,PS_BH,WA_PSb
+pecoe-0502,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0503,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0504,2022,yes,missing,no fish,< 25,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0505,2022,yes,missing,no fish,< 5,yes,yes,Sample,PS_BH,WA_PSb
+pecoe-0506,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_MB,BC_PP
+pecoe-0507,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_MB,BC_PP
+pecoe-0508,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_MB,BC_PP
+pecoe-0509,2022,yes,missing,NA,NA,yes,yes,Sample,PP_MB,BC_PP
+pecoe-0510,2022,yes,missing,no fish,NA,yes,yes,Field blank,PP_MB,BC_PP
+pecoe-0511,2022,yes,in dataset,NA,< 100,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0512,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0513,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0514,2022,yes,missing,dropped during merge step,< 5,yes,yes,Sample,PP_HI,BC_PP
+pecoe-0515,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,PP_HI,BC_PP
+pecoe-0516,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,PP_E,BC_PP
+pecoe-0517,2022,yes,missing,no fish,< 5,yes,yes,Sample,PP_E,BC_PP
+pecoe-0518,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,PP_E,BC_PP
+pecoe-0519,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_E,BC_PP
+pecoe-0520,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,PP_E,BC_PP
+pecoe-0521,2022,yes,in dataset,NA,NA,yes,yes,Sample,PP_J,BC_PP
+pecoe-0522,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_J,BC_PP
+pecoe-0523,2022,yes,missing,no fish,< 50,yes,yes,Sample,PP_J,BC_PP
+pecoe-0524,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_J,BC_PP
+pecoe-0525,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,PP_J,BC_PP
+pecoe-0526,2022,yes,missing,dropped during merge step,< 5,yes,yes,Sample,PP_C,BC_PP
+pecoe-0527,2022,yes,missing,NA,NA,yes,yes,Sample,PP_C,BC_PP
+pecoe-0528,2022,yes,in dataset,NA,NA,yes,yes,Sample,PP_C,BC_PP
+pecoe-0529,2022,yes,in dataset,NA,no,yes,yes,Sample,PP_C,BC_PP
+pecoe-0530,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,PP_C,BC_PP
+pecoe-0531,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,JN_BC,AK_JN
+pecoe-0532,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0533,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0534,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0535,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_BC,AK_JN
+pecoe-0536,2022,yes,missing,no fish,< 25,yes,no,Field blank,JN_AN,AK_JN
+pecoe-0537,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0538,2022,yes,missing,no fish,NA,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0539,2022,yes,in dataset,NA,NA,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0540,2022,yes,in dataset,NA,< 25,yes,yes,Sample,JN_AN,AK_JN
+pecoe-0541,2022,yes,missing,dropped during merge step,< 5,yes,no,Field blank,JN_FC,AK_JN
+pecoe-0542,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0543,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0544,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0545,2022,yes,missing,no fish,< 5,yes,yes,Sample,JN_FC,AK_JN
+pecoe-0546,2022,yes,missing,no fish,< 100,yes,yes,Field blank,JN_SB,AK_JN
+pecoe-0547,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0548,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0549,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0550,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_SB,AK_JN
+pecoe-0551,2022,yes,missing,NA,NA,yes,yes,Field blank,JN_EC,AK_JN
+pecoe-0552,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0553,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0554,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0555,2022,yes,in dataset,NA,no,yes,yes,Sample,JN_EC,AK_JN
+pecoe-0556,2022,yes,missing,dropped during merge step,< 5,yes,yes,Field blank,YB_F,OR_YB
+pecoe-0557,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_F,OR_YB
+pecoe-0558,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_F,OR_YB
+pecoe-0559,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_F,OR_YB
+pecoe-0560,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_F,OR_YB
+pecoe-0561,2022,yes,missing,no fish,< 5,yes,yes,Field blank,YB_SBN,OR_YB
+pecoe-0562,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0563,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0564,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0565,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBN,OR_YB
+pecoe-0566,2022,yes,missing,no fish,< 5,yes,yes,Field blank,YB_SBS,OR_YB
+pecoe-0567,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0568,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0569,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0570,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_SBS,OR_YB
+pecoe-0571,2022,yes,missing,NA,NA,yes,yes,Field blank,YB_IF,OR_YB
+pecoe-0572,2022,yes,missing,no fish,NA,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0573,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0574,2022,yes,in dataset,NA,no,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0575,2022,yes,missing,no fish,NA,yes,yes,Sample,YB_IF,OR_YB
+pecoe-0581,2022,yes,missing,NA,NA,no,no,Field blank,PS_SH,WA_PSa
+pecoe-0582,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0583,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0584,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0585,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SH,WA_PSa
+pecoe-0586,2022,yes,in dataset,NA,< 50,yes,yes,Field blank,PS_SP,WA_PSa
+pecoe-0587,2022,yes,missing,no fish,< 5,yes,yes,Sample,PS_SP,WA_PSa
+pecoe-0588,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SP,WA_PSa
+pecoe-0589,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SP,WA_PSa
+pecoe-0590,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_SP,WA_PSa
+pecoe-0591,2022,yes,missing,dropped during sequencing,NA,no,no,Field blank,PS_BV,WA_PSa
+pecoe-0592,2022,yes,missing,no fish,< 25,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0593,2022,yes,missing,no fish,< 50,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0594,2022,yes,missing,dropped during merge step,< 5,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0595,2022,yes,missing,no fish,< 50,yes,yes,Sample,PS_BV,WA_PSa
+pecoe-0596,2022,yes,missing,no fish,< 5,yes,no,Field blank,PS_YB,WA_PSa
+pecoe-0597,2022,yes,missing,no fish,NA,yes,yes,Sample,PS_YB,WA_PSa
+pecoe-0598,2022,yes,missing,no fish,NA,yes,yes,Sample,PS_YB,WA_PSa
+pecoe-0599,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_YB,WA_PSa
+pecoe-0600,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,PS_YB,WA_PSa
+pecoe-0601,2022,yes,missing,dropped during sequencing,NA,no,no,Field blank,PS_BP,WA_PSa
+pecoe-0602,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_BP,WA_PSa
+pecoe-0603,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_BP,WA_PSa
+pecoe-0604,2022,yes,in dataset,NA,no,no,no,Sample,PS_BP,WA_PSa
+pecoe-0605,2022,yes,in dataset,NA,no,yes,yes,Sample,PS_BP,WA_PSa
+pecoe-0616,2022,yes,in dataset,NA,no,yes,yes,Field blank,MB_CB,CA_MB
+pecoe-0617,2022,yes,in dataset,NA,NA,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0618,2022,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0619,2022,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0620,2022,yes,in dataset,NA,no,yes,yes,Sample,MB_CB,CA_MB
+pecoe-0621,2022,yes,missing,dropped during merge step,< 5,yes,yes,Field blank,MB_TP,CA_MB
+pecoe-0622,2022,yes,in dataset,NA,no,yes,yes,Sample,MB_TP,CA_MB
+pecoe-0623,2022,yes,missing,dropped during merge step,< 5,yes,yes,Sample,MB_TP,CA_MB
+pecoe-0624,2022,yes,missing,no fish,< 25,yes,yes,Sample,MB_TP,CA_MB
+pecoe-0625,2022,yes,in dataset,NA,no,yes,yes,Sample,MB_TP,CA_MB
+pecoe-0631,2022,yes,in dataset,NA,no,yes,yes,Field blank,SD_SI,CA_SD
+pecoe-0632,2022,yes,missing,NA,NA,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0633,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0634,2022,yes,missing,no fish,NA,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0635,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_SI,CA_SD
+pecoe-0636,2022,yes,in dataset,NA,no,yes,yes,Field blank,SD_CV,CA_SD
+pecoe-0637,2022,yes,missing,no fish,< 5,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0638,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0639,2022,yes,missing,NA,NA,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0640,2022,yes,in dataset,NA,< 100,yes,yes,Sample,SD_CV,CA_SD
+pecoe-0641,2022,yes,missing,NA,NA,yes,no,Field blank,SD_FI,CA_SD
+pecoe-0642,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0643,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0644,2022,yes,missing,dropped during sequencing,NA,no,no,Sample,SD_FI,CA_SD
+pecoe-0645,2022,yes,missing,no fish,< 5,yes,yes,Sample,SD_FI,CA_SD
+pecoe-0646,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_KF,CA_SD
+pecoe-0647,2022,yes,in dataset,NA,< 5,no,no,Sample,SD_KF,CA_SD
+pecoe-0648,2022,yes,missing,no fish,< 100,yes,yes,Sample,SD_KF,CA_SD
+pecoe-0649,2022,yes,missing,dropped during sequencing,NA,no,no,Field blank,SD_KF,CA_SD
+pecoe-0650,2022,yes,in dataset,NA,NA,yes,yes,Sample,SD_KF,CA_SD
+pecoe-0651,2022,yes,missing,no fish,< 25,yes,yes,Field blank,SD_SDL,CA_SD
+pecoe-0652,2022,yes,missing,NA,NA,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0653,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0654,2022,yes,in dataset,NA,no,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0655,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,SD_SDL,CA_SD
+pecoe-0681,2022,yes,in dataset,NA,no,yes,yes,Field blank,WB_WR,WA_WB
+pecoe-0682,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0683,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0684,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0685,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_WR,WA_WB
+pecoe-0686,2022,yes,in dataset,NA,no,yes,yes,Field blank,WB_BC,WA_WB
+pecoe-0687,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0688,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0689,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0690,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0691,2022,yes,missing,no fish,< 50,yes,yes,Field blank,WB_PA,WA_WB
+pecoe-0692,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0693,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0694,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0695,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_PA,WA_WB
+pecoe-0696,2022,yes,missing,NA,NA,no,no,Field blank,WB_BC,WA_WB
+pecoe-0697,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0698,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0699,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0700,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_BC,WA_WB
+pecoe-0701,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,WB_DP,WA_WB
+pecoe-0702,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0703,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0704,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0705,2022,yes,in dataset,NA,no,yes,yes,Sample,WB_DP,WA_WB
+pecoe-0706,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0707,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0708,2022,yes,missing,NA,NA,yes,yes,Sample,CC_CHP,BC_CC
+pecoe-0709,2022,yes,missing,no fish,< 25,no,no,Sample,CC_CHP,BC_CC
+pecoe-0710,2022,yes,missing,NA,NA,yes,yes,Field blank,CC_CHP,BC_CC
+pecoe-0711,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0712,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0713,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0714,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_PBA,BC_CC
+pecoe-0715,2022,yes,in dataset,NA,no,yes,yes,Field blank,CC_PBA,BC_CC
+pecoe-0716,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0717,2022,yes,missing,no fish,< 100,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0718,2022,yes,missing,no fish,< 50,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0719,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,CC_KIS2,BC_CC
+pecoe-0720,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,CC_KIS2,BC_CC
+pecoe-0721,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0722,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0723,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0724,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_GOG1,BC_CC
+pecoe-0725,2022,yes,missing,no fish,< 25,yes,yes,Field blank,CC_GOG1,BC_CC
+pecoe-0726,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0727,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0728,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0729,2022,yes,in dataset,NA,no,yes,yes,Sample,CC_FAN3,BC_CC
+pecoe-0730,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,CC_FAN3,BC_CC
+pecoe-0731,2022,yes,missing,no fish,< 25,yes,yes,Field blank,HG_LIE,BC_HGa
+pecoe-0732,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0733,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0734,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0735,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_LIE,BC_HGa
+pecoe-0736,2022,yes,missing,NA,NA,yes,yes,Field blank,HG_ROI,BC_HGa
+pecoe-0737,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_ROI,BC_HGa
+pecoe-0738,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_ROI,BC_HGa
+pecoe-0739,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_ROI,BC_HGa
+pecoe-0740,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_ROI,BC_HGa
+pecoe-0741,2022,yes,missing,no fish,< 5,yes,yes,Field blank,HG_BH,BC_HGa
+pecoe-0742,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_BH,BC_HGa
+pecoe-0743,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_BH,BC_HGa
+pecoe-0744,2022,yes,missing,no fish,< 100,yes,yes,Sample,HG_BH,BC_HGa
+pecoe-0745,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_BH,BC_HGa
+pecoe-0746,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,HG_SB,BC_HGa
+pecoe-0747,2022,yes,missing,no fish,< 25,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0748,2022,yes,missing,NA,NA,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0749,2022,yes,missing,NA,NA,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0750,2022,yes,missing,no fish,NA,yes,yes,Sample,HG_SB,BC_HGa
+pecoe-0751,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,HG_RI,BC_HGa
+pecoe-0752,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0753,2022,yes,in dataset,NA,NA,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0754,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0755,2022,yes,in dataset,NA,no,yes,yes,Sample,HG_RI,BC_HGa
+pecoe-0756,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,NC_RB,CA_NCb
+pecoe-0757,2022,yes,in dataset,NA,no,yes,yes,Sample,NC_RB,CA_NCb
+pecoe-0758,2022,yes,in dataset,NA,< 5,yes,yes,Sample,NC_RB,CA_NCb
+pecoe-0759,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_RB,CA_NCb
+pecoe-0760,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_RB,CA_NCb
+pecoe-0761,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,NC_PM,CA_NCb
+pecoe-0762,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_PM,CA_NCb
+pecoe-0763,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_PM,CA_NCb
+pecoe-0764,2022,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-0765,2022,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-0766,2022,yes,missing,dropped during sequencing,NA,no,no,Field blank,NC_PS,CA_NCb
+pecoe-0767,2022,yes,in dataset,NA,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-0768,2022,yes,in dataset,NA,no,yes,no,Sample,NC_PS,CA_NCb
+pecoe-0769,2022,yes,missing,no fish,< 5,yes,no,Sample,NC_PS,CA_NCb
+pecoe-0770,2022,yes,in dataset,NA,no,yes,yes,Sample,NC_PS,CA_NCb
+pecoe-0781,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0782,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,NV_BI,BC_NV
+pecoe-0783,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0784,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0785,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_BI,BC_NV
+pecoe-0786,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KI,BC_NV
+pecoe-0787,2022,yes,missing,no fish,no,yes,yes,Field blank,NV_KI,BC_NV
+pecoe-0788,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KI,BC_NV
+pecoe-0789,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KI,BC_NV
+pecoe-0790,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KI,BC_NV
+pecoe-0791,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0792,2022,yes,missing,no fish,< 25,yes,yes,Field blank,NV_KC,BC_NV
+pecoe-0793,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0794,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0795,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_KC,BC_NV
+pecoe-0796,2022,yes,missing,no fish,NA,yes,yes,Field blank,NV_PC,BC_NV
+pecoe-0797,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_PC,BC_NV
+pecoe-0798,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_PC,BC_NV
+pecoe-0799,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_PC,BC_NV
+pecoe-0800,2022,yes,in dataset,NA,no,yes,yes,Sample,NV_PC,BC_NV
+pecoe-0806,2022,yes,missing,no fish,NA,yes,no,Field blank,LA_JD,CA_LA
+pecoe-0807,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_JD,CA_LA
+pecoe-0808,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_JD,CA_LA
+pecoe-0809,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_JD,CA_LA
+pecoe-0810,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_JD,CA_LA
+pecoe-0811,2022,yes,missing,no fish,NA,no,no,Field blank,LA_MS,CA_LA
+pecoe-0812,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0813,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0814,2022,yes,missing,NA,NA,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0815,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_MS,CA_LA
+pecoe-0816,2022,yes,missing,NA,NA,yes,no,Field blank,LA_AB,CA_LA
+pecoe-0817,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_AB,CA_LA
+pecoe-0818,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_AB,CA_LA
+pecoe-0819,2022,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-0820,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_AB,CA_LA
+pecoe-0821,2022,yes,missing,no fish,< 5,no,no,Field blank,LA_UN,CA_LA
+pecoe-0822,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0823,2022,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-0824,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0825,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_UN,CA_LA
+pecoe-0826,2022,yes,missing,no fish,< 25,no,no,Field blank,LA_LN,CA_LA
+pecoe-0827,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_LN,CA_LA
+pecoe-0828,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_LN,CA_LA
+pecoe-0829,2022,yes,in dataset,NA,no,yes,no,Sample,LA_LN,CA_LA
+pecoe-0830,2022,yes,in dataset,NA,no,yes,yes,Sample,LA_LN,CA_LA
+pecoe-0831,2022,yes,missing,NA,NA,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0832,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0833,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0834,2022,yes,missing,NA,NA,no,no,Field blank,IC_GOW,BC_IC
+pecoe-0835,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_GOW,BC_IC
+pecoe-0836,2022,yes,in dataset,NA,no,yes,no,Sample,IC_SHS,BC_IC
+pecoe-0837,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0838,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0839,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SHS,BC_IC
+pecoe-0840,2022,yes,missing,no fish,< 5,no,no,Field blank,IC_SHS,BC_IC
+pecoe-0841,2022,yes,missing,no fish,< 25,yes,yes,Field blank,IC_SMB,BC_IC
+pecoe-0842,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0843,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0844,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0845,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_SMB,BC_IC
+pecoe-0846,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0847,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0848,2022,yes,in dataset,NA,no,yes,yes,Field blank,IC_MAB,BC_IC
+pecoe-0849,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0850,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_MAB,BC_IC
+pecoe-0851,2022,yes,in dataset,NA,no,yes,yes,Field blank,IC_OPB,BC_IC
+pecoe-0852,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0853,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0854,2022,yes,in dataset,NA,NA,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0855,2022,yes,in dataset,NA,no,yes,yes,Sample,IC_OPB,BC_IC
+pecoe-0856,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,NC_NC,CA_NCa
+pecoe-0857,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_NC,CA_NCa
+pecoe-0858,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_NC,CA_NCa
+pecoe-0859,2022,yes,in dataset,NA,< 25,yes,yes,Sample,NC_NC,CA_NCa
+pecoe-0860,2022,yes,in dataset,NA,no,yes,yes,Sample,NC_NC,CA_NCa
+pecoe-0861,2022,yes,in dataset,NA,no,yes,yes,Sample,NC_NC,CA_NCa
+pecoe-0862,2022,yes,missing,dropped during sequencing,NA,yes,yes,Sample,NC_NC,CA_NCa
+pecoe-0863,2022,yes,missing,NA,NA,yes,no,Sample,NC_NC,CA_NCa
+pecoe-0864,2022,yes,missing,dropped during sequencing,NA,yes,no,Sample,NC_NC,CA_NCa
+pecoe-0865,2022,yes,missing,dropped during sequencing,NA,yes,yes,Field blank,NC_WP,CA_NCa
+pecoe-0866,2022,yes,missing,dropped during merge step,< 5,no,no,Sample,NC_WP,CA_NCa
+pecoe-0867,2022,yes,in dataset,NA,NA,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0868,2022,yes,missing,NA,NA,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0869,2022,yes,in dataset,NA,no,yes,yes,Sample,NC_WP,CA_NCa
+pecoe-0876,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,PS_FB,WA_PSb
+pecoe-0877,2023,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-0878,2023,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-0879,2023,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-0880,2023,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-0881,2023,yes,missing,no fish,< 5,no,no,Field blank,PS_IC,WA_PSb
+pecoe-0882,2023,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-0883,2023,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-0884,2023,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-0885,2023,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-0886,2023,yes,missing,no fish,< 25,no,no,Field blank,PS_NC,WA_PSb
+pecoe-0887,2023,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-0888,2023,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-0889,2023,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-0890,2023,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-0891,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,PS_FJ,WA_PSb
+pecoe-0892,2023,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-0893,2023,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-0894,2023,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-0895,2023,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-0901,2023,yes,missing,no fish,NA,no,no,Sample,HG_ROI,BC_HGa
+pecoe-0902,2023,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-0903,2023,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-0904,2023,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-0905,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,HG_ROI,BC_HGa
+pecoe-0906,2023,yes,missing,no fish,NA,no,no,Field blank,HG_SB,BC_HGa
+pecoe-0907,2023,yes,missing,no fish,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-0908,2023,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-0909,2023,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-0910,2023,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-0911,2023,yes,in dataset,NA,no,no,no,Field blank,HG_BH,BC_HGa
+pecoe-0912,2023,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-0913,2023,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-0914,2023,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-0915,2023,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-0916,2023,yes,missing,no fish,NA,no,no,Field blank,HG_RI,BC_HGa
+pecoe-0917,2023,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-0918,2023,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-0919,2023,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-0920,2023,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-0926,2023,yes,missing,no fish,< 25,no,no,Field blank,PS_BV,WA_PSa
+pecoe-0927,2023,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-0928,2023,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-0929,2023,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-0930,2023,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-0931,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,PS_SH,WA_PSa
+pecoe-0932,2023,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-0933,2023,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-0934,2023,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-0935,2023,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-0936,2023,yes,missing,no fish,< 25,no,no,Field blank,PS_BB,WA_PSa
+pecoe-0937,2023,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-0938,2023,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-0939,2023,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-0940,2023,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-0951,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_E,BC_PP
+pecoe-0952,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_E,BC_PP
+pecoe-0953,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_E,BC_PP
+pecoe-0954,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_E,BC_PP
+pecoe-0955,2023,yes,missing,dropped during sequencing,NA,no,no,Field blank,PP_E,BC_PP
+pecoe-0956,2023,yes,missing,dropped during sequencing,NA,no,no,Field blank,PP_MB,BC_PP
+pecoe-0957,2023,yes,in dataset,NA,no,no,no,Sample,PP_MB,BC_PP
+pecoe-0958,2023,yes,in dataset,NA,< 25,no,no,Sample,PP_MB,BC_PP
+pecoe-0959,2023,yes,in dataset,NA,no,no,no,Sample,PP_MB,BC_PP
+pecoe-0960,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_MB,BC_PP
+pecoe-0961,2023,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-0962,2023,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-0963,2023,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-0964,2023,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-0965,2023,yes,missing,no fish,no,no,no,Field blank,PP_HI,BC_PP
+pecoe-0966,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_JJ,BC_PP
+pecoe-0967,2023,yes,in dataset,NA,no,no,no,Sample,PP_JJ,BC_PP
+pecoe-0968,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_JJ,BC_PP
+pecoe-0969,2023,yes,in dataset,NA,no,no,no,Sample,PP_JJ,BC_PP
+pecoe-0970,2023,yes,missing,no fish,no,no,no,Field blank,PP_JJ,BC_PP
+pecoe-0971,2023,yes,missing,no fish,no,no,no,Field blank,PP_C,BC_PP
+pecoe-0972,2023,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-0973,2023,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-0974,2023,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-0975,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,PP_C,BC_PP
+pecoe-0976,2023,yes,missing,no fish,NA,no,no,Field blank,HG_DSD,BC_HGa
+pecoe-0977,2023,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGa
+pecoe-0978,2023,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGa
+pecoe-0979,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,HG_DSD,BC_HGa
+pecoe-0980,2023,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGa
+pecoe-0981,2023,yes,missing,no fish,no,no,no,Field blank,HG_MDD,BC_HGa
+pecoe-0982,2023,yes,in dataset,NA,no,no,no,Sample,HG_MDD,BC_HGa
+pecoe-0983,2023,yes,in dataset,NA,no,no,no,Sample,HG_MDD,BC_HGa
+pecoe-0984,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,HG_MDD,BC_HGa
+pecoe-0985,2023,yes,missing,dropped before filterandtrim,NA,no,no,Sample,HG_MDD,BC_HGa
+pecoe-0986,2023,yes,missing,no fish,< 5,no,no,Field blank,HG_DN,BC_HGb
+pecoe-0987,2023,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-0988,2023,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-0989,2023,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-0990,2023,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-0991,2023,yes,missing,no fish,NA,no,no,Field blank,HG_TK,BC_HGb
+pecoe-0992,2023,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-0993,2023,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-0994,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,HG_TK,BC_HGb
+pecoe-0995,2023,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-1001,2023,yes,missing,dropped during sequencing,NA,no,no,Field blank,LA_UN,CA_LA
+pecoe-1002,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,LA_UN,CA_LA
+pecoe-1003,2023,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1004,2023,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1005,2023,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1006,2023,yes,missing,no fish,< 5,no,no,Field blank,LA_SP,CA_LA
+pecoe-1007,2023,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1008,2023,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1009,2023,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1010,2023,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1011,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,LA_JD,CA_LA
+pecoe-1012,2023,yes,missing,no fish,< 25,no,no,Sample,LA_JD,CA_LA
+pecoe-1013,2023,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1014,2023,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1015,2023,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1016,2023,yes,in dataset,NA,no,no,no,Field blank,LA_AB,CA_LA
+pecoe-1017,2023,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1018,2023,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1019,2023,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1020,2023,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1021,2023,yes,in dataset,NA,no,no,no,Field blank,LA_MS,CA_LA
+pecoe-1022,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,LA_MS,CA_LA
+pecoe-1023,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,LA_MS,CA_LA
+pecoe-1024,2023,yes,in dataset,NA,no,no,no,Sample,LA_MS,CA_LA
+pecoe-1025,2023,yes,in dataset,NA,no,no,no,Sample,LA_MS,CA_LA
+pecoe-1026,2023,yes,in dataset,NA,no,no,no,Sample,YB_BV,OR_YB
+pecoe-1027,2023,yes,in dataset,NA,no,no,no,Sample,YB_BV,OR_YB
+pecoe-1028,2023,yes,in dataset,NA,no,no,no,Sample,YB_BV,OR_YB
+pecoe-1029,2023,yes,in dataset,NA,no,no,no,Sample,YB_BV,OR_YB
+pecoe-1030,2023,yes,missing,no fish,< 25,no,no,Field blank,YB_BV,OR_YB
+pecoe-1031,2023,yes,in dataset,NA,no,no,no,Field blank,YB_FP,OR_YB
+pecoe-1032,2023,yes,in dataset,NA,no,no,no,Sample,YB_FP,OR_YB
+pecoe-1033,2023,yes,in dataset,NA,no,no,no,Sample,YB_FP,OR_YB
+pecoe-1034,2023,yes,in dataset,NA,no,no,no,Sample,YB_FP,OR_YB
+pecoe-1035,2023,yes,in dataset,NA,no,no,no,Sample,YB_FP,OR_YB
+pecoe-1036,2023,yes,missing,no fish,< 100,no,no,Field blank,YB_SBS,OR_YB
+pecoe-1037,2023,yes,missing,dropped before filterandtrim,NA,no,no,Sample,YB_SBS,OR_YB
+pecoe-1038,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1039,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1040,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1041,2023,yes,in dataset,NA,no,no,no,Field blank,YB_SBN,OR_YB
+pecoe-1042,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBN,OR_YB
+pecoe-1043,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBN,OR_YB
+pecoe-1044,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBN,OR_YB
+pecoe-1045,2023,yes,in dataset,NA,no,no,no,Sample,YB_SBN,OR_YB
+pecoe-1046,2023,yes,missing,no fish,no,no,no,Field blank,YB_IF,OR_YB
+pecoe-1047,2023,yes,in dataset,NA,no,no,no,Sample,YB_IF,OR_YB
+pecoe-1048,2023,yes,in dataset,NA,no,no,no,Sample,YB_IF,OR_YB
+pecoe-1049,2023,yes,in dataset,NA,no,no,no,Sample,YB_IF,OR_YB
+pecoe-1050,2023,yes,in dataset,NA,no,no,no,Sample,YB_IF,OR_YB
+pecoe-1051,2023,yes,missing,no fish,NA,no,no,Field blank,JN_FC,AK_JN
+pecoe-1052,2023,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1053,2023,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1054,2023,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1055,2023,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1056,2023,yes,missing,no fish,NA,no,no,Sample,JN_AN,AK_JN
+pecoe-1057,2023,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1058,2023,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1059,2023,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1060,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,JN_AN,AK_JN
+pecoe-1061,2023,yes,missing,no fish,no,no,no,Field blank,JN_EC,AK_JN
+pecoe-1062,2023,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1063,2023,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1064,2023,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1065,2023,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1066,2023,yes,missing,no fish,NA,no,no,Field blank,JN_SB,AK_JN
+pecoe-1067,2023,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1068,2023,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1069,2023,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1070,2023,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1071,2023,yes,missing,no fish,NA,no,no,Field blank,JN_BC,AK_JN
+pecoe-1072,2023,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1073,2023,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1074,2023,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1075,2023,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1076,2023,yes,missing,no fish,NA,no,no,Field blank,SD_SI,CA_SD
+pecoe-1077,2023,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1078,2023,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1079,2023,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1080,2023,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1081,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,SD_CV,CA_SD
+pecoe-1082,2023,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1083,2023,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1084,2023,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1085,2023,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1086,2023,yes,missing,no fish,NA,no,no,Field blank,SD_Coronado,CA_SD
+pecoe-1087,2023,yes,in dataset,NA,no,no,no,Sample,SD_Coronado,CA_SD
+pecoe-1088,2023,yes,in dataset,NA,no,no,no,Sample,SD_Coronado,CA_SD
+pecoe-1089,2023,yes,in dataset,NA,no,no,no,Sample,SD_Coronado,CA_SD
+pecoe-1090,2023,yes,in dataset,NA,no,no,no,Sample,SD_Coronado,CA_SD
+pecoe-1091,2023,yes,missing,no fish,NA,no,no,Field blank,SD_FI,CA_SD
+pecoe-1092,2023,yes,in dataset,NA,no,no,no,Sample,SD_FI,CA_SD
+pecoe-1093,2023,yes,in dataset,NA,no,no,no,Sample,SD_FI,CA_SD
+pecoe-1094,2023,yes,in dataset,NA,no,no,no,Sample,SD_FI,CA_SD
+pecoe-1095,2023,yes,in dataset,NA,no,no,no,Sample,SD_FI,CA_SD
+pecoe-1101,2023,yes,missing,no fish,NA,no,no,Sample,CC_CHP,BC_CC
+pecoe-1102,2023,yes,missing,no fish,no,no,no,Sample,CC_CHP,BC_CC
+pecoe-1103,2023,yes,missing,no fish,NA,no,no,Sample,CC_CHP,BC_CC
+pecoe-1104,2023,yes,missing,no fish,NA,no,no,Sample,CC_CHP,BC_CC
+pecoe-1105,2023,yes,missing,no fish,NA,no,no,Field blank,CC_CHP,BC_CC
+pecoe-1106,2023,yes,in dataset,NA,no,no,no,Field blank,CC_PBA,BC_CC
+pecoe-1107,2023,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1108,2023,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1109,2023,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1110,2023,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1111,2023,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1112,2023,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1113,2023,yes,missing,dropped during sequencing,NA,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1114,2023,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1115,2023,yes,missing,no fish,< 100,no,no,Field blank,CC_FAN3,BC_CC
+pecoe-1116,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,CC_GOG1,BC_CC
+pecoe-1117,2023,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1118,2023,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1119,2023,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1120,2023,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1121,2023,yes,missing,no fish,< 5,no,no,Field blank,CC_KIS1,BC_CC
+pecoe-1122,2023,yes,in dataset,NA,no,no,no,Sample,CC_KIS1,BC_CC
+pecoe-1123,2023,yes,in dataset,NA,no,no,no,Sample,CC_KIS1,BC_CC
+pecoe-1124,2023,yes,in dataset,NA,no,no,no,Sample,CC_KIS1,BC_CC
+pecoe-1125,2023,yes,in dataset,NA,no,no,no,Sample,CC_KIS1,BC_CC
+pecoe-1126,2023,yes,missing,no fish,< 5,no,no,Field blank,WB_PA,WA_WB
+pecoe-1127,2023,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1128,2023,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1129,2023,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1130,2023,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1131,2023,yes,missing,no fish,NA,no,no,Field blank,WB_DP,WA_WB
+pecoe-1132,2023,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1133,2023,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1134,2023,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1135,2023,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1136,2023,yes,in dataset,NA,no,no,no,Field blank,WB_SB,WA_WB
+pecoe-1137,2023,yes,in dataset,NA,no,no,no,Sample,WB_SB,WA_WB
+pecoe-1138,2023,yes,in dataset,NA,no,no,no,Sample,WB_SB,WA_WB
+pecoe-1139,2023,yes,in dataset,NA,no,no,no,Sample,WB_SB,WA_WB
+pecoe-1140,2023,yes,in dataset,NA,no,no,no,Sample,WB_SB,WA_WB
+pecoe-1141,2023,yes,missing,no fish,< 25,no,no,Field blank,WB_WR,WA_WB
+pecoe-1142,2023,yes,in dataset,NA,no,no,no,Sample,WB_WR,WA_WB
+pecoe-1143,2023,yes,in dataset,NA,no,no,no,Sample,WB_WR,WA_WB
+pecoe-1144,2023,yes,in dataset,NA,no,no,no,Sample,WB_WR,WA_WB
+pecoe-1145,2023,yes,in dataset,NA,no,no,no,Sample,WB_WR,WA_WB
+pecoe-1146,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,WB_BC,WA_WB
+pecoe-1147,2023,yes,in dataset,NA,no,no,no,Sample,WB_BC,WA_WB
+pecoe-1148,2023,yes,in dataset,NA,no,no,no,Sample,WB_BC,WA_WB
+pecoe-1149,2023,yes,in dataset,NA,no,no,no,Sample,WB_BC,WA_WB
+pecoe-1150,2023,yes,in dataset,NA,no,no,no,Sample,WB_BC,WA_WB
+pecoe-1151,2023,yes,in dataset,NA,< 5,no,no,Field blank,NC_RB,CA_NCb
+pecoe-1152,2023,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1153,2023,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1154,2023,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1155,2023,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1156,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NC_PS,CA_NCb
+pecoe-1157,2023,yes,in dataset,NA,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-1158,2023,yes,missing,no fish,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-1159,2023,yes,missing,no fish,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-1160,2023,yes,in dataset,NA,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-1161,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NC_PM,CA_NCb
+pecoe-1162,2023,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-1163,2023,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-1164,2023,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-1165,2023,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-1176,2023,yes,missing,no fish,< 5,no,no,Field blank,NC_DE,CA_NCc
+pecoe-1177,2023,yes,in dataset,NA,no,no,no,Sample,NC_DE,CA_NCc
+pecoe-1178,2023,yes,in dataset,NA,no,no,no,Sample,NC_DE,CA_NCc
+pecoe-1179,2023,yes,in dataset,NA,no,no,no,Sample,NC_DE,CA_NCc
+pecoe-1180,2023,yes,missing,no fish,NA,no,no,Sample,NC_DE,CA_NCc
+pecoe-1201,2023,yes,missing,no fish,NA,no,no,Field blank,MB_CB,CA_MB
+pecoe-1202,2023,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1203,2023,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1204,2023,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1205,2023,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1216,2023,yes,missing,no fish,< 100,no,no,Field blank,LA_LN,CA_LA
+pecoe-1217,2023,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1218,2023,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1219,2023,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1220,2023,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1221,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NC_NC,CA_NCa
+pecoe-1222,2023,yes,in dataset,NA,no,no,no,Sample,NC_NC,CA_NCa
+pecoe-1223,2023,yes,in dataset,NA,no,no,no,Sample,NC_NC,CA_NCa
+pecoe-1224,2023,yes,in dataset,NA,no,no,no,Sample,NC_NC,CA_NCa
+pecoe-1225,2023,yes,missing,no fish,NA,no,no,Sample,NC_NC,CA_NCa
+pecoe-1226,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NC_WP,CA_NCa
+pecoe-1227,2023,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1228,2023,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1229,2023,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1230,2023,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1239,2023,no,missing,Not sequenced,NA,no,no,Sample,NV_PC,BC_NV
+pecoe-1246,2023,yes,missing,no fish,< 25,no,no,Field blank,IC_SHS,BC_IC
+pecoe-1247,2023,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1248,2023,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1249,2023,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1250,2023,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1251,2023,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1252,2023,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1253,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,IC_SMB,BC_IC
+pecoe-1254,2023,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1255,2023,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1256,2023,yes,missing,dropped during merge step,< 5,no,no,Field blank,IC_OPB,BC_IC
+pecoe-1257,2023,yes,missing,dropped before filterandtrim,NA,no,no,Sample,IC_OPB,BC_IC
+pecoe-1258,2023,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1259,2023,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1260,2023,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1261,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,IC_MAB,BC_IC
+pecoe-1262,2023,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1263,2023,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1264,2023,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1265,2023,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1266,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,IC_GOW,BC_IC
+pecoe-1267,2023,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1268,2023,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1269,2023,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1270,2023,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1271,2023,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1272,2023,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1273,2023,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1274,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NV_KC,BC_NV
+pecoe-1275,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NV_PC,BC_NV
+pecoe-1276,2023,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1277,2023,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1278,2023,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1279,2023,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1280,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NV_JL,BC_NV
+pecoe-1281,2023,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1282,2023,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1283,2023,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1284,2023,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1285,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NV_BI,BC_NV
+pecoe-1286,2023,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1287,2023,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1288,2023,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1289,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NV_KI,BC_NV
+pecoe-1290,2023,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1291,2023,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1292,2023,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1293,2023,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1294,2023,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1295,2023,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1316,2023,yes,in dataset,NA,no,no,no,Sample,HB_SR,CA_HB
+pecoe-1317,2023,yes,in dataset,NA,no,no,no,Sample,HB_SR,CA_HB
+pecoe-1318,2023,yes,in dataset,NA,no,no,no,Sample,HB_SR,CA_HB
+pecoe-1319,2023,yes,in dataset,NA,no,no,no,Sample,HB_SR,CA_HB
+pecoe-1320,2023,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,HB_SR,CA_HB
+pecoe-1341,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,HG_BH,BC_HGa
+pecoe-1342,2024,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-1343,2024,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-1344,2024,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-1345,2024,yes,in dataset,NA,no,no,no,Sample,HG_BH,BC_HGa
+pecoe-1346,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,HG_SB,BC_HGa
+pecoe-1347,2024,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-1348,2024,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-1349,2024,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-1350,2024,yes,in dataset,NA,no,no,no,Sample,HG_SB,BC_HGa
+pecoe-1351,2024,yes,missing,dropped during merge step,< 5,no,no,Field blank,HG_RI,BC_HGa
+pecoe-1352,2024,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-1353,2024,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-1354,2024,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-1355,2024,yes,in dataset,NA,no,no,no,Sample,HG_RI,BC_HGa
+pecoe-1356,2024,yes,missing,no fish,NA,no,no,Field blank,HG_ROI,BC_HGa
+pecoe-1357,2024,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-1358,2024,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-1359,2024,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-1360,2024,yes,in dataset,NA,no,no,no,Sample,HG_ROI,BC_HGa
+pecoe-1361,2024,yes,in dataset,NA,< 25,no,no,Field blank,HG_LIE,BC_HGa
+pecoe-1362,2024,yes,in dataset,NA,no,no,no,Sample,HG_LIE,BC_HGa
+pecoe-1363,2024,yes,in dataset,NA,no,no,no,Sample,HG_LIE,BC_HGa
+pecoe-1364,2024,yes,in dataset,NA,no,no,no,Sample,HG_LIE,BC_HGa
+pecoe-1365,2024,yes,in dataset,NA,no,no,no,Sample,HG_LIE,BC_HGa
+pecoe-1366,2024,yes,in dataset,NA,< 5,no,no,Field blank,PS_BH,WA_PS
+pecoe-1367,2024,yes,in dataset,NA,NA,no,no,Sample,PS_BH,WA_PS
+pecoe-1368,2024,yes,in dataset,NA,no,no,no,Sample,PS_BH,WA_PS
+pecoe-1369,2024,yes,missing,no fish,< 25,no,no,Sample,PS_BH,WA_PS
+pecoe-1370,2024,yes,missing,dropped before filterandtrim,NA,no,no,Sample,PS_BH,WA_PS
+pecoe-1371,2024,yes,missing,no fish,< 5,no,no,Field blank,PS_NC,WA_PSb
+pecoe-1372,2024,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-1373,2024,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-1374,2024,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-1375,2024,yes,in dataset,NA,no,no,no,Sample,PS_NC,WA_PSb
+pecoe-1376,2024,yes,missing,no fish,NA,no,no,Field blank,PS_IC,WA_PSb
+pecoe-1377,2024,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-1378,2024,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-1379,2024,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-1380,2024,yes,in dataset,NA,no,no,no,Sample,PS_IC,WA_PSb
+pecoe-1381,2024,yes,missing,no fish,< 50,no,no,Field blank,PS_FB,WA_PSb
+pecoe-1382,2024,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-1383,2024,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-1384,2024,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-1385,2024,yes,in dataset,NA,no,no,no,Sample,PS_FB,WA_PSb
+pecoe-1386,2024,yes,missing,no fish,< 25,no,no,Field blank,PS_FJ,WA_PSb
+pecoe-1387,2024,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-1388,2024,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-1389,2024,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-1390,2024,yes,in dataset,NA,no,no,no,Sample,PS_FJ,WA_PSb
+pecoe-1391,2024,yes,missing,no fish,NA,no,no,Field blank,WB_DP,WA_WB
+pecoe-1392,2024,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1393,2024,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1394,2024,yes,in dataset,NA,no,no,no,Sample,WB_DP,WA_WB
+pecoe-1395,2024,yes,missing,dropped before filterandtrim,NA,no,no,Sample,WB_DP,WA_WB
+pecoe-1396,2024,yes,missing,no fish,< 25,no,no,Field blank,WB_PA,WA_WB
+pecoe-1397,2024,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1398,2024,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1399,2024,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1400,2024,yes,in dataset,NA,no,no,no,Sample,WB_PA,WA_WB
+pecoe-1401,2024,yes,in dataset,NA,no,no,no,Field blank,WB_ST,WA_WB
+pecoe-1402,2024,yes,in dataset,NA,no,no,no,Sample,WB_ST,WA_WB
+pecoe-1403,2024,yes,in dataset,NA,no,no,no,Sample,WB_ST,WA_WB
+pecoe-1404,2024,yes,in dataset,NA,no,no,no,Sample,WB_ST,WA_WB
+pecoe-1405,2024,yes,in dataset,NA,no,no,no,Sample,WB_ST,WA_WB
+pecoe-1406,2024,yes,missing,no fish,< 25,no,no,Field blank,WB_WP,WA_WB
+pecoe-1407,2024,yes,in dataset,NA,no,no,no,Sample,WB_WP,WA_WB
+pecoe-1408,2024,yes,in dataset,NA,no,no,no,Sample,WB_WP,WA_WB
+pecoe-1409,2024,yes,in dataset,NA,no,no,no,Sample,WB_WP,WA_WB
+pecoe-1410,2024,yes,in dataset,NA,no,no,no,Sample,WB_WP,WA_WB
+pecoe-1411,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,WB_SP,WA_WB
+pecoe-1412,2024,yes,in dataset,NA,no,no,no,Sample,WB_SP,WA_WB
+pecoe-1413,2024,yes,in dataset,NA,no,no,no,Sample,WB_SP,WA_WB
+pecoe-1414,2024,yes,in dataset,NA,no,no,no,Sample,WB_SP,WA_WB
+pecoe-1415,2024,yes,in dataset,NA,no,no,no,Sample,WB_SP,WA_WB
+pecoe-1416,2024,yes,in dataset,NA,no,no,no,Field blank,OR_BV,OR_YB
+pecoe-1417,2024,yes,in dataset,NA,no,no,no,Sample,OR_BV,OR_YB
+pecoe-1418,2024,yes,in dataset,NA,no,no,no,Sample,OR_BV,OR_YB
+pecoe-1419,2024,yes,in dataset,NA,no,no,no,Sample,OR_BV,OR_YB
+pecoe-1420,2024,yes,missing,dropped before filterandtrim,NA,no,no,Sample,OR_BV,OR_YB
+pecoe-1421,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,OR_FP,OR_YB
+pecoe-1422,2024,yes,in dataset,NA,NA,no,no,Sample,OR_FP,OR_YB
+pecoe-1423,2024,yes,in dataset,NA,no,no,no,Sample,OR_FP,OR_YB
+pecoe-1424,2024,yes,in dataset,NA,no,no,no,Sample,OR_FP,OR_YB
+pecoe-1425,2024,yes,in dataset,NA,no,no,no,Sample,OR_FP,OR_YB
+pecoe-1426,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,OR_SBN,OR_YB
+pecoe-1427,2024,yes,in dataset,NA,no,no,no,Sample,OR_SBN,OR_YB
+pecoe-1428,2024,yes,in dataset,NA,no,no,no,Sample,OR_SBN,OR_YB
+pecoe-1429,2024,yes,in dataset,NA,no,no,no,Sample,OR_SBN,OR_YB
+pecoe-1430,2024,yes,in dataset,NA,no,no,no,Sample,OR_SBN,OR_YB
+pecoe-1431,2024,yes,missing,no fish,< 5,no,no,Field blank,YB_SBS,OR_YB
+pecoe-1432,2024,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1433,2024,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1434,2024,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1435,2024,yes,in dataset,NA,no,no,no,Sample,YB_SBS,OR_YB
+pecoe-1436,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,OR_IF,OR_YB
+pecoe-1437,2024,yes,in dataset,NA,no,no,no,Sample,OR_IF,OR_YB
+pecoe-1438,2024,yes,in dataset,NA,no,no,no,Sample,OR_IF,OR_YB
+pecoe-1439,2024,yes,in dataset,NA,no,no,no,Sample,OR_IF,OR_YB
+pecoe-1440,2024,yes,in dataset,NA,no,no,no,Sample,OR_IF,OR_YB
+pecoe-1446,2024,yes,missing,no fish,no,no,no,Field blank,JN_SB,AK_JN
+pecoe-1447,2024,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1448,2024,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1449,2024,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1450,2024,yes,in dataset,NA,no,no,no,Sample,JN_SB,AK_JN
+pecoe-1451,2024,yes,missing,no fish,NA,no,no,Field blank,JN_EC,AK_JN
+pecoe-1452,2024,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1453,2024,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1454,2024,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1455,2024,yes,in dataset,NA,no,no,no,Sample,JN_EC,AK_JN
+pecoe-1456,2024,yes,missing,no fish,NA,no,no,Field blank,JN_AN,AK_JN
+pecoe-1457,2024,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1458,2024,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1459,2024,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1460,2024,yes,in dataset,NA,no,no,no,Sample,JN_AN,AK_JN
+pecoe-1461,2024,yes,missing,no fish,NA,no,no,Field blank,JN_BC,AK_JN
+pecoe-1462,2024,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1463,2024,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1464,2024,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1465,2024,yes,in dataset,NA,no,no,no,Sample,JN_BC,AK_JN
+pecoe-1466,2024,yes,missing,no fish,NA,no,no,Field blank,JN_FC,AK_JN
+pecoe-1467,2024,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1468,2024,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1469,2024,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1470,2024,yes,in dataset,NA,no,no,no,Sample,JN_FC,AK_JN
+pecoe-1471,2024,yes,missing,no fish,< 5,no,no,Field blank,NC_RB,CA_NCb
+pecoe-1472,2024,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1473,2024,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1474,2024,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1475,2024,yes,in dataset,NA,no,no,no,Sample,NC_RB,CA_NCb
+pecoe-1476,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,NC_PS,CA_NCb
+pecoe-1477,2024,yes,missing,no fish,NA,no,no,Sample,NC_PS,CA_NCb
+pecoe-1478,2024,yes,in dataset,NA,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-1479,2024,yes,in dataset,NA,no,no,no,Sample,NC_PS,CA_NCb
+pecoe-1480,2024,yes,missing,dropped before filterandtrim,NA,no,no,Sample,NC_PS,CA_NCb
+pecoe-1481,2024,yes,in dataset,NA,no,no,no,Field blank,NC_PM,CA_NCb
+pecoe-1482,2024,yes,missing,no fish,NA,no,no,Sample,NC_PM,CA_NCb
+pecoe-1483,2024,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-1484,2024,yes,in dataset,NA,no,no,no,Sample,NC_PM,CA_NCb
+pecoe-1485,2024,yes,missing,no fish,NA,no,no,Sample,NC_PM,CA_NCb
+pecoe-1486,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,MB_TP,CA_MB
+pecoe-1487,2024,yes,in dataset,NA,no,no,no,Sample,MB_TP,CA_MB
+pecoe-1488,2024,yes,in dataset,NA,no,no,no,Sample,MB_TP,CA_MB
+pecoe-1489,2024,yes,in dataset,NA,no,no,no,Sample,MB_TP,CA_MB
+pecoe-1490,2024,yes,in dataset,NA,no,no,no,Sample,MB_TP,CA_MB
+pecoe-1491,2024,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1492,2024,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1493,2024,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1494,2024,yes,missing,no fish,< 5,no,no,Field blank,MB_CB,CA_MB
+pecoe-1495,2024,yes,in dataset,NA,no,no,no,Sample,MB_CB,CA_MB
+pecoe-1496,2024,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1497,2024,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1498,2024,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1499,2024,yes,in dataset,NA,no,no,no,Sample,CC_FAN3,BC_CC
+pecoe-1500,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,CC_FAN3,BC_CC
+pecoe-1501,2024,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1502,2024,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1503,2024,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1504,2024,yes,in dataset,NA,no,no,no,Sample,CC_GOG1,BC_CC
+pecoe-1505,2024,yes,missing,no fish,NA,no,no,Field blank,CC_GOG1,BC_CC
+pecoe-1506,2024,yes,missing,no fish,< 5,no,no,Field blank,LA_LN,CA_LA
+pecoe-1507,2024,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1508,2024,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1509,2024,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1510,2024,yes,in dataset,NA,no,no,no,Sample,LA_LN,CA_LA
+pecoe-1511,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,LA_UN,CA_LA
+pecoe-1512,2024,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1513,2024,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1514,2024,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1515,2024,yes,in dataset,NA,no,no,no,Sample,LA_UN,CA_LA
+pecoe-1516,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,LA_SP,CA_LA
+pecoe-1517,2024,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1518,2024,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1519,2024,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1520,2024,yes,in dataset,NA,no,no,no,Sample,LA_SP,CA_LA
+pecoe-1521,2024,yes,missing,no fish,< 25,no,no,Field blank,LA_AB,CA_LA
+pecoe-1522,2024,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1523,2024,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1524,2024,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1525,2024,yes,in dataset,NA,no,no,no,Sample,LA_AB,CA_LA
+pecoe-1526,2024,yes,in dataset,NA,NA,no,no,Field blank,LA_JD,CA_LA
+pecoe-1527,2024,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1528,2024,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1529,2024,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1530,2024,yes,in dataset,NA,no,no,no,Sample,LA_JD,CA_LA
+pecoe-1531,2024,yes,missing,no fish,< 5,no,no,Field blank,PS_SH,WA_PSa
+pecoe-1532,2024,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-1533,2024,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-1534,2024,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-1535,2024,yes,in dataset,NA,no,no,no,Sample,PS_SH,WA_PSa
+pecoe-1536,2024,yes,missing,no fish,NA,no,no,Field blank,PS_BV,WA_PSa
+pecoe-1537,2024,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-1538,2024,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-1539,2024,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-1540,2024,yes,in dataset,NA,no,no,no,Sample,PS_BV,WA_PSa
+pecoe-1541,2024,yes,missing,no fish,NA,no,no,Field blank,PS_BB,WA_PSa
+pecoe-1542,2024,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-1543,2024,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-1544,2024,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-1545,2024,yes,in dataset,NA,no,no,no,Sample,PS_BB,WA_PSa
+pecoe-1546,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,HG_TK,BC_HGb
+pecoe-1547,2024,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-1548,2024,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-1549,2024,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-1550,2024,yes,in dataset,NA,no,no,no,Sample,HG_TK,BC_HGb
+pecoe-1551,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,HG_MDD,BC_HGb
+pecoe-1552,2024,yes,in dataset,NA,no,no,no,Sample,HG_MDD,BC_HGb
+pecoe-1553,2024,yes,in dataset,NA,no,no,no,Sample,HG_MDD,BC_HGb
+pecoe-1554,2024,yes,in dataset,NA,no,no,no,Sample,HG_MDD,BC_HGb
+pecoe-1555,2024,yes,in dataset,NA,no,no,no,Sample,HG_MDD,BC_HGb
+pecoe-1556,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,HG_DN,BC_HGb
+pecoe-1557,2024,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-1558,2024,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-1559,2024,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-1560,2024,yes,in dataset,NA,no,no,no,Sample,HG_DN,BC_HGb
+pecoe-1561,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,HG_DSD,BC_HGb
+pecoe-1562,2024,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGb
+pecoe-1563,2024,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGb
+pecoe-1564,2024,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGb
+pecoe-1565,2024,yes,in dataset,NA,no,no,no,Sample,HG_DSD,BC_HGb
+pecoe-1566,2024,yes,in dataset,NA,no,no,no,Sample,PP_MB,BC_PP
+pecoe-1567,2024,yes,in dataset,NA,no,no,no,Sample,PP_MB,BC_PP
+pecoe-1568,2024,yes,in dataset,NA,no,no,no,Sample,PP_MB,BC_PP
+pecoe-1569,2024,yes,in dataset,NA,no,no,no,Sample,PP_MB,BC_PP
+pecoe-1570,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,PP_MB,BC_PP
+pecoe-1571,2024,yes,in dataset,NA,no,no,no,Sample,PP_JJ,BC_PP
+pecoe-1572,2024,yes,in dataset,NA,no,no,no,Sample,PP_JJ,BC_PP
+pecoe-1573,2024,yes,in dataset,NA,no,no,no,Sample,PP_JJ,BC_PP
+pecoe-1574,2024,yes,in dataset,NA,no,no,no,Sample,PP_JJ,BC_PP
+pecoe-1575,2024,yes,in dataset,NA,< 50,no,no,Field blank,PP_JJ,BC_PP
+pecoe-1576,2024,yes,missing,dropped during merge step,< 5,no,no,Field blank,PP_C,BC_PP
+pecoe-1577,2024,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-1578,2024,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-1579,2024,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-1580,2024,yes,in dataset,NA,no,no,no,Sample,PP_C,BC_PP
+pecoe-1581,2024,yes,in dataset,NA,no,no,no,Sample,PP_E,BC_PP
+pecoe-1582,2024,yes,in dataset,NA,no,no,no,Sample,PP_E,BC_PP
+pecoe-1583,2024,yes,in dataset,NA,no,no,no,Sample,PP_E,BC_PP
+pecoe-1584,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,PP_E,BC_PP
+pecoe-1585,2024,yes,in dataset,NA,no,no,no,Sample,PP_E,BC_PP
+pecoe-1586,2024,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-1587,2024,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-1588,2024,yes,in dataset,NA,NA,no,no,Field blank,PP_HI,BC_PP
+pecoe-1589,2024,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-1590,2024,yes,in dataset,NA,no,no,no,Sample,PP_HI,BC_PP
+pecoe-1591,2024,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1592,2024,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1593,2024,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1594,2024,yes,in dataset,NA,no,no,no,Sample,IC_SHS,BC_IC
+pecoe-1595,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,IC_SHS,BC_IC
+pecoe-1596,2024,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1597,2024,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1598,2024,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1599,2024,yes,in dataset,NA,no,no,no,Sample,IC_GOW,BC_IC
+pecoe-1600,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,IC_GOW,BC_IC
+pecoe-1601,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,IC_SMB,BC_IC
+pecoe-1602,2024,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1603,2024,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1604,2024,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1605,2024,yes,in dataset,NA,no,no,no,Sample,IC_SMB,BC_IC
+pecoe-1606,2024,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1607,2024,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1608,2024,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1609,2024,yes,in dataset,NA,no,no,no,Sample,IC_MAB,BC_IC
+pecoe-1610,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,IC_MAB,BC_IC
+pecoe-1611,2024,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1612,2024,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1613,2024,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1614,2024,yes,in dataset,NA,no,no,no,Sample,IC_OPB,BC_IC
+pecoe-1615,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,IC_OPB,BC_IC
+pecoe-1616,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,SD_SI,CA_SD
+pecoe-1617,2024,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1618,2024,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1619,2024,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1620,2024,yes,in dataset,NA,no,no,no,Sample,SD_SI,CA_SD
+pecoe-1621,2024,yes,missing,dropped before filterandtrim,NA,no,no,Field blank,SD_CV,CA_SD
+pecoe-1622,2024,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1623,2024,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1624,2024,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1625,2024,yes,in dataset,NA,no,no,no,Sample,SD_CV,CA_SD
+pecoe-1626,2024,yes,in dataset,NA,< 5,no,no,Field blank,SD_CI,CA_SD
+pecoe-1627,2024,yes,in dataset,NA,no,no,no,Sample,SD_CI,CA_SD
+pecoe-1628,2024,yes,in dataset,NA,no,no,no,Sample,SD_CI,CA_SD
+pecoe-1629,2024,yes,in dataset,NA,no,no,no,Sample,SD_CI,CA_SD
+pecoe-1630,2024,yes,in dataset,NA,no,no,no,Sample,SD_CI,CA_SD
+pecoe-1631,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,SD_KF,CA_SD
+pecoe-1632,2024,yes,in dataset,NA,no,no,no,Sample,SD_KF,CA_SD
+pecoe-1633,2024,yes,in dataset,NA,no,no,no,Sample,SD_KF,CA_SD
+pecoe-1634,2024,yes,in dataset,NA,no,no,no,Sample,SD_KF,CA_SD
+pecoe-1635,2024,yes,in dataset,NA,no,no,no,Sample,SD_KF,CA_SD
+pecoe-1636,2024,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1637,2024,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1638,2024,yes,in dataset,NA,< 5,no,no,Sample,NC_WP,CA_NCa
+pecoe-1639,2024,yes,in dataset,NA,no,no,no,Sample,NC_WP,CA_NCa
+pecoe-1640,2024,yes,in dataset,NA,< 50,no,no,Field blank,NC_WP,CA_NCa
+pecoe-1641,2024,yes,in dataset,NA,no,no,no,Sample,NC_BL,CA_NCa
+pecoe-1642,2024,yes,in dataset,NA,< 5,no,no,Field blank,NC_BL,CA_NCa
+pecoe-1643,2024,yes,in dataset,NA,no,no,no,Sample,NC_BL,CA_NCa
+pecoe-1644,2024,yes,in dataset,NA,no,no,no,Sample,NC_BL,CA_NCa
+pecoe-1645,2024,yes,in dataset,NA,no,no,no,Sample,NC_BL,CA_NCa
+pecoe-1646,2024,yes,in dataset,NA,< 5,no,no,Field blank,NV_PC,BC_NV
+pecoe-1647,2024,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1648,2024,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1649,2024,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1650,2024,yes,in dataset,NA,no,no,no,Sample,NV_PC,BC_NV
+pecoe-1651,2024,yes,missing,dropped during merge step,< 5,no,no,Field blank,NV_JL,BC_NV
+pecoe-1652,2024,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1653,2024,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1654,2024,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1655,2024,yes,in dataset,NA,no,no,no,Sample,NV_JL,BC_NV
+pecoe-1656,2024,yes,missing,dropped during merge step,< 5,no,no,Field blank,NV_KC,BC_NV
+pecoe-1657,2024,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1658,2024,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1659,2024,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1660,2024,yes,in dataset,NA,no,no,no,Sample,NV_KC,BC_NV
+pecoe-1661,2024,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1662,2024,yes,missing,no fish,< 5,no,no,Field blank,NV_KI,BC_NV
+pecoe-1663,2024,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1664,2024,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1665,2024,yes,in dataset,NA,no,no,no,Sample,NV_KI,BC_NV
+pecoe-1666,2024,yes,in dataset,NA,NA,no,no,Field blank,NV_BI,BC_NV
+pecoe-1667,2024,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1668,2024,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1669,2024,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1670,2024,yes,in dataset,NA,no,no,no,Sample,NV_BI,BC_NV
+pecoe-1671,2024,yes,missing,dropped during sequencing,NA,no,no,Field blank,NC_DE,CA_NCc
+pecoe-1672,2024,yes,missing,dropped before filterandtrim,NA,no,no,Sample,NC_DE,CA_NCc
+pecoe-1673,2024,yes,in dataset,NA,no,no,no,Sample,NC_DE,CA_NCc
+pecoe-1674,2024,yes,in dataset,NA,no,no,no,Sample,NC_DE,CA_NCc
+pecoe-1675,2024,yes,in dataset,NA,no,no,no,Sample,NC_DE,CA_NCc
+pecoe-1676,2024,yes,missing,no fish,NA,no,no,Field blank,HB_SB,CA_HB
+pecoe-1677,2024,yes,in dataset,NA,no,no,no,Sample,HB_SB,CA_HB
+pecoe-1678,2024,yes,in dataset,NA,no,no,no,Sample,HB_SB,CA_HB
+pecoe-1679,2024,yes,in dataset,NA,no,no,no,Sample,HB_SB,CA_HB
+pecoe-1680,2024,yes,in dataset,NA,no,no,no,Sample,HB_SB,CA_HB
+pecoe-1681,2024,yes,missing,no fish,NA,no,no,Field blank,HB_KS,CA_HB
+pecoe-1682,2024,yes,in dataset,NA,no,no,no,Sample,HB_KS,CA_HB
+pecoe-1683,2024,yes,in dataset,NA,no,no,no,Sample,HB_KS,CA_HB
+pecoe-1684,2024,yes,in dataset,NA,no,no,no,Sample,HB_KS,CA_HB
+pecoe-1685,2024,yes,in dataset,NA,no,no,no,Sample,HB_KS,CA_HB
+pecoe-1686,2024,yes,missing,no fish,NA,no,no,Field blank,HB_EB,CA_HB
+pecoe-1687,2024,yes,in dataset,NA,no,no,no,Sample,HB_EB,CA_HB
+pecoe-1688,2024,yes,in dataset,NA,no,no,no,Sample,HB_EB,CA_HB
+pecoe-1689,2024,yes,in dataset,NA,no,no,no,Sample,HB_EB,CA_HB
+pecoe-1690,2024,yes,in dataset,NA,no,no,no,Sample,HB_EB,CA_HB
+pecoe-1691,2024,yes,in dataset,NA,no,no,no,Sample,CC_KIS2,BC_CC
+pecoe-1692,2024,yes,in dataset,NA,no,no,no,Sample,CC_KIS2,BC_CC
+pecoe-1693,2024,yes,in dataset,NA,no,no,no,Sample,CC_KIS2,BC_CC
+pecoe-1694,2024,yes,in dataset,NA,no,no,no,Sample,CC_KIS2,BC_CC
+pecoe-1695,2024,yes,in dataset,NA,< 5,no,no,Field blank,CC_KIS2,BC_CC
+pecoe-1696,2024,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1697,2024,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1698,2024,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1699,2024,yes,in dataset,NA,no,no,no,Sample,CC_PBA,BC_CC
+pecoe-1700,2024,yes,in dataset,NA,< 5,no,no,Field blank,CC_PBA,BC_CC
+pecoe-1701,2024,yes,in dataset,NA,no,no,no,Sample,CC_CHP,BC_CC
+pecoe-1702,2024,yes,in dataset,NA,no,no,no,Sample,CC_CHP,BC_CC
+pecoe-1703,2024,yes,in dataset,NA,no,no,no,Sample,CC_CHP,BC_CC
+pecoe-1704,2024,yes,in dataset,NA,no,no,no,Sample,CC_CHP,BC_CC
+pecoe-1705,2024,yes,in dataset,NA,< 25,no,no,Field blank,CC_CHP,BC_CC

@@ -20,3 +20,182 @@ motu2asvs <- read_csv(here('rawdata', 'peco',
 motu2asvs %>% distinct(motu_lulu)
 ```
 
+
+
+
+```{r}
+meta_all <- read_csv(here(edna_out, '20251107_peco-combined_metadata.csv')) 
+
+asvs2021 <- read_csv(here(edna_2021, '20250528_peco-2021_12s_asvmatrix_complete.csv')) %>%
+  mutate(year = 2021) %>%
+  select(!c(dna_extraction_date))
+
+asvs2022 <- read_csv(here(edna_2022, '20250528_peco-2022_12s_motumatrix_complete.csv')) %>%
+  mutate(year = 2022)%>%
+  select(!c(dna_extraction_date))
+
+# note; update this?
+asvs2023 <- read_csv(here(edna_2023, '20250528_peco2023_12s-asvmatrix-temp.csv')) %>%
+  mutate(year = 2023) %>%
+  mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c))
+
+
+asvs2024 <- read_csv(here(edna_2024, '20250528_peco2024_12s-asvmatrix-temp.csv')) %>%
+    mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c),
+         notes_about_sample = as.character(notes_about_sample))
+
+asv_all <- asvs2021 %>%
+  full_join(asvs2022) %>%
+  full_join(asvs2023) %>%
+  full_join(asvs2024) %>%
+  janitor::remove_empty() %>%
+  relocate(sample_id, motu, found_taxa, common_name, rank, year) %>%
+  # don't know where this error is
+  mutate(region_code = ifelse(region_code == 'CA_Nca', 'CA_NCa',region_code))
+
+new_range <- asv_all %>%
+  group_by(found_taxa) %>%
+  summarise(taxa_max = max(decimal_latitude, na.rm = TRUE), taxa_mean = mean(decimal_latitude, na.rm = TRUE),
+            taxa_median = median(decimal_latitude, na.rm = TRUE), taxa_min = min(decimal_latitude, na.rm = TRUE))
+
+fishonly_range <- asv_all %>%
+  left_join(new_range) %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii'))
+
+write_csv(fishonly_range, here(edna_out, paste0(datefield, runfield, 'asvmatrix_fish_all.csv')))
+```
+
+
+
+
+# vsc
+
+```{r}
+library(phyloseq)
+library(DESeq2)
+library(pheatmap)
+library(vsn)
+library(ape)
+
+# import otu table
+# requires numeric matrix
+fishonly_otus <- asv_all %>%
+ filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  filter(treatment %in% c('Sample')) %>%
+  select(sample_id, motu, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('motu') %>%
+  as.matrix()
+
+# there weren't any 0 columns?
+#fishonly_otus[,-(which(colSums(x)==0))] 
+
+fishonly_sample <- asv_all %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(sample_id, year, region_code) %>% 
+  # a few have no treatment, look into later
+  #  mutate(treatment_deseq = case_when(is.na(treatment) ~ 'Sample',
+   #                            treatment == 'Field blank' ~ 'field_blank',
+    #                           TRUE ~ treatment)) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_otus)) %>%
+  mutate(seq_method = ifelse(year == 2023, 'nextseq', 'miseq')) %>%
+  mutate(year = as.factor(year))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_otus = fishonly_otus + 1
+
+fishotu_dsdata = DESeqDataSetFromMatrix(countData = fishonly_otus, 
+                             colData=fishonly_sample, 
+                             #design = ~ treatment_deseq + seq_method
+                             design = ~ year
+                             )
+
+vsd_otu <- varianceStabilizingTransformation(fishotu_dsdata)
+
+## Taxa level
+
+# import otu table
+# requires numeric matrix
+fishonly_taxa_otus <- asv_all %>%
+ filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  filter(treatment == 'Sample') %>%
+  select(sample_id, found_taxa, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('found_taxa') %>%
+  as.matrix()
+
+fishonly_taxa_sample <- asv_all %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(sample_id, year, region_code) %>%
+  #mutate(treatment_deseq = case_when(is.na(treatment) ~ 'Sample',
+   #                            treatment == 'Field blank' ~ 'field_blank',
+    #                           TRUE ~ treatment)) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_taxa_otus)) %>%
+  mutate(seq_method = ifelse(year == 2023, 'nextseq', 'miseq')) %>%
+  mutate(year = as.factor(year))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_taxa_otus = fishonly_taxa_otus + 1
+
+fishtaxa_dsdata = DESeqDataSetFromMatrix(countData = fishonly_taxa_otus, 
+                             colData=fishonly_taxa_sample, 
+                             design = ~ year)
+
+vsd_taxa <- varianceStabilizingTransformation(fishtaxa_dsdata)
+
+# plots
+meanSdPlot(fishonly_otus)
+meanSdPlot(assay(vsd_otu))
+
+pheatmap(fishonly_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized MOTUs')
+pheatmap(assay(vsd_otu), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'MOTUs with VST, DESeq2')
+
+
+meanSdPlot(fishonly_taxa_otus)
+meanSdPlot(assay(vsd_taxa))
+
+pheatmap(fishonly_taxa_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized taxa')
+pheatmap(assay(vsd_taxa), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Taxa with VST, DESeq2')
+
+```
+
