@@ -1,0 +1,136 @@
+Species,common_name,Mean_prevalence,Northern_offset,Southern_offset,Extends_past_domain
+Acanthogobius flavimanus,Yellowfin goby,0.4389,-13.624,-1.2005,South
+Agonopsis vulsa,Northern spearnose poacher,0.25,9.1324,-17.4311,No
+Allosmerus elongatus,Whitebait smelt,0.25,3.9417,-10.2183,No
+Alosa sapidissima,American shad,0.25,13.3094,-13.1121,Both
+Ammodytes personatus,Pacific sandlance,0.5821,1.3371,-4.4984,North
+Anarrhichthys ocellatus,Wolf eel,0.35,4.9496,-17.1918,South
+Anchoa compressa,Deep body anchovy,0.4583,1.5963,-1.2777,South
+Anchoa delicatissima,Slough anchovy,0.6747,-0.0149,-1.2005,South
+Anisotremus davidsonii,Xantic sargo,0.623,3.1862,-1.2777,South
+Anoplopoma fimbria,Sablefish,0.7549,1.6145,-3.8604,Both
+Apodichthys flavidus,Penpoint gunnel,0.5427,4.2928,-2.6788,No
+Artedius fenestralis,Padded sculpin,0.4968,-2.8403,-3.0108,No
+Artedius harringtoni,Scalyhead sculpin,0.4142,-1.1805,1.0749,No
+Artedius lateralis,Smoothhead sculpin,0.3978,-0.8375,-2.1213,South
+Artedius notospilotus,Bonehead sculpin,0.25,12.1949,-3.8722,South
+Ascelichthys rhodorus,Rosylip sculpin,0.5382,7.9464,-7.1175,North
+Atherinops affinis,Topsmelt silverside,0.8264,-10.256,-1.2005,South
+Atherinopsis californiensis,Jack silverside,0.5309,-0.0053,-2.1022,South
+Atractoscion nobilis,White seabass,0.25,24.6714,-2.1213,South
+Aulorhynchus flavidus,Tube-snout,0.4095,1.7386,-13.1121,South
+Auxis rochei,Bullet tuna,0.2,-10.7904,-13.1228,South
+Blepsias cirrhosus,Silverspotted sculpin,0.3229,6.8054,-12.8402,North
+Bodianus pulcher,California sheephead,0.25,4.0893,-1.2142,South
+Brachygenys californiensis,Californian salema,0.6389,3.9935,-1.2142,South
+Brachyistius frenatus,Kelp perch,0.5265,4.4005,-6.6843,South
+Cebidichthys violaceus,Monkeyface prickleback,0.4688,4.7076,-1.4605,South
+Cheilotrema saturnum,Black croaker,0.4167,0.8378,-1.4605,South
+Citharichthys sordidus,Pacific sanddab,0.5075,4.8158,-9.2373,South
+Citharichthys stigmaeus,Speckled sanddab,0.5635,4.4014,-1.2142,Both
+Clevelandia ios,Arrow goby,0.4868,-0.2744,-1.2005,South
+Clinocottus acuticeps,Sharpnose sculpin,0.497,-4.4168,-5.7696,No
+Clinocottus analis,Wooly sculpin,0.5,7.7258,-1.2142,South
+Clinocottus embryum,Calico sculpin,0.25,0.9697,-17.1383,No
+Clinocottus globiceps,Mosshead sculpin,0.25,5.523,-15.6219,No
+Clupea pallasii,Pacific herring,0.7532,1.3371,-1.2142,Both
+Cololabis saira,Pacific saury,0.25,0.9568,-19.0224,South
+Cosmocampus arctus,Snubnose pipefish,0.25,5.3994,-2.1022,South
+Cryptacanthodes giganteus,Giant wrymouth,0.25,4.2917,-7.7555,North
+Cymatogaster aggregata,Shiner perch,0.8824,-0.5329,-1.2005,South
+Cynoscion parvipinnis,Shortfin weakfish,0.25,0.6895,-1.2005,South
+Embiotoca jacksoni,Black perch,0.7655,1.1234,-1.2142,South
+Embiotoca lateralis,Striped seaperch,0.476,2.362,-3.8722,South
+Engraulis mordax,Californian anchovy,0.71,4.4169,-1.2005,South
+Enophrys bison,Buffalo sculpin,0.5593,-4.135,-7.506,No
+Fundulus parvipinnis,California killifish,0.506,-0.0079,-1.2777,South
+Gadus chalcogrammus,Alaska pollock,0.3173,1.6144,-1.9532,North
+Gasterosteus aculeatus,Three-spined stickleback,0.7199,-5.5013,-2.1022,South
+Genyonemus lineatus,White croaker,0.25,15.1864,-2.2136,South
+Gibbonsia montereyensis,Crevice kelpfish,0.3526,2.3114,-3.8604,South
+Gillichthys mirabilis,Longjaw mudsucker,0.25,0.0271,-3.8722,South
+Girella nigricans,Rudderfish,0.6167,4.0053,-1.2142,South
+Gobiesox maeandricus,Northern clingfish,0.375,2.9278,-11.8597,South
+Gobiesox rhessodon,California clingfish,0.25,2.9358,-1.2142,South
+Hemilepidotus hemilepidotus,Red Irish lord,0.4583,5.9909,-3.0159,North
+Heterostichus rostratus,Giant kelpfish,0.625,18.9927,-1.2005,South
+Hexagrammos decagrammus,Kelp greenling,0.6427,-1.1161,-2.4967,No
+Hippoglossus stenolepis,Pacific halibut,0.6773,1.3371,-13.1121,Both
+Hydrolagus colliei,Spotted ratfish,0.4,4.8734,-1.2142,South
+Hypsoblennius gentilis,Bay blenny,0.707,-13.7189,-1.2005,South
+Hypsoblennius gilberti,Rockpool blenny,0.625,4.1594,-1.2142,South
+Hypsoblennius jenkinsi,Mussel blenny,0.35,3.1979,-1.2005,South
+Jordania zonope,Longfin sculpin,0.25,7.4265,-15.438,North
+Kyphosus azureus,Zebra-perch sea chub,0.25,7.7781,-2.2619,South
+Lepidogobius lepidus,Bay goby,0.318,-0.5986,-3.8604,South
+Leptocottus armatus,Pacific staghorn sculpin,0.7858,-1.267,-1.4605,South
+Leuresthes tenuis,California grunion,0.6786,4.4185,-1.2005,South
+Leuroglossus schmidti,Northern smoothtongue,0.25,4.2598,-0.1438,North
+Liparis cyclopus,Ribbon snailfish,0.25,1.6681,-5.1372,North
+Liparis florae,Tidepool snailfish,0.4167,5.3935,-15.0358,No
+Liparis greeni,Lobefin snailfish,0.3788,1.6726,9.621,No
+Liparis mucosus,Slimy snailfish,0.45,4.9185,-17.3771,South
+Lumpenus sagitta,Snake prickleback,0.5957,1.3371,-1.5157,North
+Lycodes brevipes,Shortfin eelpout,0.25,9.9199,-15.5201,North
+Mallotus villosus,Capelin,0.55,1.3371,-10.1146,North
+Menticirrhus undulatus,California kingcroaker,0.6591,1.5963,-1.2142,South
+Merluccius productus,North Pacific hake,0.7917,-5.7692,-2.2562,South
+Microgadus proximus,Pacific tomcod,0.25,6.3577,-13.5662,No
+Micrometrus minimus,Dwarf perch,0.5056,0.6139,-1.2005,South
+Morone saxatilis,Striped bass invasive,0.5208,10.6946,-5.3724,No
+Mugil cephalus,Flathead grey mullet,0.7515,-11.4651,-1.2142,South
+Myliobatis californica,Bat ray,0.625,10.8556,-2.2562,South
+Myoxocephalus stelleri,Steller's sculpin,0.25,3.9051,6.2007,No
+Nautichthys oculofasciatus,Sailfin sculpin,0.25,-0.1813,-17.8886,No
+Notorynchus cepedianus,Broadnose sevengill shark,0.25,6.8845,-15.1155,South
+Oligocottus snyderi,Fluffy sculpin,0.4375,4.458,-6.8339,South
+Oncorhynchus gorbuscha,Pink salmon,0.6335,1.3371,20.4474,North
+Oncorhynchus keta,Chum salmon,0.6906,1.3371,-0.247,North
+Oncorhynchus kisutch,Coho salmon,0.6589,1.3371,-2.268,Both
+Oncorhynchus nerka,Sockeye salmon,0.25,1.6681,-14.9213,North
+Oncorhynchus tshawytscha,Chinook salmon,0.6752,1.3371,-1.2142,Both
+Ophiodon elongatus,Lingcod,0.5231,1.6189,-3.8722,Both
+Orthonopias triacis,Snubnose sculpin,0.25,-1.9534,-20.4239,South
+Oxylebius pictus,Painted greenling,0.25,7.3689,-17.377,Both
+Paraclinus integripinnis,Reef finspot,0.35,3.1923,-2.1022,South
+Paralabrax clathratus,Kelp bass,0.4583,13.7388,-1.2142,South
+Paralabrax maculatofasciatus,Spotted sand bass,0.8325,-21.5777,-1.2005,South
+Paralabrax nebulifer,Barred sand bass,0.4902,3.1979,-1.2005,South
+Paralichthys californicus,California halibut,0.5947,-2.2247,-1.2142,South
+Peprilus simillimus,Pacific pompano,0.25,17.7287,-3.8722,South
+Phanerodon vacca,Pile perch,0.6481,-2.7164,-3.8604,South
+Pholis laeta,Crescent gunnel,0.6778,-1.7186,5.2373,No
+Pholis ornata,Saddleback gunnel,0.7167,-9.4555,-5.4908,No
+Phytichthys chirus,Ribbon prickleback,0.25,2.0413,-18.6575,No
+Platichthys stellatus,Starry flounder,0.63,1.3371,-4.9179,North
+Pleuronichthys coenosus,C-O sole,0.4678,5.9903,-3.8604,Both
+Pleuronichthys decurrens,Curlfin sole,0.25,7.4265,-21.0735,Both
+Pleuronichthys guttulatus,Diamond turbot,0.45,6.672,-1.4708,South
+Pleuronichthys ritteri,Spotted turbot,0.75,1.7621,-2.1022,South
+Psychrolutes paradoxus,Tadpole sculpin,0.25,11.0486,-3.1087,North
+Quietula y-cauda,American shadow goby,0.7256,-20.3759,-1.2005,South
+Rhinogobiops nicholsii,Blackeye goby,0.5015,6.9274,-3.8722,South
+Rimicola muscarum,Kelp clingfish,0.6131,6.4196,-17.3883,South
+Roncador stearnsii,Spotfin croaker,0.3056,-19.5697,-2.1022,South
+Ronquilus jordani,Northern ronquil,0.2708,-0.0186,-16.0759,No
+Salmo salar,Atlantic salmon,0.336,1.6189,14.8529,North
+Sardinops sagax,South American pilchard,0.5261,9.1604,-1.2005,South
+Scomber japonicus,Chub mackerel,0.25,26.3978,-1.2142,Both
+Scorpaenichthys marmoratus,Cabezon,0.5924,4.7039,-3.8604,South
+Sebastes entomelas,Widow rockfish,0.25,3.7956,-1.2142,South
+Sebastes nebulosus,China rockfish,0.25,5.8607,-18.3417,No
+Sebastes paucispinis,Bocaccio rockfish,0.25,14.294,-3.8722,South
+Seriola lalandi,Yellowtail amberjack,0.7,20.6512,-1.2142,South
+Seriphus politus,Queenfish,0.25,15.5381,-2.2562,South
+Sphyraena argentea,Pacific barracuda,0.625,23.6906,-2.2136,South
+Spirinchus starksi,Night smelt,0.25,12.5172,-10.0428,No
+Strongylura exilis,Californian needlefish,0.4167,4.1402,-1.2954,South
+Synchirus gilli,Manacled sculpin,0.5357,1.4466,-14.8529,No
+Syngnathus auliscus,Barred pipefish,0.25,0.7627,-1.2142,South
+Syngnathus californiensis,Bay pipefish,0.5952,4.2598,-1.2142,Both
+Thaleichthys pacificus,Eulachon,0.1875,7.6306,-10.6238,No
+Thunnus alalunga,Albacore,0.5741,4.2598,-1.2142,Both
+Trachurus symmetricus,Pacific jack mackerel,0.25,5.3238,-17.4223,South
+Tridentiger trigonocephalus,Chameleon goby invasive,0.4167,-0.1846,-1.1419,No
+Typhlogobius californiensis,Blind goby,0.375,0.2696,-1.2142,South
+Umbrina roncador,Yellowfin drum,0.5333,0.672,-1.2005,South

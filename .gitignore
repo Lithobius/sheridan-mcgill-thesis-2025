@@ -50,3 +50,7 @@ rsconnect/
 .DS_Store
 processeddata/bigdata/20250813_obis-gbif_region-peco-bysite_unfiltered.csv
 /rawdata/peco/fastq/2021/peco2021_raw-miseq
+lulu.log_20251112_163814
+lulu.log_20251112_173238
+lulu.log_20251112_175612
+filterfastalist-log.txt
