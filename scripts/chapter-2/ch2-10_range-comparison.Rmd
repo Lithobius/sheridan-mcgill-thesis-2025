@@ -46,7 +46,7 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 ```
 
 ```{r load-in}
-regions <- read_csv(here(dataedna, '20240925_peco_region-name-plotting.csv'))[-1] %>%
+regions <- read_csv(here(dataedna, '20251107_peco_region-name-plotting.csv'))[-1] %>%
   rename(region_label = region_name_label)
 
 region_order <- regions %>%
@@ -60,7 +60,7 @@ site_order <- regions %>%
 
 # edna
 mifish_edna <- read_csv(here(dataedna,
-                             '20250711_peco-combined_12s_asvmatrix_fish.csv'))[-1]%>%
+                             '20251107_peco-combined_12s_asvmatrix_fish.csv'))[-1]%>%
   filter(rank == 'species') %>%
     filter(relabund_vst_taxa > 3) %>%
   rename(region_label = region_name_label) %>%
@@ -748,6 +748,206 @@ prevalence_sp %>%
 
 # Direct latitudinal comparisons
 
+Bars for latitude, colored by source
+
+## obisgbif
+
+```{r loadin obis-gbif}
+bigdat_fish <-  read_csv(here('processeddata', 'bigdata',
+               '20250813_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
+  # taxonomic revision
+  mutate(scientific_name = case_when(scientific_name == 'Syngnathus leptorhynchus' ~ 'Syngnathus californiensis',
+                                     scientific_name == 'Gasterosteus aculeatus aculeatus' ~ 'Gasterosteus aculeatus',
+                                     scientific_name == 'Gasterosteus aculeatus williamsoni' ~ 'Gasterosteus aculeatus',
+                                     scientific_name == 'Oncorhynchus clarkii clarkii' ~ 'Oncorhynchus clarkii',
+                                     scientific_name == 'Clupea pallasii pallasii' ~ 'Clupea pallasii',
+                                     TRUE ~ scientific_name)) %>%
+  filter(summer == TRUE) %>%
+  # do we still need this?
+  mutate(sgf = paste0(scientific_name, '-', genus, '-', family))
+
+bigdat_pecofish <- bigdat_fish %>%
+  filter(species %in% fish_order$found_taxa) %>%
+  left_join(fish_order, by = c('scientific_name' = 'found_taxa')) %>%
+  dplyr::select(!(c(taxa_median, gbif_species, worms_aphiaid, rank))) %>%
+  distinct()
+
+bigdat_range <- bigdat_pecofish %>%
+  #filter(year >= 1990) %>%
+  group_by(species) %>%
+  summarise(bd_max = max(decimal_latitude), bd_mean = mean(decimal_latitude),
+            bd_median = median(decimal_latitude), bd_min = min(decimal_latitude))
+
+bigdat_pecofish <- bigdat_pecofish %>%
+  left_join(bigdat_range)
+
+bigdat_range_pecoyears <- bigdat_pecofish %>%
+  filter(year >= 2021) %>%
+  group_by(species) %>%
+  summarise(bd_max = max(decimal_latitude), bd_mean = mean(decimal_latitude),
+            bd_median = median(decimal_latitude), bd_min = min(decimal_latitude))
+
+bigdat_pecofish_pecoyears <- bigdat_pecofish %>%
+  filter(year >= 2021) %>%
+  left_join(bigdat_range_pecoyears)
+```
+
+```{r dfs for plotting}
+edna_fish_range <- mifish_edna %>%
+  dplyr::select(found_taxa, common_name, taxa_max, taxa_min, taxa_median) %>%
+  distinct() %>%
+  rename(edna_max = taxa_max,
+         edna_min = taxa_min,
+         edna_median = taxa_median) %>%
+  rename(species = found_taxa)
+
+bigdat_range <- bigdat_pecofish %>%
+  dplyr::select(species, bd_max, bd_min, bd_median) %>%
+  distinct() 
+
+all_range <- edna_fish_range %>%
+  left_join(bigdat_range) %>%
+  mutate(bd_max = ifelse(bd_max >= 60, 60, bd_max)) %>%
+  mutate(bd_min = ifelse(bd_min <= 32, 32, bd_min))
+
+
+all_range_long <- edna_fish_range %>%
+  left_join(bigdat_range) %>%
+  distinct() %>%
+  pivot_longer(cols = !c(species, common_name),
+               names_to = 'stat')
+
+# for bars
+fish_order2 <- all_range %>%
+  # absolute min, max, range (what is 100%)
+  mutate(abs_max = ifelse(edna_max >= bd_max, edna_max, bd_max),
+         abs_min = ifelse(edna_min <= bd_min, edna_min, bd_min),
+         abs_range = abs_max - abs_min) %>%
+  # how big is the range for each
+  mutate(edna_span = edna_max - edna_min,
+         bd_span = bd_max - bd_min) %>%
+  # iNCREASE EDNA SPAN FOR THINGS WITH 0; ONE POINT
+  mutate(edna_max = ifelse(edna_span < .01, edna_max + .1 ,edna_max)) %>%
+  mutate(edna_min = ifelse(edna_span < .01, edna_min - .1 ,edna_min)) %>%
+  mutate(edna_span = ifelse(edna_span < .01, .01, edna_span)) %>%
+  # what percent of the range is each
+  mutate(edna_percent = edna_span / abs_range,
+         bd_percent = bd_span / abs_range) %>%
+  mutate(overlap = edna_percent + bd_percent - 1) %>%
+  # what amount of range, subtraction
+  mutate(edna_sub = abs_range - edna_span,
+         bd_sub = abs_range - bd_span) %>%
+  mutate(overlap = bd_span + edna_span - abs_range) %>%
+  mutate(overlap2 = case_when(is.na(overlap) ~ -.000001,
+                              overlap > .9 ~ .9,
+                              overlap > .8 & overlap < .9 ~ .8,
+                              overlap > .7 & overlap < .8 ~ .7,
+                              overlap > .6 & overlap < .7 ~ .6,
+                              overlap > .5 & overlap < .6 ~ .5,
+                              overlap > .4 & overlap < .3 ~ .4,
+                              overlap > .3 & overlap < .4 ~ .3,
+                              overlap > .2 & overlap < .3 ~ .2,
+                              overlap > .1 & overlap < .2 ~ .1,
+                              overlap > .00000001 & overlap < .1 ~ .05,
+                              TRUE ~ overlap))
+```
+
+
+```{r obisgbif plots}
+
+range_lines <- fish_order2 %>%
+  arrange(overlap) %>%
+  mutate(fishorder = factor(common_name, levels = common_name)) %>%
+  ggplot(aes(x = fishorder)) +
+  #set up eDNA
+  geom_segment(aes(y = edna_max, yend = edna_min, 
+                   xend = common_name, 
+                   group = common_name),
+               size = 7,
+               alpha = .5,
+               col = pal[1]) +
+  # set up obis-gbif
+  geom_segment(aes(y = bd_max, yend = bd_min, 
+                   xend = common_name, 
+                   group = common_name),
+               size = 7,
+               alpha = .4,
+               col = pal[6],
+               position = position_nudge(x = .25)) +
+  geom_point(data = region_order, aes(x = Inf, 
+                                      y = region_order$avg_region_lat,
+                                      color = region_order$region_label),
+             size = 5,
+             shape = 8) +
+  scale_color_manual(values = pal_2or)+
+  labs(x = NULL, y = NULL) +
+  scale_y_continuous(limits = c(31.5,60))+
+  # a little extra space for the points marking the sampling sites
+  scale_x_discrete(expand = c(0,1.5)) +
+  coord_cartesian(clip = 'off') +
+  theme_pubclean()+
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 65, hjust = 1, size = 15),
+        axis.text.y = element_text(size = 25),
+        #axis.text.y = element_blank(),
+        #axis.ticks.y = element_blank(),
+        plot.margin = margin(2,1,1,3, "cm"),
+        legend.position = 'none')
+
+range_lines
+
+ggsave(here(ranges, paste0(datefield, 'edna-bigdata_species-range-lines.pdf')), 
+       height = 15, width = 33, units = 'in', 
+       device = 'pdf')
+
+
+
+
+# Presentation version
+
+range_lines +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45'))
+
+ggsave(here(ranges, paste0(datefield, 'edna-bigdata_species-range-lines_presentation.pdf')), 
+       height = 15, width = 33, units = 'in', 
+       device = 'pdf')
+
+
+# png version
+range_lines +
+  theme(axis.text.x = element_text(size = 16),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45')
+        )
+
+ggsave(here(ranges, paste0(datefield, 'edna-bigdata_species-range-lines_with-species.png')), 
+       height = 4500, width = 9500, units = 'px', 
+       device = 'png')
+
+# png version
+range_lines +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45'),
+        axis.text.y = element_text(size = 60))
+
+ggsave(here(ranges, '20250505_edna-bigdata_species-range-lines_presentation.png'), 
+       height = 4500, width = 9000, units = 'px', 
+       device = 'png')
+
+
+fish_order2 %>%
+  arrange(overlap2, abs_range) %>%
+  dplyr::select(!c(overlap, abs_min, abs_max, abs_range,
+            bd_median, edna_median, edna_span, bd_span,
+            edna_percent, bd_percent)) %>%
+  relocate(species, common_name, overlap2) %>%
+  write_csv(here(ranges, paste0(datefield, 'edna-bigdata_species-overlap.csv')))
+```
+
+
 ## literature
 
 ```{r literature latitude}
@@ -896,154 +1096,21 @@ range_lines_litonly_fig
 ggsave(here(ranges, paste0(datefield, 'edna-literature_species-range-lines_figver.pdf')), 
        height = 5.5, width = 14, units = 'in', 
        device = 'pdf')
-```
 
+# png version
+range_lines_lit +
+  theme(axis.text.x = element_text(size = 16),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45')
+        )
 
-## OBIS-GBIF
-
-```{r big data}
-bigdat_fish <- read_csv(here(bigdata,
-               '20250813_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
-    rename(region_label = region_name_label) %>%
-  filter(summer == TRUE) 
-# do i need this still?
-#mutate(sgf = paste0(scientific_name, '-', genus, '-', family))
-
-bigdat_pecofish <- bigdat_fish %>%
-  filter(species %in% fish_order$found_taxa) %>%
-  left_join(fish_order, by = c('scientific_name' = 'found_taxa')) %>%
-  select(!(c(taxa_median, gbif_species, worms_aphiaid, rank))) %>%
-  distinct()
-
-bigdat_range <- bigdat_pecofish %>%
-  #filter(year >= 1990) %>%
-  group_by(species) %>%
-  summarise(bd_max = max(decimal_latitude), bd_mean = mean(decimal_latitude),
-            bd_median = median(decimal_latitude), bd_min = min(decimal_latitude))
-
-bigdat_range_pecoyears <- bigdat_pecofish %>%
-  filter(year >= 2021) %>%
-  group_by(species) %>%
-  summarise(bd_max = max(decimal_latitude), bd_mean = mean(decimal_latitude),
-            bd_median = median(decimal_latitude), bd_min = min(decimal_latitude))
-
-bigdat_pecofish <- bigdat_pecofish %>%
-  left_join(bigdat_range)
-
-bigdat_pecofish_pecoyears <- bigdat_pecofish %>%
-  filter(year >= 2021) %>%
-  left_join(bigdat_range_pecoyears)
-
+ggsave(here(ranges, paste0(datefield, 'edna-literature_species-range-lines_with-species.png')), 
+       height = 4500, width = 9500, units = 'px', 
+       device = 'png')
 
 ```
 
 
-```{r dfs for plotting}
-edna_fish_range <- mifish_edna %>%
-  select(found_taxa, common_name, taxa_max, taxa_min, taxa_median) %>%
-  distinct() %>%
-  rename(edna_max = taxa_max,
-         edna_min = taxa_min,
-         edna_median = taxa_median) %>%
-  rename(species = found_taxa)
-
-bigdat_range <- bigdat_pecofish %>%
-  select(species, bd_max, bd_min, bd_median) %>%
-  distinct() 
-
-all_range <- edna_fish_range %>%
-  left_join(bigdat_range) %>%
-  mutate(bd_max = ifelse(bd_max >= 60, 60, bd_max)) %>%
-  mutate(bd_min = ifelse(bd_min <= 32, 32, bd_min))
-
-
-all_range_long <- edna_fish_range %>%
-  left_join(bigdat_range) %>%
-  distinct() %>%
-  pivot_longer(cols = !c(species, common_name),
-               names_to = 'stat')
-
-# for bars
-fish_order2 <- all_range %>%
-  # absolute min, max, range (what is 100%)
-  mutate(abs_max = ifelse(edna_max >= bd_max, edna_max, bd_max),
-         abs_min = ifelse(edna_min <= bd_min, edna_min, bd_min),
-         abs_range = abs_max - abs_min) %>%
-  # how big is the range for each
-  mutate(edna_span = edna_max - edna_min,
-         bd_span = bd_max - bd_min) %>%
-  # iNCREASE EDNA SPAN FOR THINGS WITH 0; ONE POINT
-  mutate(edna_max = ifelse(edna_span < .01, edna_max + .1 ,edna_max)) %>%
-  mutate(edna_min = ifelse(edna_span < .01, edna_min - .1 ,edna_min)) %>%
-  mutate(edna_span = ifelse(edna_span < .01, .01, edna_span)) %>%
-  # what percent of the range is each
-  mutate(edna_percent = edna_span / abs_range,
-         bd_percent = bd_span / abs_range) %>%
-  mutate(overlap = edna_percent + bd_percent - 1) %>%
-  # what amount of range, subtraction
-  mutate(edna_sub = abs_range - edna_span,
-         bd_sub = abs_range - bd_span) %>%
-  mutate(overlap = bd_span + edna_span - abs_range) %>%
-  mutate(overlap2 = case_when(is.na(overlap) ~ -.000001,
-                              overlap > .9 ~ .9,
-                              overlap > .8 & overlap < .9 ~ .8,
-                              overlap > .7 & overlap < .8 ~ .7,
-                              overlap > .6 & overlap < .7 ~ .6,
-                              overlap > .5 & overlap < .6 ~ .5,
-                              overlap > .4 & overlap < .3 ~ .4,
-                              overlap > .3 & overlap < .4 ~ .3,
-                              overlap > .2 & overlap < .3 ~ .2,
-                              overlap > .1 & overlap < .2 ~ .1,
-                              overlap > .00000001 & overlap < .1 ~ .05,
-                              TRUE ~ overlap))
-
-
-
-```
-```{r parallel bars}
-range_lines <- fish_order2 %>%
-  arrange(overlap) %>%
-  mutate(fishorder = factor(common_name, levels = common_name)) %>%
-  ggplot(aes(x = fishorder)) +
-  #set up eDNA
-  geom_segment(aes(y = edna_max, yend = edna_min, 
-                   xend = common_name, 
-                   group = common_name),
-               size = 7,
-               alpha = .5,
-               col = pal[1]) +
-  # set up obis-gbif
-  geom_segment(aes(y = bd_max, yend = bd_min, 
-                   xend = common_name, 
-                   group = common_name),
-               size = 7,
-               alpha = .4,
-               col = pal[6],
-               position = position_nudge(x = .25)) +
-  geom_point(data = region_order, aes(x = Inf, 
-                                      y = region_order$avg_region_lat,
-                                      color = region_order$region_label),
-             size = 5,
-             shape = 8) +
-  scale_color_manual(values = pal_2or)+
-  labs(x = NULL, y = NULL) +
-  scale_y_continuous(limits = c(31.5,60))+
-  # a little extra space for the points marking the sampling sites
-  scale_x_discrete(expand = c(0,1.5)) +
-  coord_cartesian(clip = 'off') +
-  theme_pubclean()+
-  theme(panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 65, hjust = 1, size = 15),
-        axis.text.y = element_text(size = 25),
-        plot.margin = margin(2,1,1,3, "cm"),
-        legend.position = 'none')
-
-range_lines
-
-ggsave(here(ranges, paste0(datefield, 'edna-obisgbif-allyears_species-range-lines.pdf')), 
-       height = 15, width = 33, units = 'in', 
-       device = 'pdf')
-```
 
 # combined per-species plots
 
@@ -1051,7 +1118,7 @@ ggsave(here(ranges, paste0(datefield, 'edna-obisgbif-allyears_species-range-line
 
 ```{r by species loop}
 prevalence_spyear <- mifish_edna %>%
-  select(sample_id, site_code, year, found_taxa, common_name) %>%
+  dplyr::select(sample_id, site_code, year, found_taxa, common_name) %>%
   distinct() %>%
   # how many sites was it found in that year?
   add_count(found_taxa, site_code, year, name='n_spsite_year') %>%
@@ -1059,11 +1126,11 @@ prevalence_spyear <- mifish_edna %>%
   mutate(prev_year = n_spsite_year / n_samplesite_year) %>%
   relocate(prev_year, 
            .before = found_taxa) %>%
-  select(prev_year, found_taxa, common_name, year, site_code) %>%
+  dplyr::select(prev_year, found_taxa, common_name, year, site_code) %>%
   distinct()
 
 bubble_plot_data_sp <- mifish_edna %>%
-  select(found_taxa, common_name, year, region_name, site_code, 
+  dplyr::select(found_taxa, common_name, year, region_name, site_code, 
          motu_pa, taxa_min, taxa_max, taxa_median) %>%
   distinct() %>%
   left_join(regions) %>%
@@ -1080,7 +1147,7 @@ for(i in 1:length(splist)){
   
   target_ranges <- bubble_plot_data_sp %>%
     filter(common_name == target_sp) %>%
-    select(bd_max, bd_min, lit_max, lit_min) %>%
+    dplyr::select(bd_max, bd_min, lit_max, lit_min) %>%
     distinct()
   
   bubble_plot_data_sp %>%
@@ -1125,11 +1192,3 @@ for(i in 1:length(splist)){
        device = 'pdf', height = 5, width = 2, units = 'in')
 }
 ```
-
-```{r}
-  target_ranges <- bubble_plot_data_sp %>%
-    filter(common_name == 'Albacore') %>%
-    select(bd_max, bd_min, lit_max, lit_min) %>%
-    distinct()
-```
-

@@ -1,0 +1,55 @@
+Swarm 3.1.3
+Copyright (C) 2012-2023 Torbjorn Rognes and Frederic Mahe
+https://github.com/torognes/swarm
+
+Mahe F, Rognes T, Quince C, de Vargas C, Dunthorn M (2014)
+Swarm: robust and fast clustering method for amplicon-based studies
+PeerJ 2:e593 https://doi.org/10.7717/peerj.593
+
+Mahe F, Rognes T, Quince C, de Vargas C, Dunthorn M (2015)
+Swarm v2: highly-scalable and high-resolution amplicon clustering
+PeerJ 3:e1420 https://doi.org/10.7717/peerj.1420
+
+Mahe F, Czech L, Stamatakis A, Quince C, de Vargas C, Dunthorn M, Rognes T (2022)
+Swarm v3: towards tera-scale amplicon clustering
+Bioinformatics 38:1, 267-269 https://doi.org/10.1093/bioinformatics/btab493
+
+Database file:     /Users/katesheridan/Documents/GitHub/sheridan-mcgill-thesis-2025/rawdata/peco/fastq/allyears/20251111_peco-combined_12s_sequence-table_swarm-format.fasta
+Output file:       /Users/katesheridan/Documents/GitHub/sheridan-mcgill-thesis-2025/rawdata/peco/fastq/allyears/swarm/20251111_peco-combined_12s_swarm_outputfile.txt
+Statistics file:   /Users/katesheridan/Documents/GitHub/sheridan-mcgill-thesis-2025/rawdata/peco/fastq/allyears/swarm/20251111_peco-combined_12s_swarm_statsfile.tsv
+Resolution (d):    1
+Threads:           1
+Break clusters:        Yes
+Fastidious:        Yes, with boundary 3
+
+Reading sequences: 100%
+Indexing database: 100%
+Database info:     1039056 nt in 5146 sequences, longest 411 nt
+Hashing sequences: 100%
+Building network:  100%
+Clustering:        100%
+
+Results before fastidious processing:
+Number of swarms:  2442
+Largest swarm:     275
+
+Counting amplicons in heavy and light swarms 100%
+Heavy swarms: 2381, with 5085 amplicons
+Light swarms: 61, with 61 amplicons
+Total length of amplicons in light swarms: 11335
+Bloom filter: bits=16, m=1269520, k=6, size=0.2MB
+Adding light swarm amplicons to Bloom filter 100%
+Generated 76629 variants from light swarms
+Checking heavy swarm amplicons against Bloom filter 100%
+Heavy variants: 6923885
+Got 0 graft candidates
+Grafting light swarms on heavy swarms 100%
+Made 0 grafts
+
+Writing swarms:    100%
+Writing seeds:     100%
+Writing stats:     100%
+
+Number of swarms:  2442
+Largest swarm:     275
+Max generations:   6

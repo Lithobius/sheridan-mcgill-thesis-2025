@@ -5,3 +5,431 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 placehlder for edna processing for ordering purposes
+
+# above here; pipeline
+
+# sequence tables combine
+```{r}
+library(tidyverse)
+library(dada2)
+library(seqinr)
+library(here)
+# here filepaths
+# combined
+fastq_path <- here('rawdata', 'peco', 'fastq')
+datefield <- '20251111_'
+runfield <- 'peco-combined_12s_'
+
+# 2021 miseq
+datefield2021 <- '20250611_'
+runfield2021 <- 'peco2021_12s_miseq_'
+
+# 2022
+datefield2022 <- '20250428_'
+runfield2022 <- 'peco2022_12s_'
+
+# 2023
+datefield2023 <- '20250428_'
+runfield2023 <- 'peco2023_12s_20240907_'
+
+# 2024
+datefield2024 <- '20250527_'
+runfield2024 <- 'peco2024_12s_'
+
+# swarm
+swarm_path <- here('rawdata', 'peco', 'fastq', 'allyears', 'swarm')
+```
+
+```{r each year}
+####read in sequence tables####
+#peco run 1
+seqtab_2021_run1 <- read_delim(here(fastq_path, '2021', 'miseq',
+                                 "20240611_12S_PECO_Run1_20220829_sequence-table_12S-merged.txt")) %>%
+  filter(!(row_names %in% c('Undetermined'))) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+seqtab_2021_run2 <- read_delim(here(fastq_path, '2021', 'miseq',
+                                 "20240611_12S_PECO_2021_Lib2_Run20221108_sequence-table_12S-merged.txt")) %>%
+  filter(!(row_names %in% c('Undetermined'))) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+seqtab_2021_bsaredo <- read_delim(here(fastq_path, '2021', 'miseq',
+                                 "20240611_12s_peco_redos_run20230109_sequence-table_12S-merged.txt")) %>%
+  filter(!(row_names %in% c('Undetermined'))) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+
+
+#peco run 2
+seqtab_2022 <- read_delim(here(fastq_path, '2022', 
+                                 '20250425_peco2022_12s_nextseq_sequence-table_12S-merged.txt')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+seqtab_2022_miseq1 <- read_delim(here(fastq_path, '2022', 'miseq', 
+                                 '20221023_peco2022_12s_run1-20230523_sequence-table_12S-merged.txt')) %>%
+  filter(!(row_names %in% c('Undetermined'))) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+seqtab_2022_miseq2 <- read_delim(here(fastq_path, '2022', 'miseq',
+                                 '20221023_peco2022_12s_run2-20230629_sequence-table_12S-merged.txt')) %>%
+  filter(!(row_names %in% c('Undetermined'))) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+
+#peco 2023
+seqtab_2023 <- read_delim(here(fastq_path, '2023',
+                               "20250428_peco2023_12s_20240907_sequence-table_12S-merged.txt")) %>%
+ column_to_rownames('row_names') %>%
+ as.matrix()
+
+#peco 2024
+seqtab_2024 <- read_delim(here(fastq_path, '2024',
+                               "20250527_peco2024_12s_sequence-table_12S-merged.txt")) %>%
+ column_to_rownames('row_names') %>%
+ as.matrix()
+```
+
+# Combine eDNA
+
+All sequence tables should be merged into one master table. This means that every identical sequence in every year will be given the same ASV number. This master combined table should be exported and run through seqtable2swarm.py before moving on to clustering and taxonomy assignment.
+
+Save sequences as fasta - give sequences human-readable names - save modified sequence table for SWARM
+
+```{r merge-all-tables}
+#ASVs are combined on sequence alone. exact matches are simply merged
+seqtab_all <- mergeSequenceTables(seqtab_2021_run1, seqtab_2021_run2, seqtab_2021_bsaredo, 
+                                  seqtab_2022, seqtab_2022_miseq1, seqtab_2022_miseq2,
+                                  seqtab_2023, seqtab_2024) 
+
+##transposed (OTUs are rows) data frame. 
+asvtab_all <- t(as.data.frame(seqtab_all)) 
+
+# unclassing the otu_table() output avoids type/class errors later on
+ASV.seq <- as.character(unclass(row.names(asvtab_all))) #store sequences in character vector
+ASV.num <- paste0("ASV", seq(ASV.seq), sep='') #create new names
+
+asv_map <- cbind(asv = ASV.num, seq = ASV.seq) %>%
+  as.data.frame()
+
+#and save a table that shows the mapping of sequences to new ASV names
+write.table(asv_map, here(fastq_path, 'allyears', 
+                          paste0(datefield, runfield,
+                                 "asv-sequences_name-mapping.txt")),
+            sep="\t", quote=F, row.names=F, col.names=F)
+
+
+#saving the new names and sequences as a .fasta file
+write.fasta(sequences=as.list(ASV.seq), names=ASV.num, 
+            here(fastq_path, 'allyears', 
+                 paste0(datefield, runfield, "asv-sequences.fasta"))) 
+
+
+#IMPORTANT: sanity checks
+colnames(seqtab_all) == ASV.seq #only proceed if this tests as true for all elements
+
+#rename your ASVs in the taxonomy table and sequence table objects
+colnames(seqtab_all) <- ASV.num
+
+#re-save sequence table w updated names
+write.table(data.frame("row_names" = rownames(seqtab_all), seqtab_all),
+            here(fastq_path, 'allyears',
+                 paste0(datefield, runfield, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+```
+
+Now go to seqtable2swarm.py and come back here with 'datefield, runfield, sequence-table_swarm-format.fasta'
+
+BUT FIRST save each years' ASV table for later QC
+## ASV tables by year
+
+These will be used for eDNA QC after taxonomy assignment.
+
+```{r yearly sequence tables}
+# 2021 needs merged sequence table
+seqtab_2021 <- mergeSequenceTables(seqtab_2021_run1, seqtab_2021_run2, seqtab_2021_bsaredo)
+
+asvtab_2021 <- seqtab_2021 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2021,
+            here(fastq_path, '2021',
+                 paste0(datefield, runfield, "sequence-table_asv-names_2021.txt")), 
+            row.names=FALSE, quote=F, sep="\t")
+
+# 2022 doesn't need merged but should be saved separately as nextseq and merged miseq
+
+asvtab_2022 <- seqtab_2022 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2022 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2022,
+            here(fastq_path, '2022',
+                 paste0(datefield, runfield, "sequence-table_asv-names_2022.txt")), 
+            row.names=FALSE, quote=F, sep="\t")
+
+seqtab_2022_miseq <- mergeSequenceTables(seqtab_2022_miseq1, seqtab_2022_miseq2)
+
+asvtab_2022_miseq <- seqtab_2022_miseq %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2022 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2022_miseq,
+            here(fastq_path, '2022', 'miseq',
+                 paste0(datefield, runfield, "sequence-table_asv-names_2022-miseq.txt")), 
+            row.names=FALSE, quote=F, sep="\t")
+
+# 2023
+asvtab_2023 <- seqtab_2023 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2023 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2023,
+            here(fastq_path, '2023',
+                 paste0(datefield, runfield, "sequence-table_asv-names_2023.txt")), 
+            row.names=FALSE, quote=F, sep="\t")
+
+# 2024
+asvtab_2024 <- seqtab_2024 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2024 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2024,
+            here(fastq_path, '2024',
+                 paste0(datefield, runfield, "sequence-table_asv-names_2024.txt")), 
+            row.names=FALSE, quote=F, sep="\t")
+```
+
+# SWARM
+
+Now you should have the SWARM format fasta from python.
+
+Here we're going to prepare the required output files with file.path so we can feed them into system2 as arguments.
+
+```{r prepare command}
+
+
+# filepath to fasta we formatted for swarm
+swarmfasta <- file.path(here(fastq_path, 'allyears',
+                             "20251111_peco-combined_12s_sequence-table_swarm-format.fasta"))
+
+#generate filenames for output
+swarmout <- file.path(here(swarm_path, paste0(datefield, runfield, 'swarm_outputfile.txt')))
+swarmstats <- file.path(here(swarm_path, paste0(datefield, runfield, 'swarm_statsfile.tsv')))
+swarmlog <- file.path(here(swarm_path, paste0(datefield, runfield, 'swarm_log.txt')))
+swarmreps <- file.path(here(swarm_path, paste0(datefield, runfield, 'swarm_clusterreps.fasta')))
+```
+
+## running swarm
+SWARM is a command line program so we're going to use system2 to just run it through R instead of switching to terminal.
+
+```{r}
+system2("swarm", args = "-v")
+
+system2("swarm", args = c(swarmfasta,
+                          "-w", swarmreps,
+                          "-o", swarmout,
+                          "-s", swarmstats,
+                          "-l", swarmlog,
+                          "-f"))
+
+```
+
+## input swarm output to generate motus
+
+
+```{r input swarm}
+swarm_stat <- read_delim(here(swarm_path, 
+                             '20251111_peco-combined_12s_swarm_statsfile.tsv'),
+                         # give columns names
+                        col_names = c('n_in_cluster', 'motu_reads', 
+                                      'seed_asv', 'seed_reads', 'n_1readamplicon',
+                                      'max_iterations_to_limit', 'cumulative_steps')) 
+
+swarm_stat <- swarm_stat %>%
+  mutate(motu = paste0('motu', seq.int(from = 1, to = nrow(swarm_stat)))) %>%
+  mutate(seed_asv_reads = paste0(seed_asv, '_', seed_reads)) %>%
+  # for lulu
+  mutate(swarm_reads = paste0(seed_asv, '_', motu_reads))
+
+swarm_out <- read_delim(here(swarm_path, 
+                             '20251111_peco-combined_12s_swarm_outputfile.txt'),
+                        col_names = FALSE, delim = " ")
+
+
+# format
+motu2asv <- swarm_out %>%
+  # identify seeds for taxonomy assignment ~TEMPORARY~
+  mutate(seed_asv_reads = X1) %>%
+  # add 'motu' numbers
+  left_join(swarm_stat) %>%
+  select(!(c(motu_reads, n_in_cluster, n_1readamplicon, seed_reads,
+             max_iterations_to_limit, cumulative_steps, seed_asv_reads))) %>%
+  #mutate(cluster = paste0('cluster', seq.int(from = 1, to = nrow(swarm_out)))) %>%
+  # make long, no more NAs
+  pivot_longer(cols = !c(motu, seed_asv)) %>%
+  select(!name) %>%
+  filter(!(is.na(value))) %>%
+  # asv + reads each get their own column
+  separate_wider_delim(value, delim = "_", names = c("asv", "asv_reads"))
+
+# put the motu2asv key in the main output folder
+write_csv(motu2asv, here(swarm_path,
+                          paste0(datefield, runfield, 'motu2asv.csv')))
+
+write_csv(swarm_stat, here(swarm_path,
+                           paste0(datefield, runfield, 'swarm_statsfile-w-motunums.csv')))
+```
+
+Now we need to get stuff into cluster curation with LULU so we have to go back to Python and reformat our FASTA file.
+
+head to swarmformat2motu.py and reformat the cluster reps to have MOTU numbers
+
+# LULU cluster curation
+
+```{r loadin and setup dataframe}
+motu2asv <- read_csv(here(swarm_path,
+                          '20251111_peco-combined_12s_motu2asv.csv'))%>%
+  distinct()
+
+asv_seq_table <- read_delim(here(fastq_path, 'allyears',
+                                 "20251111_peco-combined_12s_sequence-table_asv-names.txt"))
+
+# join data to filter into the required dfs
+motuxsample <-  asv_seq_table %>%
+  # pivot to long so sequence can map to ASV
+  pivot_longer(cols = !row_names,
+               names_to = 'asv') %>%
+  filter(value >= 1) %>% 
+  left_join(motu2asv) %>%
+  rename(reads_raw = value,
+         sample_id = row_names) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  select(sample_id, reads_raw, motu) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = (reads_raw),
+              values_fn = sum) %>%
+    # NA to 0
+  mutate_all(~replace(., is.na(.), 0)) %>%
+  column_to_rownames('motu')
+```
+We'll want to use the already-swarmed stuff, but we need our cluster representatives to match the motu names
+
+From github:
+First produce a blastdatabase with the OTUs
+makeblastdb -in OTU_sequences.fasta -parse_seqids -dbtype nucl
+ Then blast the OTUs against the database
+blastn -db OTU_sequences.fasta -outfmt '6 qseqid sseqid pident' -out match_list.txt -qcov_hsp_perc 80 -perc_identity 84 -query OTU_sequences.fasta
+
+Again, we'll translate that into system2 and use swarmpath again to keep everything cluster related in the same place.
+
+```{r}
+otu_sequences <- file.path(swarm_path,
+                           '20251111_peco-combined_12s_swarm_clusterreps-motus.fasta')
+blast_out <- file.path(swarm_path, paste0(datefield, runfield, 'lulu_matchlist.txt'))
+
+# check its working
+system2("blastn", args = "-h")
+system2("makeblastdb", args = "-h")
+
+# first produce a blast database with the otus
+system2("makeblastdb", args=c("-in", otu_sequences,
+                         "-parse_seqids",
+                         "-dbtype", 'nucl'
+                         ))
+
+system2("blastn", args=c("-db", otu_sequences, # directory of db to blast against
+                         "-outfmt", "'6 qseqid sseqid pident'",
+                         "-qcov_hsp_perc", 80,
+                         "-perc_identity", 84,
+                         "-query", otu_sequences,
+                         "-out", blast_out
+                         ))
+
+motu_matchlist <- read_delim(here(swarm_path, paste0(datefield, runfield, 'lulu_matchlist.txt')),
+                           delim = '\t', col_names = c("motu_query", "motu_hit",  "identity_percentage"))
+```
+
+Now that we have both parts we can try lulu
+
+We can look at the settings more in depth at some point!
+
+```{r lulu}
+library(lulu)
+
+curated_result <- lulu(motuxsample, motu_matchlist)
+
+# make sure the motus are in a column to merge in later steps
+curated_table <- curated_result$curated_table %>%
+  rownames_to_column('motu')
+motu_map <- curated_result$otu_map %>%
+  rownames_to_column('motu')
+
+discard <- data.frame(curated_result$discarded_otus) %>%
+  rename(discarded = `curated_result.discarded_otus`)
+
+curated_result
+
+curated_result$minimum_relative_cooccurence #.95
+curated_result$minimum_match # 84
+
+motu2asv2 <- motu2asv %>%
+  left_join(motu_map) %>%
+  rename(motu_swarm = motu,
+         motu_lulu = parent_id,
+         lulu_rank = rank) %>%
+  relocate(motu_lulu, motu_swarm) %>%
+  select(!c(seed_asv, total, spread, asv_reads))
+
+# key for QC
+# put in main path so it is easy to use
+write_csv(motu2asv2, here(fastq_path, "allyears",
+                          paste0(datefield, runfield, 'lulu_motu2asv.csv')))
+
+# TODO later make into a txt with commas
+# Used to remove from fasta
+write_csv(discard, here(swarm_path, paste0(datefield, runfield, 'removed-motus.csv')))
+```
+
+Now we need to remove the discarded motus from the fasta
+so its back to python again, then its time to BLAST with the lulu-curated cluster representatives.

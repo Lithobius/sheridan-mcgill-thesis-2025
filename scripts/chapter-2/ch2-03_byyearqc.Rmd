@@ -17,7 +17,7 @@ fastq <- here('rawdata', 'peco', 'fastq')
 # Out
 edna_combined <- here('processeddata', 'peco', '2021-24_edna')
 # fields
-datefield <- '20251107_'
+datefield <- '20251111_'
 
 # Palette
 ## match map with 14 levels if by region
@@ -31,16 +31,15 @@ pal2023 <- pnw_palette("Bay", 15, type = "continuous")
 ```
 In: taxonomy from BLAST, asv table, metadata
 ```{r loadin}
-metadata <- read_csv(here(edna_combined, '20251107_peco-combined_metadata.csv'))
+metadata <- read_csv(here(edna_combined, '20251107_peco-combined_metadata.csv')) %>%
+  mutate(region_name_label = case_when(region_name_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+                                       TRUE ~ region_name_label))
 
-taxonomy <- read_csv(here(edna_combined, '20250528_peco-combined_12s_taxonomy.csv'))
+taxonomy <- read_csv(here(edna_combined, '20251111_peco-combined_12s_taxonomy.csv'))
 
 motu2asvs <- read_csv(here(fastq, 'allyears', 
-                           '20250528_peco-combined_12s_lulu_motu2asv.csv'))
+                           '20251111_peco-combined_12s_lulu_motu2asv.csv'))
 ```
-
-
-
 
 # 2021
 
@@ -53,8 +52,11 @@ Updated with new metadata October 04, 2024
 Updating sample names at the end to keep from having to rewrite the whole script
 
 ```{r load-in}
+#asvtable_2021 <- read_delim(here(fastq, '2021',
+#                            '20250528_peco-combined_12s_sequence-table_asv-names_2021.txt'))
+
 asvtable_2021 <- read_delim(here(fastq, '2021',
-                            '20250528_peco-combined_12s_sequence-table_asv-names_2021.txt'))
+                            '20251111_peco-combined_12s_sequence-table_asv-names_2021.txt'))
 ```
 
 ```{r merge}
@@ -66,21 +68,22 @@ motumatrix_metadata_2021 <- asvtable_2021 %>%
   mutate(sample = tolower(sample)) %>%
   mutate(sample_id = sample) %>%
     #update blanks
-  mutate(sample_id = case_when(str_detect(sample_id, 'pecoe-') ~ 
-                                 str_replace_all(sample_id, 'pecoe-', 'pecoe-0'),
+  mutate(sample_id = case_when(str_detect(sample_id, 'coe[0-9]{3}$') ~ str_replace(sample_id, 'coe', 'coe-0'),
+                               str_detect(sample_id, 'peco-neg-pcr-p') ~ str_replace_all(sample_id, 'peco-neg-pcr-p', 'negpcr-2021-'),
+                               str_detect(sample_id, 'pecoxn') ~ str_replace_all(sample_id, 'pecoxn', 'exblank-2021-'),
                                str_detect(sample_id, 'exblank-2021-') ~ 
                                  str_replace_all(sample_id, 'exblank-2021-', 'exblank-2021-0'),
                                TRUE ~ sample_id)) %>%
+  select(!sample) %>%
   filter(sample_id %in% metadata$sample_id) %>%
   left_join(taxonomy) %>%
   mutate(motu_pa = 1) %>%
   rename(reads_raw = value) %>%
   left_join(metadata) %>%
-  #filter(!(treatment == 'Calibration')) %>%
-  # remove columns that don't matter this year
+  mutate(seq_method = paste0('miseq-', year)) %>%
+  # remove columns that are empty
   janitor::remove_empty() %>%
-  # check before removing
-  select(!c(motu_swarm, curated, lulu_rank)) 
+  distinct()
 ```
 
 ## Lab controls
@@ -188,8 +191,7 @@ motumatrix_metadata_nofield_2021 <- motumatrix_metadata_nolab_2021 %>%
   select(!(c(reads_control, siteasv))) %>%
   #relocate(reads_adjust, .before = reads_raw) %>%
   mutate(ctrl_field0 = ifelse(reads_adjust_field == 0, 'yes', 'no')) %>%
-  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) %>%
-  select(!c(n_dups))
+  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) 
 ```
 
 
@@ -205,19 +207,18 @@ all_ctrl_2021 <- motumatrix_metadata_2021 %>%
 ```
 
   
-# 2022  
+# 2022 nextseq
   
 
 Updated with new merged format October 7 2024
 Updated for MOTUs and lulu September 25, 2024
 
 
-
 ## Load In
 
 ```{r load-in}
 asvtable_2022 <- read_delim(here(fastq, "2022",
-                            '20250528_peco-combined_12s_sequence-table_asv-names_2022.txt'))
+                            '20251111_peco-combined_12s_sequence-table_asv-names_2022.txt'))
 
 motumatrix_metadata_2022 <- asvtable_2022 %>%
   # pivot to long so sequence can map to ASV
@@ -241,7 +242,7 @@ motumatrix_metadata_2022 <- asvtable_2022 %>%
   # remove columns that don't matter this year
   janitor::remove_empty() %>%
   # check before removing
-  select(!c(motu_swarm, curated, lulu_rank, sample)) %>%
+  select(!c(sample)) %>%
   mutate(extraction_blank = case_when(str_detect(extraction_blank, 'pecoxn') ~ str_replace_all(extraction_blank, 'pecoxn', 'exblank-2022-'),
                                       TRUE ~ extraction_blank))
 ```
@@ -355,13 +356,7 @@ motumatrix_metadata_nofield_2022 <- motumatrix_metadata_nolab_2022 %>%
   select(!(c(reads_control, siteasv))) %>%
   #relocate(reads_adjust, .before = reads_raw) %>%
   mutate(ctrl_field0 = ifelse(reads_adjust_field == 0, 'yes', 'no')) %>%
-  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) %>%
-  select(!c(n_dups))
-
-
-#write_csv(motumatrix_metadata_nofield, here(edna_out,
-#                                              paste0(datefield_out, 
-#                                                     runfield, 'motumatrix_complete.csv')))
+  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab)
 ```
 
 
@@ -373,11 +368,40 @@ all_ctrl_2022 <- motumatrix_metadata_2022 %>%
   select(sample_id, motu, reads_raw, found_taxa, common_name, site_code, 
          region_name, region_code, decimal_latitude, decimal_longitude,
          genus, family, order, class)
-  
-
-#write_csv(all_ctrl, here(edna_out, 
-#                         '20250707_peco2022_12s_controls.csv'))
 ```
+
+# 2022 miseq
+```{r}
+asvtable_2022_miseq <- read_delim(here(fastq, "2022", 'miseq',
+                            '20251111_peco-combined_12s_sequence-table_asv-names_2022-miseq.txt'))
+
+motumatrix_metadata_2022_miseq <- asvtable_2022_miseq %>%
+  # pivot to long so sequence can map to ASV
+  pivot_longer(cols = !sample,
+               names_to = 'asv') %>%
+  filter(value >= 1) %>% 
+  mutate(sample = tolower(sample)) %>%
+  mutate(sample_id = sample) %>%
+    mutate(sample_id = case_when(str_detect(sample_id, 'pecoe') ~ 
+                                 str_replace_all(sample_id, 'pecoe', 'pecoe-0'),
+                               sample_id == 'neg-pcr1' ~ 'negpcr-2022-1',
+                               sample_id == 'peco2022-negpcr2' ~ 'negpcr-2022-2',
+                               str_detect(sample_id, 'exblank-2022-') ~ 
+                                 str_replace_all(sample_id, 'exblank-2022-', 'exblank-2022-0'),
+                               TRUE ~ sample_id)) %>%
+  #filter(sample_id2 %in% metadata$sample_id2) %>%
+  left_join(taxonomy) %>%
+  mutate(motu_pa = 1) %>%
+  rename(reads_raw = value) %>%
+  left_join(metadata) %>%
+  # remove columns that don't matter this year
+  janitor::remove_empty() %>%
+  # check before removing
+  select(!c(sample))
+```
+
+
+
 
 # 2023
 
@@ -389,7 +413,7 @@ Updated sept 25 2024 to include lulu etc.
 
 ```{r load-in}
 asvtable_2023 <- read_delim(here(fastq, '2023',
-                            '20250528_peco-combined_12s_sequence-table_asv-names_2023.txt'))
+                            '20251111_peco-combined_12s_sequence-table_asv-names_2023.txt'))
 
 motumatrix_metadata_2023 <- asvtable_2023 %>%
   # pivot to long so sequence can map to ASV
@@ -403,15 +427,14 @@ motumatrix_metadata_2023 <- asvtable_2023 %>%
                                  str_detect(sample_id, 'pecoe-9') ~ 
                                  str_replace_all(sample_id, 'pecoe-9', 'pecoe-09'),
                                TRUE ~ sample_id)) %>%
+  select(!sample) %>%
   filter(sample_id %in% metadata$sample_id) %>%
   left_join(taxonomy) %>%
   mutate(motu_pa = 1) %>%
   rename(reads_raw = value) %>%
   left_join(metadata) %>%
     # remove columns that don't matter this year
-  janitor::remove_empty() %>%
-  # check before removing
-  select(!c(motu_swarm, curated, lulu_rank)) 
+  janitor::remove_empty() 
 
 ```
 
@@ -526,7 +549,6 @@ motumatrix_metadata_nofield_2023 <- motumatrix_metadata_nolab_2023 %>%
   mutate(ctrl_field0 = ifelse(reads_adjust_field == 0, 'yes', 'no')) %>%
   relocate(reads_adjust, in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) %>%
   rename(reads_adjust_fieldlab = reads_adjust) %>%
-  select(!c(n_dups)) %>%
   #select(!c(biological_observations,
             #general_notes, 
             #swell_height_m, 
@@ -541,19 +563,12 @@ motumatrix_metadata_nofield_2023 <- motumatrix_metadata_nolab_2023 %>%
 
 ## controls
 ```{r controls}
-
-# add controls
-
 # this will need to be expanded with more data + lab metadata
 all_ctrl_2023 <- motumatrix_metadata_2023 %>%
   filter(treatment %in% c('PCR blank', 'Extraction blank', 'Field blank')) %>%
     # excess columns for this version
   select(!c(biological_observations,
              tide, wind, rain,organization_participants))
-  
-
-#write_csv(lab_controls_to_merge, here(edna_out, paste0(datefield, 'peco2023_12s_controls.csv')))
-
 ```
 
 # 2024
@@ -564,7 +579,7 @@ Updated sept 25 2024 to include lulu etc.
 
 ```{r load-in}
 asvtable_2024 <- read_delim(here(fastq, '2024',
-                            '20250528_peco-combined_12s_sequence-table_asv-names_2024.txt'))
+                            '20251111_peco-combined_12s_sequence-table_asv-names_2024.txt'))
 
 
 
@@ -593,6 +608,7 @@ motumatrix_metadata_2024 <- asvtable_2024 %>%
   mutate(sample = tolower(sample)) %>%
   mutate(sample_id = sample) %>%
   filter(sample_id %in% edna_metadata_pcr_2024$sample_id) %>%
+  select(!sample) %>%
   #filter(sample_id %in% metadata$sample_id) %>%
   left_join(taxonomy) %>%
   mutate(motu_pa = 1) %>%
@@ -601,7 +617,6 @@ motumatrix_metadata_2024 <- asvtable_2024 %>%
     # remove columns that don't matter this year
   janitor::remove_empty() %>%
   # check before removing
-  select(!c(motu_swarm, curated, lulu_rank)) %>%
   left_join(edna_metadata_pcr_2024)
 
 ```
@@ -718,17 +733,8 @@ motumatrix_metadata_nofield_2024 <- motumatrix_metadata_nolab_2024 %>%
   #relocate(reads_adjust, .before = reads_raw) %>%
   mutate(ctrl_field0 = ifelse(reads_adjust_field == 0, 'yes', 'no')) %>%
   relocate(reads_adjust, in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) %>%
-  rename(reads_adjust_fieldlab = reads_adjust) %>%
-  select(!c(n_dups))
-
+  rename(reads_adjust_fieldlab = reads_adjust)
 ```
-
-
-
-
-
-
-
 
 ## controls
 ```{r}
@@ -740,12 +746,7 @@ all_ctrl_2024 <- motumatrix_metadata_2024 %>%
              tide, wind, rain,organization_participants))
 ```
 
-
-
-
-
 # merge years
-
 
 asv matrix combine
 Blend 2021 and 2022, standardize to the same blast run
@@ -754,69 +755,17 @@ Blend 2021 and 2022, standardize to the same blast run
 missing_samples <- read_csv(here(edna_combined, '20250530sample_tracking.csv')) %>%
   filter(missing == 'missing')
 
-# miseq for 2021 and 2022
-# Miseq data
-miseq2021 <- read_csv(here(edna_combined,
-                           '20241022_peco-2021_12s_asvmatrix_complete.csv')) %>%
-  #filter(sample_id %in% missing_samples$sample_id) %>%
-  mutate(seq_method = paste0('miseq-', year))%>%
-  select(!c(dna_extraction_date)) %>%
-  mutate(site_code = case_when(site_code == "NC_F" ~ "NC_BL",
-                               TRUE ~ site_code))
-
-miseq2022 <- read_csv(here(edna_combined,
-                           '20241022_peco-2022_12s_motumatrix_complete.csv')) %>%
+miseq_2022_filtered <- motumatrix_metadata_2022_miseq %>%
   filter(sample_id %in% missing_samples$sample_id) %>%
-  mutate(seq_method = paste0('miseq-', year)) %>%
-  select(!c(dna_extraction_date))
+  mutate(seq_method = paste0('miseq-', year))
 
-miseq_all <- miseq2021 %>%
-  bind_rows(miseq2022) %>%
-  mutate(region_name = case_when(site_code %in% c("YB_FP", "YB_BV") ~ "OR_CB",
-                                  site_code %in% c("NC_PM", "NC_PS",
-                                                   "NC_RB", "NC_WP") ~ "CA_SF",
-                                  TRUE ~ region_name)) %>%
-  mutate(region_code = case_when(site_code %in% c('YB_FP', 'YB_BV') ~ 'OR_CB',
-                                 TRUE ~ region_code)) %>%
-  mutate(region_name_label = case_when(region_name == 'AK_JN' ~ "Juneau Region, Alaska",
-               region_name == 'AK_SE' ~  "Southeast Alaska",
-                region_name == 'BC_HG' ~ "Haida Gwaii, British Columbia",
-                region_name == 'BC_CC' ~ "Central Coast British Columbia",
-                region_name == 'BC_IC' ~ "Inner Coast, British Columbia",
-                region_name == 'BC_NV' ~ "North Vancouver Island, British Columbia",
-                region_name == 'BC_PP' ~ "Pacific Rim Park, British Columbia",
-                region_name == 'WA_PS' ~ "Puget Sound & Padilla Bay, Washington",
-                region_name == 'WA_WB' ~ "Willapa Bay, Washington",
-                region_name == 'OR_YB' ~ "Yaquina Bay, Oregon",
-               region_name == 'OR_CB' ~ 'Coos Bay, Oregon', 
-                region_name == 'CA_HB' ~ "Humboldt Bay, California",
-                region_name == 'CA_MB' ~ "Morro Bay, California",
-                region_name == "CA_SF" ~ "San Fransisco Bay, California",
-                region_name == "CA_NC" ~ "Bodega Bay, California",
-               region_name == 'CA_SD' ~  "San Diego region, California",
-               region_name == 'CA_LA' ~  "Los Angeles, California")) %>%
-  mutate(site_code = case_when(site_code == 'PP_J' ~ 'PP_JJ',
-                               site_code == "MB_TD" ~ 'MB_TP',
-                               site_code == "YB_FP" ~ "CB_FP",
-                               site_code == "YB_BV" ~ "CB_BV",
-                               TRUE ~ site_code)) %>%
-    #TEMPORARY; get coordinates for this site
-  mutate(decimal_latitude = case_when(site_code == 'CC_KIS1' ~ 51,
-                                      TRUE ~ decimal_latitude)) %>%
-  mutate(decimal_longitude = case_when(site_code == 'CC_KIS1' ~ -128.5,
-                                       site_code == 'PS_NC' ~ -123.04,
-                                      TRUE ~ decimal_longitude)) 
-
-
-
-asv_all <- motumatrix_metadata_nofield_2022 %>% #asvs2021 %>%
-  #full_join(asvs2022) %>%
+asv_all <- motumatrix_metadata_nofield_2022 %>% 
   full_join(motumatrix_metadata_nofield_2023) %>%
   full_join(motumatrix_metadata_nofield_2024) %>%
   mutate(seq_method = paste0('nextseq-', year)) %>%
   janitor::remove_empty() %>%
   filter(!(sample_id %in% missing_samples$sample_id)) %>%
-  bind_rows(miseq_all) %>%
+  bind_rows(miseq_2022_filtered, motumatrix_metadata_nofield_2021) %>%
   relocate(sample_id, motu, found_taxa, common_name, rank, year) %>%
   # temporary until updated in data
   mutate(site_code = case_when(site_code %in% c('NV_KI', 'NV_KH') ~ 'NV_KB',
@@ -845,7 +794,6 @@ species_list <- fishonly_range%>%
 # species list
 write.csv(species_list, here(edna_combined, paste0(datefield, 'peco-combined_12s_species-list.csv')))
 ```
-
 
 # controls
 ```{r combine controls}
@@ -1044,7 +992,6 @@ fishonly_relabund <- fishonly_range %>%
   left_join(wis_otu_tomerge) %>%
   relocate(relabund_vst_taxa, relabund_vst_motu, relabund_wis_taxa, relabund_wis_motu,
            motu_pa, .before = reads_raw) %>%
-  select(!c(n_dups, fish_base_url, group)) %>%
   janitor::remove_empty()
 
 write.csv(fishonly_relabund, here(edna_combined, paste0(datefield, 'peco-combined_12s_asvmatrix_fish.csv')))
@@ -1079,6 +1026,9 @@ fish_vstest %>%
   geom_col(aes(x = relabund_vst_taxa_round,
                y = n_vst_value),
            fill = 'black') +
+  geom_vline(xintercept = 1,
+             alpha = .5,
+                 colour = 'red') +
   labs(x = "VST rounded to 2 decimals", y = NULL,
        title = "VST value histogram") +
   theme_bw() +
@@ -1279,7 +1229,7 @@ region_by_lat <- regions %>%
                 region_name == 'OR_SB' ~ 'Southern site, Oregon', 
                 region_name == 'CA_HB' ~ "Humboldt Bay, California",
                 region_name == 'CA_MB' ~ "Morro Bay, California",
-                region_name == "CA_SF" ~ "San Fransisco Bay, California",
+                region_name == "CA_SF" ~ "San Francisco Bay, California",
                 region_name == "CA_NC" ~ "Bodega Bay, California",
                region_name == 'CA_SD' ~  "San Diego region, California",
                region_name == 'CA_LA' ~  "Los Angeles, California"))

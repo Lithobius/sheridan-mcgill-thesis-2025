@@ -1,0 +1,158 @@
+"","found_taxa","common_name","biogeographical_notes","group","fish_base_url","n_dups","remove"
+"1","Agonomalus mozinoi","Kelp poacher",NA,NA,NA,1,NA
+"2","Ammodytes","Pacific sandlance species",NA,NA,NA,1,NA
+"3","Ammodytes personatus","Pacific sandlance",NA,"Forage fish","https://www.fishbase.ca/summary/Ammodytes-personatus.html",1,NA
+"4","Anarrhichthys ocellatus","Wolf eel",NA,NA,NA,1,NA
+"5","Anoplarchus","Cockscomb species",NA,NA,NA,1,NA
+"6","Anoplopoma fimbria","Sablefish",NA,"Other","https://www.fishbase.ca/summary/Anoplopoma-fimbria.html",1,NA
+"7","Apodichthys flavidus","Penpoint gunnel",NA,"Eelpouts and pricklebacks","https://www.fishbase.ca/summary/Apodichthys-flavidus.html",1,NA
+"8","Artedius fenestralis","Padded sculpin",NA,"Sculpins","https://www.fishbase.ca/summary/Artedius-fenestralis.html",1,NA
+"9","Artedius harringtoni","Scalyhead sculpin","north to central cali","Sculpins","https://www.fishbase.ca/summary/Artedius-harringtoni.html",1,NA
+"10","Artedius lateralis","Smoothhead sculpin",NA,"Sculpins","https://www.fishbase.ca/summary/ARTEDIUS-LATERALIS.html",1,NA
+"11","Artedius notospilotus","Bonehead sculpin",NA,NA,NA,1,NA
+"12","Ascelichthys rhodorus","Rosylip sculpin","north to central CA","Sculpins","https://www.fishbase.ca/summary/4051",1,NA
+"13","Aulorhynchus flavidus","Tube-snout",NA,"Other","https://www.fishbase.ca/summary/3270",1,NA
+"14","Blepsias cirrhosus","Silverspotted sculpin","north to central CA","Sculpins","https://www.fishbase.ca/summary/4054",1,NA
+"15","Brachyistius frenatus","Kelp perch","south to northern BC","Perches","https://www.fishbase.ca/summary/3625",1,NA
+"16","Brosmophycis marginata","Red brotula",NA,NA,NA,1,NA
+"17","Chirolophis","Warbonnet species",NA,NA,NA,1,NA
+"18","Chitonotus pugetensis","Roughback sculpin",NA,NA,NA,1,NA
+"19","Citharichthys sordidus","Pacific sanddab",NA,"Flatfish","https://www.fishbase.ca/summary/Citharichthys-sordidus.html",1,NA
+"20","Citharichthys stigmaeus","Speckled sanddab",NA,"Flatfish","https://www.fishbase.ca/summary/Citharichthys-stigmaeus",1,NA
+"21","Clevelandia ios","Arrow goby","South to Rivers Inlet, BC","Other","https://www.fishbase.ca/summary/3840",1,NA
+"22","Clinocottus","Clinoottus sculpin species",NA,NA,NA,1,NA
+"23","Clinocottus acuticeps","Sharpnose sculpin","north to central cali","Sculpins","https://www.fishbase.ca/summary/Clinocottus-acuticeps.html",1,NA
+"24","Clinocottus globiceps","Mosshead sculpin",NA,NA,NA,1,NA
+"25","Clupea pallasii","Pacific herring",NA,"Forage fish","https://www.fishbase.ca/summary/Clupea-pallasii+pallasii.html",1,NA
+"26","Cottidae","Sculpin family",NA,NA,NA,1,NA
+"27","Cottus","Cottus sculpin species",NA,NA,NA,1,NA
+"28","Cryptacanthodes","Wrymouth species",NA,NA,NA,1,NA
+"29","Cymatogaster aggregata","Shiner perch",NA,"Perches","https://www.fishbase.ca/summary/Cymatogaster-aggregata.html",1,NA
+"30","Embiotoca lateralis","Striped seaperch",NA,"Perches","https://www.fishbase.ca/summary/3629",1,NA
+"31","Embiotocidae","Surfperch family",NA,NA,NA,1,NA
+"32","Enophrys bison","Buffalo sculpin","north to Monterrey Bay","Sculpins","https://www.fishbase.ca/summary/Enophrys-bison.html",1,NA
+"33","Eopsetta jordani","Petrale sole",NA,NA,NA,1,NA
+"34","Gadidae","True cod family",NA,NA,NA,1,NA
+"35","Gadus","Cod species",NA,NA,NA,1,NA
+"36","Gadus chalcogrammus","Alaska pollock","north to Sarmel, CA","Other","https://www.fishbase.ca/summary/Gadus-chalcogrammus.html",1,NA
+"37","Gadus macrocephalus","Pacific cod",NA,NA,NA,1,NA
+"38","Gasterosteus","Three-spined stickleback species",NA,NA,NA,1,NA
+"39","Gasterosteus aculeatus","Three-spined stickleback",NA,"Other","https://www.fishbase.ca/summary/Gasterosteus-aculeatus.html",1,NA
+"40","Gibbonsia montereyensis","Crevice kelpfish","south to BC","Other","https://www.fishbase.ca/summary/Gibbonsia-montereyensis.html",1,NA
+"41","Gobiesox maeandricus","Northern clingfish",NA,"Other","https://www.fishbase.ca/summary/Gobiesox-maeandricus.html",1,NA
+"42","Hemilepidotus","Hemilepidotus sculpin species",NA,NA,NA,1,NA
+"43","Hemilepidotus hemilepidotus","Red Irish lord","north to Monterrey Bay","Sculpins","https://www.fishbase.ca/summary/Hemilepidotus-jordani.html",1,NA
+"44","Hexagrammos","Greenling species",NA,NA,NA,1,NA
+"45","Hexagrammos decagrammus","Kelp greenling",NA,"Other","https://www.fishbase.ca/summary/Hexagrammos-decagrammus.html",1,NA
+"46","Hippoglossus stenolepis","Pacific halibut",NA,NA,NA,1,NA
+"47","Hydrolagus colliei","Spotted ratfish",NA,"Cartilaginous fishes","https://www.fishbase.ca/summary/Hydrolagus-colliei.html",1,NA
+"48","Hyperprosopon argenteum","Walleye surfperch",NA,NA,NA,1,NA
+"49","Hypomesus pretiosus","Surf smelt","north to Long Beach, southern California","Forage fish","https://www.fishbase.ca/summary/Hypomesus-pretiosus.html",1,NA
+"50","Icelinus","Icelinus sculpin species",NA,NA,NA,1,NA
+"51","Icelinus borealis","Northern sculpin",NA,NA,NA,1,NA
+"52","Icosteus aenigmaticus","Ragfish",NA,NA,NA,1,NA
+"53","Jordania zonope","Longfin sculpin",NA,NA,NA,1,NA
+"54","Leiocottus","Leiocottus sculpin species?",NA,NA,NA,1,NA
+"55","Lepidogobius lepidus","Bay goby",NA,"Other","https://www.fishbase.ca/summary/Lepidogobius-lepidus.html",1,NA
+"56","Lepidopsetta","Sole species",NA,NA,NA,1,NA
+"57","Leptoclinus maculatus","Spotted snakeblenny",NA,NA,NA,1,NA
+"58","Leptocottus armatus","Pacific staghorn sculpin",NA,"Sculpins","https://www.fishbase.ca/summary/4112",1,NA
+"59","Liparis","Liparis snailfish species",NA,NA,NA,1,NA
+"60","Liparis cyclopus","Ribbon snailfish",NA,NA,NA,1,NA
+"61","Liparis florae","Tidepool snailfish","north to Point Conception","Snailfish","https://www.fishbase.ca/summary/Liparis-florae",1,NA
+"62","Liparis fuscensis","Slipskin snailfish",NA,NA,NA,1,NA
+"63","Liparis mucosus","Slimy snailfish",NA,NA,NA,1,NA
+"64","Liparis pulchellus","Showy snailfish",NA,NA,NA,1,NA
+"65","Lumpenus sagitta","Snake prickleback","north to San Francisco","Eelpouts and pricklebacks","https://www.fishbase.ca/summary/Lumpenus-sagitta.html",1,NA
+"66","Lyopsetta exilis","Slender sole",NA,NA,NA,1,NA
+"67","Malacocottus","Malacocottus sculpin species",NA,NA,NA,1,NA
+"68","Microgadus proximus","Pacific tomcod","borth to central cali","Other","https://www.fishbase.ca/summary/Microgadus-proximus.html",1,NA
+"69","Microstomus pacificus","Pacific Dover sole",NA,NA,NA,1,NA
+"70","Mola","Sunfish species",NA,NA,NA,1,NA
+"71","Myoxocephalus","Myoxocephalus sculpin species",NA,NA,NA,1,NA
+"72","Nautichthys oculofasciatus","Sailfin sculpin",NA,NA,NA,1,NA
+"73","Odontopyxis trispinosa","Pygmy poacher",NA,NA,NA,1,NA
+"74","Oligocottus","Oligocottus sculpin species",NA,NA,NA,1,NA
+"75","Oligocottus snyderi","Fluffy sculpin",NA,NA,NA,1,NA
+"76","Oncorhynchus","Salmon species",NA,NA,NA,1,NA
+"77","Oncorhynchus keta","Chum salmon",NA,"Salmon","https://www.fishbase.ca/summary/Oncorhynchus-keta.html",1,NA
+"78","Oncorhynchus kisutch","Coho salmon",NA,"Salmon","https://www.fishbase.ca/summary/Oncorhynchus-kisutch.html",1,NA
+"79","Oncorhynchus nerka","Sockeye salmon","north of Columbia River drainage in Oregon","Salmon","https://www.fishbase.ca/summary/oncorhynchus-nerka.html",1,NA
+"80","Oncorhynchus tshawytscha","Chinook salmon","north to Oregon","Salmon","https://www.fishbase.ca/summary/244",1,NA
+"81","Ophiodon elongatus","Lingcod",NA,"Other","https://www.fishbase.ca/summary/Ophiodon-elongatus.html",1,NA
+"82","Orthonopias triacis","Snubnose sculpin",NA,NA,NA,1,NA
+"83","Oxylebius pictus","Painted greenling",NA,"Other","https://www.fishbase.ca/summary/Oxylebius-pictus.html",1,NA
+"84","Perciformes","Perciformes order",NA,NA,NA,1,NA
+"85","Pholis","Gunnel species",NA,NA,NA,1,NA
+"86","Pholis laeta","Crescent gunnel","north to northern California","Eelpouts and pricklebacks","https://www.fishbase.ca/summary/Pholis-laeta.html",1,NA
+"87","Pholis ornata","Saddleback gunnel","north to 36°","Eelpouts and pricklebacks","https://www.fishbase.ca/summary/3806",1,NA
+"88","Phytichthys chirus","Ribbon prickleback",NA,"Eelpouts and pricklebacks","https://www.fishbase.ca/summary/3791",1,NA
+"89","Pleuronectidae","Flatfish family",NA,NA,NA,1,NA
+"90","Pleuronectiformes","Flatfish order",NA,NA,NA,1,NA
+"91","Pleuronichthys coenosus","C-O sole",NA,"Flatfish","https://www.fishbase.ca/summary/4251",1,NA
+"92","Prosopium williamsoni","Mountain whitefish",NA,NA,NA,1,NA
+"93","Rhamphocottus richardsonii","Grunt sculpin",NA,NA,NA,1,NA
+"94","Rhinichthys cataractae","Longnose dace",NA,NA,NA,1,NA
+"95","Rhinogobiops nicholsii","Blackeye goby",NA,NA,NA,1,NA
+"96","Rimicola muscarum","Kelp clingfish","south to Queen Charlotte Islands",NA,"https://www.fishbase.se/summary/Rimicola-muscarum.html",1,NA
+"97","Ronquilus jordani","Northern ronquil",NA,NA,NA,1,NA
+"98","Salmo salar","Atlantic salmon","maybe from farm or food?","Salmon","https://www.fishbase.ca/summary/salmo-salar.html",1,NA
+"99","Salvelinus","Char species",NA,NA,NA,1,NA
+"100","Scomber","Mackerel species",NA,NA,NA,1,NA
+"101","Scorpaenichthys marmoratus","Cabezon",NA,"Sculpins","https://www.fishbase.ca/summary/Scorpaenichthys-marmoratus.html",1,NA
+"102","Sebastes","Rockfish species",NA,NA,NA,1,NA
+"103","Sebastes entomelas","Widow rockfish",NA,NA,NA,1,NA
+"104","Sebastes nebulosus","China rockfish",NA,NA,NA,1,NA
+"105","Sebastes paucispinis","Bocaccio rockfish",NA,NA,NA,1,NA
+"106","Sebastolobus","Thornyhead species",NA,NA,NA,1,NA
+"107","Stichaeidae","Butterfish family",NA,NA,NA,1,NA
+"108","Synchirus gilli","Manacled sculpin",NA,NA,NA,1,NA
+"109","Syngnathus","Pipefish species",NA,NA,NA,1,NA
+"110","Trichodon trichodon","Pacific sandfish",NA,NA,NA,1,NA
+"111","Xiphister","Prickleback species",NA,NA,NA,1,NA
+"112","Atherinops affinis","Topsmelt silverside","south to northern Van Island",NA,NA,1,NA
+"113","Acanthogobius flavimanus","Yellowfin goby","japan",NA,NA,1,NA
+"114","Syngnathus exilis","Barcheek pipefish","south to Half Moon Bay in central California",NA,NA,1,NA
+"115","Syngnathus leptorhynchus","Bay pipefish",NA,"Other","https://www.fishbase.ca/summary/Syngnathus-leptorhynchus.html",1,NA
+"116","Atherinopsis californiensis","Jack silverside","south to Yaquina Bay, OR",NA,NA,1,NA
+"117","Engraulis mordax","Californian anchovy","south to northern Van Island",NA,NA,1,NA
+"118","Sebastes baramenuke","Sebastes baramenuke","japan",NA,NA,1,NA
+"119","Embiotoca jacksoni","Black perch","south to Fort Bragg, CA",NA,NA,1,NA
+"120","Sebastes caurinus","Copper rockfish",NA,NA,NA,1,NA
+"121","Amphistichus rhodoterus","Redtail surfperch","Vancouver Island, British Columbia, Canada to Avila Beach, central California, USA.","Perches","https://www.fishbase.ca/summary/3624",1,NA
+"122","Phanerodon vacca","Pile perch",NA,NA,NA,1,NA
+"123","Xiphister atropurpureus","Black prickleback",NA,"Eelpouts and pricklebacks","https://www.fishbase.ca/summary/Xiphister-atropurpureus.html",1,NA
+"124","Oncorhynchus gorbuscha","pink salmon",NA,NA,NA,1,NA
+"125","Isopsetta isolepis","Butter sole","north to Ventura, CA","Flatfish","https://www.fishbase.ca/summary/4242",1,NA
+"126","Anoplarchus purpurescens","High cockscomb",NA,"Eelpouts and pricklebacks","https://www.fishbase.ca/summary/anoplarchus-purpurescens.html",1,NA
+"127","Merluccius productus","North Pacific hake","south to northern Van Island",NA,NA,1,NA
+"128","Hippoglossus hippoglossus","Atlantic halibut","atlantic",NA,NA,1,NA
+"129","Paralabrax maculatofasciatus","Spotted sand bass","south to Monterey Bay",NA,NA,1,NA
+"130","Sardinops sagax","South American pilchard",NA,NA,NA,1,NA
+"131","Myoxocephalus jaok","Plain sculpin","Alaska","Sculpins","https://www.fishbase.ca/summary/Myoxocephalus-jaok.html",1,NA
+"132","Cottus cognatus","Slimy sculpin","freshwater","Sculpins","https://www.fishbase.ca/summary/4068",1,NA
+"133","Oligocottus maculosus","Tidepool sculpin","north to Los Angeles County","Sculpins","https://www.fishbase.ca/summary/4128",1,NA
+"134","Cottus asper","prickly sculpin",NA,NA,NA,1,NA
+"135","Platichthys stellatus","Starry flounder",NA,"Flatfish","https://www.fishbase.ca/summary/Platichthys-stellatus.html",1,NA
+"136","Thunnus orientalis","Pacific bluefin tuna",NA,"Other","https://www.fishbase.ca/summary/14290",1,NA
+"137","Oncorhynchus clarkii clarkii","Cutthroat trout","north to Eel River",NA,NA,1,NA
+"138","Alburnus alburnus","Bleak","freshwater europe",NA,NA,1,NA
+"139","Salvelinus taranetzi","Salvelinus taranetzi","russia",NA,NA,1,NA
+"140","Hexagrammos agrammus","Spotty-bellied greenling","west pacific",NA,NA,1,NA
+"141","Mugil cephalus","Flathead grey mullet","south to cali",NA,NA,1,NA
+"142","Hypsoblennius gentilis","Bay blenny","south to Monterey Bay",NA,NA,1,NA
+"143","Paralabrax clathratus","Kelp bass","south to WA",NA,NA,1,NA
+"144","Paralabrax nebulifer","Barred sand bass","south to Santa Cruz, CA",NA,NA,1,NA
+"145","Anchoa mitchilli","Bay anchovy","Atlantic",NA,NA,1,NA
+"146","Seriola lalandi","Yellowtail amberjack","south to BC",NA,NA,1,NA
+"147","Paralichthys californicus","California flounder","south to WA",NA,NA,1,NA
+"148","Fundulus lima","Killifish","tropical",NA,NA,1,NA
+"149","Hypsopsetta guttulata","Diamond turbot","south to Cape Mendicino",NA,NA,1,NA
+"150","Limanda limanda","Common dab","european",NA,NA,1,NA
+"151","Salvelinus malma","Dolly varden","freshewater - north to Washington",NA,NA,1,NA
+"152","Lepidopsetta bilineata","Pacific rock sole",NA,NA,NA,1,NA
+"153","Micrometrus minimus","Dwarf perch","south to Bodega Bay, CA",NA,NA,1,NA
+"154","Sebastes auriculatus","Brown rockfish",NA,NA,NA,1,NA
+"155","Myoxocephalus stelleri","Steller's sculpin","Alaska",NA,NA,1,NA
+"156","Pholis crassispina","Pholis crassispina","asian species",NA,NA,1,NA
+"157","Oncorhynchus mykiss","Rainbow trout / steelhead",NA,NA,NA,1,NA

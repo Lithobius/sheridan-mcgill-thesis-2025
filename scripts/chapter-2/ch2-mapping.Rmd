@@ -48,12 +48,12 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 ```{r load-in}
 # load in csvs
 edna_meta <- read_csv(here(plotdata, 
-                           "20240925_peco-combined_metadata.csv")) %>%
+                           "20251107_peco-combined_metadata.csv")) %>%
   rename(region_label = region_name_label) %>%
   janitor::remove_empty()
 
 region_plotting <- read_csv(here(plotdata,
-                                 "20240925_peco_region-name-plotting.csv"))[-1] %>%
+                                 "20251107_peco_region-name-plotting.csv"))[-1] %>%
   rename(region_label = region_name_label)
 
 # set up labels and colors for region
@@ -366,5 +366,113 @@ ggsave(filename =  here('output', 'maps',
                                  paste0(datefield, 'map_edna_2021-24_centroids-blue.png')), 
        device = "png", dpi = 300, width = 6, height = 7, units = "in")
 
+```
+
+# Haida Gwaii
+
+lon = c(-133.2, -130.5, -130.5, -133.2), lat = c(50.2, 50.2, 54.3, 54.3)))
+
+
+```{r haida gwaii}
+hg_land <- st_read(here('rawdata', 'spatial', 'hg.gpkg'), layer = 'land')
+
+#convert to to lat long
+hg_land_t <- st_transform(hg_land, "EPSG:4326")
+
+# make a bounding box
+hg_bbox <- st_bbox(c(xmin = -138, xmax = -130.5, ymin = 50.5, ymax = 54.3), 
+                     crs = "EPSG:4326")
+
+# st_crop to use the bounding box to crop the original object
+hg_crop <- st_crop(hg_land_t, hg_bbox)
+
+hg_map <- ggplot(hg_crop) +
+  geom_sf(fill = 'white', 
+          color = 'grey50') +
+  xlim(min(-133.5, 
+    na.rm = T), 
+    max(-130.5, na.rm = T)) +
+  ylim(min(51.8, na.rm = T), 
+       max(54.3, na.rm = T)) + 
+  theme_classic() +
+    theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = .5),
+        axis.ticks.y = element_blank(),
+        panel.background = element_rect(fill = 'grey80'))
+
+hg_map
+
+
+hg_subset <- region_plotting %>%
+    filter(region_name == "BC_HG") %>%
+  mutate(side_hg = case_when(#site_code %in% c('HG_TN', 'HG_LIE') ~ 'west',
+                             site_code %in% c('HG_BH', 'HG_RI', 'HG_TK',
+                                              'HG_SB') ~ 'east',
+                             site_code %in% c('HG_ROI', 'HG_LIE') ~ 'south',
+                             site_code %in% c('HG_MDD', 'HG_DSD') ~ 'north',
+                             site_code %in% c('HG_DN') ~ 'central')) %>%
+  mutate(site_code_plot = str_remove_all(site_code, 'HG_'))
+
+hg_map + geom_point(data = hg_subset,
+                    aes(x = decimal_longitude,
+                        y = decimal_latitude,
+                        shape = side_hg),
+                    size = 3,
+                    fill = 'dodgerblue3') +
+    scale_shape_manual(values = c(23, # central
+                                21, # east
+                                24, # north
+                                25, # south
+                                5 # west
+                                )) +
+    geom_text(data = hg_subset,
+            aes(x = decimal_longitude +.1,
+                 y = decimal_latitude +.1,
+                label =site_code_plot))
+
+ggsave(here('output', 'maps', paste0(datefield, 'haidagwaii.pdf')))
+
+
+ggplot(hg_crop) +
+  geom_sf(fill = 'white', 
+          color = 'grey50',
+          linewidth = .05) +
+  xlim(min(-133.5, 
+    na.rm = T), 
+    max(-130.5, na.rm = T)) +
+  ylim(min(51.8, na.rm = T), 
+       max(54.3, na.rm = T)) + 
+  geom_point(data = hg_subset,
+                    aes(x = decimal_longitude,
+                        y = decimal_latitude,
+                        shape = side_hg),
+                    size = 3,
+                    fill = 'dodgerblue3') +
+    scale_shape_manual(values = c(23, # central
+                                21, # east
+                                24, # north
+                                25, # south
+                                5 # west
+                                )) +
+    geom_text(data = hg_subset,
+            aes(x = decimal_longitude +.1,
+                 y = decimal_latitude +.1,
+                label =site_code_plot)) +
+  theme_classic() +
+    theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = .5),
+        axis.ticks.y = element_blank(),
+        panel.background = element_rect(fill = 'grey80'))
+
+ggsave(here('output', 'maps', paste0(datefield, 'haidagwaiismall.pdf')),
+       height = 3,
+       width = 3,
+       units = 'in')
 ```
 

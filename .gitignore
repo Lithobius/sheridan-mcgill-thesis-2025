@@ -49,3 +49,4 @@ po/*~
 rsconnect/
 .DS_Store
 processeddata/bigdata/20250813_obis-gbif_region-peco-bysite_unfiltered.csv
+/rawdata/peco/fastq/2021/peco2021_raw-miseq

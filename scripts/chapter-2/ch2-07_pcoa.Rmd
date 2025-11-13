@@ -23,7 +23,7 @@ bigdata <- here('processeddata', 'bigdata')
 # save in
 pcoa_out <- here::here("output", "pcoa")
 
-datefield <- '20250927_'
+datefield <- '20251113_'
 
 # from PNW colors, Bay
 # or with 2 oregon regions
@@ -40,7 +40,7 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Coos Bay, Oregon" = "#EDB123",
              "Humboldt Bay, California" = "#ED9E11",
              "Bodega Bay, California" = "#ED8B00",
-             "San Fransisco Bay, California" = "#E97809",
+             "San Francisco Bay, California" = "#E97809",
              "Morro Bay, California" = "#E56512",
              "Los Angeles, California" = "#E1531B",
              "San Diego region, California" = "#DD4124")
@@ -52,10 +52,10 @@ obisgbif <- read_csv(here(bigdata,
     rename(region_label = region_name_label) 
 
 mifish_edna <- read_csv(here(dataedna,
-                             '20250711_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+                             '20251111_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
   distinct() %>%
   # remove below threshold
-  filter(relabund_vst_taxa > 3) %>%
+  filter(relabund_vst_taxa > 1) %>%
   rename(region_label = region_name_label) %>%
   filter(!(sample_id %in% c('pecoe-0207')))
 
@@ -65,7 +65,7 @@ fishlist <- mifish_edna %>%
   distinct() %>%
   rename(species = found_taxa)
 
-regions <- read_csv(here(dataedna, '20240925_peco_region-name-plotting.csv'))[-1] %>%
+regions <- read_csv(here(dataedna, '20251111_peco_region-name-plotting.csv'))[-1] %>%
   rename(region_label = region_name_label)
 
 region_order <- regions %>%

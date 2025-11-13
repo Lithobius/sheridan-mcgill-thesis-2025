@@ -29,7 +29,7 @@ library(ggeffects)
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 plotout <- here('output', 'thermalaffinity', 'models')
-datefield <- '20251107_'
+datefield <- '20251111_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -44,14 +44,14 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Coos Bay, Oregon" = "#EDB123",
              "Humboldt Bay, California" = "#ED9E11",
              "Bodega Bay, California" = "#ED8B00",
-             "San Fransisco Bay, California" = "#E97809",
+             "San Francisco Bay, California" = "#E97809",
              "Morro Bay, California" = "#E56512",
              "Los Angeles, California" = "#E1531B",
              "San Diego region, California" = "#DD4124")
 ```
 
 ```{r loadin}
-regions <- read_csv(here(dataedna, '20251107_peco_region-name-plotting.csv'))[-1] %>%
+regions <- read_csv(here(dataedna, '20251111_peco_region-name-plotting.csv'))[-1] %>%
   rename(region_label = region_name_label)
 
 
@@ -65,11 +65,11 @@ site_order <- regions %>%
   arrange(decimal_latitude)
 
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
-                             '20251107_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+                             '20251111_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
   filter(rank == 'species') %>%
   rename(region_label = region_name_label) %>%
   # remove below threshold
-  filter(relabund_vst_taxa > 3) %>%
+  filter(relabund_vst_taxa > 1) %>%
   # problematic sample
   filter(!(sample_id %in% c('pecoe-0207')))
 
@@ -86,7 +86,9 @@ region_environment <- read_csv(here('rawdata', 'temp', 'erddap',
 region_temps <- region_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
   distinct() %>%
-  select(!avg_region_lat) 
+  select(!avg_region_lat) %>%
+  mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+                                       TRUE ~ region_label))
 
 site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
                                    '20250713_summer-sst-summary-stats_by-site.csv'))
@@ -95,7 +97,9 @@ site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
 site_temps <- site_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
   select(!c(decimal_latitude, decimal_longitude))%>%
-  select(!c(avg_region_lat))
+  select(!c(avg_region_lat)) %>%
+    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+                                       TRUE ~ region_label))
 ```
 
 ## thermal affinities
@@ -303,7 +307,17 @@ for (i in 1:length(region_list)) {
          units = 'in')
 }
 
-cti_95_out <- region_output
+cti_95_out <- region_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = '95th')
+
+cti_95_random <- random_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = '95th')
 
 cti_95_out %>%
   filter(term == 'site_temp95') %>%
@@ -339,6 +353,25 @@ ggsave(here(plotout, paste0(datefield, 'cti-sst95_all-regions.pdf')),
        height = 2.5,
        width = 4,
        units = 'in')
+
+write_csv(cti_95_out, here(plotout, paste0(datefield, '95-out.csv')))
+write_csv(cti_95_random, here(plotout, paste0(datefield, '95-random.csv')))
+
+model_summary$varcor$site_code["stddev"]
+model_summary$varcor
+model_summary$sigma
+model_summary
+
+test2 <- attr(model_summary$varcor$site_code, 'stddev')
+
+test2
+model_summary
+
+str(model_summary$varcor)
+
+test <- VarCorr(region_model)
+
+test["StdDev"]
 ```
 
 
@@ -443,7 +476,17 @@ for (i in 1:length(region_list)) {
          units = 'in')
 }
 
-cti_75_out <- region_output
+cti_75_out <- region_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = '75th')
+
+cti_75_random <- random_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = '75th')
 
 cti_75_out %>%
   filter(term == 'site_temp75') %>%
@@ -475,6 +518,10 @@ cti_75_out %>%
 # pdf version 
 ggsave(here(plotout, paste0(datefield, 'cti-sst75_all-regions.pdf')),
        height = 2.5, width = 4, units = 'in')
+
+
+write_csv(cti_75_out, here(plotout, paste0(datefield, '75-out.csv')))
+write_csv(cti_75_random, here(plotout, paste0(datefield, '75-random.csv')))
 ```
 
 ## mean sst
@@ -604,12 +651,22 @@ for (i in 1:length(region_list)) {
     # pdf for figures
   ggsave(here(plotout, paste0(datefield, 'sti-sstmean_line-region-',
                                      region_list[i], '.pdf')),
-         height = 3,
+         height = 2.5,
          width = 5.5,
          units = 'in')
 }
 
-cti_mean_out <- region_output
+cti_mean_out <- region_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = 'mean')
+
+cti_mean_random <- random_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = 'mean')
 
 cti_mean_out %>%
   filter(term == 'sst_mean') %>%
@@ -639,8 +696,16 @@ cti_mean_out %>%
         legend.position = 'none')
 
 # pdf version 
+ggsave(here(plotout, paste0(datefield, 'cti-sstmean_all-regions-wide.pdf')),
+       height = 2.5, width = 5.5, units = 'in')
+
+# pdf version 
 ggsave(here(plotout, paste0(datefield, 'cti-sstmean_all-regions.pdf')),
        height = 2.5, width = 4, units = 'in')
+
+
+write_csv(cti_mean_out, here(plotout, paste0(datefield, 'mean-out.csv')))
+write_csv(cti_mean_random, here(plotout, paste0(datefield, 'mean-random.csv')))
 
 ```
 ### scatter plots with models for all regions
@@ -835,15 +900,24 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
   
   # pdf for figures
   ggsave(here(plotout, paste0(datefield, 'sti-upwelling_region-',
-                                     region_list[i], '.pdf')),
+                                     region_list_upwell[i], '.pdf')),
          height = 2,
          width = 2,
          units = 'in')
   
 }
 
+cti_upwelling_out <- region_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = 'upwelling')
 
-cti_upwelling_out <- region_output
+cti_upwelling_random <- random_output %>%
+    #or change string in every column of dataframe
+  mutate(across(.cols = where(is.numeric),
+                .fns = ~ round(., digits = 3))) %>%
+  mutate(model = 'upwelling')
 
 region_output %>%
   filter(term == 'beuti_year') %>%
@@ -871,11 +945,13 @@ region_output %>%
         axis.text.y = element_text(size = 5),
         axis.title.x = element_text(size = 10))
 
-
 ggsave(here(plotout, paste0(datefield, 'cti-beuti_all-regions.png')),
        width = 1200,
        height = 750,
        units = 'px')
+
+write_csv(cti_upwelling_out, here(plotout, paste0(datefield, 'upwelling-out.csv')))
+write_csv(cti_upwelling_random, here(plotout, paste0(datefield, 'upwelling-random.csv')))
 ```
 
 
@@ -900,40 +976,24 @@ hg_subset <- cti_environment %>%
   mutate(site_code_plot = str_remove_all(site_code, 'HG_'))
 
 # mean  
-hgmean_model <- lme(cti_value ~ sst_mean, 
-                      random=~1|site_code, 
-                      data=hg_subset)
+hgmean_model <- blmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = hg_subset)
   
 # make a ggpredict plot object
-hgmean_y <- ggpredict(hgmean_model) %>% 
-    plot()
+# plot of lines per site 
+hg_pred_pop <- predict(hgmean_model, re.form = NA) ## whole population level
+hg_subset$pred_group <- predict(hgmean_model) ## group level
 
-# 75%
-hg75_model <- lme(cti_value ~ site_temp75, 
-                      random=~1|site_code, 
-                      data=hg_subset)
-  
-# make a ggpredict plot object
-hg75_y <- ggpredict(hg75_model) %>% 
-    plot()
-
-# 95%
-hg95_model <- lme(cti_value ~ site_temp95, 
-                      random=~1|site_code, 
-                      data=hg_subset)
-  
-# make a ggpredict plot object
-hg95_y <- ggpredict(hg95_model) %>% 
-    plot()
   
 # subset sti values
 hgsti_4plot <- sti_peco %>%
     left_join(cti_environment) %>%
     filter(region_name == "BC_HG") 
-  
-# add sti and cti to ggpredict plot
-hgmean_y +
-    # points for sti vs sst
+
+
+ggplot(data = hg_subset, 
+       mapping = aes(x = sst_mean, y = cti_value)) + 
+      # points for sti vs sst
     geom_point(data = hgsti_4plot,
                aes(y = sti_value,
                  x = sst_mean,
@@ -941,186 +1001,19 @@ hgmean_y +
                  size = relabund_vst_taxa),
              alpha = .35) +
     scale_size(range = c(.1,3)) +
-    # points for cti vs temp, red diamonds
-  geom_point(data = hgsti_4plot,
+    geom_point(data = hgsti_4plot,
              aes(y = cti_value,
                  x = sst_mean),
              shape = 23,
-             size = 3,
+             size = 2,
              fill = 'red') +
+  geom_line(aes(y = pred_group,
+                color = region_label,
+                linetype = site_code)) + 
   scale_color_manual(values = pal_2or) +
-  ggnewscale::new_scale('color') +
-  geom_jitter(data = hg_subset,
-             aes(x = sst_mean,
-                 y = 18,
-                 shape = side_hg,
-                 color = as.factor(year))
-             ) +
-  geom_text(data = hg_subset,
-            aes(x = sst_mean,
-                 y = 20,
-                label =site_code_plot),
-            alpha = .6) +
-  scale_shape_manual(values = c(3, # central
-                                1, # east
-                                2, # north
-                                6, # south
-                                5 # west
-                                )) +
-  scale_color_manual(values = c('#015B58FF', '#2C6184FF', '#89689DFF', '#BA7999FF')) +
-  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
-       title = NULL)+
-  facet_grid('year') +
-  theme_bw() +
-  theme(legend.position = 'none',
-        axis.text = element_text(size = 8),
-        axis.title = element_text(size = 8))
-
-  # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-sstmean_haidagwaii-yearfacet.pdf')),
-         height = 6,
-         width = 6,
-         units = 'in')
-
-
-# add sti and cti to ggpredict plot
-hg75_y +
-    # points for sti vs sst
-    geom_point(data = hgsti_4plot,
-               aes(y = sti_value,
-                 x = site_temp75,
-                 color = region_label,
-                 size = relabund_vst_taxa),
-             alpha = .35) +
-    scale_size(range = c(.1,3)) +
-    # points for cti vs temp, red diamonds
-  geom_point(data = hgsti_4plot,
-             aes(y = cti_value,
-                 x = site_temp75),
-             shape = 23,
-             size = 3,
-             fill = 'red') +
-  scale_color_manual(values = pal_2or) +
-  ggnewscale::new_scale('color') +
-  geom_jitter(data = hg_subset,
-             aes(x = site_temp75,
-                 y = 18,
-                 shape = side_hg,
-                 color = as.factor(year))
-             ) +
-  geom_text(data = hg_subset,
-            aes(x = site_temp75,
-                 y = 20,
-                label =site_code_plot),
-            alpha = .6) +
-  scale_shape_manual(values = c(3, # central
-                                1, # east
-                                2, # north
-                                6, # south
-                                5 # west
-                                )) +
-  scale_color_manual(values = c('#015B58FF', '#2C6184FF', '#89689DFF', '#BA7999FF')) +
-  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
-       title = NULL)+
-  facet_grid('year') +
-  theme_bw() +
-  theme(legend.position = 'none',
-        axis.text = element_text(size = 8),
-        axis.title = element_text(size = 8))
-
-  # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-sst75_haidagwaii-yearfacet.pdf')),
-         height = 6,
-         width = 6,
-         units = 'in')
-
-  
-# add sti and cti to ggpredict plot
-hg95_y +
-    # points for sti vs sst
-    geom_point(data = hgsti_4plot,
-               aes(y = sti_value,
-                 x = site_temp95,
-                 color = region_label,
-                 size = relabund_vst_taxa),
-             alpha = .35) +
-    scale_size(range = c(.1,3)) +
-    # points for cti vs temp, red diamonds
-  geom_point(data = hgsti_4plot,
-             aes(y = cti_value,
-                 x = site_temp95),
-             shape = 23,
-             size = 3,
-             fill = 'red') +
-  scale_color_manual(values = pal_2or) +
-  ggnewscale::new_scale('color') +
-  geom_jitter(data = hg_subset,
-             aes(x = site_temp95,
-                 y = 18,
-                 shape = side_hg,
-                 color = as.factor(year))
-             ) +
-  geom_text(data = hg_subset,
-            aes(x = site_temp95,
-                 y = 20,
-                label =site_code_plot),
-            alpha = .6) +
-  scale_shape_manual(values = c(3, # central
-                                1, # east
-                                2, # north
-                                6, # south
-                                5 # west
-                                )) +
-  scale_color_manual(values = c('#015B58FF', '#2C6184FF', '#89689DFF', '#BA7999FF')) +
-  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
-       title = NULL)+
-  facet_grid('year') +
-  theme_bw() +
-  theme(legend.position = 'none',
-        axis.text = element_text(size = 8),
-        axis.title = element_text(size = 8))
-
-  # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-sst95_haidagwaii-yearfacet.pdf')),
-         height = 6,
-         width = 6,
-         units = 'in')
-  
-
-
-# add sti and cti to ggpredict plot
-hgmean_y +
-    # points for sti vs sst
-    geom_point(data = hgsti_4plot,
-               aes(y = sti_value,
-                 x = sst_mean,
-                 color = region_label,
-                 size = relabund_vst_taxa),
-             alpha = .35) +
-    scale_size(range = c(.1,3)) +
-    # points for cti vs temp, red diamonds
-  geom_point(data = hgsti_4plot,
-             aes(y = cti_value,
-                 x = sst_mean),
-             shape = 23,
-             size = 3,
-             fill = 'red') +
-  scale_color_manual(values = pal_2or) +
-  ggnewscale::new_scale('color') +
-  geom_jitter(data = hg_subset,
-             aes(x = sst_mean,
-                 y = 18,
-                 shape = side_hg,
-                 color = as.factor(year))
-             ) +
-  scale_shape_manual(values = c(3, # central
-                                1, # east
-                                2, # north
-                                6, # south
-                                5 # west
-                                )) +
-  scale_color_manual(values = c('#015B58FF', '#2C6184FF', '#89689DFF', '#BA7999FF')) +
-  labs(x = 'Mean percentile Summer SST', y = 'Thermal affinity',
+  geom_line(mapping = aes(y = hg_pred_pop), colour = "black") + 
+  theme(legend.position = "bottom") +
+  labs(x = 'Mean Summer SST', y = 'Thermal affinity',
        title = NULL)+
   facet_wrap('site_code') +
   theme_bw() +
@@ -1128,164 +1021,43 @@ hgmean_y +
         axis.text = element_text(size = 8),
         axis.title = element_text(size = 8))
 
-  # pdf for figures
-  ggsave(here(plotout, paste0(datefield, 'sti-sstmean_haidagwaii-sitefacet.pdf')),
+# pdf for figures
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_haidagwaii-sitefacet.pdf')),
          height = 6,
          width = 6,
          units = 'in')
 
 ```
 
+# combine output
+
+```{r table maybe}
+table_output <- cti_95_out %>%
+  bind_rows(cti_75_out, cti_mean_out, cti_upwelling_out) %>%
+  left_join(region_order) %>%
+  arrange(region_lat_name) %>%
+  relocate(region_label) %>%
+  select(!c(region_name, avg_region_lat, region_lat_name)) %>%
+  mutate(term = case_when(term == '(Intercept)' ~ stringr::str_to_sentence(paste0(model, " intercept")),
+                          term == 'beuti_year' ~ 'BEUTI index',
+                          term == 'site_temp95' ~ '95th percentile SST',
+                          term == 'site_temp75' ~ '75th percentile SST',
+                          term == 'sst_mean' ~ 'Mean SST',
+                          TRUE ~ term)) %>%
+  mutate(blme = case_when(singular == TRUE ~ 'BLME',
+                          singular == FALSE ~ NA_character_)) %>%
+  select(!c(model, singular))
+
+table_random <- cti_95_random %>%
+  bind_rows(cti_75_random, cti_mean_random, cti_upwelling_random) %>%
+  select(!c(site_code, grpvar, term)) %>%
+  left_join(region_order) %>%
+  arrange(region_lat_name) %>%
+    relocate(region_label) %>%
+  select(!c(region_name, avg_region_lat, region_lat_name)) 
 
 
-test hg with tutorial 
-
-```{r}
-## fit a LMM with a random effect on the intercept
-## i.e. thermal limits vary by Class
-mod5 <- lmer(cti_value ~ sst_mean + (1 | site_code), data = hg_subset)
-summary(mod5)["call"] ## check model formula
-broom.mixed::tidy(mod5)
-
-help('isSingular')
-
-isSingular(mod5)
-prc <- rePCA(mod5)
-prc$site_code
-summary(rePCA(mod5))
-
-plot(prc$site_code)
-screeplot(prc$site_code)
-
-## plot random effects
-## how much did thermal tolerance vary across classes?
-## make dot and whisker plots of group means and CIs from the model
-rand_effs <- broom.mixed::tidy(mod5, ## get tidy to provide random effects
-                  effects = "ran_vals")
-
-ggplot(data = rand_effs, 
-       mapping = aes(x = level, y = estimate))+ 
-  geom_pointrange(mapping = aes(ymin = estimate - 1.96 * std.error,
-                                ymax = estimate + 1.96 * std.error), 
-                  colour = "blue") + 
-  geom_hline(yintercept = 0, lty = 2) + ## geom_hline b/c coord_flip() next
-  coord_flip()
-
-
-## plot fitted model over data
-## first predict thermal tolerance for each row of data, at each level
-pred_pop <- predict(mod5, re.form = NA) ## whole population level
-pred_group <- predict(mod5) ## group level
-
-## now plot
-ggplot(data = hg_subset, 
-       mapping = aes(x = sst_mean, y = cti_value, 
-                     colour = site_code)) + 
-  #geom_point(mapping = aes(y = thermal_limit)) + 
-  geom_line(mapping = aes(y = pred_group)) + 
- # geom_line(mapping = aes(y = pred_pop), colour = "black") + 
-  theme(legend.position = "bottom")
-
-
-
-```
-
-
-```{r}
-test_subset <- cti_environment %>%
-    filter(region_name == "CA_MB") 
-
-## fit a LMM with a random effect on the intercept
-## i.e. thermal limits vary by Class
-mod5 <- lmer(cti_value ~ sst_mean + (1 | site_code), data = test_subset)
-summary(mod5)["call"] ## check model formula
-broom.mixed::tidy(mod5)
-
-isSingular(mod5)
-
-plot.lme(mod5) 
-
-## plot random effects
-## how much did thermal tolerance vary across classes?
-## make dot and whisker plots of group means and CIs from the model
-rand_effs <- broom.mixed::tidy(mod5, ## get tidy to provide random effects
-                  effects = "ran_vals")
-
-ggplot(data = rand_effs, 
-       mapping = aes(x = level, y = estimate))+ 
-  geom_pointrange(mapping = aes(ymin = estimate - 1.96 * std.error,
-                                ymax = estimate + 1.96 * std.error), 
-                  colour = "blue") + 
-  geom_hline(yintercept = 0, lty = 2) + ## geom_hline b/c coord_flip() next
-  coord_flip()
-
-
-## plot fitted model over data
-## first predict thermal tolerance for each row of data, at each level
-pred_pop <- predict(mod5, re.form = NA) ## whole population level
-pred_group <- predict(mod5) ## group level
-
-## now plot
-ggplot(data = test_subset, 
-       mapping = aes(x = sst_mean, y = cti_value, 
-                     colour = site_code)) + 
-  #geom_point(mapping = aes(y = thermal_limit)) + 
-  geom_line(mapping = aes(y = pred_group)) + 
-  geom_line(mapping = aes(y = pred_pop), colour = "black") + 
-  theme(legend.position = "bottom")
-
-```
-```{r}
-regions_2 <- region_order %>%
-  filter(!(region_name %in% c('CA_HB')))
-
-region_list2 <- unique(regions_2$region_name)
-
-for (i in 1:length(region_list)) {
-  print(region_list[i])
-  
-    region_subset <- cti_environment %>%
-    filter(region_name == region_list[i])
-  
-  region_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
-                       data = region_subset)
-  
-  print(isSingular(region_model))
-}
-```
-
-```{r}
-hg_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
-                       data = hg_subset)
-
-hg_b_model <- blmer(cti_value ~ sst_mean + (1 | site_code), 
-                       data = hg_subset)
-
-rand_effs <- broom.mixed::tidy(hg_b_model, ## get tidy to provide random effects
-                  effects = "ran_vals")
-
-ggplot(data = rand_effs, 
-       mapping = aes(x = level, y = estimate))+ 
-  geom_pointrange(mapping = aes(ymin = estimate - 1.96 * std.error,
-                                ymax = estimate + 1.96 * std.error), 
-                  colour = "blue") + 
-  geom_hline(yintercept = 0, lty = 2) + ## geom_hline b/c coord_flip() next
-  coord_flip()
-
-## plot fitted model over data
-## first predict thermal tolerance for each row of data, at each level
-pred_pop <- predict(hg_b_model, re.form = NA) ## whole population level
-pred_group <- predict(hg_b_model) ## group level
-
-## now plot
-ggplot(data = hg_subset, 
-       mapping = aes(x = sst_mean, y = cti_value, 
-                     colour = site_code)) + 
-  #geom_point(mapping = aes(y = thermal_limit)) + 
-  geom_line(mapping = aes(y = pred_group)) + 
-  geom_line(mapping = aes(y = pred_pop), colour = "black") + 
-  theme(legend.position = "bottom")
-
-
+write_csv(table_output, here(plotout, paste0(datefield, 'table-out.csv')))
+write_csv(table_random, here(plotout, paste0(datefield, 'table-random.csv')))
 ```
 
