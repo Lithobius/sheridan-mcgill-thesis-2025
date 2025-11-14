@@ -756,8 +756,10 @@ missing_samples <- read_csv(here(edna_combined, '20250530sample_tracking.csv')) 
   filter(missing == 'missing')
 
 miseq_2022_filtered <- motumatrix_metadata_2022_miseq %>%
-  filter(sample_id %in% missing_samples$sample_id) %>%
-  mutate(seq_method = paste0('miseq-', year))
+  #filter(sample_id %in% missing_samples$sample_id) %>%
+  mutate(seq_method = paste0('miseq-', year)) %>%
+  mutate(sample_id = paste0(sample_id, '_ms')) %>%
+  filter(!(rank == 'offtarget'))
 
 asv_all <- motumatrix_metadata_nofield_2022 %>% 
   full_join(motumatrix_metadata_nofield_2023) %>%
@@ -992,7 +994,11 @@ fishonly_relabund <- fishonly_range %>%
   left_join(wis_otu_tomerge) %>%
   relocate(relabund_vst_taxa, relabund_vst_motu, relabund_wis_taxa, relabund_wis_motu,
            motu_pa, .before = reads_raw) %>%
-  janitor::remove_empty()
+  janitor::remove_empty() %>%
+    mutate(sample_id = str_remove_all(sample_id, '_ms')) %>%
+  mutate(remove = case_when(seq_method == 'miseq-2022' & !(sample_id %in% missing_samples$sample_id) ~ 'x')) %>%
+  filter(is.na(remove)) %>%
+  select(!remove)
 
 write.csv(fishonly_relabund, here(edna_combined, paste0(datefield, 'peco-combined_12s_asvmatrix_fish.csv')))
 ```
@@ -1037,6 +1043,13 @@ fish_vstest %>%
 
 ggsave(here("output", "controls", paste0(datefield, 'vst-value-histogram.png')),
        height = 7, width = 10, unit = 'in')
+
+
+fish_vstest %>%
+  ggplot() +
+  geom_histogram(aes(x = relabund_vst_taxa_round)) +
+  facet_wrap('seq_method') +
+  theme_bw()
 
 
 fish_vstest %>%
@@ -1184,7 +1197,209 @@ ggsave(here('output', 'controls',  'wisconsin_pcoa.png'))
 
 ```
 
-Combined regions for plotting
+### miseq vs nextseq vst
+```{r mi and next}
+fish_vstest %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method),
+             alpha = .5) +
+  facet_wrap('seq_method') +
+  theme_bw()
+
+fish_vstest %>%
+  filter(relabund_vst_taxa < 15) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method),
+             alpha = .5) +
+  facet_wrap('seq_method') +
+  theme_bw()
+
+fish_vstest %>%
+  select(relabund_vst_taxa_round, n_vst_value, seq_method) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = relabund_vst_taxa_round,
+               y = n_vst_value),
+           fill = 'black') +
+  facet_wrap('seq_method') +
+  labs(x = "VST rounded to 2 decimals", y = NULL,
+       title = "VST value histogram") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank())
+
+fish_vstest %>%
+  ggplot() +
+  geom_histogram(aes(x = relabund_vst_taxa_round),
+                 bins = 100) +
+  facet_wrap('seq_method') +
+  theme_bw()
+
+fish_vstest %>%
+  filter(year == 2022) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method,
+                 shape = seq_method),
+             alpha = .2) +
+  theme_bw()
+
+fish_vstest %>%
+  filter(year == 2022) %>%
+  filter(relabund_vst_taxa < 15) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method,
+                 shape = seq_method),
+             alpha = .2) +
+  theme_bw()
+```
+
+
+```{r direct comparison}
+fish_vstest2 <- fish_vstest %>%
+  mutate(sample_id = str_remove_all(sample_id, '_ms')) %>%
+  filter(year == 2022) %>%
+  mutate(relabund_vst_taxa_round = round(relabund_vst_taxa, digits = 2)) %>%
+  select(sample_id, seq_method, relabund_vst_taxa_round, 
+         found_taxa, motu, asv, reads_raw) %>%
+  distinct() %>%
+  pivot_wider(values_from = c(relabund_vst_taxa_round, reads_raw),
+              names_from = seq_method) %>%
+  janitor::clean_names() %>%
+  dplyr::rename(vst_nextseq = relabund_vst_taxa_round_nextseq_2022,
+         vst_miseq = relabund_vst_taxa_round_miseq_2022)
+
+fish_vstest2 %>%
+  ggplot() +
+  geom_point(aes(y = vst_nextseq,
+                 x = vst_miseq),
+             alpha = .5) +
+  theme_bw()
+
+ggsave(here('output', 'controls', 'vst_miseq-nextseq.png'))
+```
+
+
+```{r}
+fish_vstest3 <- fish_vstest %>%
+  mutate(sample_id = str_remove_all(sample_id, '_ms')) %>%
+  mutate(remove = case_when(seq_method == 'miseq-2022' & !(sample_id %in% missing_samples$sample_id) ~ 'x')) %>%
+  filter(is.na(remove)) %>%
+  select(!remove)
+
+fish_vstest3 %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method),
+             alpha = .5) +
+  facet_wrap('seq_method') +
+  theme_bw()
+
+fish_vstest3 %>%
+  filter(relabund_vst_taxa < 15) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method),
+             alpha = .5) +
+  facet_wrap('seq_method') +
+  theme_bw()
+
+fish_vstest3 %>%
+  select(relabund_vst_taxa_round, n_vst_value, seq_method) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = relabund_vst_taxa_round,
+               y = n_vst_value),
+           fill = 'black') +
+  facet_wrap('seq_method') +
+  labs(x = "VST rounded to 2 decimals", y = NULL,
+       title = "VST value histogram") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank())
+
+fish_vstest3 %>%
+  ggplot() +
+  geom_histogram(aes(x = relabund_vst_taxa_round),
+                 bins = 100) +
+  facet_wrap('seq_method') +
+  theme_bw()
+
+fish_vstest3 %>%
+  filter(year == 2022) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method,
+                 shape = seq_method),
+             alpha = .2) +
+  theme_bw()
+
+fish_vstest3 %>%
+  filter(year == 2022) %>%
+  filter(relabund_vst_taxa < 15) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = reads_raw,
+                 colour = seq_method,
+                 shape = seq_method),
+             alpha = .2) +
+  theme_bw()
+```
+
+```{r}
+#saveforcompariosn <- fish_vstest2 %>%
+#  dplyr::rename(vst_miseq_all = vst_miseq)
+  
+
+fish_vstest4 <- fish_vstest2 %>% 
+  select(!c(reads_raw_nextseq_2022, reads_raw_miseq_2022)) %>%
+  left_join(saveforcompariosn) %>%
+  mutate(diff_miseq = vst_miseq - vst_miseq_all) %>%
+  mutate(diff_next = vst_nextseq - vst_miseq_all) %>%
+  relocate(vst_miseq_all, diff_miseq, diff_next, .before = reads_raw_nextseq_2022) %>%
+  group_by(found_taxa) %>%
+  mutate(reads_raw_miseq = sum(reads_raw_miseq_2022, na.rm = TRUE),
+         reads_raw_nextseq = sum(reads_raw_nextseq_2022, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(!c(motu,asv, reads_raw_nextseq_2022, reads_raw_miseq_2022)) %>%
+  distinct()
+
+fish_vstest4 %>%
+  ggplot() +
+  geom_point(aes(x = vst_miseq,
+                 y = vst_miseq_all)) +
+  theme_bw()
+
+ggsave(here('output', 'controls', 'vst_miseqall-subset.png'))
+
+fish_vstest4 %>%
+  ggplot() +
+  geom_histogram(aes(x = diff_miseq)) +
+  theme_bw()
+
+ggsave(here('output', 'controls', 'vst_miseq-difference-hist.png'))
+
+fish_vstest4 %>%
+  ggplot() +
+  geom_histogram(aes(x = diff_next)) +
+  theme_bw()
+
+ggsave(here('output', 'controls', 'vst_miseq-nextseq-difference-hist.png'))
+
+```
+
+
+# Combined regions for plotting
 
 
 ```{r set up for plotting}
