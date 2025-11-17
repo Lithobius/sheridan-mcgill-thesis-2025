@@ -18,7 +18,7 @@ library(matrixStats)
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 plotout <- here('output', 'thermalaffinity')
-datefield <- '20251111_'
+datefield <- '20251113_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -75,7 +75,7 @@ site_temps <- site_environment %>%
 
 # species list
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
-                             '20251111_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+                             '20251113_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
   filter(rank == 'species') %>%
   # remove below threshold
   filter(relabund_vst_taxa > 1) %>%

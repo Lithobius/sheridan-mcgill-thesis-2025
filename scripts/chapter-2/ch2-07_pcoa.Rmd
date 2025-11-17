@@ -52,7 +52,7 @@ obisgbif <- read_csv(here(bigdata,
     rename(region_label = region_name_label) 
 
 mifish_edna <- read_csv(here(dataedna,
-                             '20251111_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+                             '20251113_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
   distinct() %>%
   # remove below threshold
   filter(relabund_vst_taxa > 1) %>%

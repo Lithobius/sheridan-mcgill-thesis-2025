@@ -7,7 +7,7 @@ output: html_document
 Here we are going to BLAST using our local CRABS database in the repository it was made in. Sorry to all you following along at home, its not public yet.
 
 Changes Sept 2024:
-We're greatly reducing our usage of ASVs with 12S MiFish moving forward so I've eliminated some of the unnecessary steps to add in ASV conversions. Instead we're just going to use MOTU-level assignments for all ASVs and as a result, only BLAST the cluster representative.
+We're greatly reducing our usage of ASVs with 12S MiFish moving forward so I've eliminated some of the unnecessary steps to add in ASV conversions. Instead we're just going to use asv-level assignments for all ASVs and as a result, only BLAST the cluster representative.
 
 Note also I think datefield will be the same in all iterations in this final version but its often different based on when things are processed or re-processed. So I'm not going to change the script just because I'm reprocessing everything today.
 
@@ -18,8 +18,8 @@ library(here)
 
 # here filepaths
 fastq_path <- here('rawdata', 'peco', 'fastq', 'allyears') 
-datefield <- '20251111_'
-datefield_new <- '20251111_'
+datefield <- '20251113_'
+datefield_new <- '20251113_'
 # if different
 datefield_swarm <- '20251111_'
 runfield <- 'peco-combined_12s_'
@@ -38,9 +38,11 @@ Note that you need to have a blast database set up locally; this is NOT an api c
 mifishdb <- file.path("/Users/katesheridan/Documents/GitHub/taxonomy_keys/database12s/crabs/blastdb_make/crabs-mifish")
 
 
+#edna_to_blast <- file.path(fastq_path,
+#                           '20251111_peco-combined_12s_post-lulu-asvs.fasta')
 edna_to_blast <- file.path(fastq_path,
-                           '20251111_peco-combined_12s_post-lulu-motus.fasta')
-blast_out <- file.path(fastq_path, paste0(datefield_new, runfield, 'swarm_blastresults_motu.txt'))
+                           '20251111_peco-combined_12s_asv-sequences.fasta')
+blast_out <- file.path(fastq_path, paste0(datefield_new, runfield, 'swarm_blastresults_asv.txt'))
 
 # check its working
 system2("blastn", args = "-h")
@@ -60,10 +62,10 @@ system2("blastn", args=c("-task", "'megablast'", # which kind of blast
 
 ## cleanup
 
-```{r cleanup-motus}
+```{r cleanup-asvs}
 # top 10 list
-motu_50blast <- read_delim(here(fastq_path, paste0(datefield_new, runfield, 'swarm_blastresults_motu.txt')),
-                           delim = '\t', col_names = c("motu", "identity_percentage", 
+asv_50blast <- read_delim(here(fastq_path, paste0(datefield_new, runfield, 'swarm_blastresults_asv.txt')),
+                           delim = '\t', col_names = c("asv", "identity_percentage", 
                                                        "evalue", "accession", "hit_name",
                                                        "bitscore", "coverage", "n_mismatches")) %>%
   mutate(hit_name = trimws(hit_name)) %>%
@@ -74,9 +76,9 @@ motu_50blast <- read_delim(here(fastq_path, paste0(datefield_new, runfield, 'swa
   # fill in NAs
   mutate(across(kingdom:genus, ~ na_if(., "")))
 
-# motu numbers to join with the blast results
-motu_key <- read_csv(here(fastq_path, '20251111_peco-combined_12s_lulu_motu2asv.csv')) %>%
-  rename(motu = motu_lulu)
+# asv numbers to join with the blast results
+asv_key <- read_csv(here(fastq_path, '20251111_peco-combined_12s_lulu_asv2asv.csv')) %>%
+  rename(asv = asv_lulu)
 ```
 # assignment
 
@@ -115,7 +117,7 @@ common_name <- common_name1 %>%
 ```{r top hits}
 # strip and replace higher taxonomy
 # remove out of region and hybrids
-blast50_updatetaxa <- motu_50blast %>%
+blast50_updatetaxa <- asv_50blast %>%
     # remove columns that will be duplicated
   select(!c(kingdom, phylum, class, order, family, genus, species)) %>%
   left_join(taxa_key) %>%
@@ -278,24 +280,24 @@ blast50_updatetaxa <- motu_50blast %>%
                             'NC_026537', 'OQ846303',
                             'OQ789493'))) %>%
    # set it up exactly as needed
-  select(motu, identity_percentage, evalue, found_taxa, common_name, rank, 
+  select(asv, identity_percentage, evalue, found_taxa, common_name, rank, 
          genus, family, order, class, phylum, kingdom, worms_sciname,
          freshwater_only, accession, coverage, bitscore, 
          status, unacceptreason)
 
 
 # the original pipeline assumed we were working from a matrix with taxonomy already assigned.
-# Here we're going to assign to MOTUs from scratch
-# First; assign all MOTUs with 100% one species
+# Here we're going to assign to asvs from scratch
+# First; assign all asvs with 100% one species
 blast_assign <- blast50_updatetaxa %>%
   # remove duplicate rows by freqency
   ## this will make the merge faster as it will be done on fewer unique rows with no info loss
-  distinct(motu, found_taxa, identity_percentage, .keep_all = TRUE) %>%
-  group_by(motu) %>%
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv) %>%
   # how many blast hits
   add_count(name = 'num_blast') %>%
   ungroup() %>%
-  group_by(motu,found_taxa) %>%
+  group_by(asv,found_taxa) %>%
   # how often does that species come up
   add_count(name = 'sp_freq') %>%
   ungroup() %>%
@@ -305,20 +307,20 @@ blast_assign <- blast50_updatetaxa %>%
                                               'Unknown eukaryote', 'Unknown algae',
                                               'Unknown protist'))) %>%
   # how many blast hits
-  group_by(motu) %>%
+  group_by(asv) %>%
   add_count(name = 'num_blast') %>%
   ungroup() %>%
-  group_by(motu,found_taxa) %>%
+  group_by(asv,found_taxa) %>%
   # how often does that species come up
   add_count(name = 'sp_freq') %>%
   ungroup() %>%
   mutate(sp_percent = sp_freq/num_blast) %>%
   # remove duplicate rows by percent
   ## this will make the merge faster as it will be done on fewer unique rows with no info loss
-  distinct(motu, found_taxa, sp_percent, .keep_all = TRUE) %>%
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
   # indicate keep rows with 100% same species
   mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
-  group_by(motu, found_taxa) %>%
+  group_by(asv, found_taxa) %>%
   ## hits with relatively rare frequency and low identity percentage
   mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
                                 (any(sp_percent <= .25) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
@@ -329,16 +331,16 @@ blast_assign <- blast50_updatetaxa %>%
   filter(!(one_hit == 'no' & unlikely %in% c('x') & identity_percentage <= 98.5|
              identity_percentage <= 97)) %>%
   # how many hits are left?
-  add_count(motu, name = 'hit_remain') %>%
+  add_count(asv, name = 'hit_remain') %>%
   # filter for anything 100%/98% that passed the original filter
-  group_by(motu) %>%
+  group_by(asv) %>%
   mutate(unlikely = case_when((hit_remain > 1 & any(identity_percentage == 100) & any(identity_percentage <= 99.5)) ~ 'x')) %>%
   ungroup() %>%
   # remove unlikely hits
   filter(!(unlikely %in% c('x') & identity_percentage <= 99.5)) %>%
   # assign asvs with one hit remaining after unlikely and < 100% frequency
   # # how many hits are left?
-  add_count(motu, name = 'hit_remain') %>%
+  add_count(asv, name = 'hit_remain') %>%
   filter(hit_remain == 1) %>%
   select(!(c(hit_remain, unlikely, one_hit, sp_percent, num_blast, sp_freq)))
   
@@ -347,23 +349,23 @@ blast_assign <- blast50_updatetaxa %>%
 
 If there isn't a single identification, use stricter criteria or drop to higher taxonomy
 ```{r conflicts}
-# identify motus that have conflicts in their top 10
-# This removes motus without conflicts, leaving only the potential problems.
+# identify asvs that have conflicts in their top 10
+# This removes asvs without conflicts, leaving only the potential problems.
 blast_conflict <- blast50_updatetaxa %>%
-  filter(!(motu %in% blast_assign$motu)) %>%
+  filter(!(asv %in% blast_assign$asv)) %>%
   # remove duplicate rows by freqency
   ## this will make the merge faster as it will be done on fewer unique rows with no info loss
-  distinct(motu, found_taxa, identity_percentage, .keep_all = TRUE) %>%
-  group_by(motu, found_taxa) %>%
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv, found_taxa) %>%
   mutate(max_sp_id = max(identity_percentage)) %>%
   ungroup() %>%
   mutate(max_keep = ifelse(max_sp_id == identity_percentage, 'keep', 'toss')) %>%
   filter(max_keep == 'keep') %>%
-  group_by(motu) %>%
+  group_by(asv) %>%
   # how many blast hits
   add_count(name = 'num_blast') %>%
   ungroup() %>%
-  group_by(motu,found_taxa) %>%
+  group_by(asv,found_taxa) %>%
   # how often does that species come up
   add_count(name = 'sp_freq') %>%
   ungroup() %>%
@@ -373,18 +375,18 @@ blast_conflict <- blast50_updatetaxa %>%
                                               'Unknown eukaryote', 'Unknown algae',
                                               'Unknown protist'))) %>%
   # how many blast hits
-  group_by(motu) %>%
+  group_by(asv) %>%
   add_count(name = 'num_blast') %>%
   ungroup() %>%
-  group_by(motu,found_taxa) %>%
+  group_by(asv,found_taxa) %>%
   # how often does that species come up
   add_count(name = 'sp_freq') %>%
   ungroup() %>%
   mutate(sp_percent = sp_freq/num_blast) %>%
   # remove duplicate rows by percent
   ## this will make the merge faster as it will be done on fewer unique rows with no info loss
-  distinct(motu, found_taxa, sp_percent, .keep_all = TRUE) %>%
-    group_by(motu, found_taxa) %>%
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+    group_by(asv, found_taxa) %>%
   # remove hits with less than 98.5%% when an ID in the list has 100%,
   ## hits with relatively rare frequency and low identity percentage
   mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
@@ -396,8 +398,8 @@ blast_conflict <- blast50_updatetaxa %>%
              identity_percentage <= 97)) %>%
   select(!(c(unlikely))) %>%
     #remove anything that's more than .5 lower
-  group_by(motu) %>%
-  # what is the highest identity percentage on that motu
+  group_by(asv) %>%
+  # what is the highest identity percentage on that asv
   mutate(max_id = max(identity_percentage)) %>%
   ungroup() %>%
   # if the species max is .5% lower than the max
@@ -410,13 +412,13 @@ blast_conflict <- blast50_updatetaxa %>%
   filter(point_diff < .5) %>%
   select(!(c(max_id, max_sp_id, point_diff))) %>%
     # recalculate species percent
-  group_by(motu) %>%
+  group_by(asv) %>%
   add_count(name = 'num_blast') %>%
-  group_by(motu, found_taxa) %>%
+  group_by(asv, found_taxa) %>%
   add_count(name = 'sp_freq') %>%
   ungroup() %>%
   mutate(sp_percent = sp_freq/num_blast) %>%
-  group_by(motu) %>%
+  group_by(asv) %>%
     # na handling
   mutate(na_gen = ifelse(any(is.na(genus)), 'yes', 'no'),
          na_fam = ifelse(any(is.na(family)), 'yes', 'no'),
@@ -436,31 +438,31 @@ blast_conflict <- blast50_updatetaxa %>%
             num_blast, sp_percent, sp_freq)) 
 
 blast_lowmatch <- blast50_updatetaxa %>%
-  filter(!(motu %in% blast_assign$motu | motu %in% blast_conflict$motu)) %>%
+  filter(!(asv %in% blast_assign$asv | asv %in% blast_conflict$asv)) %>%
   # remove duplicate rows by freqency
   ## this will make the merge faster as it will be done on fewer unique rows with no info loss
   ## what is the highest identity percentage per species, to eliminate duplicates
-  group_by(motu, found_taxa) %>%
+  group_by(asv, found_taxa) %>%
   mutate(max_sp_id = max(identity_percentage)) %>%
   ungroup() %>%
-  distinct(motu, found_taxa, max_sp_id, .keep_all = TRUE) %>%
-  group_by(motu) %>%
-  # what is the highest identity percentage on that motu
+  distinct(asv, found_taxa, max_sp_id, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # what is the highest identity percentage on that asv
   mutate(max_id = max(identity_percentage)) %>%
   ungroup() %>%
-  # if the species max is .5 points or about 99.5% lower than the max for the motu
+  # if the species max is .5 points or about 99.5% lower than the max for the asv
   # eliminate that hit
   # Filter to the max
   mutate(point_diff = max_id - max_sp_id) %>%
   filter(point_diff < .5) %>%
   # recalculate species percent and remove 100s
-  group_by(motu) %>%
+  group_by(asv) %>%
   add_count(name = 'num_blast') %>%
-  group_by(motu, found_taxa) %>%
+  group_by(asv, found_taxa) %>%
   add_count(name = 'sp_freq') %>%
   ungroup() %>%
   mutate(sp_percent = sp_freq/num_blast) %>%
-  group_by(motu) %>%
+  group_by(asv) %>%
   mutate(low_match = ifelse(max_id < 96, 'yes', 'no')) %>%
   mutate(very_low_match = ifelse(max_id < 93, 'yes', 'no')) %>%
   mutate(extremely_low_match = ifelse(max_id < 90.99, 'yes', 'no')) %>%
@@ -495,9 +497,9 @@ blast_lowmatch <- blast50_updatetaxa %>%
 nothing this time :)
 everything got SOMETHING
 ```{r}
-hit_nohit <- motu_50blast %>%
-  filter(!(motu %in% blast_conflict$motu | motu %in% blast_lowmatch$motu | motu %in% blast_assign$motu)) %>%
-  group_by(motu) %>%
+hit_nohit <- asv_50blast %>%
+  filter(!(asv %in% blast_conflict$asv | asv %in% blast_lowmatch$asv | asv %in% blast_assign$asv)) %>%
+  group_by(asv) %>%
     mutate(updated_taxon = case_when(length(unique(genus)) == 1 ~ genus,
                                    length(unique(family)) == 1 ~ family)) %>%
   ungroup() %>%
@@ -511,12 +513,12 @@ hit_nohit <- motu_50blast %>%
 
 ## Update
 
-Now we'll use updated taxa from the conflicts, and add a column for MOTU level ids based on seed asv
+Now we'll use updated taxa from the conflicts, and add a column for asv level ids based on seed asv
 ```{r update}
 # drop uncertanties to next taxonomic level
 blast_updates <- blast_conflict %>%
       # modify dataframe to be more useful
-  select(motu, found_taxa, updated_taxon, common_name,
+  select(asv, found_taxa, updated_taxon, common_name,
          identity_percentage, coverage, evalue, 
          bitscore, rank, kingdom, phylum, class, order, 
          family, genus, freshwater_only
@@ -548,13 +550,13 @@ blast_updates <- blast_conflict %>%
                             TRUE ~ phylum)) %>%
   mutate(kingdom = case_when(str_detect(updated_taxon, 'Unknown organism') == TRUE ~ NA_character_,
                             TRUE ~ kingdom)) %>%
-  distinct(motu, updated_taxon, .keep_all = TRUE) %>%
+  distinct(asv, updated_taxon, .keep_all = TRUE) %>%
   rbind(blast_assign) %>%
   mutate(found_taxa = coalesce(updated_taxon,found_taxa)) %>%
   select(!c(updated_taxon, coverage, bitscore,
             accession, worms_sciname, status, unacceptreason)) %>%
-  relocate(motu, found_taxa, common_name, rank) %>%
-  arrange(motu) %>%
+  relocate(asv, found_taxa, common_name, rank) %>%
+  arrange(asv) %>%
   # open group somewhere?
   ungroup()
 ```
@@ -565,9 +567,10 @@ blast_updates <- blast_conflict %>%
 All our blast taxa should be updated now, we can assign
 
 NOTE a few not found in database, note to improve later;
-motu45: castor canadensis
-motu61: homo sapiens
-motu871: ralstonia bacteria etc.
+asv45: castor canadensis
+asv61: homo sapiens
+asv132: bacteria
+asv871: ralstonia bacteria etc.
 
 ```{r assign new}
 taxonomy_assigned_asv <- motu_key %>%
@@ -605,6 +608,7 @@ taxonomy_assigned_asv <- motu_key %>%
                                  found_taxa == 'Atherinopsis' ~ 'Atherinopsis silverside species',
                                  found_taxa == 'Anisotremus' ~ 'Grunt species',
                                  found_taxa == 'Artedius' ~ 'Artedius sculpin species',
+                                 found_taxa == 'Apodichthys' ~ 'Apodichthys gunnel species',
                                  found_taxa == 'Cymatogaster' ~ 'Cymastogater perch species',
                                  found_taxa == 'Ruscarius' ~ 'Roughcheek sculpin species',
                                  # # families
@@ -627,19 +631,82 @@ taxonomy_assigned_asv <- motu_key %>%
   arrange(found_taxa) %>%
   select(!c(blast, common_name_key))
 ```
+# consensus for MOTUs
+```{r motus}
+taxonomy_assigned_motu <- taxonomy_assigned_asv %>%
+  group_by(motu) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(motu,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  group_by(motu, common_name) %>%
+  # how often does that species come up
+  add_count(name = 'com_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  mutate(com_percent = com_freq/num_blast) %>%
+    # indicate keep rows with 100% same species
+  mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
+  mutate(one_com = ifelse(com_percent == 1 & rank == 'offtarget', 'yes', 'no')) %>%
+  mutate(hit_100_higher = ifelse(identity_percentage == 100 & !(rank %in% c('species', 'offtarget')), 1, NA_character_)) %>%
+  group_by(motu) %>%
+  # if any species has 100% and the rest are other ranks without 100%
+  # go with highest ranking species
+  mutate(sp_100 = ifelse((sum(hit_100_higher < 1, na.rm = TRUE) | is.na(sum(hit_100_higher < 1))) & any(one_hit == 'no' & rank != 'species' & rank != 'offtarget'),
+         found_taxa[which.max(identity_percentage) & rank == 'species'], NA_character_)) %>%
+  # all hits genus or higher, just collapse to highest match
+  mutate(higher_taxa = ifelse(all(rank != 'species'), found_taxa[which.max(sp_percent)], NA_character_)) %>%
+  # if family level has 100%
+  mutate(fam_100 = ifelse(any(one_hit == 'no' & rank == 'family' & hit_100_higher == 1),
+         found_taxa[which.max(identity_percentage) & rank == 'family'], NA_character_)) %>%
+  # genus level has 100%
+  mutate(gen_100 = ifelse(any(one_hit == 'no' & rank == 'genus' & hit_100_higher == 1),
+         found_taxa[which.max(identity_percentage) & rank == 'genus'], NA_character_)) %>%
+  # species level conflict, expand later to be one family etc.
+  mutate(sp_conflict = ifelse(length(unique(genus)) == 1 & one_hit == 'no', 'one genus', NA_character_)) %>%
+  ungroup() %>%
+  mutate(found_taxa_motu = case_when(one_hit == 'yes' ~ found_taxa,
+                                     one_com == 'yes' ~ common_name,
+                                     one_com == 'no' & rank == 'offtarget' ~ 'Unknown organism',
+                                     !is.na(sp_100) ~ sp_100,
+                                     !is.na(higher_taxa) ~ higher_taxa,
+                                     !is.na(fam_100) ~ fam_100,
+                                     !is.na(gen_100) ~ gen_100,
+                                     sp_conflict == 'one genus' ~ genus)) %>%
+  select(!c(one_hit, one_com, sp_100, higher_taxa, fam_100, gen_100, sp_conflict,
+            motu_swarm, curated, lulu_rank, low_match, very_low_match, extremely_low_match,
+            sp_percent, num_blast, sp_freq, com_freq, hit_100_higher, com_percent)) %>%
+  relocate(found_taxa_motu) %>%
+  rename(common_name_asv = common_name,
+         found_taxa_asv = found_taxa,
+         rank_asv = rank) %>%
+  group_by(motu) %>%
+  mutate(common_name = ifelse(any(found_taxa_asv == found_taxa_motu), common_name_asv[which(found_taxa_asv == found_taxa_motu)], NA_character_)) %>%
+    mutate(common_name = ifelse(any(common_name_asv == found_taxa_motu), common_name_asv[which(common_name_asv == found_taxa_motu)], common_name)) %>%
+  ungroup() %>%
+  mutate(common_name = case_when(!is.na(common_name) ~ common_name,
+                                 found_taxa_motu == 'Unknown organism' ~ 'Unknown organism',
+                                 # ugh just manual for now
+                                 found_taxa_motu == 'Oncorhynchus' ~ 'Oncorhynchus salmon species')) %>%
+  # rank now
+  group_by(motu) %>%
+    mutate(rank = ifelse(any(found_taxa_asv == found_taxa_motu), rank_asv[which(found_taxa_asv == found_taxa_motu)], NA_character_)) %>%
+      mutate(rank = ifelse(any(common_name_asv == found_taxa_motu), rank_asv[which(common_name_asv == found_taxa_motu)], rank)) %>%
+  ungroup() %>%
+  mutate(rank = case_when(!is.na(rank) ~ rank,
+                          found_taxa_motu == 'Unknown organism' ~ 'offtarget',
+                          # for expansion later
+                          found_taxa_motu == genus ~ 'genus')) %>%
+  relocate(common_name, rank, .before = motu) %>%
+  rename(found_taxa = found_taxa_motu)
 
 
 
-add a column for motu level ids, this way we can select columns based on the analysis we want to do
-```{r add motus}
-# add motu columns, relocate
-taxonomy_assigned_full <- taxonomy_assigned_asv %>%
-  relocate(found_taxa, common_name, rank, 
-           .before = identity_percentage) %>%
-  select(!c(low_match, very_low_match, extremely_low_match, 
-            motu_swarm, curated, lulu_rank)) %>%
-  distinct()
 
-write_csv(taxonomy_assigned_full, here(processededna, 
+
+write_csv(taxonomy_assigned_motu, here(processededna, 
                                        paste0(datefield_new, runfield,'taxonomy.csv')))
 ```

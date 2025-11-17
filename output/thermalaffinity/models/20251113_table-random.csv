@@ -1,0 +1,349 @@
+region_label,grp,condval,condsd,model
+"Juneau Region, Alaska",JN_AN,0.182,0.194,95th
+"Juneau Region, Alaska",JN_BC,-0.165,0.194,95th
+"Juneau Region, Alaska",JN_EC,0.257,0.194,95th
+"Juneau Region, Alaska",JN_FC,-0.146,0.194,95th
+"Juneau Region, Alaska",JN_SB,-0.128,0.194,95th
+"Juneau Region, Alaska",JN_AN,0.172,0.195,75th
+"Juneau Region, Alaska",JN_BC,-0.164,0.195,75th
+"Juneau Region, Alaska",JN_EC,0.257,0.195,75th
+"Juneau Region, Alaska",JN_FC,-0.145,0.195,75th
+"Juneau Region, Alaska",JN_SB,-0.12,0.195,75th
+"Juneau Region, Alaska",JN_AN,0.177,0.201,mean
+"Juneau Region, Alaska",JN_BC,-0.181,0.201,mean
+"Juneau Region, Alaska",JN_EC,0.288,0.201,mean
+"Juneau Region, Alaska",JN_FC,-0.168,0.201,mean
+"Juneau Region, Alaska",JN_SB,-0.116,0.201,mean
+Southeast Alaska,SE_GK,0.279,0.252,95th
+Southeast Alaska,SE_NF,0.062,0.296,95th
+Southeast Alaska,SE_NS,-0.188,0.252,95th
+Southeast Alaska,SE_NZ,0.024,0.252,95th
+Southeast Alaska,SE_RF,-0.161,0.252,95th
+Southeast Alaska,SE_SH,-0.017,0.252,95th
+Southeast Alaska,SE_GK,0.56,0.309,75th
+Southeast Alaska,SE_NF,0.184,0.39,75th
+Southeast Alaska,SE_NS,-0.083,0.309,75th
+Southeast Alaska,SE_NZ,0.013,0.309,75th
+Southeast Alaska,SE_RF,-0.237,0.309,75th
+Southeast Alaska,SE_SH,-0.437,0.309,75th
+Southeast Alaska,SE_GK,0.251,0.273,mean
+Southeast Alaska,SE_NF,0.108,0.325,mean
+Southeast Alaska,SE_NS,-0.258,0.273,mean
+Southeast Alaska,SE_NZ,0.018,0.273,mean
+Southeast Alaska,SE_RF,-0.18,0.273,mean
+Southeast Alaska,SE_SH,0.061,0.273,mean
+"Haida Gwaii, British Columbia",HG_BH,-0.17,0.273,95th
+"Haida Gwaii, British Columbia",HG_DN,0.035,0.293,95th
+"Haida Gwaii, British Columbia",HG_DSD,0.028,0.273,95th
+"Haida Gwaii, British Columbia",HG_LIE,-0.04,0.273,95th
+"Haida Gwaii, British Columbia",HG_MDD,-0.112,0.273,95th
+"Haida Gwaii, British Columbia",HG_RI,-0.07,0.257,95th
+"Haida Gwaii, British Columbia",HG_ROI,-0.058,0.273,95th
+"Haida Gwaii, British Columbia",HG_SB,0.038,0.257,95th
+"Haida Gwaii, British Columbia",HG_TK,0.349,0.293,95th
+"Haida Gwaii, British Columbia",HG_BH,-0.25,0.272,75th
+"Haida Gwaii, British Columbia",HG_DN,0.018,0.296,75th
+"Haida Gwaii, British Columbia",HG_DSD,0.147,0.272,75th
+"Haida Gwaii, British Columbia",HG_LIE,-0.055,0.272,75th
+"Haida Gwaii, British Columbia",HG_MDD,-0.011,0.272,75th
+"Haida Gwaii, British Columbia",HG_RI,-0.039,0.253,75th
+"Haida Gwaii, British Columbia",HG_ROI,-0.224,0.272,75th
+"Haida Gwaii, British Columbia",HG_SB,0.095,0.253,75th
+"Haida Gwaii, British Columbia",HG_TK,0.32,0.296,75th
+"Haida Gwaii, British Columbia",HG_BH,-0.152,0.304,mean
+"Haida Gwaii, British Columbia",HG_DN,0.06,0.327,mean
+"Haida Gwaii, British Columbia",HG_DSD,-0.052,0.304,mean
+"Haida Gwaii, British Columbia",HG_LIE,-0.048,0.304,mean
+"Haida Gwaii, British Columbia",HG_MDD,-0.199,0.304,mean
+"Haida Gwaii, British Columbia",HG_RI,-0.045,0.285,mean
+"Haida Gwaii, British Columbia",HG_ROI,-0.069,0.304,mean
+"Haida Gwaii, British Columbia",HG_SB,0.116,0.285,mean
+"Haida Gwaii, British Columbia",HG_TK,0.391,0.327,mean
+Central Coast British Columbia,CC_CHP,-1.02,0.47,95th
+Central Coast British Columbia,CC_FAN3,0.334,0.429,95th
+Central Coast British Columbia,CC_GOG1,-0.241,0.429,95th
+Central Coast British Columbia,CC_KIS1,0.461,0.612,95th
+Central Coast British Columbia,CC_KIS2,0.052,0.47,95th
+Central Coast British Columbia,CC_PBA,0.413,0.429,95th
+Central Coast British Columbia,CC_CHP,-0.916,0.461,75th
+Central Coast British Columbia,CC_FAN3,0.296,0.422,75th
+Central Coast British Columbia,CC_GOG1,-0.241,0.422,75th
+Central Coast British Columbia,CC_KIS1,0.434,0.585,75th
+Central Coast British Columbia,CC_KIS2,0.006,0.461,75th
+Central Coast British Columbia,CC_PBA,0.421,0.422,75th
+Central Coast British Columbia,CC_CHP,-0.96,0.468,mean
+Central Coast British Columbia,CC_FAN3,0.282,0.428,mean
+Central Coast British Columbia,CC_GOG1,-0.261,0.428,mean
+Central Coast British Columbia,CC_KIS1,0.526,0.604,mean
+Central Coast British Columbia,CC_KIS2,-0.005,0.468,mean
+Central Coast British Columbia,CC_PBA,0.419,0.428,mean
+"North Vancouver Island, British Columbia",NV_BI,0.223,0.212,95th
+"North Vancouver Island, British Columbia",NV_JL,-0.184,0.236,95th
+"North Vancouver Island, British Columbia",NV_KB,0.098,0.212,95th
+"North Vancouver Island, British Columbia",NV_KC,-0.573,0.212,95th
+"North Vancouver Island, British Columbia",NV_PC,0.437,0.236,95th
+"North Vancouver Island, British Columbia",NV_BI,0.23,0.212,75th
+"North Vancouver Island, British Columbia",NV_JL,-0.199,0.235,75th
+"North Vancouver Island, British Columbia",NV_KB,0.097,0.212,75th
+"North Vancouver Island, British Columbia",NV_KC,-0.546,0.212,75th
+"North Vancouver Island, British Columbia",NV_PC,0.417,0.235,75th
+"North Vancouver Island, British Columbia",NV_BI,0.236,0.214,mean
+"North Vancouver Island, British Columbia",NV_JL,-0.206,0.238,mean
+"North Vancouver Island, British Columbia",NV_KB,0.106,0.214,mean
+"North Vancouver Island, British Columbia",NV_KC,-0.545,0.214,mean
+"North Vancouver Island, British Columbia",NV_PC,0.41,0.238,mean
+"Inner Coast, British Columbia",IC_GOW,-0.11,0.249,95th
+"Inner Coast, British Columbia",IC_MAB,0.327,0.249,95th
+"Inner Coast, British Columbia",IC_OPB,0.082,0.249,95th
+"Inner Coast, British Columbia",IC_SHS,-0.118,0.249,95th
+"Inner Coast, British Columbia",IC_SMB,-0.18,0.249,95th
+"Inner Coast, British Columbia",IC_GOW,-0.16,0.239,75th
+"Inner Coast, British Columbia",IC_MAB,0.213,0.239,75th
+"Inner Coast, British Columbia",IC_OPB,0.009,0.239,75th
+"Inner Coast, British Columbia",IC_SHS,-0.035,0.239,75th
+"Inner Coast, British Columbia",IC_SMB,-0.028,0.239,75th
+"Inner Coast, British Columbia",IC_GOW,-0.168,0.232,mean
+"Inner Coast, British Columbia",IC_MAB,0.184,0.232,mean
+"Inner Coast, British Columbia",IC_OPB,-0.009,0.232,mean
+"Inner Coast, British Columbia",IC_SHS,-0.015,0.232,mean
+"Inner Coast, British Columbia",IC_SMB,0.008,0.232,mean
+"Pacific Rim Park, British Columbia",PP_C,-0.069,0.214,95th
+"Pacific Rim Park, British Columbia",PP_E,-0.12,0.229,95th
+"Pacific Rim Park, British Columbia",PP_EB,0.152,0.27,95th
+"Pacific Rim Park, British Columbia",PP_G,0.074,0.27,95th
+"Pacific Rim Park, British Columbia",PP_HI,0.045,0.214,95th
+"Pacific Rim Park, British Columbia",PP_JJ,0.202,0.214,95th
+"Pacific Rim Park, British Columbia",PP_K,-0.168,0.27,95th
+"Pacific Rim Park, British Columbia",PP_M,0.14,0.27,95th
+"Pacific Rim Park, British Columbia",PP_MB,0.079,0.229,95th
+"Pacific Rim Park, British Columbia",PP_MI,-0.08,0.27,95th
+"Pacific Rim Park, British Columbia",PP_O,-0.032,0.27,95th
+"Pacific Rim Park, British Columbia",PP_S,-0.083,0.27,95th
+"Pacific Rim Park, British Columbia",PP_SI,-0.142,0.27,95th
+"Pacific Rim Park, British Columbia",PP_C,-0.095,0.218,75th
+"Pacific Rim Park, British Columbia",PP_E,-0.153,0.234,75th
+"Pacific Rim Park, British Columbia",PP_EB,0.162,0.278,75th
+"Pacific Rim Park, British Columbia",PP_G,0.072,0.278,75th
+"Pacific Rim Park, British Columbia",PP_HI,0.057,0.218,75th
+"Pacific Rim Park, British Columbia",PP_JJ,0.209,0.218,75th
+"Pacific Rim Park, British Columbia",PP_K,-0.172,0.278,75th
+"Pacific Rim Park, British Columbia",PP_M,0.152,0.278,75th
+"Pacific Rim Park, British Columbia",PP_MB,0.1,0.234,75th
+"Pacific Rim Park, British Columbia",PP_MI,-0.081,0.278,75th
+"Pacific Rim Park, British Columbia",PP_O,-0.031,0.278,75th
+"Pacific Rim Park, British Columbia",PP_S,-0.081,0.278,75th
+"Pacific Rim Park, British Columbia",PP_SI,-0.137,0.278,75th
+"Pacific Rim Park, British Columbia",PP_C,-0.097,0.219,mean
+"Pacific Rim Park, British Columbia",PP_E,-0.158,0.234,mean
+"Pacific Rim Park, British Columbia",PP_EB,0.164,0.279,mean
+"Pacific Rim Park, British Columbia",PP_G,0.075,0.279,mean
+"Pacific Rim Park, British Columbia",PP_HI,0.055,0.219,mean
+"Pacific Rim Park, British Columbia",PP_JJ,0.206,0.219,mean
+"Pacific Rim Park, British Columbia",PP_K,-0.173,0.279,mean
+"Pacific Rim Park, British Columbia",PP_M,0.155,0.279,mean
+"Pacific Rim Park, British Columbia",PP_MB,0.096,0.234,mean
+"Pacific Rim Park, British Columbia",PP_MI,-0.081,0.279,mean
+"Pacific Rim Park, British Columbia",PP_O,-0.03,0.279,mean
+"Pacific Rim Park, British Columbia",PP_S,-0.079,0.279,mean
+"Pacific Rim Park, British Columbia",PP_SI,-0.135,0.279,mean
+"Puget Sound & Padilla Bay, Washington",PS_BB,0.122,0.23,95th
+"Puget Sound & Padilla Bay, Washington",PS_BH,0.479,0.203,95th
+"Puget Sound & Padilla Bay, Washington",PS_BP,-0.205,0.274,95th
+"Puget Sound & Padilla Bay, Washington",PS_BV,-0.209,0.183,95th
+"Puget Sound & Padilla Bay, Washington",PS_FB,-0.128,0.183,95th
+"Puget Sound & Padilla Bay, Washington",PS_FJ,0.472,0.183,95th
+"Puget Sound & Padilla Bay, Washington",PS_IC,0.154,0.183,95th
+"Puget Sound & Padilla Bay, Washington",PS_NC,-0.144,0.183,95th
+"Puget Sound & Padilla Bay, Washington",PS_SH,0.003,0.183,95th
+"Puget Sound & Padilla Bay, Washington",PS_SP,-0.346,0.274,95th
+"Puget Sound & Padilla Bay, Washington",PS_YB,-0.199,0.274,95th
+"Puget Sound & Padilla Bay, Washington",PS_BB,0.12,0.23,75th
+"Puget Sound & Padilla Bay, Washington",PS_BH,0.477,0.203,75th
+"Puget Sound & Padilla Bay, Washington",PS_BP,-0.193,0.272,75th
+"Puget Sound & Padilla Bay, Washington",PS_BV,-0.21,0.183,75th
+"Puget Sound & Padilla Bay, Washington",PS_FB,-0.133,0.183,75th
+"Puget Sound & Padilla Bay, Washington",PS_FJ,0.462,0.183,75th
+"Puget Sound & Padilla Bay, Washington",PS_IC,0.148,0.183,75th
+"Puget Sound & Padilla Bay, Washington",PS_NC,-0.143,0.183,75th
+"Puget Sound & Padilla Bay, Washington",PS_SH,-0.001,0.183,75th
+"Puget Sound & Padilla Bay, Washington",PS_SP,-0.336,0.272,75th
+"Puget Sound & Padilla Bay, Washington",PS_YB,-0.191,0.272,75th
+"Puget Sound & Padilla Bay, Washington",PS_BB,0.111,0.231,mean
+"Puget Sound & Padilla Bay, Washington",PS_BH,0.481,0.203,mean
+"Puget Sound & Padilla Bay, Washington",PS_BP,-0.201,0.274,mean
+"Puget Sound & Padilla Bay, Washington",PS_BV,-0.213,0.183,mean
+"Puget Sound & Padilla Bay, Washington",PS_FB,-0.125,0.183,mean
+"Puget Sound & Padilla Bay, Washington",PS_FJ,0.475,0.183,mean
+"Puget Sound & Padilla Bay, Washington",PS_IC,0.154,0.183,mean
+"Puget Sound & Padilla Bay, Washington",PS_NC,-0.15,0.183,mean
+"Puget Sound & Padilla Bay, Washington",PS_SH,0.003,0.183,mean
+"Puget Sound & Padilla Bay, Washington",PS_SP,-0.341,0.274,mean
+"Puget Sound & Padilla Bay, Washington",PS_YB,-0.194,0.274,mean
+"Willapa Bay, Washington",WB_BC,0.166,0.287,95th
+"Willapa Bay, Washington",WB_CO,0.058,0.396,95th
+"Willapa Bay, Washington",WB_DP,-0.208,0.258,95th
+"Willapa Bay, Washington",WB_PA,-0.647,0.258,95th
+"Willapa Bay, Washington",WB_SB,0.112,0.329,95th
+"Willapa Bay, Washington",WB_SP,0.335,0.396,95th
+"Willapa Bay, Washington",WB_ST,0.218,0.396,95th
+"Willapa Bay, Washington",WB_WP,0.551,0.396,95th
+"Willapa Bay, Washington",WB_WR,-0.586,0.287,95th
+"Willapa Bay, Washington",WB_BC,0.19,0.287,75th
+"Willapa Bay, Washington",WB_CO,0.069,0.39,75th
+"Willapa Bay, Washington",WB_DP,-0.223,0.258,75th
+"Willapa Bay, Washington",WB_PA,-0.606,0.258,75th
+"Willapa Bay, Washington",WB_SB,0.107,0.327,75th
+"Willapa Bay, Washington",WB_SP,0.306,0.39,75th
+"Willapa Bay, Washington",WB_ST,0.199,0.39,75th
+"Willapa Bay, Washington",WB_WP,0.503,0.39,75th
+"Willapa Bay, Washington",WB_WR,-0.545,0.287,75th
+"Willapa Bay, Washington",WB_BC,0.233,0.283,mean
+"Willapa Bay, Washington",WB_CO,0.119,0.379,mean
+"Willapa Bay, Washington",WB_DP,-0.295,0.256,mean
+"Willapa Bay, Washington",WB_PA,-0.533,0.256,mean
+"Willapa Bay, Washington",WB_SB,0.076,0.321,mean
+"Willapa Bay, Washington",WB_SP,0.278,0.379,mean
+"Willapa Bay, Washington",WB_ST,0.182,0.379,mean
+"Willapa Bay, Washington",WB_WP,0.43,0.379,mean
+"Willapa Bay, Washington",WB_WR,-0.49,0.283,mean
+"Willapa Bay, Washington",WB_BC,0.296,0.257,upwelling
+"Willapa Bay, Washington",WB_CO,0.146,0.334,upwelling
+"Willapa Bay, Washington",WB_DP,-0.165,0.235,upwelling
+"Willapa Bay, Washington",WB_PA,-0.506,0.235,upwelling
+"Willapa Bay, Washington",WB_SB,0.183,0.288,upwelling
+"Willapa Bay, Washington",WB_SP,0.109,0.334,upwelling
+"Willapa Bay, Washington",WB_ST,0.023,0.334,upwelling
+"Willapa Bay, Washington",WB_WP,0.266,0.334,upwelling
+"Willapa Bay, Washington",WB_WR,-0.353,0.257,upwelling
+"Yaquina Bay, Oregon",YB_F,0.024,0.23,95th
+"Yaquina Bay, Oregon",YB_IF,-0.279,0.149,95th
+"Yaquina Bay, Oregon",YB_SBN,0.338,0.149,95th
+"Yaquina Bay, Oregon",YB_SBS,-0.082,0.149,95th
+"Yaquina Bay, Oregon",YB_F,-0.016,0.233,75th
+"Yaquina Bay, Oregon",YB_IF,-0.258,0.154,75th
+"Yaquina Bay, Oregon",YB_SBN,0.34,0.154,75th
+"Yaquina Bay, Oregon",YB_SBS,-0.067,0.154,75th
+"Yaquina Bay, Oregon",YB_F,0.02,0.231,mean
+"Yaquina Bay, Oregon",YB_IF,-0.277,0.15,mean
+"Yaquina Bay, Oregon",YB_SBN,0.337,0.15,mean
+"Yaquina Bay, Oregon",YB_SBS,-0.081,0.15,mean
+"Yaquina Bay, Oregon",YB_F,-0.031,0.231,upwelling
+"Yaquina Bay, Oregon",YB_IF,-0.254,0.152,upwelling
+"Yaquina Bay, Oregon",YB_SBN,0.346,0.152,upwelling
+"Yaquina Bay, Oregon",YB_SBS,-0.06,0.152,upwelling
+"Coos Bay, Oregon",CB_BV,0.28,0.223,95th
+"Coos Bay, Oregon",CB_FP,-0.28,0.259,95th
+"Coos Bay, Oregon",CB_BV,0.31,0.277,75th
+"Coos Bay, Oregon",CB_FP,-0.31,0.319,75th
+"Coos Bay, Oregon",CB_BV,0.332,0.265,mean
+"Coos Bay, Oregon",CB_FP,-0.332,0.308,mean
+"Coos Bay, Oregon",CB_BV,0.266,0.216,upwelling
+"Coos Bay, Oregon",CB_FP,-0.266,0.251,upwelling
+"Humboldt Bay, California",HB_EB,-0.15,0.001,95th
+"Humboldt Bay, California",HB_KS,0.303,0.001,95th
+"Humboldt Bay, California",HB_SR,-0.152,0,95th
+"Humboldt Bay, California",HB_EB,-0.081,0,75th
+"Humboldt Bay, California",HB_KS,0.26,0,75th
+"Humboldt Bay, California",HB_SR,-0.159,0,75th
+"Humboldt Bay, California",HB_EB,-0.136,0.001,mean
+"Humboldt Bay, California",HB_KS,0.287,0.001,mean
+"Humboldt Bay, California",HB_SR,-0.151,0,mean
+"Humboldt Bay, California",HB_EB,-0.102,0,upwelling
+"Humboldt Bay, California",HB_KS,0.284,0,upwelling
+"Humboldt Bay, California",HB_SR,-0.179,0,upwelling
+"Bodega Bay, California",NC_B,-1.078,1.052,95th
+"Bodega Bay, California",NC_BL,-0.263,0.857,95th
+"Bodega Bay, California",NC_D,-0.548,1.052,95th
+"Bodega Bay, California",NC_DE,0.063,0.741,95th
+"Bodega Bay, California",NC_E,0.695,1.052,95th
+"Bodega Bay, California",NC_NC,1.13,0.857,95th
+"Bodega Bay, California",NC_B,-0.752,1.04,75th
+"Bodega Bay, California",NC_BL,-0.026,0.882,75th
+"Bodega Bay, California",NC_D,-0.364,1.04,75th
+"Bodega Bay, California",NC_DE,0.052,0.779,75th
+"Bodega Bay, California",NC_E,0.54,1.04,75th
+"Bodega Bay, California",NC_NC,0.55,0.882,75th
+"Bodega Bay, California",NC_B,-0.694,0.983,mean
+"Bodega Bay, California",NC_BL,-0.043,0.839,mean
+"Bodega Bay, California",NC_D,-0.315,0.983,mean
+"Bodega Bay, California",NC_DE,0.063,0.744,mean
+"Bodega Bay, California",NC_E,0.662,0.983,mean
+"Bodega Bay, California",NC_NC,0.327,0.839,mean
+"Bodega Bay, California",NC_B,-1.234,0.546,upwelling
+"Bodega Bay, California",NC_BL,-1.269,0.4,upwelling
+"Bodega Bay, California",NC_D,-0.392,0.546,upwelling
+"Bodega Bay, California",NC_DE,-0.585,0.331,upwelling
+"Bodega Bay, California",NC_E,1.453,0.546,upwelling
+"Bodega Bay, California",NC_NC,2.027,0.4,upwelling
+"San Francisco Bay, California",NC_PM,1.254,0.723,95th
+"San Francisco Bay, California",NC_PS,0.61,0.723,95th
+"San Francisco Bay, California",NC_RB,0.373,0.825,95th
+"San Francisco Bay, California",NC_WP,-2.237,0.723,95th
+"San Francisco Bay, California",NC_PM,1.073,0.667,75th
+"San Francisco Bay, California",NC_PS,0.456,0.667,75th
+"San Francisco Bay, California",NC_RB,0.368,0.748,75th
+"San Francisco Bay, California",NC_WP,-1.897,0.667,75th
+"San Francisco Bay, California",NC_PM,1.034,0.644,mean
+"San Francisco Bay, California",NC_PS,0.435,0.644,mean
+"San Francisco Bay, California",NC_RB,0.322,0.72,mean
+"San Francisco Bay, California",NC_WP,-1.792,0.644,mean
+"San Francisco Bay, California",NC_PM,0.591,0.674,upwelling
+"San Francisco Bay, California",NC_PS,0.02,0.674,upwelling
+"San Francisco Bay, California",NC_RB,0.231,0.746,upwelling
+"San Francisco Bay, California",NC_WP,-0.842,0.674,upwelling
+"Morro Bay, California",MB_CB,-0.29,0.124,95th
+"Morro Bay, California",MB_TP,0.29,0.141,95th
+"Morro Bay, California",MB_CB,-0.282,0.104,75th
+"Morro Bay, California",MB_TP,0.282,0.119,75th
+"Morro Bay, California",MB_CB,-0.279,0.112,mean
+"Morro Bay, California",MB_TP,0.279,0.127,mean
+"Morro Bay, California",MB_CB,-0.298,0.097,upwelling
+"Morro Bay, California",MB_TP,0.298,0.111,upwelling
+"Los Angeles, California",LA_AB,-0.349,0.374,95th
+"Los Angeles, California",LA_JD,0.346,0.355,95th
+"Los Angeles, California",LA_LN,-0.14,0.355,95th
+"Los Angeles, California",LA_MS,0.25,0.374,95th
+"Los Angeles, California",LA_SP,-0.168,0.397,95th
+"Los Angeles, California",LA_UN,0.061,0.355,95th
+"Los Angeles, California",LA_AB,-0.358,0.387,75th
+"Los Angeles, California",LA_JD,0.37,0.366,75th
+"Los Angeles, California",LA_LN,-0.148,0.366,75th
+"Los Angeles, California",LA_MS,0.272,0.387,75th
+"Los Angeles, California",LA_SP,-0.207,0.412,75th
+"Los Angeles, California",LA_UN,0.071,0.366,75th
+"Los Angeles, California",LA_AB,-0.237,0.312,mean
+"Los Angeles, California",LA_JD,0.203,0.301,mean
+"Los Angeles, California",LA_LN,-0.032,0.301,mean
+"Los Angeles, California",LA_MS,0.116,0.312,mean
+"Los Angeles, California",LA_SP,-0.147,0.324,mean
+"Los Angeles, California",LA_UN,0.096,0.301,mean
+"Los Angeles, California",LA_AB,-0.127,0.242,upwelling
+"Los Angeles, California",LA_JD,0.126,0.238,upwelling
+"Los Angeles, California",LA_LN,-0.04,0.238,upwelling
+"Los Angeles, California",LA_MS,0.073,0.242,upwelling
+"Los Angeles, California",LA_SP,-0.069,0.248,upwelling
+"Los Angeles, California",LA_UN,0.038,0.238,upwelling
+"San Diego region, California",SD_CI,-0.252,0.909,95th
+"San Diego region, California",SD_CV,-0.194,0.782,95th
+"San Diego region, California",SD_FI,0.112,0.839,95th
+"San Diego region, California",SD_KF,0.554,0.909,95th
+"San Diego region, California",SD_SDL,0.94,0.909,95th
+"San Diego region, California",SD_SI,-1.16,0.782,95th
+"San Diego region, California",SD_CI,-0.372,0.958,75th
+"San Diego region, California",SD_CV,-0.223,0.811,75th
+"San Diego region, California",SD_FI,0.143,0.875,75th
+"San Diego region, California",SD_KF,0.626,0.958,75th
+"San Diego region, California",SD_SDL,1.114,0.958,75th
+"San Diego region, California",SD_SI,-1.289,0.811,75th
+"San Diego region, California",SD_CI,-0.448,0.979,mean
+"San Diego region, California",SD_CV,-0.234,0.823,mean
+"San Diego region, California",SD_FI,0.172,0.891,mean
+"San Diego region, California",SD_KF,0.618,0.979,mean
+"San Diego region, California",SD_SDL,1.222,0.979,mean
+"San Diego region, California",SD_SI,-1.33,0.823,mean
+"San Diego region, California",SD_CI,-0.253,0.862,upwelling
+"San Diego region, California",SD_CV,-0.138,0.761,upwelling
+"San Diego region, California",SD_FI,0.179,0.807,upwelling
+"San Diego region, California",SD_KF,0.339,0.862,upwelling
+"San Diego region, California",SD_SDL,0.812,0.862,upwelling
+"San Diego region, California",SD_SI,-0.939,0.761,upwelling
