@@ -239,58 +239,58 @@ Central Coast British Columbia,CC_PBA,0.419,0.428,mean
 "Coos Bay, Oregon",CB_FP,-0.332,0.308,mean
 "Coos Bay, Oregon",CB_BV,0.266,0.216,upwelling
 "Coos Bay, Oregon",CB_FP,-0.266,0.251,upwelling
-"Humboldt Bay, California",HB_EB,-0.15,0.001,95th
-"Humboldt Bay, California",HB_KS,0.303,0.001,95th
-"Humboldt Bay, California",HB_SR,-0.152,0,95th
-"Humboldt Bay, California",HB_EB,-0.081,0,75th
-"Humboldt Bay, California",HB_KS,0.26,0,75th
-"Humboldt Bay, California",HB_SR,-0.159,0,75th
-"Humboldt Bay, California",HB_EB,-0.136,0.001,mean
+"Humboldt Bay, California",HB_EB,-0.182,0,95th
+"Humboldt Bay, California",HB_KS,0.285,0,95th
+"Humboldt Bay, California",HB_SR,-0.104,0,95th
+"Humboldt Bay, California",HB_EB,-0.072,0,75th
+"Humboldt Bay, California",HB_KS,0.27,0,75th
+"Humboldt Bay, California",HB_SR,-0.149,0,75th
+"Humboldt Bay, California",HB_EB,-0.135,0.001,mean
 "Humboldt Bay, California",HB_KS,0.287,0.001,mean
-"Humboldt Bay, California",HB_SR,-0.151,0,mean
+"Humboldt Bay, California",HB_SR,-0.153,0,mean
 "Humboldt Bay, California",HB_EB,-0.102,0,upwelling
 "Humboldt Bay, California",HB_KS,0.284,0,upwelling
 "Humboldt Bay, California",HB_SR,-0.179,0,upwelling
-"Bodega Bay, California",NC_B,-1.078,1.052,95th
-"Bodega Bay, California",NC_BL,-0.263,0.857,95th
-"Bodega Bay, California",NC_D,-0.548,1.052,95th
-"Bodega Bay, California",NC_DE,0.063,0.741,95th
-"Bodega Bay, California",NC_E,0.695,1.052,95th
-"Bodega Bay, California",NC_NC,1.13,0.857,95th
-"Bodega Bay, California",NC_B,-0.752,1.04,75th
-"Bodega Bay, California",NC_BL,-0.026,0.882,75th
-"Bodega Bay, California",NC_D,-0.364,1.04,75th
-"Bodega Bay, California",NC_DE,0.052,0.779,75th
-"Bodega Bay, California",NC_E,0.54,1.04,75th
-"Bodega Bay, California",NC_NC,0.55,0.882,75th
-"Bodega Bay, California",NC_B,-0.694,0.983,mean
-"Bodega Bay, California",NC_BL,-0.043,0.839,mean
-"Bodega Bay, California",NC_D,-0.315,0.983,mean
-"Bodega Bay, California",NC_DE,0.063,0.744,mean
-"Bodega Bay, California",NC_E,0.662,0.983,mean
-"Bodega Bay, California",NC_NC,0.327,0.839,mean
-"Bodega Bay, California",NC_B,-1.234,0.546,upwelling
-"Bodega Bay, California",NC_BL,-1.269,0.4,upwelling
-"Bodega Bay, California",NC_D,-0.392,0.546,upwelling
-"Bodega Bay, California",NC_DE,-0.585,0.331,upwelling
-"Bodega Bay, California",NC_E,1.453,0.546,upwelling
-"Bodega Bay, California",NC_NC,2.027,0.4,upwelling
-"San Francisco Bay, California",NC_PM,1.254,0.723,95th
-"San Francisco Bay, California",NC_PS,0.61,0.723,95th
-"San Francisco Bay, California",NC_RB,0.373,0.825,95th
-"San Francisco Bay, California",NC_WP,-2.237,0.723,95th
-"San Francisco Bay, California",NC_PM,1.073,0.667,75th
-"San Francisco Bay, California",NC_PS,0.456,0.667,75th
-"San Francisco Bay, California",NC_RB,0.368,0.748,75th
-"San Francisco Bay, California",NC_WP,-1.897,0.667,75th
-"San Francisco Bay, California",NC_PM,1.034,0.644,mean
-"San Francisco Bay, California",NC_PS,0.435,0.644,mean
-"San Francisco Bay, California",NC_RB,0.322,0.72,mean
-"San Francisco Bay, California",NC_WP,-1.792,0.644,mean
-"San Francisco Bay, California",NC_PM,0.591,0.674,upwelling
-"San Francisco Bay, California",NC_PS,0.02,0.674,upwelling
-"San Francisco Bay, California",NC_RB,0.231,0.746,upwelling
-"San Francisco Bay, California",NC_WP,-0.842,0.674,upwelling
+"Bodega Bay, California",NC_B,-0.595,0.801,95th
+"Bodega Bay, California",NC_BL,-0.171,0.699,95th
+"Bodega Bay, California",NC_D,-0.278,0.801,95th
+"Bodega Bay, California",NC_DE,0.147,0.629,95th
+"Bodega Bay, California",NC_E,0.384,0.801,95th
+"Bodega Bay, California",NC_NC,0.62,0.699,95th
+"Bodega Bay, California",NC_WP,-0.108,0.576,95th
+"Bodega Bay, California",NC_B,-0.397,0.746,75th
+"Bodega Bay, California",NC_BL,0.032,0.67,75th
+"Bodega Bay, California",NC_D,-0.144,0.746,75th
+"Bodega Bay, California",NC_DE,0.105,0.613,75th
+"Bodega Bay, California",NC_E,0.362,0.746,75th
+"Bodega Bay, California",NC_NC,0.22,0.67,75th
+"Bodega Bay, California",NC_WP,-0.177,0.569,75th
+"Bodega Bay, California",NC_B,-0.378,0.715,mean
+"Bodega Bay, California",NC_BL,-0.001,0.64,mean
+"Bodega Bay, California",NC_D,-0.125,0.715,mean
+"Bodega Bay, California",NC_DE,0.122,0.585,mean
+"Bodega Bay, California",NC_E,0.401,0.715,mean
+"Bodega Bay, California",NC_NC,0.202,0.64,mean
+"Bodega Bay, California",NC_WP,-0.22,0.542,mean
+"Bodega Bay, California",NC_B,-1.039,0.611,upwelling
+"Bodega Bay, California",NC_BL,-0.718,0.472,upwelling
+"Bodega Bay, California",NC_D,-0.381,0.611,upwelling
+"Bodega Bay, California",NC_DE,-0.29,0.398,upwelling
+"Bodega Bay, California",NC_E,1.06,0.611,upwelling
+"Bodega Bay, California",NC_NC,1.512,0.472,upwelling
+"Bodega Bay, California",NC_WP,-0.144,0.351,upwelling
+"San Francisco Bay, California",NC_PM,0.5,0.719,95th
+"San Francisco Bay, California",NC_PS,-0.068,0.719,95th
+"San Francisco Bay, California",NC_RB,-0.432,0.811,95th
+"San Francisco Bay, California",NC_PM,0.534,0.606,75th
+"San Francisco Bay, California",NC_PS,-0.101,0.606,75th
+"San Francisco Bay, California",NC_RB,-0.433,0.684,75th
+"San Francisco Bay, California",NC_PM,0.491,0.608,mean
+"San Francisco Bay, California",NC_PS,-0.132,0.608,mean
+"San Francisco Bay, California",NC_RB,-0.359,0.684,mean
+"San Francisco Bay, California",NC_PM,0.359,0.73,upwelling
+"San Francisco Bay, California",NC_PS,-0.271,0.73,upwelling
+"San Francisco Bay, California",NC_RB,-0.088,0.818,upwelling
 "Morro Bay, California",MB_CB,-0.29,0.124,95th
 "Morro Bay, California",MB_TP,0.29,0.141,95th
 "Morro Bay, California",MB_CB,-0.282,0.104,75th
@@ -299,48 +299,48 @@ Central Coast British Columbia,CC_PBA,0.419,0.428,mean
 "Morro Bay, California",MB_TP,0.279,0.127,mean
 "Morro Bay, California",MB_CB,-0.298,0.097,upwelling
 "Morro Bay, California",MB_TP,0.298,0.111,upwelling
-"Los Angeles, California",LA_AB,-0.349,0.374,95th
-"Los Angeles, California",LA_JD,0.346,0.355,95th
-"Los Angeles, California",LA_LN,-0.14,0.355,95th
-"Los Angeles, California",LA_MS,0.25,0.374,95th
-"Los Angeles, California",LA_SP,-0.168,0.397,95th
-"Los Angeles, California",LA_UN,0.061,0.355,95th
-"Los Angeles, California",LA_AB,-0.358,0.387,75th
-"Los Angeles, California",LA_JD,0.37,0.366,75th
-"Los Angeles, California",LA_LN,-0.148,0.366,75th
-"Los Angeles, California",LA_MS,0.272,0.387,75th
-"Los Angeles, California",LA_SP,-0.207,0.412,75th
-"Los Angeles, California",LA_UN,0.071,0.366,75th
-"Los Angeles, California",LA_AB,-0.237,0.312,mean
-"Los Angeles, California",LA_JD,0.203,0.301,mean
-"Los Angeles, California",LA_LN,-0.032,0.301,mean
-"Los Angeles, California",LA_MS,0.116,0.312,mean
-"Los Angeles, California",LA_SP,-0.147,0.324,mean
-"Los Angeles, California",LA_UN,0.096,0.301,mean
+"Los Angeles, California",LA_AB,-0.303,0.352,95th
+"Los Angeles, California",LA_JD,0.281,0.337,95th
+"Los Angeles, California",LA_LN,-0.123,0.337,95th
+"Los Angeles, California",LA_MS,0.199,0.352,95th
+"Los Angeles, California",LA_SP,-0.146,0.37,95th
+"Los Angeles, California",LA_UN,0.092,0.337,95th
+"Los Angeles, California",LA_AB,-0.27,0.346,75th
+"Los Angeles, California",LA_JD,0.269,0.331,75th
+"Los Angeles, California",LA_LN,-0.132,0.331,75th
+"Los Angeles, California",LA_MS,0.195,0.346,75th
+"Los Angeles, California",LA_SP,-0.15,0.363,75th
+"Los Angeles, California",LA_UN,0.087,0.331,75th
+"Los Angeles, California",LA_AB,-0.325,0.355,mean
+"Los Angeles, California",LA_JD,0.296,0.339,mean
+"Los Angeles, California",LA_LN,-0.03,0.339,mean
+"Los Angeles, California",LA_MS,0.175,0.355,mean
+"Los Angeles, California",LA_SP,-0.214,0.375,mean
+"Los Angeles, California",LA_UN,0.099,0.339,mean
 "Los Angeles, California",LA_AB,-0.127,0.242,upwelling
 "Los Angeles, California",LA_JD,0.126,0.238,upwelling
 "Los Angeles, California",LA_LN,-0.04,0.238,upwelling
 "Los Angeles, California",LA_MS,0.073,0.242,upwelling
 "Los Angeles, California",LA_SP,-0.069,0.248,upwelling
 "Los Angeles, California",LA_UN,0.038,0.238,upwelling
-"San Diego region, California",SD_CI,-0.252,0.909,95th
-"San Diego region, California",SD_CV,-0.194,0.782,95th
-"San Diego region, California",SD_FI,0.112,0.839,95th
-"San Diego region, California",SD_KF,0.554,0.909,95th
-"San Diego region, California",SD_SDL,0.94,0.909,95th
-"San Diego region, California",SD_SI,-1.16,0.782,95th
-"San Diego region, California",SD_CI,-0.372,0.958,75th
-"San Diego region, California",SD_CV,-0.223,0.811,75th
-"San Diego region, California",SD_FI,0.143,0.875,75th
-"San Diego region, California",SD_KF,0.626,0.958,75th
-"San Diego region, California",SD_SDL,1.114,0.958,75th
-"San Diego region, California",SD_SI,-1.289,0.811,75th
-"San Diego region, California",SD_CI,-0.448,0.979,mean
-"San Diego region, California",SD_CV,-0.234,0.823,mean
-"San Diego region, California",SD_FI,0.172,0.891,mean
-"San Diego region, California",SD_KF,0.618,0.979,mean
-"San Diego region, California",SD_SDL,1.222,0.979,mean
-"San Diego region, California",SD_SI,-1.33,0.823,mean
+"San Diego region, California",SD_CI,-0.236,0.892,95th
+"San Diego region, California",SD_CV,-0.191,0.77,95th
+"San Diego region, California",SD_FI,0.101,0.824,95th
+"San Diego region, California",SD_KF,0.572,0.892,95th
+"San Diego region, California",SD_SDL,0.879,0.892,95th
+"San Diego region, California",SD_SI,-1.125,0.77,95th
+"San Diego region, California",SD_CI,-0.317,0.913,75th
+"San Diego region, California",SD_CV,-0.208,0.781,75th
+"San Diego region, California",SD_FI,0.116,0.839,75th
+"San Diego region, California",SD_KF,0.609,0.913,75th
+"San Diego region, California",SD_SDL,0.971,0.913,75th
+"San Diego region, California",SD_SI,-1.172,0.781,75th
+"San Diego region, California",SD_CI,-0.418,0.952,mean
+"San Diego region, California",SD_CV,-0.224,0.805,mean
+"San Diego region, California",SD_FI,0.155,0.87,mean
+"San Diego region, California",SD_KF,0.607,0.952,mean
+"San Diego region, California",SD_SDL,1.138,0.952,mean
+"San Diego region, California",SD_SI,-1.257,0.805,mean
 "San Diego region, California",SD_CI,-0.253,0.862,upwelling
 "San Diego region, California",SD_CV,-0.138,0.761,upwelling
 "San Diego region, California",SD_FI,0.179,0.807,upwelling

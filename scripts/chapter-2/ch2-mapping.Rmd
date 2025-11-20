@@ -341,8 +341,8 @@ ggsave(wcsf_map_blue, filename =  here('output', 'maps',
                                  'westcoast_blank-blue.png'), 
        device = "png", 
        dpi = 300, 
-       width = 6, 
-       height = 8, 
+       width = 8, 
+       height = 12, 
        units = "in")
 
 wcsf_map_blue + geom_point(data = all_centroids, 
@@ -352,19 +352,28 @@ wcsf_map_blue + geom_point(data = all_centroids,
                                         levels = region_by_lat$region_label)),
                       color = 'black',
                       shape = 21,
-                      size = 2.5, 
+                      size = 5, 
                       alpha = .95)+
-    xlim(min(-136, 
+    xlim(min(-145, 
     na.rm = T), 
     max(-115, na.rm = T)) +
-  ylim(min(32.45, na.rm = T), 
-       max(58.6, na.rm = T)) + 
+  ylim(min(28, na.rm = T), 
+       max(61, na.rm = T)) + 
+  #   xlim(min(-136, 
+  #   na.rm = T), 
+  #   max(-115, na.rm = T)) +
+  # ylim(min(32.45, na.rm = T), 
+  #      max(58.6, na.rm = T)) + 
   scale_fill_manual(values = pal_2or) +
   theme(legend.position = 'none')
 
 ggsave(filename =  here('output', 'maps', 
                                  paste0(datefield, 'map_edna_2021-24_centroids-blue.png')), 
-       device = "png", dpi = 300, width = 6, height = 7, units = "in")
+       device = "png", dpi = 300, width = 8, height = 12, units = "in")
+
+ggsave(filename =  here('output', 'maps', 
+                                 paste0(datefield, 'map_edna_2021-24_centroids-blue.pdf')), 
+       device = "pdf", dpi = 300, width = 8, height = 12, units = "in")
 
 ```
 
@@ -468,11 +477,52 @@ ggplot(hg_crop) +
         axis.line = element_blank(),
         panel.border = element_rect(colour = "black", fill = NA, size = .5),
         axis.ticks.y = element_blank(),
-        panel.background = element_rect(fill = 'grey80'))
+        panel.background = element_rect(fill = 'grey70'))
 
 ggsave(here('output', 'maps', paste0(datefield, 'haidagwaiismall.pdf')),
        height = 3,
        width = 3,
        units = 'in')
+
+ggplot(hg_crop) +
+  geom_sf(fill = 'white', 
+          color = 'grey10',
+          linewidth = .05) +
+  xlim(min(-133.5, 
+    na.rm = T), 
+    max(-130.5, na.rm = T)) +
+  ylim(min(51.8, na.rm = T), 
+       max(54.3, na.rm = T)) + 
+  geom_point(data = hg_subset,
+                    aes(x = decimal_longitude,
+                        y = decimal_latitude,
+                        shape = side_hg),
+                    size = 3,
+                    fill = 'dodgerblue3') +
+    scale_shape_manual(values = c(23, # central
+                                21, # east
+                                24, # north
+                                25, # south
+                                5 # west
+                                )) +
+  theme_classic() +
+    theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA, size = .5),
+        axis.ticks.y = element_blank(),
+        panel.background = element_rect(fill = '#7693B8'))
+
+ggsave(here('output', 'maps', paste0(datefield, 'haidagwaiismall-blue.pdf')),
+       height = 3,
+       width = 3,
+       units = 'in')
+
+ggsave(here('output', 'maps', paste0(datefield, 'haidagwaiismall-blue.png')),
+       height = 3,
+       width = 3,
+       units = 'in')
+
 ```
 

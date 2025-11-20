@@ -14,22 +14,22 @@ Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Bodega Bay,
 Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Bodega Bay, California",38.184255,13.88376038104543,14.901499999999999,16.096225
 Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Bodega Bay, California",38.184255,13.88376038104543,14.901499999999999,16.096225
 Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"Bodega Bay, California",38.184255,13.88376038104543,14.901499999999999,16.096225
-Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Oncorhynchus tshawytscha,Chinook salmon,1 safe,15.8,8.154796036642479,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Lepidogobius lepidus,Bay goby,1 safe,14.812666666666669,13.023486394557825,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Cebidichthys violaceus,Monkeyface prickleback,1 safe,15.308125,12.987799024096818,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Ammodytes personatus,Pacific sandlance,1 safe,15.60675,10.361521879728333,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Anoplopoma fimbria,Sablefish,1 safe,15.586599999999995,9.925363550274746,"San Francisco Bay, California",38.31916025,NA,NA,NA
+Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Oncorhynchus tshawytscha,Chinook salmon,2 uncomfortable,15.8,8.154796036642479,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Clupea pallasii,Pacific herring,2 uncomfortable,15.0505,8.531887571773222,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Lepidogobius lepidus,Bay goby,2 uncomfortable,14.812666666666669,13.023486394557825,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Cebidichthys violaceus,Monkeyface prickleback,2 uncomfortable,15.308125,12.987799024096818,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Ammodytes personatus,Pacific sandlance,2 uncomfortable,15.60675,10.361521879728333,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Anoplopoma fimbria,Sablefish,2 uncomfortable,15.586599999999995,9.925363550274746,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
 Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Bodega Bay, California",38.3339,13.929807971014492,14.655500000000002,16.15206666666667
 Clupea pallasii,Pacific herring,2 uncomfortable,15.0505,8.531887571773222,"Bodega Bay, California",38.3339,13.929807971014492,14.655500000000002,16.15206666666667
 Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Bodega Bay, California",38.3339,13.929807971014492,14.655500000000002,16.15206666666667
@@ -563,16 +563,16 @@ Oncorhynchus gorbuscha,Pink salmon,2 uncomfortable,16.063249999999996,11.9422764
 Apodichthys flavidus,Penpoint gunnel,1 safe,19.159333333333333,13.204074963924963,"Morro Bay, California",35.372155,14.659514296165788,15.31459375,16.189671875000002
 Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"Morro Bay, California",35.372155,14.659514296165788,15.31459375,16.189671875000002
 Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Morro Bay, California",35.372155,14.659514296165788,15.31459375,16.189671875000002
-Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Gadus chalcogrammus,Alaska pollock,1 safe,14.707975,6.184568576686207,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Acanthogobius flavimanus,Yellowfin goby,1 safe,26.14,15.471480299448384,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Oncorhynchus gorbuscha,Pink salmon,1 safe,16.063249999999996,11.942276461701782,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",37.9461065,NA,NA,NA
+Clupea pallasii,Pacific herring,4 highest,15.0505,8.531887571773222,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Engraulis mordax,Californian anchovy,2 uncomfortable,18.888666666666666,13.552145913169358,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Gadus chalcogrammus,Alaska pollock,4 highest,14.707975,6.184568576686207,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Cymatogaster aggregata,Shiner perch,4 highest,16.17,11.206163030265502,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Acanthogobius flavimanus,Yellowfin goby,1 safe,26.14,15.471480299448384,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Oncorhynchus gorbuscha,Pink salmon,4 highest,16.063249999999996,11.942276461701782,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Syngnathus californiensis,Bay pipefish,2 uncomfortable,18.918750000000003,13.196948692152915,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
 Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Puget Sound & Padilla Bay, Washington",48.56302955,13.234662873641303,14.3208984375,15.56196640625
 Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Puget Sound & Padilla Bay, Washington",48.56302955,13.234662873641303,14.3208984375,15.56196640625
 Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Puget Sound & Padilla Bay, Washington",48.56302955,13.234662873641303,14.3208984375,15.56196640625
@@ -1044,16 +1044,16 @@ Citharichthys sordidus,Pacific sanddab,1 safe,17.4725,12.446434875366249,"Haida 
 Jordania zonope,Longfin sculpin,1 safe,18.5885,11.518196582946585,"Haida Gwaii, British Columbia",52.57346275,13.622334390096619,15.01728125,16.018449305555556
 Hydrolagus colliei,Spotted ratfish,1 safe,16.02,12.096712697290684,"Haida Gwaii, British Columbia",52.57346275,13.622334390096619,15.01728125,16.018449305555556
 Pleuronichthys decurrens,Curlfin sole,2 uncomfortable,15.265499999999996,11.69498814681544,"Haida Gwaii, British Columbia",52.57346275,13.622334390096619,15.01728125,16.018449305555556
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Pholis laeta,Crescent gunnel,1 safe,19.503749999999997,13.543768151260505,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Liparis greeni,Lobefin snailfish,1 safe,18.23,14.3855,"San Francisco Bay, California",37.9461065,NA,NA,NA
+Cymatogaster aggregata,Shiner perch,3 high,16.17,11.206163030265502,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Clupea pallasii,Pacific herring,4 highest,15.0505,8.531887571773222,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Cymatogaster aggregata,Shiner perch,4 highest,16.17,11.206163030265502,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Pholis laeta,Crescent gunnel,1 safe,19.503749999999997,13.543768151260505,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Liparis greeni,Lobefin snailfish,2 uncomfortable,18.23,14.3855,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
 Pholis laeta,Crescent gunnel,1 safe,19.503749999999997,13.543768151260505,"North Vancouver Island, British Columbia",50.488348975,13.155836050724638,14.354625,15.437472916666666
 Citharichthys sordidus,Pacific sanddab,1 safe,17.4725,12.446434875366249,"North Vancouver Island, British Columbia",50.488348975,13.155836050724638,14.354625,15.437472916666666
 Ophiodon elongatus,Lingcod,1 safe,16.113333333333333,12.20348177087046,"North Vancouver Island, British Columbia",50.488348975,13.155836050724638,14.354625,15.437472916666666
@@ -1136,7 +1136,7 @@ Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.55214591316935
 Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"Bodega Bay, California",38.2054146428571,13.320284818442428,14.138,16.62825
 Pholis laeta,Crescent gunnel,1 safe,19.503749999999997,13.543768151260505,"Bodega Bay, California",38.2054146428571,13.320284818442428,14.138,16.62825
 Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"Bodega Bay, California",38.2054146428571,13.320284818442428,14.138,16.62825
-Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",38.31916025,NA,NA,NA
+Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
 Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Puget Sound & Padilla Bay, Washington",48.482629825,12.67431377877238,13.66927205882353,15.060673529411764
 Brachyistius frenatus,Kelp perch,1 safe,18.682,12.472343380614657,"Puget Sound & Padilla Bay, Washington",48.482629825,12.67431377877238,13.66927205882353,15.060673529411764
 Oncorhynchus kisutch,Coho salmon,1 safe,16,11.510628495379835,"Puget Sound & Padilla Bay, Washington",48.482629825,12.67431377877238,13.66927205882353,15.060673529411764
@@ -1279,19 +1279,19 @@ Hexagrammos decagrammus,Kelp greenling,4 highest,15.347083333333329,6.6116133007
 Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"Willapa Bay, Washington",46.6154695238095,16.254468297101447,17.502166666666668,18.85429166666667
 Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"Willapa Bay, Washington",46.6154695238095,16.254468297101447,17.502166666666668,18.85429166666667
 Citharichthys sordidus,Pacific sanddab,3 high,17.4725,12.446434875366249,"Willapa Bay, Washington",46.6154695238095,16.254468297101447,17.502166666666668,18.85429166666667
-Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Oncorhynchus gorbuscha,Pink salmon,1 safe,16.063249999999996,11.942276461701782,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Paralichthys californicus,California flounder,1 safe,29.938666666666663,22.15423536036036,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Paralichthys californicus,California halibut,1 safe,29.938666666666663,22.15423536036036,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"San Francisco Bay, California",37.9725825,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Tridentiger trigonocephalus,Chameleon goby invasive,1 safe,24.23240909090909,14.55591628913722,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Micrometrus minimus,Dwarf perch,1 safe,22.3975,17.182642680339463,"San Francisco Bay, California",37.9461065,NA,NA,NA
-Apodichthys flavidus,Penpoint gunnel,1 safe,19.159333333333333,13.204074963924963,"San Francisco Bay, California",37.9461065,NA,NA,NA
+Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Oncorhynchus gorbuscha,Pink salmon,3 high,16.063249999999996,11.942276461701782,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Paralichthys californicus,California flounder,1 safe,29.938666666666663,22.15423536036036,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Paralichthys californicus,California halibut,1 safe,29.938666666666663,22.15423536036036,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Leptocottus armatus,Pacific staghorn sculpin,2 uncomfortable,18.449,11.537443212943543,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
+Engraulis mordax,Californian anchovy,2 uncomfortable,18.888666666666666,13.552145913169358,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Embiotoca jacksoni,Black perch,1 safe,22.428749999999997,18.229504083298917,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Tridentiger trigonocephalus,Chameleon goby invasive,1 safe,24.23240909090909,14.55591628913722,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Micrometrus minimus,Dwarf perch,1 safe,22.3975,17.182642680339463,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
+Apodichthys flavidus,Penpoint gunnel,2 uncomfortable,19.159333333333333,13.204074963924963,"San Francisco Bay, California",37.9461065,16.695396739130434,17.74498611111111,19.1628875
 Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Bodega Bay, California",38.06559,13.900608058608059,14.753333333333334,16.288666666666664
 Pleuronichthys coenosus,C-O sole,2 uncomfortable,15.750833333333334,11.68927101067946,"Morro Bay, California",35.372155,14.659514296165788,15.31459375,16.189671875000002
 Gillichthys mirabilis,Longjaw mudsucker,1 safe,25.58,19.354855122364196,"Morro Bay, California",35.372155,14.659514296165788,15.31459375,16.189671875000002
@@ -1303,7 +1303,7 @@ Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Bo
 Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Bodega Bay, California",38.2054146428571,13.320284818442428,14.138,16.62825
 Acanthogobius flavimanus,Yellowfin goby,1 safe,26.14,15.471480299448384,"Bodega Bay, California",38.2054146428571,13.320284818442428,14.138,16.62825
 Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Bodega Bay, California",38.2054146428571,13.320284818442428,14.138,16.62825
-Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"San Francisco Bay, California",38.31916025,NA,NA,NA
+Hexagrammos decagrammus,Kelp greenling,2 uncomfortable,15.347083333333329,6.611613300764646,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
 Clinocottus acuticeps,Sharpnose sculpin,2 uncomfortable,19.185,12.926695505474918,"Inner Coast, British Columbia",50.091105,16.628266692546582,18.28166517857143,19.42871160714286
 Artedius lateralis,Smoothhead sculpin,3 high,16.69349999999999,11.925488405257935,"Inner Coast, British Columbia",50.091105,16.628266692546582,18.28166517857143,19.42871160714286
 Gasterosteus aculeatus,Three-spined stickleback,2 uncomfortable,19.099625,10.770302831408788,"Inner Coast, British Columbia",50.091105,16.628266692546582,18.28166517857143,19.42871160714286
@@ -1322,24 +1322,24 @@ Salmo salar,Atlantic salmon,1 safe,16.896,10.431068796938057,"North Vancouver Is
 Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"North Vancouver Island, British Columbia",50.5181539125,12.658814009661835,13.619533333333333,15.033743333333334
 Lumpenus sagitta,Snake prickleback,1 safe,18.639999999999997,11.613569225143198,"North Vancouver Island, British Columbia",50.5181539125,12.658814009661835,13.619533333333333,15.033743333333334
 Tautogolabrus adspersus,Cunner no records,1 safe,19.83,13.875686805512768,"North Vancouver Island, British Columbia",50.5181539125,12.658814009661835,13.619533333333333,15.033743333333334
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Humboldt Bay, California",40.772352,NA,NA,NA
-Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"Humboldt Bay, California",40.772352,NA,NA,NA
-Enophrys bison,Buffalo sculpin,1 safe,16.535583333333335,11.671476138729211,"Humboldt Bay, California",40.772352,NA,NA,NA
-Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"Humboldt Bay, California",40.772352,NA,NA,NA
-Embiotoca lateralis,Striped seaperch,1 safe,20.128,14.143670776316709,"Humboldt Bay, California",40.772352,NA,NA,NA
-Ammodytes personatus,Pacific sandlance,1 safe,15.60675,10.361521879728333,"Humboldt Bay, California",40.772352,NA,NA,NA
-Cebidichthys violaceus,Monkeyface prickleback,1 safe,15.308125,12.987799024096818,"Humboldt Bay, California",40.772352,NA,NA,NA
-Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Humboldt Bay, California",40.772352,NA,NA,NA
-Thunnus alalunga,Albacore,1 safe,27.5295,21.083087272816982,"Humboldt Bay, California",40.772352,NA,NA,NA
-Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"Humboldt Bay, California",40.772352,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Humboldt Bay, California",40.772352,NA,NA,NA
-Paralichthys californicus,California flounder,1 safe,29.938666666666663,22.15423536036036,"Humboldt Bay, California",40.772352,NA,NA,NA
-Paralichthys californicus,California halibut,1 safe,29.938666666666663,22.15423536036036,"Humboldt Bay, California",40.772352,NA,NA,NA
-Artedius harringtoni,Scalyhead sculpin,1 safe,16.35349999999999,7.789592599349005,"Humboldt Bay, California",40.772352,NA,NA,NA
-Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Humboldt Bay, California",40.772352,NA,NA,NA
-Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"Humboldt Bay, California",40.772352,NA,NA,NA
-Artedius fenestralis,Padded sculpin,1 safe,16.822738095238094,11.794433497536946,"Humboldt Bay, California",40.772352,NA,NA,NA
-Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Humboldt Bay, California",40.772352,NA,NA,NA
+Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Enophrys bison,Buffalo sculpin,1 safe,16.535583333333335,11.671476138729211,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Embiotoca lateralis,Striped seaperch,1 safe,20.128,14.143670776316709,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Ammodytes personatus,Pacific sandlance,1 safe,15.60675,10.361521879728333,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Cebidichthys violaceus,Monkeyface prickleback,1 safe,15.308125,12.987799024096818,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Thunnus alalunga,Albacore,1 safe,27.5295,21.083087272816982,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Paralichthys californicus,California flounder,1 safe,29.938666666666663,22.15423536036036,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Paralichthys californicus,California halibut,1 safe,29.938666666666663,22.15423536036036,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Artedius harringtoni,Scalyhead sculpin,1 safe,16.35349999999999,7.789592599349005,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Artedius fenestralis,Padded sculpin,1 safe,16.822738095238094,11.794433497536946,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
 Pholis laeta,Crescent gunnel,1 safe,19.503749999999997,13.543768151260505,"Haida Gwaii, British Columbia",52.34841,13.52869492753623,15.100866666666667,15.92556
 Rhinogobiops nicholsii,Blackeye goby,1 safe,17.923333333333332,14.205773411532611,"Haida Gwaii, British Columbia",52.34841,13.52869492753623,15.100866666666667,15.92556
 Clinocottus acuticeps,Sharpnose sculpin,1 safe,19.185,12.926695505474918,"Haida Gwaii, British Columbia",52.34841,13.52869492753623,15.100866666666667,15.92556
@@ -1428,8 +1428,8 @@ Anoplopoma fimbria,Sablefish,1 safe,15.586599999999995,9.925363550274746,"Juneau
 Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Juneau Region, Alaska",58.385519775,12.62564311594203,13.931531249999999,15.304433333333332
 Oncorhynchus clarkii,Cutthroat trout,2 uncomfortable,15.1,10.646901214170445,"Juneau Region, Alaska",58.385519775,12.62564311594203,13.931531249999999,15.304433333333332
 Oncorhynchus clarkii,Cutthroat trout,2 uncomfortable,15.1,10.646901214170445,"Juneau Region, Alaska",58.331876375,12.57119806763285,13.872055555555555,15.261410416666667
-Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"San Francisco Bay, California",37.8724225,NA,NA,NA
-Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"San Francisco Bay, California",37.9725825,NA,NA,NA
+Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"San Francisco Bay, California",37.8724225,15.917069444444444,17.026638888888886,18.410980555555554
+Morone saxatilis,Striped bass invasive,1 safe,20.586,12.587436398620234,"San Francisco Bay, California",37.9725825,16.763118671862557,17.79252604166667,19.304179166666668
 Quietula y-cauda,American shadow goby,1 safe,29.69075,22.410412418785594,"Morro Bay, California",35.3604406666667,14.589320618994531,15.229416666666667,15.905899999999999
 Lepidogobius lepidus,Bay goby,3 high,14.812666666666669,13.023486394557825,"Morro Bay, California",35.3604406666667,14.589320618994531,15.229416666666667,15.905899999999999
 Typhlogobius californiensis,Blind goby,1 safe,20.0125,16.614370799835086,"Morro Bay, California",35.3604406666667,14.589320618994531,15.229416666666667,15.905899999999999
@@ -1636,9 +1636,9 @@ Clevelandia ios,Arrow goby,2 uncomfortable,23.119999999999997,18.924724489795917
 Anchoa compressa,Deep body anchovy,3 high,21.52,18.6930303030303,"San Diego region, California",32.795375,21.34451956521739,22.426199999999998,23.312835
 Strongylura exilis,Californian needlefish,1 safe,29.346000000000004,22.56191094619666,"San Diego region, California",32.795375,21.34451956521739,22.426199999999998,23.312835
 Oncorhynchus keta,Chum salmon,4 highest,15.552193181818184,9.95009006312726,"San Diego region, California",32.795375,21.34451956521739,22.426199999999998,23.312835
-Thunnus alalunga,Albacore,1 safe,27.5295,21.083087272816982,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Embiotoca lateralis,Striped seaperch,1 safe,20.128,14.143670776316709,"San Francisco Bay, California",38.31916025,NA,NA,NA
-Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"San Francisco Bay, California",38.31916025,NA,NA,NA
+Thunnus alalunga,Albacore,1 safe,27.5295,21.083087272816982,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Embiotoca lateralis,Striped seaperch,1 safe,20.128,14.143670776316709,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
+Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"San Francisco Bay, California",38.31916025,13.407893439440993,14.24115625,16.13695625
 Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Bodega Bay, California",38.184255,13.88376038104543,14.901499999999999,16.096225
 Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Bodega Bay, California",38.184255,13.88376038104543,14.901499999999999,16.096225
 Acanthogobius flavimanus,Yellowfin goby,1 safe,26.14,15.471480299448384,"Bodega Bay, California",38.184255,13.88376038104543,14.901499999999999,16.096225
@@ -1690,45 +1690,45 @@ Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.8916679379
 Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"North Vancouver Island, British Columbia",50.488348975,13.155836050724638,14.354625,15.437472916666666
 Oncorhynchus clarkii,Cutthroat trout,2 uncomfortable,15.1,10.646901214170445,"North Vancouver Island, British Columbia",50.488348975,13.155836050724638,14.354625,15.437472916666666
 Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"Bodega Bay, California",38.06559,13.900608058608059,14.753333333333334,16.288666666666664
-Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Humboldt Bay, California",40.772352,NA,NA,NA
-Clinocottus acuticeps,Sharpnose sculpin,1 safe,19.185,12.926695505474918,"Humboldt Bay, California",40.772352,NA,NA,NA
-Sebastes paucispinis,Bocaccio rockfish,1 safe,16.53075,12.672472228535264,"Humboldt Bay, California",40.772352,NA,NA,NA
-Lepidogobius lepidus,Bay goby,1 safe,14.812666666666669,13.023486394557825,"Humboldt Bay, California",40.772352,NA,NA,NA
-Apodichthys flavidus,Penpoint gunnel,1 safe,19.159333333333333,13.204074963924963,"Humboldt Bay, California",40.772352,NA,NA,NA
-Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Humboldt Bay, California",40.772352,NA,NA,NA
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Humboldt Bay, California",40.737335,NA,NA,NA
-Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Humboldt Bay, California",40.737335,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Humboldt Bay, California",40.737335,NA,NA,NA
-Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Humboldt Bay, California",40.737335,NA,NA,NA
-Sardinops sagax,South American pilchard,1 safe,24.6725,16.737467468146704,"Humboldt Bay, California",40.737335,NA,NA,NA
-Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"Humboldt Bay, California",40.737335,NA,NA,NA
-Thunnus alalunga,Albacore,1 safe,27.5295,21.083087272816982,"Humboldt Bay, California",40.737335,NA,NA,NA
-Clinocottus acuticeps,Sharpnose sculpin,1 safe,19.185,12.926695505474918,"Humboldt Bay, California",40.737335,NA,NA,NA
-Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"Humboldt Bay, California",40.737335,NA,NA,NA
-Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Humboldt Bay, California",40.737335,NA,NA,NA
-Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Humboldt Bay, California",40.737335,NA,NA,NA
-Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Humboldt Bay, California",40.737335,NA,NA,NA
-Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"Humboldt Bay, California",40.737335,NA,NA,NA
-Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"Humboldt Bay, California",40.737335,NA,NA,NA
-Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"Humboldt Bay, California",40.737335,NA,NA,NA
-Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"Humboldt Bay, California",40.737335,NA,NA,NA
-Embiotoca lateralis,Striped seaperch,1 safe,20.128,14.143670776316709,"Humboldt Bay, California",40.737335,NA,NA,NA
-Cebidichthys violaceus,Monkeyface prickleback,1 safe,15.308125,12.987799024096818,"Humboldt Bay, California",40.737335,NA,NA,NA
-Citharichthys sordidus,Pacific sanddab,1 safe,17.4725,12.446434875366249,"Humboldt Bay, California",40.737335,NA,NA,NA
-Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Humboldt Bay, California",40.803473,NA,NA,NA
-Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Humboldt Bay, California",40.803473,NA,NA,NA
-Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Humboldt Bay, California",40.803473,NA,NA,NA
-Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Humboldt Bay, California",40.803473,NA,NA,NA
-Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Humboldt Bay, California",40.803473,NA,NA,NA
-Sardinops sagax,South American pilchard,1 safe,24.6725,16.737467468146704,"Humboldt Bay, California",40.803473,NA,NA,NA
-Artedius fenestralis,Padded sculpin,1 safe,16.822738095238094,11.794433497536946,"Humboldt Bay, California",40.803473,NA,NA,NA
-Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Humboldt Bay, California",40.803473,NA,NA,NA
-Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Humboldt Bay, California",40.803473,NA,NA,NA
-Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"Humboldt Bay, California",40.803473,NA,NA,NA
-Anoplopoma fimbria,Sablefish,1 safe,15.586599999999995,9.925363550274746,"Humboldt Bay, California",40.803473,NA,NA,NA
-Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"Humboldt Bay, California",40.803473,NA,NA,NA
-Lepidogobius lepidus,Bay goby,1 safe,14.812666666666669,13.023486394557825,"Humboldt Bay, California",40.803473,NA,NA,NA
-Ophiodon elongatus,Lingcod,1 safe,16.113333333333333,12.20348177087046,"Humboldt Bay, California",40.803473,NA,NA,NA
+Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Clinocottus acuticeps,Sharpnose sculpin,1 safe,19.185,12.926695505474918,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Sebastes paucispinis,Bocaccio rockfish,1 safe,16.53075,12.672472228535264,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Lepidogobius lepidus,Bay goby,2 uncomfortable,14.812666666666669,13.023486394557825,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Apodichthys flavidus,Penpoint gunnel,1 safe,19.159333333333333,13.204074963924963,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Humboldt Bay, California",40.772352,12.85180108695652,13.674725,14.83103
+Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Sardinops sagax,South American pilchard,1 safe,24.6725,16.737467468146704,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Scorpaenichthys marmoratus,Cabezon,1 safe,17.780499999999993,13.339885961780348,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Thunnus alalunga,Albacore,1 safe,27.5295,21.083087272816982,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Clinocottus acuticeps,Sharpnose sculpin,1 safe,19.185,12.926695505474918,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Clupea pallasii,Pacific herring,1 safe,15.0505,8.531887571773222,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Clevelandia ios,Arrow goby,1 safe,23.119999999999997,18.924724489795917,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Phanerodon vacca,Pile perch,1 safe,20.953125,15.681928201730544,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Embiotoca lateralis,Striped seaperch,1 safe,20.128,14.143670776316709,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Cebidichthys violaceus,Monkeyface prickleback,1 safe,15.308125,12.987799024096818,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Citharichthys sordidus,Pacific sanddab,1 safe,17.4725,12.446434875366249,"Humboldt Bay, California",40.737335,12.763917582417582,13.40475,14.669999999999998
+Cymatogaster aggregata,Shiner perch,1 safe,16.17,11.206163030265502,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Leptocottus armatus,Pacific staghorn sculpin,1 safe,18.449,11.537443212943543,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Pholis ornata,Saddleback gunnel,1 safe,19.357999999999997,13.685455266367963,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Engraulis mordax,Californian anchovy,1 safe,18.888666666666666,13.552145913169358,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Citharichthys stigmaeus,Speckled sanddab,1 safe,17.331333333333333,12.891667937914477,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Sardinops sagax,South American pilchard,1 safe,24.6725,16.737467468146704,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Artedius fenestralis,Padded sculpin,1 safe,16.822738095238094,11.794433497536946,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Gasterosteus aculeatus,Three-spined stickleback,1 safe,19.099625,10.770302831408788,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Syngnathus californiensis,Bay pipefish,1 safe,18.918750000000003,13.196948692152915,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Hexagrammos decagrammus,Kelp greenling,1 safe,15.347083333333329,6.611613300764646,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Anoplopoma fimbria,Sablefish,1 safe,15.586599999999995,9.925363550274746,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Atherinopsis californiensis,Jack silverside,1 safe,21.82125,14.48822204968944,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Lepidogobius lepidus,Bay goby,1 safe,14.812666666666669,13.023486394557825,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
+Ophiodon elongatus,Lingcod,1 safe,16.113333333333333,12.20348177087046,"Humboldt Bay, California",40.803473,12.74063043478261,13.48175,14.57671666666667
 Apodichthys flavidus,Penpoint gunnel,1 safe,19.159333333333333,13.204074963924963,Central Coast British Columbia,51.8367216666667,14.369694293478261,15.667333333333332,16.60934375
 Oncorhynchus tshawytscha,Chinook salmon,2 uncomfortable,15.8,8.154796036642479,Central Coast British Columbia,51.646445,14.32207082201087,15.7071015625,16.45739375
 Quietula y-cauda,American shadow goby,1 safe,29.69075,22.410412418785594,Central Coast British Columbia,51.646445,14.32207082201087,15.7071015625,16.45739375

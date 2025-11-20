@@ -53,25 +53,40 @@ site_order <- regions %>%
   select(site_code, decimal_latitude) %>%
   arrange(decimal_latitude)
 
+# for separate sf and nc
+site_order2 <- regions %>%
+  select(site_code, decimal_latitude) %>%
+  mutate(decimal_latitude = case_when(site_code == 'NC_WP' ~ 38,
+                                      TRUE ~ decimal_latitude)) %>%
+  arrange(decimal_latitude)
+
 # region/site environmental data
 region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
-                                    '20250713_mean-summer-sst_by-region.csv')) 
+                                    '20250713_mean-summer-sst_by-region.csv')) %>%
+    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+                                       TRUE ~ region_label)) %>%
+  select(!avg_region_lat) 
 
 region_temps <- region_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  distinct() %>%
-  select(!avg_region_lat) %>%
-  mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_label))
+  distinct() 
 
 site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
-                                    '20250713_summer-sst-summary-stats_by-site.csv'))
+                                    '20250713_summer-sst-summary-stats_by-site.csv')) %>%
+    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+                                       TRUE ~ region_label)) %>%
+  mutate(site_code = case_when(site_code == 'HB_SB' ~ 'HB_SR',
+                               TRUE ~ site_code)) %>%
+  select(!avg_region_lat) %>%
+  mutate(decimal_latitude = case_when(site_code == 'HB_SR' ~ 40.77235,
+                                      TRUE ~ decimal_latitude)) %>%
+    mutate(decimal_longitude = case_when(site_code == 'HB_SR' ~ -124.2124,
+                                      TRUE ~ decimal_longitude)) %>%
+  distinct(site_code, year, .keep_all = TRUE)
 
 site_temps <- site_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  select(!c(decimal_latitude, decimal_longitude)) %>%
-    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_label))
+  select(!c(decimal_latitude, decimal_longitude)) 
 
 # species list
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
@@ -127,7 +142,8 @@ cti_environment <- cti_peco %>%
   mutate(sitegroup = fct_reorder(as_factor(site_code), year, .fun = first))
 
 cti_environment_site <- cti_peco %>%
-  left_join(site_environment) %>%
+  left_join(site_temps) %>%
+  #left_join(site_environment) #%>%
   group_by(region_name) %>%
   mutate(region_last5_meansst = mean(sst_mean, na.rm = TRUE),
          region_last5_maxsst = max(sst_max, na.rm = TRUE),
@@ -346,7 +362,7 @@ sti_peco %>%
                  )) +
   scale_alpha_manual(values = c(.5,1))+
         geom_point(data = cti_environment_site_distinct,
-                 aes(x = factor(site_code, levels = site_order$site_code),
+                 aes(x = factor(site_code, levels = site_order2$site_code),
                 y = site_last5_meansst),
              shape = 13,
              size = 3,
@@ -357,7 +373,7 @@ sti_peco %>%
   #facet_wrap('year') +
   labs(color = NULL,x = NULL, y = 'Species-95 | Mean summer SST') +
   theme_bw() +
-  theme(axis.text.x = element_blank(),
+  theme(#axis.text.x = element_blank(),
         legend.position = 'none',
         panel.grid.minor = element_blank())
 
@@ -380,7 +396,7 @@ sti_peco %>%
                  )) +
   scale_alpha_manual(values = c(.5,1))+
         geom_point(data = cti_environment_site_distinct,
-                 aes(x = factor(site_code, levels = site_order$site_code),
+                 aes(x = factor(site_code, levels = site_order2$site_code),
                 y = site_last5_meansst),
              shape = 13,
              size = 3,
@@ -401,6 +417,54 @@ ggsave(here(plotout, paste0(datefield,
 
 
 ```
+
+```{r prsentation version of 95}
+
+testing <- sti_peco %>%
+  select(site_code, temp_95, region_label, found_taxa) %>%
+  distinct()%>%
+  left_join(cti_environment_site_distinct) %>%
+  mutate(below_mean = ifelse(temp_95 < site_last5_meansst, 'below', 'above')) 
+
+sti_peco %>%
+  select(site_code, temp_95, region_label, found_taxa) %>%
+  distinct()%>%
+  left_join(cti_environment_site_distinct) %>%
+  mutate(below_mean = case_when(is.na(site_last5_meansst) ~ 'z',
+                                temp_95 < site_last5_meansst ~ 'below',
+                                temp_95 > site_last5_meansst ~ 'above')) %>%
+  ggplot()+
+  geom_point(aes(y=temp_95,
+                   x= factor(site_code, levels = site_order$site_code),
+                  color = region_label,
+                  alpha = below_mean
+                 )) +
+  scale_alpha_manual(values = c(.3,1, .3))+
+        geom_point(data = cti_environment_site_distinct,
+                 aes(x = factor(site_code, levels = site_order2$site_code),
+                y = site_last5_meansst),
+             shape = 13,
+             size = 3,
+             fill = 'white',
+             alpha = .5) +
+  scale_color_manual(values = pal_2or) +
+  coord_flip() +
+  #facet_wrap('year') +
+  labs(color = NULL,x = NULL, y = 'Species-95 | Mean summer SST') +
+  theme_bw() +
+  theme(#axis.text.y = element_blank(),
+        legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+ggsave(here(plotout, paste0(datefield,
+                            's95-mean_bysite_scatter_vertical-presentation.png')),
+        height = 12,
+       width = 6,
+       unit = 'in')
+```
+
+
+
 
 ```{r interactive version of 95}
 interactive <- sti_peco %>%
@@ -675,8 +739,6 @@ sti_peco %>%
   #add_count(region_label, vulnerable_sp, name = 'nsp_region_vulnerable') %>%
   select(region_label, nsp_region, nsp_region_vulnerable) %>%
   distinct() %>%
-  
-
   mutate(region_vulnerable_perc = round(
            (as.numeric(nsp_region_vulnerable) / nsp_region) * 100, digits = 1))
 ```

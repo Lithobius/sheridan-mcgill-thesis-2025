@@ -32,8 +32,12 @@ pal2023 <- pnw_palette("Bay", 15, type = "continuous")
 In: taxonomy from BLAST, asv table, metadata
 ```{r loadin}
 metadata <- read_csv(here(edna_combined, '20251107_peco-combined_metadata.csv')) %>%
-  mutate(region_name_label = case_when(region_name_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+  mutate(region_name = case_when(site_code == 'NC_WP' ~ 'CA_NC',
+                                 TRUE ~ region_name)) %>%
+  mutate(region_name_label = case_when(region_name == 'CA_NC' ~ 'Bodega Bay, California',
+                                       region_name_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
                                        TRUE ~ region_name_label))
+
 
 taxonomy <- read_csv(here(edna_combined, '20251111_peco-combined_12s_taxonomy.csv'))
 

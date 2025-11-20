@@ -1108,6 +1108,18 @@ ggsave(here(ranges, paste0(datefield, 'edna-literature_species-range-lines_with-
        height = 4500, width = 9500, units = 'px', 
        device = 'png')
 
+
+# png version
+range_lines_lit +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45'),
+        axis.text.y = element_blank())
+
+ggsave(here(ranges, paste0(datefield, 'edna-literature_species-range-lines_presentation.png')), 
+       height = 3500, width = 9000, units = 'px', 
+       device = 'png')
+
 ```
 
 

@@ -51,8 +51,8 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 ```
 
 ```{r loadin}
-regions <- read_csv(here(dataedna, '20251111_peco_region-name-plotting.csv'))[-1] %>%
-  rename(region_label = region_name_label)
+regions <- read_csv(here(dataedna, '20251113_peco_region-name-plotting.csv'))[-1] %>%
+  rename(region_label = region_name_label) 
 
 
 region_order <- regions %>%
@@ -81,25 +81,22 @@ sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
 
 # environment
 region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
-                                   '20250713_mean-summer-sst_by-region.csv')) 
-
-region_temps <- region_environment %>%
-  filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  distinct() %>%
+                                   '20251113_mean-summer-sst_by-region.csv')) %>%
   select(!avg_region_lat) %>%
   mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
                                        TRUE ~ region_label))
 
+region_temps <- region_environment %>%
+  filter(year %in% c(2021, 2022, 2023, 2024)) %>%
+  distinct() 
+
 site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
-                                   '20250713_summer-sst-summary-stats_by-site.csv'))
+                                   '20251113_summer-sst-summary-stats_by-site.csv')) 
 
 
 site_temps <- site_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  select(!c(decimal_latitude, decimal_longitude))%>%
-  select(!c(avg_region_lat)) %>%
-    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_label))
+  select(!c(decimal_latitude, decimal_longitude))
 ```
 
 ## thermal affinities
@@ -611,12 +608,22 @@ for (i in 1:length(region_list)) {
        title = NULL)+
   theme_bw() +
   theme(legend.position = 'none',
-        axis.text = element_text(size = 4),
-        axis.title = element_text(size = 4))
+        axis.text = element_text(size = 6),
+        #axis.title = element_text(size = 4)
+        axis.title = element_blank()
+        )
   
   # pdf for figures
   ggsave(here(plotout, paste0(datefield, 'sti-sstmean_region-',
                                      region_list[i], '.pdf')),
+         height = 2,
+         width = 2,
+         units = 'in')
+  
+        # png for presentation
+      # 
+  ggsave(here(plotout, 'forpresentation', paste0(datefield, 'sti-sstmean-region-',
+                                     region_list[i], '.png')),
          height = 2,
          width = 2,
          units = 'in')
@@ -654,6 +661,7 @@ for (i in 1:length(region_list)) {
          height = 2.5,
          width = 5.5,
          units = 'in')
+
 }
 
 cti_mean_out <- region_output %>%
@@ -840,6 +848,16 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
   
   region_sd <- model_summary$sigma
   
+  #region_predict <- ggpredict(region_model) %>%
+  #  as.data.frame() %>%
+  #  janitor::clean_names() %>%
+  #  summarise(conf_high = mean(beuti_year_conf_high))
+  
+  #region_conf <- confint(region_model)%>%
+  #  as.data.frame() %>%
+  #  janitor::clean_names() %>%
+  #  rownames_to_column('term')
+  
   ttable <- data.frame(model_summary$coefficients) %>%
     mutate(region_name = region_list_upwell[i]) %>%
     mutate(aic = model_summary$AICtab) %>%
@@ -847,7 +865,8 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
     mutate(sd = region_sd) %>%
-    mutate(singular = singular)
+    mutate(singular = singular) #%>%
+   # left_join(region_conf)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -924,6 +943,9 @@ region_output %>%
   mutate(std_positive = intercept + std_error,
          std_negative = intercept - std_error,
          significant = ifelse(pr_t < .05, 'yes', 'no')) %>%
+  #mutate(std_positive = intercept + sd,
+  ##       std_negative = intercept - sd,
+  #       significant = ifelse(pr_t < .05, 'yes', 'no')) %>%
   left_join(region_order)%>%
   mutate(region_label = factor(region_label, levels = region_order$region_label)) %>%
   ggplot(aes(x = intercept,
@@ -1028,6 +1050,256 @@ ggsave(here(plotout, paste0(datefield, 'sti-sstmean_haidagwaii-sitefacet.pdf')),
          units = 'in')
 
 ```
+# morro bay
+
+```{r}
+mb_subset <- cti_environment %>%
+    filter(region_name == "CA_MB") %>%
+  mutate(site_code_plot = str_remove_all(site_code, 'MB_'))
+
+# mean  
+mbmean_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = mb_subset)
+  
+# make a ggpredict plot object
+# plot of lines per site 
+mb_pred_pop <- predict(mbmean_model, re.form = NA) ## whole population level
+mb_subset$pred_group <- predict(mbmean_model) ## group level
+
+  
+# subset sti values
+mbsti_4plot <- sti_peco %>%
+    left_join(cti_environment) %>%
+    filter(region_name == "CA_MB") 
+
+
+ggplot(data = mb_subset, 
+       mapping = aes(x = sst_mean, y = cti_value)) + 
+      # points for sti vs sst
+    geom_point(data = mbsti_4plot,
+               aes(y = sti_value,
+                 x = sst_mean,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    geom_point(data = mbsti_4plot,
+             aes(y = cti_value,
+                 x = sst_mean),
+             shape = 23,
+             size = 2,
+             fill = 'red') +
+  geom_line(aes(y = pred_group,
+                color = region_label,
+                linetype = site_code)) + 
+  scale_color_manual(values = pal_2or) +
+  geom_line(mapping = aes(y = mb_pred_pop), colour = "black") + 
+  theme(legend.position = "bottom") +
+  labs(x = 'Mean Summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  facet_wrap('site_code') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8))
+
+# pdf for figures
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_morrobay-sitefacet.pdf')),
+         height = 3,
+         width = 5,
+         units = 'in')
+
+# png for presentation
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_morrobay-sitefacet.png')),
+         height = 3,
+         width = 5,
+         units = 'in')
+
+```
+
+# negatives
+```{r}
+nv_subset <- cti_environment %>%
+    filter(region_name == "BC_NV")
+
+
+nv_stis <- sti_peco %>%
+  filter(region_name == "BC_NV") %>%
+  left_join(nv_subset) %>%
+  relocate(year, sst_mean, cti_value, relabund_vst_taxa)
+
+
+nv_stis %>%
+  filter(year == 2021) %>%
+  #select(sst_mean, cti_value, year, site_code) %>%
+  distinct() %>%
+  ggplot() +
+  geom_point(aes(x = sti_value,
+                 y = relabund_vst_taxa,
+                 colour = as.factor(year))) +
+  theme_bw()
+
+nv_stis %>%
+  select(sst_mean, cti_value, year, site_code) %>%
+  distinct() %>%
+  ggplot() +
+  geom_point(aes(x = sst_mean,
+                 y = cti_value,
+                 colour = as.factor(year))) +
+  theme_bw()
+
+
+
+# try model
+# mean  
+nvmean_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = nv_subset)
+  
+# make a ggpredict plot object
+# plot of lines per site 
+nv_pred_pop <- predict(nvmean_model, re.form = NA) ## whole population level
+nv_subset$pred_group <- predict(nvmean_model) ## group level
+
+  
+# subset sti values
+nvsti_4plot <- sti_peco %>%
+    left_join(cti_environment) %>%
+    filter(region_name == "BC_NV") 
+
+
+ggplot(data = nv_subset, 
+       mapping = aes(x = sst_mean, y = cti_value)) + 
+      # points for sti vs sst
+    geom_point(data = nvsti_4plot,
+               aes(y = sti_value,
+                 x = sst_mean,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    geom_point(data = nvsti_4plot,
+             aes(y = cti_value,
+                 x = sst_mean),
+             shape = 23,
+             size = 2,
+             fill = 'red') +
+  geom_line(aes(y = pred_group,
+                color = region_label,
+                linetype = site_code)) + 
+  scale_color_manual(values = pal_2or) +
+  geom_line(mapping = aes(y = nv_pred_pop), colour = "black") + 
+  theme(legend.position = "bottom") +
+  labs(x = 'Mean Summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  facet_wrap('site_code') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8))
+
+# pdf for figures
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_nvan-sitefacet.pdf')),
+         height = 6,
+         width = 6,
+         units = 'in')
+
+# png for presentation
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_nvan-sitefacet.png')),
+         height = 6,
+         width = 6,
+         units = 'in')
+```
+```{r}
+sf_subset <- cti_environment %>%
+    filter(region_name == "CA_SF")
+
+
+sf_stis <- sti_peco %>%
+  filter(region_name == "CA_SF") %>%
+  left_join(sf_subset) %>%
+  relocate(year, sst_mean, cti_value, relabund_vst_taxa)
+
+
+sf_stis %>%
+  #filter(year == 2021) %>%
+  #select(sst_mean, cti_value, year, site_code) %>%
+  distinct() %>%
+  ggplot() +
+  geom_point(aes(x = sti_value,
+                 y = relabund_vst_taxa,
+                 colour = as.factor(year))) +
+  theme_bw()
+
+sf_stis %>%
+  select(sst_mean, cti_value, year, site_code) %>%
+  distinct() %>%
+  ggplot() +
+  geom_point(aes(x = sst_mean,
+                 y = cti_value,
+                 colour = as.factor(year))) +
+  theme_bw()
+
+
+# try model
+# mean  
+sfmean_model <- lmer(cti_value ~ sst_mean + (1 | site_code), 
+                       data = sf_subset)
+  
+# make a ggpredict plot object
+# plot of lines per site 
+sf_pred_pop <- predict(sfmean_model, re.form = NA) ## whole population level
+sf_subset$pred_group <- predict(sfmean_model) ## group level
+
+  
+# subset sti values
+sfsti_4plot <- sti_peco %>%
+    left_join(cti_environment) %>%
+    filter(region_name == "CA_SF") 
+
+
+ggplot(data = sf_subset, 
+       mapping = aes(x = sst_mean, y = cti_value)) + 
+      # points for sti vs sst
+    geom_point(data = sfsti_4plot,
+               aes(y = sti_value,
+                 x = sst_mean,
+                 color = region_label,
+                 size = relabund_vst_taxa),
+             alpha = .35) +
+    scale_size(range = c(.1,3)) +
+    geom_point(data = sfsti_4plot,
+             aes(y = cti_value,
+                 x = sst_mean),
+             shape = 23,
+             size = 2,
+             fill = 'red') +
+  geom_line(aes(y = pred_group,
+                color = region_label,
+                linetype = site_code)) + 
+  scale_color_manual(values = pal_2or) +
+  geom_line(mapping = aes(y = sf_pred_pop), colour = "black") + 
+  theme(legend.position = "bottom") +
+  labs(x = 'Mean Summer SST', y = 'Thermal affinity',
+       title = NULL)+
+  facet_wrap('site_code') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8))
+
+# pdf for figures
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_sanfran-sitefacet.pdf')),
+         height = 6,
+         width = 6,
+         units = 'in')
+
+# png for presentation
+ggsave(here(plotout, paste0(datefield, 'sti-sstmean_sanfran-sitefacet.png')),
+         height = 6,
+         width = 6,
+         units = 'in')
+```
+
 
 # combine output
 
