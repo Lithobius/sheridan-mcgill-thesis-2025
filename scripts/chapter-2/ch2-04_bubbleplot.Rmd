@@ -1,0 +1,1120 @@
+---
+title: "ch2-04_sites"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Bubbleplot only.
+Modified from Thomas's script:
+species on the bottom, site up the side, colored by region, no size for now.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+library(ggpubr)
+
+# filepaths for use with here
+# eDNA
+dataedna <- here('processeddata', 'peco', '2021-24_edna')
+# save in
+ranges <- here("output",  "rangecomparison")
+
+datefield <- '20251118_'
+
+# or with 2 oregon regions
+pal_2or <- c("Juneau Region, Alaska" = "#00496F",
+             "Southeast Alaska" = "#03587B",
+             "Haida Gwaii, British Columbia" = "#076787",
+             "Central Coast British Columbia" = "#0B7693",
+             "North Vancouver Island, British Columbia" = "#0F85A0",
+             "Inner Coast, British Columbia" = "#469989",
+             "Pacific Rim Park, British Columbia" = "#7EAE73",
+             "Puget Sound & Padilla Bay, Washington" = "#B5C25C",
+             "Willapa Bay, Washington" = "#EDD746",
+             "Yaquina Bay, Oregon" = "#EDC334",
+             "Coos Bay, Oregon" = "#EDB123",
+             "Humboldt Bay, California" = "#ED9E11",
+             "Bodega Bay, California" = "#ED8B00",
+             "San Francisco Bay, California" = "#E97809",
+             "Morro Bay, California" = "#E56512",
+             "Los Angeles, California" = "#E1531B",
+             "San Diego region, California" = "#DD4124")
+
+```
+
+
+```{r loadin}
+regions <- read_csv(here(dataedna, '20251113_peco_region-name-plotting.csv'))[-1] %>%
+  rename(region_label = region_name_label) 
+
+
+region_order <- regions %>%
+  select(region_lat_name, region_name, region_label, avg_region_lat) %>% 
+  distinct() %>%
+  arrange(-avg_region_lat)
+
+site_order <- regions %>%
+  select(site_code, decimal_latitude) %>%
+  arrange(-decimal_latitude)
+
+edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
+                             '20251113_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+  filter(rank == 'species') %>%
+  rename(region_label = region_name_label) %>%
+  # remove below threshold
+  filter(relabund_vst_taxa > 1) %>%
+  # problematic sample
+  filter(!(sample_id %in% c('pecoe-0207')))
+
+
+# set an order for plotting; here mean of range found
+fish_order <- edna_peco %>%
+  #mutate(taxa_mean = case_when(found_taxa %in% c('Spirinchus starksi') ~ 44.62282,
+  #                             found_taxa == 'Cynoscion parvipinnis' ~ 32.7005,
+  #                             TRUE ~ taxa_mean)) %>%
+  select(found_taxa, common_name, taxa_mean) %>%
+  distinct() %>%
+  arrange(taxa_mean) %>%
+  mutate(order_num = as.numeric(row.names(.)))
+```
+
+
+
+# Bubble plot eDNA version
+
+
+## size = sites
+Includes region names, etc
+
+```{r bubble-region}
+bubble_plot_data2 <- edna_peco %>%
+  select(found_taxa, common_name, region_name, site_code, motu_pa, taxa_mean) %>%
+  distinct() %>%
+  select(!(site_code)) %>%
+  #total how many sites species was present in
+  pivot_wider(names_from = region_name,
+              values_from = motu_pa,
+              values_fn = sum) %>%
+  replace(is.na(.), 0) %>%
+  pivot_longer(cols = !c(found_taxa, common_name,  taxa_mean),
+               values_to = 'num_sites',
+               names_to = 'region_name') %>%
+  left_join(regions) %>%
+  select(!(c(decimal_latitude, decimal_longitude, site_code, region_code))) %>%
+  distinct() %>%
+  filter(num_sites > 0)
+
+
+
+bubble_plot2 <- ggplot(bubble_plot_data2, 
+                      aes(x = factor(common_name, levels = fish_order$common_name), 
+                          y = factor(region_label, levels = region_order$region_label))) +
+  geom_point(aes(size = 10 +num_sites,
+                 color = region_label,
+                 alpha = .8)) +
+  scale_color_manual(values = pal_2or)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  labs(title = "Fish species from 12S eDNA by PECO region") +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust=1, size = 18),
+        plot.margin = unit(c(1,10,1,1), 'lines'),
+        panel.grid = element_blank(),
+        legend.position = 'none',
+        plot.title = element_text( size = 40)
+        )
+
+
+# bit to add labels
+bubble_plot2 <- bubble_plot2 +                                                         
+  #add labels
+  ## x values for left-hand side commented out
+  geom_text(x = Inf,
+            hjust = -.095,
+            #assign colours and position to region labels manually
+            y = 15,
+            label = "Juneau region", 
+            colour = pal_2or[1],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 14, 
+            label = "Southeast Alaska", 
+            colour = pal_2or[2],
+            
+            size = 10)+
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 13, 
+            label = "Haida Gwaii",
+            colour = pal_2or[3],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 12, 
+            label =  "Central Coast",
+            colour = pal_2or[4],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.065,
+              y = 11, 
+            label = "North Vancouver Island",
+            colour = pal_2or[5],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 10, 
+            label = "Inner Coast", 
+            colour = pal_2or[6],
+            
+            size = 10)+
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 9, 
+            label = "Pacific Rim Park", 
+            colour = pal_2or[7],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.05,
+            y = 8, 
+            label = "Puget Sound & Padilla Bay",
+            colour = pal_2or[8],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 7, 
+            label = "Willapa Bay",
+            colour = pal_2or[9],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 6, 
+            label = "Yaquina Bay",
+            colour = pal_2or[10],
+            
+            size = 10) +
+      geom_text(x = Inf,
+            hjust = -.095,
+            y = 5, 
+            label = "Humboldt Bay",
+            colour = pal_2or[11],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.03,
+            y = 4, 
+            label = "Bodega Bay & San Francisco Bay",
+            colour = pal_2or[12],
+            
+            size = 10) +
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 3, 
+            label = " Morro Bay",
+            colour = pal_2or[13],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.095,
+            y = 2, 
+            label = "Los Angeles",
+            colour = pal_2or[14],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 1, 
+            label =  "San Diego region", 
+            colour = pal_2or[15],
+            
+            size = 10)
+
+
+
+bubble_plot2
+
+
+ggsave(filename = here(ranges, paste0(datefield, 'peco_edna_bubble-plot_region.png')),
+       device = 'png', height = 11, width = 11, units = 'in')
+```
+```{r}
+
+bubble_plot_pres <- ggplot(bubble_plot_data2, 
+                      aes(x = factor(common_name, levels = fish_order$common_name), 
+                          y = factor(region_label, levels = region_order$region_label))) +
+  geom_point(aes(size = 10 +num_sites,
+                 color = region_label,
+                 alpha = .8)) +
+  scale_color_manual(values = pal_2or)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = 'none',
+        plot.title = element_text( size = 40)
+        )
+
+ggsave(filename = here(ranges, paste0(datefield, 'peco_edna_bubble-plot_region-presentation.png')),
+       device = 'png', height = 6, width = 11, units = 'in')
+```
+
+## with grid
+
+Some people like to see it with teh grid so they can more easily trace the species and sites.
+
+```{r}
+bubble_plot3 <- ggplot(bubble_plot_data2, 
+                      aes(x = factor(common_name, levels = fish_order$common_name), 
+                          y = factor(region_label, levels = region_order$region_label))) +
+  geom_point(aes(size = 10 + num_sites,
+                 color = region_label,
+                 alpha = .8)) +
+  scale_color_manual(values = pal_2or)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  labs(title = "Fish species from 12S eDNA by PECO region") +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust=1, size = 18),
+        plot.margin = unit(c(1,10,1,1), 'lines'),
+        legend.position = 'none'
+        )
+
+
+# bit to add labels
+bubble_plot3 <- bubble_plot3 +                                                         
+  #add labels
+  ## x values for left-hand side commented out
+  geom_text(x = Inf,
+            hjust = -.095,
+            #assign colours and position to region labels manually
+            y = 15,
+            label = "Juneau region", 
+            colour = pal_2or[1],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 14, 
+            label = "Southeast Alaska", 
+            colour = pal_2or[2],
+            
+            size = 10)+
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 13, 
+            label = "Haida Gwaii",
+            colour = pal_2or[3],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 12, 
+            label =  "Central Coast",
+            colour = pal_2or[4],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.065,
+              y = 11, 
+            label = "North Vancouver Island",
+            colour = pal_2or[5],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 10, 
+            label = "Inner Coast", 
+            colour = pal_2or[6],
+            
+            size = 10)+
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 9, 
+            label = "Pacific Rim Park", 
+            colour = pal_2or[7],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.05,
+            y = 8, 
+            label = "Puget Sound & Padilla Bay",
+            colour = pal_2or[8],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 7, 
+            label = "Willapa Bay",
+            colour = pal_2or[9],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 6, 
+            label = "Yaquina Bay",
+            colour = pal_2or[10],
+            
+            size = 10) +
+      geom_text(x = Inf,
+            hjust = -.095,
+            y = 5, 
+            label = "Humboldt Bay",
+            colour = pal_2or[11],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.03,
+            y = 4, 
+            label = "Bodega Bay & San Francisco Bay",
+            colour = pal_2or[12],
+            
+            size = 10) +
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 3, 
+            label = " Morro Bay",
+            colour = pal_2or[13],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.095,
+            y = 2, 
+            label = "Los Angeles",
+            colour = pal_2or[14],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 1, 
+            label =  "San Diego region", 
+            colour = pal_2or[15],
+            
+            size = 10)
+
+ggsave(filename = here(ranges, paste0(datefield, 'peco_edna_bubble-plot_region-grid.png')),
+       device = 'png', height = 5.25, width = 11, units = 'in')
+```
+
+
+
+
+
+## loop by year
+
+```{r loop}
+# setup
+#set number of pages to plot over
+npages<-length(unique(mifish_edna$year))
+
+
+#ridgeline by latitude
+for(i in 1:npages){
+  target_year <- 2020 + i
+  
+  bubble_plot_loop_data <- mifish_edna %>%
+  filter(year == target_year) %>%
+  select(found_taxa, common_name, region_name, 
+         site_code, motu_pa, taxa_mean) %>%
+  distinct() %>%
+  select(!(site_code)) %>%
+  #total how many sites species was present in
+  pivot_wider(names_from = region_name,
+              values_from = motu_pa,
+              values_fn = sum) %>%
+  pivot_longer(cols = !c(found_taxa, common_name,  taxa_mean),
+               values_to = 'num_sites',
+               names_to = 'region_name') %>%
+  left_join(regions) %>%
+  select(!(c(decimal_latitude, decimal_longitude, site_code, region_code))) %>%
+  distinct() %>%
+    left_join(fish_order)
+  
+  bubble_plot_loop <-  ggplot(bubble_plot_loop_data) +
+    geom_point(aes(x = order_num,
+                   y = factor(region_label, levels = region_order$region_label),
+                   size = 10 + num_sites,
+                   color = region_name),
+                 alpha = .8) +
+    scale_color_manual(values = pal_2or)+
+  # keeps wanting to put california at the top
+  #scale_y_discrete(limits = rev) +
+    scale_x_discrete(limits = factor(fish_order$order_num), 
+                           labels = fish_order$common_name) +
+     # keeps wanting to put california at the top
+    scale_y_discrete(limits = rev(factor(region_order$region_label))) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  labs(title = paste0("Fish species from 12S eDNA by PECO region: ", toString(target_year))) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust=1, size = 18),
+        plot.margin = unit(c(1,10,1,1), 'lines'),
+        legend.position = 'none',
+        plot.title = element_text( size = 40)
+        )
+    
+# bit to add labels
+  bubble_plot_loop <- bubble_plot_loop +                                                      
+  #add labels
+  ## x values for left-hand side commented out
+   geom_text(x = Inf,
+              hjust = -.095,
+            #assign colours and position to region labels manually
+              y = 15,
+              label = "Juneau region", 
+              colour = pal_2or[1],
+              
+              size = 10) +
+    geom_text(x = Inf,
+              hjust = -.065,
+              y = 14, 
+              label = "Southeast Alaska", 
+            colour = pal_2or[2],
+            
+            size = 10)+
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 13, 
+            label = "Haida Gwaii",
+            colour = pal_2or[3],
+            
+            size = 10) +
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 12, 
+            label =  "Central Coast",
+            colour = pal_2or[4],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.065,
+              y = 11, 
+            label = "North Vancouver Island",
+            colour = pal_2or[5],
+            
+            size = 10) +
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 10, 
+            label = "Inner Coast", 
+            colour = pal_2or[6],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.065,
+            y = 9, 
+            label = "Pacific Rim Park", 
+            colour = pal_2or[7],
+            
+            size = 10) +
+    geom_text(x = Inf,
+            hjust = -.05,
+            y = 8, 
+            label = "Puget Sound & Padilla Bay",
+            colour = pal_2or[8],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 7, 
+            label = "Willapa Bay",
+            colour = pal_2or[9],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 6, 
+            label = "Yaquina Bay",
+            colour = pal_2or[10],
+            
+            size = 10) +
+        geom_text(x = Inf,
+            hjust = -.095,
+            y = 6, 
+            label = "Coos Bay",
+            colour = pal_2or[11],
+            
+            size = 10) +
+      geom_text(x = Inf,
+            hjust = -.095,
+            y = 5, 
+            label = "Humboldt Bay",
+            colour = pal_2or[12],
+            
+            size = 10) +
+    geom_text(x = Inf,
+            hjust = -.03,
+            y = 4, 
+            label = "Bodega Bay & San Francisco Bay",
+            colour = pal_2or[14],
+            
+            size = 10) +
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 3, 
+            label = " Morro Bay",
+            colour = pal_2or[15],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.095,
+            y = 2, 
+            label = "Los Angeles",
+            colour = pal_2or[16],
+            
+            size = 10) +
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 1, 
+            label =  "San Diego region", 
+            colour = pal_2or[17],
+            
+            size = 10)
+
+  ggsave(#plotout,
+         file=here(ranges, paste0(datefield, "PECO_bubbleplot", toString(target_year), ".png")),
+         width = 11,
+         height = 5.5,
+         unit = 'in'
+         )
+}
+```
+
+## size = year
+
+```{r year size}
+bubble_plot_data_sizeyear <- edna_peco %>%
+  select(found_taxa, common_name, site_code, year, motu_pa, taxa_mean) %>%
+  distinct() %>%
+  select(!(year)) %>%
+  #total how many sites species was present in
+  pivot_wider(names_from = site_code,
+              values_from = motu_pa,
+              values_fn = sum) %>%
+  replace(is.na(.), 0) %>%
+  pivot_longer(cols = !c(found_taxa, common_name, taxa_mean),
+               values_to = 'num_years',
+               names_to = 'site_code') %>%
+  filter(num_years > 0) %>%
+  left_join(regions) %>%
+  select(!(c(decimal_latitude, decimal_longitude, region_code_label, region_code))) %>%
+  distinct()
+
+
+bubble_plot_sizeyear <- bubble_plot_data_sizeyear %>%
+  ggplot() +
+  geom_point(aes(x = factor(common_name, levels = fish_order$common_name), 
+                 y = factor(site_code, levels = site_order$site_code),
+                 size = num_years,
+                 color = region_label),
+                 alpha = .8) +
+  scale_color_manual(values = pal_2or)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  labs(title = "Fish species from 12S eDNA by PECO region") +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust=1, size = 18),
+        plot.margin = unit(c(1,10,1,1), 'lines'),
+        legend.position = 'none',
+        plot.title = element_text( size = 40)
+        )
+
+
+# bit to add labels
+bubble_plot_sizeyear <- bubble_plot_sizeyear +                                                         
+  #add labels
+  ## x values for left-hand side commented out
+  geom_text(x = Inf,
+            hjust = -.095,
+            #assign colours and position to region labels manually
+            y = 102,
+            label = "Juneau region", 
+            colour = pal_2or[1],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 96.5, 
+            label = "Southeast Alaska", 
+            colour = pal_2or[2],
+            
+            size = 10)+
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 89, 
+            label = "Haida Gwaii",
+            colour = pal_2or[3],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 81.5, 
+            label =  "Central Coast",
+            colour = pal_2or[4],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.065,
+              y = 75.5, 
+            label = "North Vancouver Island",
+            colour = pal_2or[5],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 70, 
+            label = "Inner Coast", 
+            colour = pal_2or[6],
+            
+            size = 10)+
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 61, 
+            label = "Pacific Rim Park", 
+            colour = pal_2or[7],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.05,
+            y = 49, 
+            label = "Puget Sound & Padilla Bay",
+            colour = pal_2or[8],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 39, 
+            label = "Willapa Bay",
+            colour = pal_2or[9],
+            
+            size = 10)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 31.5, 
+            label = "Yaquina Bay",
+            colour = pal_2or[10],
+            
+            size = 10) +
+      geom_text(x = Inf,
+            hjust = -.095,
+            y = 27, 
+            label = "Humboldt Bay",
+            colour = pal_2or[11],
+            
+            size = 10) +
+  
+  geom_text(x = Inf,
+            hjust = -.03,
+            y = 19, 
+            label = "Bodega Bay & San Francisco Bay",
+            colour = pal_2or[12],
+            
+            size = 10) +
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 13.5, 
+            label = " Morro Bay",
+            colour = pal_2or[13],
+            
+            size = 10) +
+    geom_text(x = Inf,
+              hjust = -.095,
+            y = 9.5, 
+            label = "Los Angeles",
+            colour = pal_2or[14],
+            
+            size = 10) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 3.5, 
+            label =  "San Diego region", 
+            colour = pal_2or[15],
+            
+            size = 10)
+
+ggsave(filename = here(ranges, paste0(datefield, 'peco_edna_bubble-plot_site-grid.png')),
+       device = 'png', height = 8, width = 13, units = 'in')
+
+# pdf version
+bubble_plot_sizeyear +
+  theme(axis.text.x = element_text(angle = 70, hjust=1, size = 5))
+
+
+
+
+bubble_plot_sizeyear
+```
+
+```{r pdf version}
+
+bubble_plot_sizeyear <- bubble_plot_data_sizeyear %>%
+  ggplot() +
+  geom_point(aes(x = factor(common_name, levels = fish_order$common_name), 
+                 y = factor(site_code, levels = site_order$site_code),
+                 size = num_years,
+                 color = region_label),
+                 alpha = .8) +
+  scale_size(range = c(.75,3)) +
+  scale_color_manual(values = pal_2or)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust=1, size = 6),
+        plot.margin = unit(c(1,10,1,1), 'lines'),
+        legend.position = 'none')
+
+
+# bit to add labels
+bubble_plot_sizeyear <- bubble_plot_sizeyear +
+  #add labels
+  ## x values for left-hand side commented out
+  geom_text(x = Inf,
+            hjust = -.095,
+            #assign colours and position to region labels manually
+            y = 102,
+            #label = "Juneau region",
+            label = "J",
+            colour = pal_2or[1],
+            
+            size = 4) +
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 96.5, 
+            #label = "Southeast Alaska", 
+            label = "S",
+            colour = pal_2or[2],
+            
+            size = 4)+
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 89, 
+            #label = "Haida Gwaii",
+            label = "H",
+            colour = pal_2or[3],
+            
+            size = 4) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 81.5, 
+           # label =  "Central Coast",
+           label = "c",
+            colour = pal_2or[4],
+            
+            size = 4) +
+    geom_text(x = Inf,
+              hjust = -.065,
+              y = 75.5, 
+            #label = "North Vancouver Island",
+            label = "N",
+            colour = pal_2or[5],
+            
+            size = 4) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 70, 
+            #label = "Inner Coast",
+            label = "i",
+            colour = pal_2or[6],
+            
+            size = 5)+
+  geom_text(x = Inf,
+            hjust = -.065,
+            y = 61, 
+            #label = "Pacific Rim Park", 
+            label = "P",
+            colour = pal_2or[7],
+            
+            size = 4) +
+  geom_text(x = Inf,
+            hjust = -.05,
+            y = 49, 
+            #label = "Puget Sound & Padilla Bay",
+            label = "P",
+            colour = pal_2or[8],
+            size = 4)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 39, 
+            #label = "Willapa Bay",
+            label = "W",
+            colour = pal_2or[9],
+            size = 5)+
+    geom_text(x = Inf,
+            hjust = -.095,
+            y = 32.5, 
+            #label = "Yaquina Bay",
+            label = "Y",
+            colour = pal_2or[10],
+            size = 5) +
+      geom_text(x = Inf,
+            hjust = -.095,
+            y = 29.5, 
+            #label = "Coos Bay",
+            label = "C",
+            colour = pal_2or[11],
+            size = 4) +
+      geom_text(x = Inf,
+            hjust = -.095,
+            y = 27, 
+            #label = "Humboldt Bay",
+            label = "H",
+            colour = pal_2or[12],
+            size = 4) +
+  geom_text(x = Inf,
+            hjust = -.03,
+            y = 19, 
+            #label = "Bodega Bay & San Francisco Bay
+            label = "N",
+            colour = pal_2or[14],
+            size = 4) +
+    geom_text(hjust = -.095,
+            x = Inf,
+            y = 13.5, 
+            #label = " Morro Bay",
+            label = "M",
+            colour = pal_2or[15],
+            size = 5) +
+    geom_text(x = Inf,
+              hjust = -.095,
+            y = 9.5, 
+            #label = "Los Angeles",
+            label = "L",
+            colour = pal_2or[16],
+            size = 4) +
+  geom_text(x = Inf,
+            hjust = -.095,
+            y = 3.5, 
+            #label =  "San Diego region", 
+            label = "S",
+            colour = pal_2or[17],
+            size = 4)
+
+ggsave(filename = here(ranges, paste0(datefield, 'peco_edna_bubble-plot_site-grid.pdf')),
+       device = 'pdf', height = 6, width = 14, units = 'in')
+```
+
+
+
+# by species
+
+
+```{r bubble-species}
+# literature
+fish_lit <- read_csv(here('rawdata', 'peco', '20250626_range-from-literature.csv')) %>%
+  rename(lit_max = max_lat,
+         lit_min = min_lat) %>%
+  select(!c(min_long, max_long)) %>%
+  mutate(lit_max = ifelse(lit_max >= 60, 60, lit_max)) %>%
+  mutate(lit_min = ifelse(lit_min <= 32, 32, lit_min))
+
+# obisgbif
+bigdat_fish <-  read_csv(here('processeddata','bigdata',
+               '20250626_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
+  # taxonomic revision
+  mutate(scientific_name = case_when(scientific_name == 'Syngnathus leptorhynchus' ~ 'Syngnathus californiensis',
+                                     scientific_name == 'Gasterosteus aculeatus aculeatus' ~ 'Gasterosteus aculeatus',
+                                     scientific_name == 'Gasterosteus aculeatus williamsoni' ~ 'Gasterosteus aculeatus',
+                                     scientific_name == 'Oncorhynchus clarkii clarkii' ~ 'Oncorhynchus clarkii',
+                                     scientific_name == 'Clupea pallasii pallasii' ~ 'Clupea pallasii',
+                                     TRUE ~ scientific_name)) %>%
+  filter(summer == TRUE) %>%
+  filter(species %in% fish_order$found_taxa) %>%
+    group_by(species) %>%
+  summarise(bd_max = max(decimal_latitude), bd_mean = mean(decimal_latitude),
+            bd_median = median(decimal_latitude), bd_min = min(decimal_latitude)) %>%
+    mutate(bd_max = ifelse(bd_max >= 60, 60, bd_max)) %>%
+  mutate(bd_min = ifelse(bd_min <= 32, 32, bd_min)) %>%
+  select(species, bd_max, bd_min) %>%
+  distinct() %>%
+  rename(found_taxa = species)
+
+region_order2 <- region_order %>%
+  arrange(avg_region_lat)
+
+# prevalence
+samplesite <- mifish_edna %>% 
+  select(sample_id, year, site_code) %>%
+  distinct() %>%
+  left_join(regions) %>%
+  select(!c(samples, sites)) %>%
+  # calculate how many samples per site
+  # by year and total
+  group_by(year) %>%
+  add_count(site_code, name = 'n_samplesite_year') %>%
+  #add_count(region_code, name = 'n_sampleregioncode_year') %>%
+  ungroup() %>%
+  #add_count(site_code, name = 'n_samplesite') %>%
+  #add_count(region_code, name = 'n_sampleregioncode') %>%
+  relocate(n_samplesite_year, #n_samplesite, 
+           #n_sampleregioncode_year, n_sampleregioncode,
+           .before = region_code) 
+
+prevalence_sp <- mifish_edna %>%
+  filter(rank == 'species') %>%
+  select(sample_id, site_code, year, found_taxa, common_name) %>%
+  distinct() %>%
+  # how many sites was it found in that year?
+  add_count(found_taxa, site_code, year, name='n_spsite_year') %>%
+  left_join(samplesite) %>%
+  mutate(prev_year = n_spsite_year / n_samplesite_year) %>%
+  relocate(prev_year, 
+           .before = found_taxa) %>%
+  select(prev_year, found_taxa, common_name, year, site_code) %>%
+  distinct()
+
+
+bubble_plot_data_sp <- mifish_edna %>%
+  select(found_taxa, common_name, year, region_name, site_code, 
+         motu_pa, taxa_min, taxa_max, taxa_median) %>%
+  distinct() %>%
+  left_join(regions) %>%
+  left_join(prevalence_sp) %>%
+  left_join(fish_lit) %>%
+  left_join(bigdat_fish)
+
+bubble_plot_data_sp %>%
+  filter(found_taxa == 'Clupea pallasii') %>%
+  group_by(region_name, year) %>%
+  add_count() %>%
+  ungroup %>%
+  ggplot() +
+  geom_point(aes(x = year, 
+                 y = decimal_latitude,
+                 alpha = prev_year
+                 #size = n
+                 ),
+              col = pal_2or[1]) +
+  geom_segment(aes(y = lit_max, yend = lit_min,
+                   x = 2024.5),
+               col = pal_2or[5],
+               alpha = .25) +
+  geom_segment(aes(y = bd_max, yend = bd_min,
+                   x = 2024.75),
+               col = pal_2or[6],
+               alpha = .25) +
+  scale_x_continuous(limits = c(2021,2024.8)) +
+  scale_y_continuous(limits = c(32,60)) +
+  theme_bw() +
+  labs(title = 'Pacific herring') +
+  theme(axis.text = element_text(size = 8, family = 'muli'),
+        panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45'),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 8),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust = 1, size = 8),
+        #plot.margin = unit(c(1,10,1,1), 'lines'),
+        panel.grid = element_blank(),
+        legend.position = 'none',
+        plot.title = element_text( size = 5))
+
+
+
+ggsave(filename = here(ranges, 'splevel', paste0(datefield, 'bubble_herring_TEST.pdf')),
+       device = 'pdf', height = 5, width = 2, units = 'in')
+
+```
+
+```{r by species loop}
+region_order2 <- region_order %>%
+  arrange(avg_region_lat)
+
+splist <- unique(bubble_plot_data_sp$common_name)
+
+for(i in 1:length(splist)){
+  target_sp <- splist[i]
+  
+  bubble_plot_data_sp %>%
+  filter(common_name == target_sp) %>%
+  group_by(region_name, year) %>%
+  add_count() %>%
+  ungroup %>%
+  ggplot() +
+    geom_point(aes(x = year, 
+                 y = decimal_latitude,
+                 alpha = prev_year
+                 #size = n
+                 ),
+              col = pal_2or[1]) +
+    geom_segment(aes(y = lit_max, yend = lit_min,
+                   x = 2024.5),
+               col = pal_2or[5],
+               alpha = .25) +
+    geom_segment(aes(y = bd_max, yend = bd_min,
+                   x = 2024.75),
+               col = pal_2or[6],
+               alpha = .25) +
+  scale_x_continuous(limits = c(2021,2024.8)) +
+  scale_y_continuous(limits = c(32,60)) +
+  theme_bw() +
+  labs(title = paste0(target_sp)) +
+  theme(axis.text = element_text(size = 8, family = 'muli'),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(size = 8),
+        axis.title.x = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.x = element_text(angle = 70, hjust = 1, size = 8),
+        #plot.margin = unit(c(1,10,1,1), 'lines'),
+        panel.grid = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', 
+                                          colour = 'grey45'),
+        legend.position = 'none',
+        plot.title = element_text( size = 5))
+  
+  ggsave(filename = here(ranges, 'splevel', paste0(datefield, 'bubble_', target_sp, '.pdf')),
+       device = 'pdf', height = 5, width = 2, units = 'in')
+}
+```
+
+
+
+
+```{r}
+unique(edna_peco$found_taxa)
+unique(edna_peco$site_code)
+length(unique(edna_peco$sample_id))
+```
+

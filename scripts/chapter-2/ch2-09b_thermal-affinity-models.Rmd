@@ -233,21 +233,27 @@ for (i in 1:length(region_list)) {
                        data = region_subset)
   }
   
+  # generate summary statistics
   model_summary <- summary(region_model)
+  # standard deviation of the model
+  stdev <- attr(model_summary$varcor$site_code, 'stddev')
   
   #pr_t is the same as the anova result now
   #modelanova <- anova(region_model)
   
+  # sigma
   region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
-    mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AICtab) %>%
+    # columns for stats
+    mutate(region_name = region_list[i],
+           aic = model_summary$AICtab,
+           model_stdev = stdev) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd) %>%
-    mutate(singular = singular)
+    mutate(sd = region_sd,
+           singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -308,13 +314,13 @@ cti_95_out <- region_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = '95th')
+  mutate(model = '95th percentile SST')
 
 cti_95_random <- random_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = '95th')
+  mutate(model = '95th percentile SST')
 
 cti_95_out %>%
   filter(term == 'site_temp95') %>%
@@ -361,6 +367,8 @@ model_summary
 
 test2 <- attr(model_summary$varcor$site_code, 'stddev')
 
+model_summary$varcor$site_code
+
 test2
 model_summary
 
@@ -403,18 +411,27 @@ for (i in 1:length(region_list)) {
                        data = region_subset)
   }
   
+  # generate summary statistics
   model_summary <- summary(region_model)
+  # standard deviation of the model
+  stdev <- attr(model_summary$varcor$site_code, 'stddev')
   
+  #pr_t is the same as the anova result now
+  #modelanova <- anova(region_model)
+  
+  # sigma
   region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
-    mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AICtab) %>%
+    # columns for stats
+    mutate(region_name = region_list[i],
+           aic = model_summary$AICtab,
+           model_stdev = stdev) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd) %>%
-    mutate(singular = singular)
+    mutate(sd = region_sd,
+           singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -477,7 +494,7 @@ cti_75_out <- region_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = '75th')
+  mutate(model = '75th percentile SST')
 
 cti_75_random <- random_output %>%
     #or change string in every column of dataframe
@@ -549,18 +566,27 @@ for (i in 1:length(region_list)) {
                        data = region_subset)
   }
   
+  # generate summary statistics
   model_summary <- summary(region_model)
+  # standard deviation of the model
+  stdev <- attr(model_summary$varcor$site_code, 'stddev')
   
+  #pr_t is the same as the anova result now
+  #modelanova <- anova(region_model)
+  
+  # sigma
   region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
-    mutate(region_name = region_list[i]) %>%
-    mutate(aic = model_summary$AICtab) %>%
+    # columns for stats
+    mutate(region_name = region_list[i],
+           aic = model_summary$AICtab,
+           model_stdev = stdev) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd) %>%
-    mutate(singular = singular)
+    mutate(sd = region_sd,
+           singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -668,13 +694,13 @@ cti_mean_out <- region_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = 'mean')
+  mutate(model = 'Mean SST')
 
 cti_mean_random <- random_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = 'mean')
+  mutate(model = 'Mean SST')
 
 cti_mean_out %>%
   filter(term == 'sst_mean') %>%
@@ -844,29 +870,27 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
                        data = region_subset)
   }
   
+  # generate summary statistics
   model_summary <- summary(region_model)
+  # standard deviation of the model
+  stdev <- attr(model_summary$varcor$site_code, 'stddev')
   
+  #pr_t is the same as the anova result now
+  #modelanova <- anova(region_model)
+  
+  # sigma
   region_sd <- model_summary$sigma
   
-  #region_predict <- ggpredict(region_model) %>%
-  #  as.data.frame() %>%
-  #  janitor::clean_names() %>%
-  #  summarise(conf_high = mean(beuti_year_conf_high))
-  
-  #region_conf <- confint(region_model)%>%
-  #  as.data.frame() %>%
-  #  janitor::clean_names() %>%
-  #  rownames_to_column('term')
-  
   ttable <- data.frame(model_summary$coefficients) %>%
-    mutate(region_name = region_list_upwell[i]) %>%
-    mutate(aic = model_summary$AICtab) %>%
+    # columns for stats
+    mutate(region_name = region_list_upwell[i],
+           aic = model_summary$AICtab,
+           model_stdev = stdev) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd) %>%
-    mutate(singular = singular) #%>%
-   # left_join(region_conf)
+    mutate(sd = region_sd,
+           singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -913,9 +937,14 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
   labs(x = 'BEUTI upwelling index', y = 'Thermal affinity',
        title = NULL)+
   theme_bw() +
-  theme(legend.position = 'none',
-        axis.text = element_text(size = 4),
-        axis.title = element_text(size = 4))
+      theme(legend.position = 'none',
+        axis.text = element_text(size = 6),
+        #axis.title = element_text(size = 4)
+        axis.title = element_blank()
+        )
+ # theme(legend.position = 'none',
+  #      axis.text = element_text(size = 4),
+   #     axis.title = element_text(size = 4))
   
   # pdf for figures
   ggsave(here(plotout, paste0(datefield, 'sti-upwelling_region-',
@@ -924,19 +953,25 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
          width = 2,
          units = 'in')
   
+    ggsave(here(plotout, 'forpresentation', paste0(datefield, 'sti-upwelling_region-',
+                                     region_list_upwell[i], '.png')),
+         height = 2,
+         width =2,
+         units = 'in')
+  
 }
 
 cti_upwelling_out <- region_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = 'upwelling')
+  mutate(model = 'Upwelling')
 
 cti_upwelling_random <- random_output %>%
     #or change string in every column of dataframe
   mutate(across(.cols = where(is.numeric),
                 .fns = ~ round(., digits = 3))) %>%
-  mutate(model = 'upwelling')
+  mutate(model = 'Upwelling')
 
 region_output %>%
   filter(term == 'beuti_year') %>%
@@ -1308,17 +1343,19 @@ table_output <- cti_95_out %>%
   bind_rows(cti_75_out, cti_mean_out, cti_upwelling_out) %>%
   left_join(region_order) %>%
   arrange(region_lat_name) %>%
-  relocate(region_label) %>%
+  mutate(type = case_when(singular == TRUE ~ 'BLME',
+                          singular == FALSE ~ 'LME')) %>%
+  relocate(region_label, model, type, aic, model_stdev) %>%
   select(!c(region_name, avg_region_lat, region_lat_name)) %>%
-  mutate(term = case_when(term == '(Intercept)' ~ stringr::str_to_sentence(paste0(model, " intercept")),
+  mutate(term = case_when(term == '(Intercept)' ~ "Intercept",
+                          #term == '(Intercept)' ~ stringr::str_to_sentence(paste0(model, " intercept")),
                           term == 'beuti_year' ~ 'BEUTI index',
                           term == 'site_temp95' ~ '95th percentile SST',
                           term == 'site_temp75' ~ '75th percentile SST',
                           term == 'sst_mean' ~ 'Mean SST',
                           TRUE ~ term)) %>%
-  mutate(blme = case_when(singular == TRUE ~ 'BLME',
-                          singular == FALSE ~ NA_character_)) %>%
-  select(!c(model, singular))
+  select(!c(singular)) %>%
+  relocate(sd, .before = df)
 
 table_random <- cti_95_random %>%
   bind_rows(cti_75_random, cti_mean_random, cti_upwelling_random) %>%

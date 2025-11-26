@@ -239,7 +239,189 @@ write.csv(retention_summary, here(retention_in, 'allyears',
 ```
 
 
-new common names
+# variability
+
+comparing variability in reads between next- and mi- seq
+
+```{r samplesheets}
+ss2021 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2021','SampleSheet.csv'),
+              skip = 26) %>%
+  janitor::clean_names() %>%
+  select(sample_id) %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]"))) %>%
+  mutate(year = 2021) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = str_remove_all(sample_id, '_2021$')) %>%
+  mutate(sample_id = str_replace_all(sample_id, 'coe', 'coe-0')) %>%
+    mutate(sample_id = case_when(str_detect(sample_id, 'negpcr') ~ 
+                                 str_replace_all(sample_id, 'negpcr', 'negpcr-2021-'),
+                               str_detect(sample_id, 'neg_pcr') ~ 
+                                 str_replace_all(sample_id, 'neg_pcr', 'negpcr-2021-'),
+                               str_detect(sample_id, 'pecoxn') ~ 
+                                 str_replace_all(sample_id, 'pecoxn', 'exblank-2021-'),
+                               TRUE ~ sample_id)) %>%
+  mutate(version = 'miseq')
+
+ss2023 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2023', "SampleSheet.csv"),
+              skip = 27) %>%  
+  janitor::clean_names() %>%
+  select(sample_id) %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]")))%>%
+  mutate(year = 2023) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = case_when(str_detect(sample_id, 'peco2023_redos_negpcr') ~ 
+                                 str_replace_all(sample_id, 'peco2023_redos_negpcr', 'negpcr-2023-'),
+                               str_detect(sample_id, 'neg-pcr-peco') ~ 
+                                 str_replace_all(sample_id, 'neg-pcr-peco', 'negpcr-2023'),
+                               str_detect(sample_id, 'xn') ~ 
+                                 str_replace_all(sample_id, 'xn', 'exblank-2023-0'),
+                               str_detect(sample_id, 'oe_8') ~ 
+                                 str_replace_all(sample_id, 'oe_8', 'oe-08'),
+                               str_detect(sample_id, 'oe_9') ~ 
+                                 str_replace_all(sample_id, 'oe_9', 'oe-09'),
+                               str_detect(sample_id, 'oe_1') ~ 
+                                 str_replace_all(sample_id, 'oe_1', 'oe-1'),
+                               TRUE ~ sample_id)) %>%
+  mutate(version = 'nextseq')
+
+ss2024 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2024', "SampleSheet.csv"),
+              skip = 28) %>%  
+  janitor::clean_names() %>%
+  select(sample_id) %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]")))%>%
+  mutate(year = 2024) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = str_remove_all(sample_id, '_2024$')) %>%
+      mutate(sample_id = case_when(str_detect(sample_id, 'negpcr') ~ 
+                                 str_replace_all(sample_id, 'negpcr', 'negpcr-2024-'),
+                               str_detect(sample_id, 'neg_pcr') ~ 
+                                 str_replace_all(sample_id, 'neg_pcr', 'negpcr-2024-'),
+                               TRUE ~ sample_id)) %>%
+  mutate(version = 'nextseq')
+
+ss_all <- ss2021 %>%
+  bind_rows(ss2023, ss2024)
+  
+ss_retention <- ss_all %>%
+  left_join(retention_all) %>%
+  mutate_all(~replace(., is.na(.), 0)) %>%
+  # odd sample with higher cutadapt than raw
+  filter(!(sample_id %in% c('pecoe-1013', 'pecoe-1111')))
+```
+## retention plots
+
+It seems like there are a lot more 0s overall with nextseq
+
+```{r}
+ss_retention %>%
+  filter(version == 'miseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = raw_f)) +
+  theme_bw()
+
+ss_retention %>%
+      filter(raw_r < 700000) %>%
+  filter(version == 'nextseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = raw_f)) +
+  theme_bw()
+
+ss_retention %>%
+  filter(version == 'miseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = cutadapt_f)) +
+  theme_bw()
+
+ss_retention %>%
+      filter(raw_r < 700000) %>%
+  filter(version == 'nextseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = cutadapt_f)) +
+  theme_bw()
+
+ss_retention %>%
+  filter(version == 'miseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = dereplicated_f)) +
+  theme_bw()
+
+ss_retention %>%
+      filter(raw_r < 700000) %>%
+  filter(version == 'nextseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = dereplicated_f)) +
+  theme_bw()
+
+ss_retention %>%
+  filter(version == 'miseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = nochimeras)) +
+  theme_bw()
+
+ss_retention %>%
+    filter(raw_r < 700000) %>%
+  filter(version == 'nextseq') %>%
+  ggplot() +
+  geom_histogram(aes(x = nochimeras)) +
+  theme_bw()
+
+
+
+ss_retention %>%
+  select(!c(bsa_redo, percentraw_retainedby_cutadapt,
+            percent_retained_aftermerge, percent_notsingleton,
+            percent_notchimera, percent_retained_of_raw)) %>%
+  pivot_longer(cols = !c(sample_id, year, version)) %>%
+  ggplot() +
+  geom_boxplot(aes(value, name)) +
+  facet_wrap(~ year) +
+  theme_bw()
+
+ss_retention %>%
+  filter(version == 'miseq') %>%
+  select(!c(bsa_redo, percentraw_retainedby_cutadapt,
+            percent_retained_aftermerge, percent_notsingleton,
+            percent_notchimera, percent_retained_of_raw)) %>%
+  pivot_longer(cols = !c(sample_id, year, version)) %>%
+  ggplot() +
+  geom_boxplot(aes(value, name)) +
+  theme_bw()
+
+ss_retention %>%
+  filter(version == 'nextseq') %>%
+  select(!c(bsa_redo, percentraw_retainedby_cutadapt,
+            percent_retained_aftermerge, percent_notsingleton,
+            percent_notchimera, percent_retained_of_raw)) %>%
+  pivot_longer(cols = !c(sample_id, year, version)) %>%
+  ggplot() +
+  geom_boxplot(aes(value, name)) +
+  theme_bw()
+
+ss_retention %>%
+  filter(version == 'nextseq') %>%
+  filter(raw_r < 753071) %>%
+  select(!c(bsa_redo, percentraw_retainedby_cutadapt,
+            percent_retained_aftermerge, percent_notsingleton,
+            percent_notchimera, percent_retained_of_raw)) %>%
+  pivot_longer(cols = !c(sample_id, year, version)) %>%
+  ggplot() +
+  geom_boxplot(aes(value, name)) +
+  theme_bw()
+
+```
+
+
+
+# new common names
 ```{r}
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
                              '20251107_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
