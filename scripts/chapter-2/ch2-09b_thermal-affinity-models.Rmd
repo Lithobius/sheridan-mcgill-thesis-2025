@@ -52,7 +52,8 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 
 ```{r loadin}
 regions <- read_csv(here(dataedna, '20251113_peco_region-name-plotting.csv'))[-1] %>%
-  rename(region_label = region_name_label) 
+  rename(region_label = region_name_label) %>%
+  select(!c(region_code,region_code_label))
 
 
 region_order <- regions %>%
@@ -96,7 +97,7 @@ site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
 
 site_temps <- site_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  select(!c(decimal_latitude, decimal_longitude))
+  select(!c(decimal_latitude, decimal_longitude, avg_region_lat, region_lat_name))
 ```
 
 ## thermal affinities
@@ -132,7 +133,7 @@ cti_peco <- edna_peco %>%
 
 
 cti_environment <- cti_peco %>%
-  select(!c(region_code, region_code_label, region_lat_name, avg_region_lat)) %>%
+  select(!c(region_lat_name, avg_region_lat)) %>%
   rename(
          cti_value = cti) %>%
   left_join(site_temps) %>%
@@ -154,7 +155,7 @@ cti_environment <- cti_peco %>%
 
 # STI
 sti_peco <- edna_peco %>%
-  select(!c(region_code,  decimal_latitude, decimal_longitude,
+  select(!c(decimal_latitude, decimal_longitude,
             extraction_blank, library,
             seagrass_presence, seagrass_notes, describe_transect,
             notes, collection_time_24h, notes_about_sample,
@@ -235,25 +236,29 @@ for (i in 1:length(region_list)) {
   
   # generate summary statistics
   model_summary <- summary(region_model)
-  # standard deviation of the model
-  stdev <- attr(model_summary$varcor$site_code, 'stddev')
+  # random effects
+  random_effect <- model_summary$varcor$site_code[1]
+  # standard deviation of the random effect
+  #stdev <- attr(model_summary$varcor$site_code, 'stddev')
+  # residuals
+  resid <- attr(model_summary$varcor, 'sc')^2
   
   #pr_t is the same as the anova result now
   #modelanova <- anova(region_model)
   
   # sigma
-  region_sd <- model_summary$sigma
+  #region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
     # columns for stats
     mutate(region_name = region_list[i],
            aic = model_summary$AICtab,
-           model_stdev = stdev) %>%
+           random_variance = random_effect,
+           residual_variance = resid) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd,
-           singular = singular)
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -360,23 +365,27 @@ ggsave(here(plotout, paste0(datefield, 'cti-sst95_all-regions.pdf')),
 write_csv(cti_95_out, here(plotout, paste0(datefield, '95-out.csv')))
 write_csv(cti_95_random, here(plotout, paste0(datefield, '95-random.csv')))
 
-model_summary$varcor$site_code["stddev"]
+
+#random effect + standard deviation
+#model_summary$varcor$site_code[1]
+#attr(model_summary$varcor$site_code, 'stddev')
+# residuals?
+#
 model_summary$varcor
-model_summary$sigma
+attr(model_summary$varcor, 'sc')
+
 model_summary
-
-test2 <- attr(model_summary$varcor$site_code, 'stddev')
-
-model_summary$varcor$site_code
-
-test2
-model_summary
+str(model_summary)
 
 str(model_summary$varcor)
 
+
+
 test <- VarCorr(region_model)
 
-test["StdDev"]
+str(test)
+test$site_code
+test$site_code[1]
 ```
 
 
@@ -413,25 +422,29 @@ for (i in 1:length(region_list)) {
   
   # generate summary statistics
   model_summary <- summary(region_model)
-  # standard deviation of the model
-  stdev <- attr(model_summary$varcor$site_code, 'stddev')
+    # random effects
+  random_effect <- model_summary$varcor$site_code[1]
+  # standard deviation of the random effect
+  #stdev <- attr(model_summary$varcor$site_code, 'stddev')
+  # residuals
+  resid <- attr(model_summary$varcor, 'sc')^2
   
   #pr_t is the same as the anova result now
   #modelanova <- anova(region_model)
   
   # sigma
-  region_sd <- model_summary$sigma
+  #region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
     # columns for stats
     mutate(region_name = region_list[i],
            aic = model_summary$AICtab,
-           model_stdev = stdev) %>%
+           random_variance = random_effect,
+           residual_variance = resid) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd,
-           singular = singular)
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -568,25 +581,29 @@ for (i in 1:length(region_list)) {
   
   # generate summary statistics
   model_summary <- summary(region_model)
-  # standard deviation of the model
-  stdev <- attr(model_summary$varcor$site_code, 'stddev')
+    # random effects
+  random_effect <- model_summary$varcor$site_code[1]
+  # standard deviation of the random effect
+  #stdev <- attr(model_summary$varcor$site_code, 'stddev')
+  # residuals
+  resid <- attr(model_summary$varcor, 'sc')^2
   
   #pr_t is the same as the anova result now
   #modelanova <- anova(region_model)
   
   # sigma
-  region_sd <- model_summary$sigma
+  #region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
     # columns for stats
     mutate(region_name = region_list[i],
            aic = model_summary$AICtab,
-           model_stdev = stdev) %>%
+           random_variance = random_effect,
+           residual_variance = resid) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd,
-           singular = singular)
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -872,25 +889,28 @@ region_model <- lmer(cti_value ~ beuti_year + (1 | site_code),
   
   # generate summary statistics
   model_summary <- summary(region_model)
-  # standard deviation of the model
-  stdev <- attr(model_summary$varcor$site_code, 'stddev')
-  
+  # random effects
+  random_effect <- model_summary$varcor$site_code[1]
+  # standard deviation of the random effect
+  #stdev <- attr(model_summary$varcor$site_code, 'stddev')
+  # residuals
+  resid <- attr(model_summary$varcor, 'sc')^2
   #pr_t is the same as the anova result now
   #modelanova <- anova(region_model)
   
   # sigma
-  region_sd <- model_summary$sigma
+  #region_sd <- model_summary$sigma
   
   ttable <- data.frame(model_summary$coefficients) %>%
     # columns for stats
     mutate(region_name = region_list_upwell[i],
            aic = model_summary$AICtab,
-           model_stdev = stdev) %>%
+           random_variance = random_effect,
+           residual_variance = resid) %>%
     rownames_to_column('term') %>%
     janitor::clean_names() %>%
     rename(intercept = estimate) %>%
-    mutate(sd = region_sd,
-           singular = singular)
+    mutate(singular = singular)
   
   region_output <- region_output %>%
     bind_rows(ttable)
@@ -1345,7 +1365,7 @@ table_output <- cti_95_out %>%
   arrange(region_lat_name) %>%
   mutate(type = case_when(singular == TRUE ~ 'BLME',
                           singular == FALSE ~ 'LME')) %>%
-  relocate(region_label, model, type, aic, model_stdev) %>%
+  relocate(region_label, model, type, aic, random_variance, residual_variance) %>%
   select(!c(region_name, avg_region_lat, region_lat_name)) %>%
   mutate(term = case_when(term == '(Intercept)' ~ "Intercept",
                           #term == '(Intercept)' ~ stringr::str_to_sentence(paste0(model, " intercept")),
@@ -1354,8 +1374,7 @@ table_output <- cti_95_out %>%
                           term == 'site_temp75' ~ '75th percentile SST',
                           term == 'sst_mean' ~ 'Mean SST',
                           TRUE ~ term)) %>%
-  select(!c(singular)) %>%
-  relocate(sd, .before = df)
+  select(!c(singular))
 
 table_random <- cti_95_random %>%
   bind_rows(cti_75_random, cti_mean_random, cti_upwelling_random) %>%

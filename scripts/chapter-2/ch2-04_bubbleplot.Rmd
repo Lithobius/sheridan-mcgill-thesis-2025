@@ -432,14 +432,14 @@ ggsave(filename = here(ranges, paste0(datefield, 'peco_edna_bubble-plot_region-g
 ```{r loop}
 # setup
 #set number of pages to plot over
-npages<-length(unique(mifish_edna$year))
+npages<-length(unique(edna_peco$year))
 
 
 #ridgeline by latitude
 for(i in 1:npages){
   target_year <- 2020 + i
   
-  bubble_plot_loop_data <- mifish_edna %>%
+  bubble_plot_loop_data <- edna_peco %>%
   filter(year == target_year) %>%
   select(found_taxa, common_name, region_name, 
          site_code, motu_pa, taxa_mean) %>%
@@ -952,7 +952,7 @@ fish_lit <- read_csv(here('rawdata', 'peco', '20250626_range-from-literature.csv
 
 # obisgbif
 bigdat_fish <-  read_csv(here('processeddata','bigdata',
-               '20250626_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
+               '20251113_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
   # taxonomic revision
   mutate(scientific_name = case_when(scientific_name == 'Syngnathus leptorhynchus' ~ 'Syngnathus californiensis',
                                      scientific_name == 'Gasterosteus aculeatus aculeatus' ~ 'Gasterosteus aculeatus',
@@ -975,7 +975,7 @@ region_order2 <- region_order %>%
   arrange(avg_region_lat)
 
 # prevalence
-samplesite <- mifish_edna %>% 
+samplesite <- edna_peco %>% 
   select(sample_id, year, site_code) %>%
   distinct() %>%
   left_join(regions) %>%
@@ -992,7 +992,7 @@ samplesite <- mifish_edna %>%
            #n_sampleregioncode_year, n_sampleregioncode,
            .before = region_code) 
 
-prevalence_sp <- mifish_edna %>%
+prevalence_sp <- edna_peco %>%
   filter(rank == 'species') %>%
   select(sample_id, site_code, year, found_taxa, common_name) %>%
   distinct() %>%
@@ -1006,7 +1006,7 @@ prevalence_sp <- mifish_edna %>%
   distinct()
 
 
-bubble_plot_data_sp <- mifish_edna %>%
+bubble_plot_data_sp <- edna_peco %>%
   select(found_taxa, common_name, year, region_name, site_code, 
          motu_pa, taxa_min, taxa_max, taxa_median) %>%
   distinct() %>%
@@ -1039,7 +1039,7 @@ bubble_plot_data_sp %>%
   scale_y_continuous(limits = c(32,60)) +
   theme_bw() +
   labs(title = 'Pacific herring') +
-  theme(axis.text = element_text(size = 8, family = 'muli'),
+  theme(axis.text = element_text(size = 8),
         panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45'),
         axis.title.y = element_blank(),
         axis.text.y = element_text(size = 8),
@@ -1091,7 +1091,7 @@ for(i in 1:length(splist)){
   scale_y_continuous(limits = c(32,60)) +
   theme_bw() +
   labs(title = paste0(target_sp)) +
-  theme(axis.text = element_text(size = 8, family = 'muli'),
+  theme(axis.text = element_text(size = 8),
         axis.title.y = element_blank(),
         axis.text.y = element_text(size = 8),
         axis.title.x = element_blank(),
@@ -1115,6 +1115,7 @@ for(i in 1:length(splist)){
 ```{r}
 unique(edna_peco$found_taxa)
 unique(edna_peco$site_code)
+length(unique(edna_peco$found_taxa))
 length(unique(edna_peco$sample_id))
 ```
 

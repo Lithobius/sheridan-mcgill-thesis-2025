@@ -41,7 +41,7 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 
 ```{r loadin}
 # region info for plotting
-regions <- read_csv(here(dataedna, '20251111_peco_region-name-plotting.csv'))[-1] %>%
+regions <- read_csv(here(dataedna, '20251113_peco_region-name-plotting.csv'))[-1] %>%
   rename(region_label = region_name_label)
 
 region_order <- regions %>%
@@ -56,8 +56,6 @@ site_order <- regions %>%
 # for separate sf and nc
 site_order2 <- regions %>%
   select(site_code, decimal_latitude) %>%
-  mutate(decimal_latitude = case_when(site_code == 'NC_WP' ~ 38,
-                                      TRUE ~ decimal_latitude)) %>%
   arrange(decimal_latitude)
 
 # region/site environmental data
@@ -72,17 +70,18 @@ region_temps <- region_environment %>%
   distinct() 
 
 site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
-                                    '20250713_summer-sst-summary-stats_by-site.csv')) %>%
-    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_label)) %>%
-  mutate(site_code = case_when(site_code == 'HB_SB' ~ 'HB_SR',
-                               TRUE ~ site_code)) %>%
-  select(!avg_region_lat) %>%
-  mutate(decimal_latitude = case_when(site_code == 'HB_SR' ~ 40.77235,
-                                      TRUE ~ decimal_latitude)) %>%
-    mutate(decimal_longitude = case_when(site_code == 'HB_SR' ~ -124.2124,
-                                      TRUE ~ decimal_longitude)) %>%
-  distinct(site_code, year, .keep_all = TRUE)
+                                    '20251113_summer-sst-summary-stats_by-site.csv')) #%>%
+  #   mutate(region_label = case_when(site_code == 'NC_WP' ~ 'Bodega Bay, California',
+  #                                   region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+  #                                      TRUE ~ region_label)) %>%
+  # mutate(site_code = case_when(site_code == 'HB_SB' ~ 'HB_SR',
+  #                              TRUE ~ site_code)) %>%
+  # select(!avg_region_lat) %>%
+  # mutate(decimal_latitude = case_when(site_code == 'HB_SR' ~ 40.77235,
+  #                                     TRUE ~ decimal_latitude)) %>%
+  #   mutate(decimal_longitude = case_when(site_code == 'HB_SR' ~ -124.2124,
+  #                                     TRUE ~ decimal_longitude)) %>%
+  # distinct(site_code, year, .keep_all = TRUE)
 
 site_temps <- site_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%

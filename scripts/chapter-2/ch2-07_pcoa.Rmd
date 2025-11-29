@@ -132,7 +132,7 @@ obisgbif_mifish_upgma <- recluster.cons(sitesp_all_pa,
 
 # write tree
 ape::write.tree(obisgbif_mifish_upgma$cons, 
-                here(pcoa_out, paste0(datefield, 'obisgbif-mifish_clusters-site.tre')))
+                here(pcoa_out, paste0(datefield, 'obisgbif-mifish_clusters-site-year.tre')))
 
 # looking at cuts
 # expldiss shows cluster attribution for each cut, 
@@ -177,11 +177,11 @@ ggplot(obisgbif_mifish_plot, aes(x = axis_1, y = axis_2)) +
         axis.title = element_blank()
         )
 
-ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site.png')),
+ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site-year.png')),
        device = 'png', dpi=300, height = 8, width= 13,  units = "in")
 
-ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site.pdf')),
-       device = 'pdf', dpi=300, height = 8, width= 13,  units = "in")
+ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site-year.pdf')),
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
 
 # centroids of clusters
 obisgbif_centroid <- obisgbif_mifish_plot %>%
@@ -220,16 +220,16 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-siteyear-motu-
 ```
 
 ```{r obisgbif tree}
-obisgbif_cons <- read.tree(here(pcoa_out, 
-                                '20251117_obisgbif-mifish_clusters-site.tre'))
+obisgbif_cons_y <- read.tree(here(pcoa_out, 
+                                '20251117_obisgbif-mifish_clusters-site-year.tre'))
 #check for polytomies? true = good
-is.binary(obisgbif_cons)
+is.binary(obisgbif_cons_y)
 
 #set up labels
 obisgbif_tree_plot <- obisgbif_mifish_plot %>%
   mutate(tip.label = as.factor(region_label))
 
-ggtree(obisgbif_cons,
+ggtree(obisgbif_cons_y,
        # we only want the topology
        branch.length = 'none')  %<+%
   # add labels and coloring to ggtree
@@ -306,7 +306,7 @@ obisgbif_mifish_expldiss <- recluster.expl.diss(obisgbif_mifish_upgma$cons,
 obisgbif_mifish_expldiss
 
 # extracting group identities from matrix at chosen cut (column)
-obisgbif_mifish_clusters <- obisgbif_mifish_expldiss$matrix[,1] %>%
+obisgbif_mifish_clusters <- obisgbif_mifish_expldiss$matrix[,10] %>%
   as.data.frame()
 
 # prepare to plot
@@ -343,7 +343,7 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-mifish.png')),
        device = 'png', dpi=300, height = 8, width= 13,  units = "in")
 
 ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-mifish.pdf')),
-       device = 'pdf', dpi=300, height = 8, width= 13,  units = "in")
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
 
 # centroids of clusters
 obisgbif_centroid <- obisgbif_mifish_plot %>%
@@ -508,7 +508,7 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site_unfiltere
        device = 'png', dpi=300, height = 8, width= 13,  units = "in")
 
 ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site_unfiltered.pdf')),
-       device = 'pdf', dpi=300, height = 8, width= 13,  units = "in")
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
 ```
 
 ```{r unfiltered-tree}
@@ -1351,7 +1351,7 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'peco_pcoa-site-motu-site.png
        device = 'png', dpi=300, height = 8, width= 13,  units = "in")
 
 ggsave(filename = here(pcoa_out, paste0(datefield, 'peco_pcoa-site-motu-site.pdf')),
-       device = 'pdf', dpi=300, height = 8, width= 13,  units = "in")
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
 
 
 
@@ -1424,15 +1424,161 @@ ggsave(filename = here(pcoa_out, paste0(datefield,'region-tree_site.pdf')),
        height = 11,
        width = 4,
        unit = 'in')
+```
+# motu sq
+semiquantitative
 
 
+# species site
+
+```{r}
+set.seed(2021)
+
+site_pa <- mifish_edna %>%
+  filter(rank == 'species') %>%
+  # for some reason this one isn't showing up as a species
+  # region name clumps nearby partners, region code does not
+  select(found_taxa, motu_pa, site_code) %>%
+  filter(!(is.na(site_code))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = site_code,
+              names_from = found_taxa, 
+              values_from = motu_pa) %>%
+  column_to_rownames('site_code') %>%
+  # make binary
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0)))
+
+#distance matrix
+mifish_site_jaccard <- as.matrix(vegdist(site_pa, method = 'jaccard', binary = T))
+
+#pcoa
+mifish_site_pcoa <- pcoa(mifish_site_jaccard)
+#vectors for plotting
+mifish_site_pcoa_plot <- as.data.frame(mifish_site_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('site')
+
+
+# basic clustering
+
+
+# note most of these settings are default
+# consensus tree of 100 trees
+mifish_site_upgma <- recluster.cons(site_pa, 
+                              dist = 'jaccard', 
+                              method = 'average',
+                              tr = 100,
+                              p = .5)
+
+# looking at cuts
+# expldiss shows cluster attribution for each cut, 
+## explained dissimilarity, and resulting clusters, so we can pick:
+# pick cut that represents > 90% dissimilarity ($expl.div)
+#NOTE: identical before and after polytomies
+mifish_site_expldiss <- recluster.expl.diss(mifish_site_upgma$cons, mifish_site_jaccard)
+mifish_site_expldiss
+
+# extracting group identities from matrix at chosen cut (column)
+mifish_site_clusters <- mifish_site_expldiss$matrix[,11] %>%
+  as.data.frame()
+
+
+# prepare to plot
+# combine cluster identities with PCoA axes and metadata
+mifish_site_plot <- mifish_site_clusters %>%
+  rename(cluster = '.') %>%
+  rownames_to_column('site') %>%
+  left_join(mifish_site_pcoa_plot) %>%
+  left_join(mifish_edna, by = c('site' = 'site_code')) %>%
+  select(site, cluster, axis_1, axis_2,
+         region_code, year) %>%
+  distinct() %>%
+  left_join(regions) %>%
+  select(!c(site_code, decimal_latitude, decimal_longitude)) %>%
+  distinct()
+
+# MB only has 2 points
+mb_site_line <- mifish_site_plot %>%
+  filter(region_code == "CA_MB")
+
+
+ggplot(mifish_site_plot, aes(x = axis_1, y = axis_2)) +
+  geom_convexhull(aes(fill = as.factor(region_label)),
+                  alpha=0.4) +
+          # line between morro bay dots
+  geom_line(data = mb_site_line, 
+            aes(x = axis_1, y = axis_2),
+            color = "#E56512",
+            alpha = 0.4,
+            size =3) +
+  scale_fill_manual(values = pal_2or,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label)+
+  geom_point(aes(x = axis_1, y = axis_2, 
+                 col = as.factor(region_label)
+                 ))+
+  scale_color_manual(values = pal_2or,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label)+
+  theme_bw()+
+  #labs(title = 'Mifish PECO partners') +
+  theme(#legend.position = 'bottom',
+    legend.position = 'none',
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        title = element_blank())
+
+ggsave(filename = here(pcoa_out, paste0(datefield, 'peco_pcoa-site-sp.png')),
+       device = 'png', dpi=300, height = 8, width= 13,  units = "in")
+
+ggsave(filename = here(pcoa_out, paste0(datefield, 'peco_pcoa-site-sp.pdf')),
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
 ```
 
+```{r}
+# write tree
+ape::write.tree(mifish_site_upgma$cons, here(pcoa_out, paste0(datefield, 'region-site_clusters-sp.tre')))
 
+mifish_cons <- read.tree(here(pcoa_out, paste0(datefield, 'region-site_clusters-sp.tre')))
+#check for polytomies? true = good
+is.binary(mifish_cons)
 
+mifish_tree_plot <- mifish_site_plot %>%
+  #mutate(node = as.numeric(cluster)) %>%
+  mutate(tip.label = as.factor(region_label)) 
 
+#tr_data <- mifish_tree$data 
 
+ggtree(mifish_cons,
+       branch.length = 'none') %<+% 
+  # add labels and coloring to ggtree
+  mifish_tree_plot +
+  geom_text(aes(label=region_label), 
+            # slightly off the tips
+            position = position_nudge(x = -.05, y = -.5),
+            # left justify
+            #hjust=1, 
+          size=5) +
+  geom_point(aes(fill = region_label),
+             shape = 22,
+             position = position_nudge(x = .015, y = 0),
+             size = 3) +
+  scale_fill_manual(values = pal_2or)+
+  #scale_shape_manual(values = shape_pal) +
+  geom_text(aes(label=cluster), 
+            hjust=0, vjust=0, size=3)+
+  #scale_x_reverse(expand = c(0, .5)) +
+  theme(#plot.margin = unit(c(2,1,1,4), "cm"),
+        legend.position = 'none') 
 
+ggsave(filename = here(pcoa_out, paste0(datefield,'region-tree_sp-site.pdf')),
+       height = 11,
+       width = 4,
+       unit = 'in')
+
+```
 
 
 # pc1 vs latitude

@@ -77,8 +77,8 @@ asv_50blast <- read_delim(here(fastq_path, paste0(datefield_new, runfield, 'swar
   mutate(across(kingdom:genus, ~ na_if(., "")))
 
 # asv numbers to join with the blast results
-asv_key <- read_csv(here(fastq_path, '20251111_peco-combined_12s_lulu_asv2asv.csv')) %>%
-  rename(asv = asv_lulu)
+asv_key <- read_csv(here(fastq_path, '20251111_peco-combined_12s_lulu_motu2asv.csv')) %>%
+  rename(motu = motu_lulu)
 ```
 # assignment
 
@@ -573,7 +573,7 @@ asv132: bacteria
 asv871: ralstonia bacteria etc.
 
 ```{r assign new}
-taxonomy_assigned_asv <- motu_key %>%
+taxonomy_assigned_asv <- asv_key %>%
   full_join(blast_updates) %>%
   # update based on research
   mutate(found_taxa = case_when(found_taxa == 'Merluccius angustimanus' ~ 'Merluccius',
@@ -671,10 +671,10 @@ taxonomy_assigned_motu <- taxonomy_assigned_asv %>%
   mutate(found_taxa_motu = case_when(one_hit == 'yes' ~ found_taxa,
                                      one_com == 'yes' ~ common_name,
                                      one_com == 'no' & rank == 'offtarget' ~ 'Unknown organism',
-                                     !is.na(sp_100) ~ sp_100,
-                                     !is.na(higher_taxa) ~ higher_taxa,
                                      !is.na(fam_100) ~ fam_100,
                                      !is.na(gen_100) ~ gen_100,
+                                     !is.na(sp_100) ~ sp_100,
+                                     !is.na(higher_taxa) ~ higher_taxa,
                                      sp_conflict == 'one genus' ~ genus)) %>%
   select(!c(one_hit, one_com, sp_100, higher_taxa, fam_100, gen_100, sp_conflict,
             motu_swarm, curated, lulu_rank, low_match, very_low_match, extremely_low_match,

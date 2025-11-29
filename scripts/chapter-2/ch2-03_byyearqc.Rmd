@@ -39,7 +39,7 @@ metadata <- read_csv(here(edna_combined, '20251107_peco-combined_metadata.csv'))
                                        TRUE ~ region_name_label))
 
 
-taxonomy <- read_csv(here(edna_combined, '20251111_peco-combined_12s_taxonomy.csv'))
+taxonomy <- read_csv(here(edna_combined, '20251113_peco-combined_12s_taxonomy.csv'))
 
 motu2asvs <- read_csv(here(fastq, 'allyears', 
                            '20251111_peco-combined_12s_lulu_motu2asv.csv'))
@@ -1127,6 +1127,56 @@ pheatmap(wis_taxa,
          main = 'Wisconsin with Vegan',
          na_col = 'black')
 dev.off()
+
+# pngs
+png(file = here('output', 'controls', 'untransformed_large.png'),
+    width = 800, height = 500)
+pheatmap(fishonly_taxa_otus, 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         legend = FALSE,
+         show_rownames = F,
+         show_colnames = F,
+         main = 'Untransformed',
+         na_col = 'white')
+dev.off()
+
+png(file = here('output', 'controls', 'vst_large.png'),
+    width = 800, height = 500)
+pheatmap(assay(vsd_taxa), 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         legend = FALSE,
+         show_rownames = F,
+         show_colnames = F,
+         main = 'VST with DESeq2',
+         na_col = 'white')
+dev.off()
+
+png(file = here('output', 'controls', 'wisconsin_large.png'),
+    width = 800, height = 500)
+pheatmap(wis_taxa, 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         legend = FALSE,
+         show_rownames = F,
+         show_colnames = F,
+         main = 'Wisconsin with Vegan',
+         na_col = 'black')
+dev.off()
+
+
+png(file = here('output', 'controls', 'wisconsin_large2.png'),
+    width = 800, height = 500)
+pheatmap(wis_taxa, 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         legend = TRUE,
+         show_rownames = F,
+         show_colnames = F,
+         main = 'Wisconsin with Vegan',
+         na_col = 'black')
+dev.off()
 ```
 
 
@@ -1182,6 +1232,7 @@ ggplot(fishonly_pcoa_plot, aes(x = axis_1, y = axis_2)) +
   theme_bw()
 
 ggsave(here('output', 'controls',  'unadjusted_pcoa.png'))
+ggsave(here('output', 'controls',  'unadjusted_pcoa.pdf'))
 
 ggplot(vsd_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
   geom_point(aes(x = axis_1, y = axis_2,
@@ -1190,6 +1241,7 @@ ggplot(vsd_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
   theme_bw()
 
 ggsave(here('output', 'controls',  'vst_pcoa.png'))
+ggsave(here('output', 'controls',  'vst_pcoa.pdf'))
 
 ggplot(wis_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
   geom_point(aes(x = axis_1, y = axis_2,
@@ -1198,6 +1250,7 @@ ggplot(wis_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
   theme_bw()
 
 ggsave(here('output', 'controls',  'wisconsin_pcoa.png'))
+ggsave(here('output', 'controls',  'wisconsin_pcoa.pdf'))
 
 ```
 

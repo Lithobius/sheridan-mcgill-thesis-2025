@@ -2138,7 +2138,7 @@ Embiotoca lateralis,Striped seaperch,species,motu42,ASV3330,Embiotoca lateralis,
 Embiotoca lateralis,Striped seaperch,species,motu42,ASV3817,Embiotoca lateralis,Striped seaperch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Embiotoca,0
 Embiotoca lateralis,Striped seaperch,species,motu42,ASV45,Embiotoca lateralis,Striped seaperch,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Embiotoca,0
 Embiotoca lateralis,Striped seaperch,species,motu1592,ASV4064,Embiotoca lateralis,Striped seaperch,species,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Embiotoca,0
-Phanerodon vacca,Pile perch,species,motu32,ASV188,Embiotocidae,Surfperch family,family,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,NA,0
+Embiotocidae,Surfperch family,family,motu32,ASV188,Embiotocidae,Surfperch family,family,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,NA,0
 Embiotocidae,Surfperch family,family,motu105,ASV149,Embiotocidae,Surfperch family,family,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,NA,0
 Embiotocidae,Surfperch family,family,motu105,ASV2113,Embiotocidae,Surfperch family,family,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,NA,0
 Embiotocidae,Surfperch family,family,motu105,ASV2419,Embiotocidae,Surfperch family,family,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,NA,0
@@ -2599,13 +2599,13 @@ Hexagrammos decagrammus,Kelp greenling,species,motu28,ASV3998,Hexagrammos decagr
 Hexagrammos decagrammus,Kelp greenling,species,motu28,ASV30,Hexagrammos decagrammus,Kelp greenling,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Perciformes,Hexagrammidae,Hexagrammos,0
 Hexagrammos decagrammus,Kelp greenling,species,motu894,ASV2539,Hexagrammos decagrammus,Kelp greenling,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Perciformes,Hexagrammidae,Hexagrammos,0
 Hexagrammos decagrammus,Kelp greenling,species,motu1220,ASV3336,Hexagrammos decagrammus,Kelp greenling,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Perciformes,Hexagrammidae,Hexagrammos,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV53,Hippoglossus stenolepis,Pacific halibut,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV502,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV1553,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV2056,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV2152,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV3258,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV53,Hippoglossus stenolepis,Pacific halibut,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV53,Hippoglossus stenolepis,Pacific halibut,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV502,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV1553,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV2056,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV2152,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV3258,Hippoglossus stenolepis,Pacific halibut,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
+Pleuronectidae,Flatfish family,family,motu49,ASV53,Hippoglossus stenolepis,Pacific halibut,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
 Hippoglossus stenolepis,Pacific halibut,species,motu1575,ASV4037,Hippoglossus stenolepis,Pacific halibut,species,98.225,7.36e-80,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Hippoglossus,0
 Hydrolagus colliei,Spotted ratfish,species,motu172,ASV359,Hydrolagus colliei,Spotted ratfish,species,100,4.72e-92,Eukaryota,Chordata,Holocephali,Chimaeriformes,Chimaeridae,Hydrolagus,0
 Hydrolagus colliei,Spotted ratfish,species,motu172,ASV3257,Hydrolagus colliei,Spotted ratfish,species,99.451,7.859999999999999e-90,Eukaryota,Chordata,Holocephali,Chimaeriformes,Chimaeridae,Hydrolagus,0
@@ -2650,8 +2650,8 @@ Lepidogobius lepidus,Bay goby,species,motu68,ASV79,Lepidogobius lepidus,Bay goby
 Lepidogobius lepidus,Bay goby,species,motu532,ASV1484,Lepidogobius lepidus,Bay goby,species,98.81,2.0300000000000002e-80,Eukaryota,Chordata,Teleostei,Gobiiformes,Gobiidae,Lepidogobius,0
 Lepidogobius lepidus,Bay goby,species,motu1326,ASV3553,Lepidogobius lepidus,Bay goby,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Gobiiformes,Gobiidae,Lepidogobius,0
 Lepidogobius lepidus,Bay goby,species,motu1559,ASV4012,Lepidogobius lepidus,Bay goby,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Gobiiformes,Gobiidae,Lepidogobius,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV485,Lepidopsetta,Sole species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV4002,Lepidopsetta,Sole species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
+Pleuronectidae,Flatfish family,family,motu16,ASV485,Lepidopsetta,Sole species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
+Pleuronectidae,Flatfish family,family,motu16,ASV4002,Lepidopsetta,Sole species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
 Lepidopsetta,Sole species,genus,motu56,ASV62,Lepidopsetta,Sole species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
 Lepidopsetta,Sole species,genus,motu56,ASV660,Lepidopsetta,Sole species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
 Lepidopsetta,Sole species,genus,motu56,ASV2855,Lepidopsetta,Sole species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Lepidopsetta,0
@@ -2920,45 +2920,45 @@ Mugil cephalus,Flathead grey mullet,species,motu20,ASV2872,Mugil cephalus,Flathe
 Mugil cephalus,Flathead grey mullet,species,motu20,ASV20,Mugil cephalus,Flathead grey mullet,species,100,5.7300000000000005e-86,Eukaryota,Chordata,Teleostei,Mugiliformes,Mugilidae,Mugil,0
 Mugil cephalus,Flathead grey mullet,species,motu1532,ASV3963,Mugil cephalus,Flathead grey mullet,species,98.83,1.24e-82,Eukaryota,Chordata,Teleostei,Mugiliformes,Mugilidae,Mugil,0
 Myliobatis californica,Bat ray,species,motu770,ASV2142,Myliobatis californica,Bat ray,species,100,1.6900000000000002e-91,Eukaryota,Chordata,Elasmobranchii,Myliobatiformes,Myliobatidae,Myliobatis,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV14,Myoxocephalus,Myoxocephalus sculpin species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV434,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1121,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1124,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1347,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1593,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1769,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1802,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1841,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1870,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1965,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2045,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2165,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2252,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2408,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2460,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2610,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2653,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2738,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2838,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2913,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3002,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3006,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3122,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3211,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3293,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3299,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3467,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3754,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3775,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3808,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3841,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3855,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3870,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3881,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2241,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,1
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3858,Myoxocephalus,Myoxocephalus sculpin species,genus,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3940,Myoxocephalus,Myoxocephalus sculpin species,genus,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV14,Myoxocephalus,Myoxocephalus sculpin species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV14,Myoxocephalus,Myoxocephalus sculpin species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV434,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1121,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1124,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1347,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1593,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1769,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1802,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1841,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1870,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1965,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2045,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2165,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2252,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2408,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2460,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2610,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2653,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2738,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2838,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2913,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3002,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3006,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3122,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3211,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3293,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3299,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3467,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3754,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3775,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3808,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3841,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3855,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3870,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3881,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2241,Myoxocephalus,Myoxocephalus sculpin species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,1
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3858,Myoxocephalus,Myoxocephalus sculpin species,genus,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3940,Myoxocephalus,Myoxocephalus sculpin species,genus,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV14,Myoxocephalus,Myoxocephalus sculpin species,genus,100,7.31e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus,Myoxocephalus sculpin species,genus,motu151,ASV288,Myoxocephalus,Myoxocephalus sculpin species,genus,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,1
 Myoxocephalus,Myoxocephalus sculpin species,genus,motu1073,ASV2987,Myoxocephalus,Myoxocephalus sculpin species,genus,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus,Myoxocephalus sculpin species,genus,motu1112,ASV3081,Myoxocephalus,Myoxocephalus sculpin species,genus,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
@@ -2970,43 +2970,43 @@ Myoxocephalus,Myoxocephalus sculpin species,genus,motu1400,ASV3694,Myoxocephalus
 Myoxocephalus,Myoxocephalus sculpin species,genus,motu1425,ASV3749,Myoxocephalus,Myoxocephalus sculpin species,genus,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus,Myoxocephalus sculpin species,genus,motu1544,ASV3990,Myoxocephalus,Myoxocephalus sculpin species,genus,98.225,7.36e-80,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus,Myoxocephalus sculpin species,genus,motu1563,ASV4021,Myoxocephalus,Myoxocephalus sculpin species,genus,98.225,7.36e-80,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,1
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV158,Myoxocephalus stelleri,Steller's sculpin,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV205,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1318,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1683,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1885,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV1906,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2078,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2190,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2268,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2286,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2349,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2767,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2847,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2857,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2938,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2979,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2995,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3091,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3140,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3337,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3371,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3400,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3430,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3489,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3511,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3599,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3701,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3713,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3891,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3897,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3987,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV4032,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV4140,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2447,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV2813,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV3874,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
-Myoxocephalus stelleri,Steller's sculpin,species,motu14,ASV4040,Myoxocephalus stelleri,Steller's sculpin,species,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV158,Myoxocephalus stelleri,Steller's sculpin,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV205,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1318,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1683,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1885,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV1906,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2078,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2190,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2268,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2286,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2349,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2767,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2847,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2857,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2938,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2979,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2995,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3091,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3140,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3337,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3371,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3400,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3430,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3489,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3511,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3599,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3701,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3713,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3891,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3897,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3987,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV4032,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV4140,Myoxocephalus stelleri,Steller's sculpin,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2447,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV2813,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV3874,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
+Myoxocephalus,Myoxocephalus sculpin species,genus,motu14,ASV4040,Myoxocephalus stelleri,Steller's sculpin,species,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus stelleri,Steller's sculpin,species,motu282,ASV705,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus stelleri,Steller's sculpin,species,motu587,ASV1652,Myoxocephalus stelleri,Steller's sculpin,species,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
 Myoxocephalus stelleri,Steller's sculpin,species,motu683,ASV1925,Myoxocephalus stelleri,Steller's sculpin,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Myoxocephalus,0
@@ -3524,10 +3524,10 @@ Oligocottus snyderi,Fluffy sculpin,species,motu139,ASV255,Oligocottus snyderi,Fl
 Oligocottus snyderi,Fluffy sculpin,species,motu139,ASV1425,Oligocottus snyderi,Fluffy sculpin,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Oligocottus,0
 Oligocottus snyderi,Fluffy sculpin,species,motu139,ASV255,Oligocottus snyderi,Fluffy sculpin,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Oligocottus,0
 Oligocottus snyderi,Fluffy sculpin,species,motu1107,ASV3068,Oligocottus snyderi,Fluffy sculpin,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Perciformes,Cottidae,Oligocottus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1110,Oncorhynchus,Salmon species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2196,Oncorhynchus,Salmon species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV665,Oncorhynchus,Salmon species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV690,Oncorhynchus,Salmon species,genus,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,1
+Oncorhynchus,Salmon species,genus,motu11,ASV1110,Oncorhynchus,Salmon species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2196,Oncorhynchus,Salmon species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV665,Oncorhynchus,Salmon species,genus,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV690,Oncorhynchus,Salmon species,genus,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,1
 Oncorhynchus,Salmon species,genus,motu697,ASV1959,Oncorhynchus,Salmon species,genus,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus,Salmon species,genus,motu818,ASV2304,Oncorhynchus,Salmon species,genus,99.408,3.42e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,1
 Oncorhynchus,Salmon species,genus,motu886,ASV2514,Oncorhynchus,Salmon species,genus,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
@@ -3535,12 +3535,12 @@ Oncorhynchus clarkii,Cutthroat trout,species,motu101,ASV142,Oncorhynchus clarkii
 Oncorhynchus clarkii,Cutthroat trout,species,motu101,ASV1114,Oncorhynchus clarkii,Cutthroat trout,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus clarkii,Cutthroat trout,species,motu101,ASV1880,Oncorhynchus clarkii,Cutthroat trout,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus clarkii,Cutthroat trout,species,motu101,ASV142,Oncorhynchus clarkii,Cutthroat trout,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1139,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1139,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2105,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2105,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2560,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2560,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1139,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1139,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2105,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2105,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2560,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2560,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus gorbuscha,Pink salmon,species,motu15,ASV15,Oncorhynchus gorbuscha,Pink salmon,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus gorbuscha,Pink salmon,species,motu15,ASV15,Oncorhynchus gorbuscha,Pink salmon,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus gorbuscha,Pink salmon,species,motu15,ASV271,Oncorhynchus gorbuscha,Pink salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
@@ -3607,71 +3607,71 @@ Oncorhynchus gorbuscha,Pink salmon,species,motu1817,ASV4401,Oncorhynchus gorbusc
 Oncorhynchus gorbuscha,Pink salmon,species,motu1817,ASV4401,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus gorbuscha,Pink salmon,species,motu1870,ASV4475,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus gorbuscha,Pink salmon,species,motu1870,ASV4475,Oncorhynchus gorbuscha,Pink salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV11,Oncorhynchus keta,Chum salmon,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV111,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV216,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV287,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV294,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV443,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV449,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV484,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV486,Oncorhynchus keta,Chum salmon,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV504,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV518,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV672,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV694,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV720,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV785,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV798,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV881,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV949,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV954,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV959,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1093,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1148,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1182,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1201,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1210,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1246,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1302,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1303,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1310,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1433,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1434,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1442,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1561,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1607,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1647,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1651,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1711,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1736,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1774,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1826,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1833,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1943,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1992,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2068,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2151,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2204,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2370,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2467,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2525,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2564,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2568,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2756,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2761,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2800,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2827,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2860,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2886,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2947,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2949,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2952,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV3172,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV132,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1602,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2321,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV11,Oncorhynchus keta,Chum salmon,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV11,Oncorhynchus keta,Chum salmon,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV111,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV216,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV287,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV294,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV443,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV449,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV484,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV486,Oncorhynchus keta,Chum salmon,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV504,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV518,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV672,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV694,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV720,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV785,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV798,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV881,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV949,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV954,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV959,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1093,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1148,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1182,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1201,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1210,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1246,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1302,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1303,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1310,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1433,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1434,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1442,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1561,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1607,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1647,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1651,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1711,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1736,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1774,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1826,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1833,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1943,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1992,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2068,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2151,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2204,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2370,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2467,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2525,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2564,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2568,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2756,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2761,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2800,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2827,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2860,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2886,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2947,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2949,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2952,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV3172,Oncorhynchus keta,Chum salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV132,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1602,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2321,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV11,Oncorhynchus keta,Chum salmon,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus keta,Chum salmon,species,motu301,ASV782,Oncorhynchus keta,Chum salmon,species,99.405,1.2199999999999999e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus keta,Chum salmon,species,motu913,ASV2589,Oncorhynchus keta,Chum salmon,species,98.225,7.36e-80,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus keta,Chum salmon,species,motu1120,ASV3108,Oncorhynchus keta,Chum salmon,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
@@ -3689,20 +3689,20 @@ Oncorhynchus kisutch,Coho salmon,species,motu37,ASV2960,Oncorhynchus kisutch,Coh
 Oncorhynchus kisutch,Coho salmon,species,motu37,ASV3054,Oncorhynchus kisutch,Coho salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus kisutch,Coho salmon,species,motu37,ASV3938,Oncorhynchus kisutch,Coho salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus kisutch,Coho salmon,species,motu37,ASV40,Oncorhynchus kisutch,Coho salmon,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV3136,Oncorhynchus mykiss,Rainbow trout / steelhead,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV3136,Oncorhynchus mykiss,Rainbow trout / steelhead,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus,Oncorhynchus salmon species,genus,motu506,ASV2571,Oncorhynchus mykiss,Rainbow trout / steelhead,species,97.059,4.46e-77,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV244,Oncorhynchus nerka,Sockeye salmon,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV604,Oncorhynchus nerka,Sockeye salmon,species,100,2.63e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV659,Oncorhynchus nerka,Sockeye salmon,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1052,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1306,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1391,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1407,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1954,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2329,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV3456,Oncorhynchus nerka,Sockeye salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV1700,Oncorhynchus nerka,Sockeye salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
-Oncorhynchus gorbuscha,Pink salmon,species,motu11,ASV2468,Oncorhynchus nerka,Sockeye salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV244,Oncorhynchus nerka,Sockeye salmon,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV604,Oncorhynchus nerka,Sockeye salmon,species,100,2.63e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV659,Oncorhynchus nerka,Sockeye salmon,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1052,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1306,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1391,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1407,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1954,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2329,Oncorhynchus nerka,Sockeye salmon,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV3456,Oncorhynchus nerka,Sockeye salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV1700,Oncorhynchus nerka,Sockeye salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
+Oncorhynchus,Salmon species,genus,motu11,ASV2468,Oncorhynchus nerka,Sockeye salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus nerka,Sockeye salmon,species,motu821,ASV2314,Oncorhynchus nerka,Sockeye salmon,species,98.824,4.43e-82,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus tshawytscha,Chinook salmon,species,motu30,ASV32,Oncorhynchus tshawytscha,Chinook salmon,species,100,2.05e-85,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
 Oncorhynchus tshawytscha,Chinook salmon,species,motu30,ASV103,Oncorhynchus tshawytscha,Chinook salmon,species,99.412,9.52e-84,Eukaryota,Chordata,Teleostei,Salmoniformes,Salmonidae,Oncorhynchus,0
@@ -3782,19 +3782,19 @@ Perciformes,Perciformes order,order,motu148,ASV281,Perciformes,Perciformes order
 Perciformes,Perciformes order,order,motu580,ASV1630,Perciformes,Perciformes order,order,94.675,7.46e-70,Eukaryota,Chordata,Teleostei,Perciformes,NA,NA,0
 Perciformes,Perciformes order,order,motu580,ASV1630,Perciformes,Perciformes order,order,94.675,7.46e-70,Eukaryota,Chordata,Teleostei,Perciformes,NA,NA,0
 Phalacrocoracidae,Cormorant,offtarget,motu819,ASV2310,Phalacrocoracidae,Cormorant,offtarget,92.697,3.7399999999999994e-68,Eukaryota,Chordata,Aves,Suliformes,Phalacrocoracidae,Phalacrocorax,NA
-Phanerodon vacca,Pile perch,species,motu32,ASV34,Phanerodon vacca,Pile perch,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV530,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV948,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV1690,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV2248,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV2641,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV2957,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV3076,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV3126,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV3605,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV4080,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV4322,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
-Phanerodon vacca,Pile perch,species,motu32,ASV34,Phanerodon vacca,Pile perch,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV34,Phanerodon vacca,Pile perch,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV530,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV948,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV1690,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV2248,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV2641,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV2957,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV3076,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV3126,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV3605,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV4080,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV4322,Phanerodon vacca,Pile perch,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
+Embiotocidae,Surfperch family,family,motu32,ASV34,Phanerodon vacca,Pile perch,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
 Phanerodon vacca,Pile perch,species,motu1517,ASV3932,Phanerodon vacca,Pile perch,species,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
 Phanerodon vacca,Pile perch,species,motu1661,ASV4166,Phanerodon vacca,Pile perch,species,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
 Phanerodon vacca,Pile perch,species,motu1880,ASV4490,Phanerodon vacca,Pile perch,species,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Ovalentaria incertae sedis,Embiotocidae,Phanerodon,0
@@ -4022,86 +4022,86 @@ Planctomycetes bacterium,Bacteria,offtarget,motu1768,ASV4324,Planctomycetes bact
 Planoglabratella opercularis,Foraminifera,offtarget,motu249,ASV589,Planoglabratella opercularis,Foraminifera,offtarget,100,2.31e-131,Eukaryota,Foraminifera,NA,Rotaliida,Glabratellidae,Planoglabratella,NA
 Planoglabratella opercularis,Foraminifera,offtarget,motu249,ASV3790,Planoglabratella opercularis,Foraminifera,offtarget,99.605,1.0799999999999998e-129,Eukaryota,Foraminifera,NA,Rotaliida,Glabratellidae,Planoglabratella,NA
 Planoglabratella opercularis,Foraminifera,offtarget,motu249,ASV589,Planoglabratella opercularis,Foraminifera,offtarget,100,2.31e-131,Eukaryota,Foraminifera,NA,Rotaliida,Glabratellidae,Planoglabratella,NA
-Platichthys stellatus,Starry flounder,species,motu16,ASV21,Platichthys stellatus,Starry flounder,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV236,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV295,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV381,Platichthys stellatus,Starry flounder,species,100,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV499,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV603,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV625,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV703,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV791,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV842,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1676,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1907,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1995,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2101,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2233,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2709,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2851,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3044,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3132,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3444,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3698,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3741,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1193,Platichthys stellatus,Starry flounder,species,99.398,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2283,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2748,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2888,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV21,Platichthys stellatus,Starry flounder,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV236,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV295,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV381,Platichthys stellatus,Starry flounder,species,100,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV499,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV603,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV625,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV703,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV791,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV842,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1676,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1907,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1995,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2101,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2233,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2709,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2851,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3044,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3132,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3444,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3698,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3741,Platichthys stellatus,Starry flounder,species,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1193,Platichthys stellatus,Starry flounder,species,99.398,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2283,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2748,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2888,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
 Platichthys stellatus,Starry flounder,species,motu1018,ASV2867,Platichthys stellatus,Starry flounder,species,98.225,7.36e-80,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
 Platichthys stellatus,Starry flounder,species,motu1207,ASV3315,Platichthys stellatus,Starry flounder,species,97.633,1.22e-77,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
 Platichthys stellatus,Starry flounder,species,motu1308,ASV3526,Platichthys stellatus,Starry flounder,species,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
 Platichthys stellatus,Starry flounder,species,motu1558,ASV4011,Platichthys stellatus,Starry flounder,species,97.619,1.23e-77,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,Platichthys,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV16,Pleuronectidae,Flatfish family,family,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV179,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV198,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV289,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV339,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV433,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV576,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1088,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1172,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1295,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1386,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1491,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1570,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1893,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV1989,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2026,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2030,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2189,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2348,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2359,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2391,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2533,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2614,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2631,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2837,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2881,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2887,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2953,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3025,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3072,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3197,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3353,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3365,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3466,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3594,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3618,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3619,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3893,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3896,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3899,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3988,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV609,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2041,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV2775,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3094,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV3740,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Platichthys stellatus,Starry flounder,species,motu16,ASV16,Pleuronectidae,Flatfish family,family,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV76,Pleuronectidae,Flatfish family,family,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV1497,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
-Hippoglossus stenolepis,Pacific halibut,species,motu49,ASV2433,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV16,Pleuronectidae,Flatfish family,family,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV179,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV198,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV289,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV339,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV433,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV576,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1088,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1172,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1295,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1386,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1491,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1570,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1893,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV1989,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2026,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2030,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2189,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2348,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2359,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2391,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2533,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2614,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2631,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2837,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2881,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2887,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2953,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3025,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3072,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3197,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3353,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3365,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3466,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3594,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3618,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3619,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3893,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3896,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3899,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3988,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV609,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2041,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV2775,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3094,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV3740,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu16,ASV16,Pleuronectidae,Flatfish family,family,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu49,ASV76,Pleuronectidae,Flatfish family,family,100,7.31e-85,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu49,ASV1497,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
+Pleuronectidae,Flatfish family,family,motu49,ASV2433,Pleuronectidae,Flatfish family,family,99.408,3.4e-83,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
 Pleuronectidae,Flatfish family,family,motu479,ASV1300,Pleuronectidae,Flatfish family,family,100,1.3899999999999999e-56,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
 Pleuronectidae,Flatfish family,family,motu654,ASV1822,Pleuronectidae,Flatfish family,family,98.225,7.36e-80,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
 Pleuronectidae,Flatfish family,family,motu671,ASV1881,Pleuronectidae,Flatfish family,family,98.817,1.58e-81,Eukaryota,Chordata,Teleostei,Pleuronectiformes,Pleuronectidae,NA,0
@@ -4334,23 +4334,23 @@ Sebastes,Rockfish species,genus,motu26,ASV3676,Sebastes,Rockfish species,genus,9
 Sebastes,Rockfish species,genus,motu26,ASV3424,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes,Rockfish species,genus,motu26,ASV3738,Sebastes,Rockfish species,genus,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes,Rockfish species,genus,motu26,ASV28,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV29,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV92,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV717,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV777,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV1133,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV1214,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV1464,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV1483,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV2656,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV2972,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV3218,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV3275,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV4083,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV1904,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV2507,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV3807,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV29,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV29,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV92,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV717,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV777,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV1133,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV1214,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV1464,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV1483,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV2656,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV2972,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV3218,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV3275,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV4083,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV1904,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV2507,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV3807,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV29,Sebastes,Rockfish species,genus,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes,Rockfish species,genus,motu284,ASV711,Sebastes,Rockfish species,genus,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes,Rockfish species,genus,motu324,ASV844,Sebastes,Rockfish species,genus,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes,Rockfish species,genus,motu324,ASV1854,Sebastes,Rockfish species,genus,98.214,2.6300000000000003e-79,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
@@ -4362,7 +4362,7 @@ Sebastes entomelas,Widow rockfish,species,motu116,ASV994,Sebastes entomelas,Wido
 Sebastes entomelas,Widow rockfish,species,motu116,ASV2975,Sebastes entomelas,Widow rockfish,species,99.405,1.2099999999999999e-82,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes entomelas,Widow rockfish,species,motu116,ASV175,Sebastes entomelas,Widow rockfish,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes gilli,Bronzespotted rockfish,species,motu1526,ASV3956,Sebastes gilli,Bronzespotted rockfish,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
-Sebastes nebulosus,China rockfish,species,motu27,ASV269,Sebastes nebulosus,China rockfish,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
+Sebastes,Rockfish species,genus,motu27,ASV269,Sebastes nebulosus,China rockfish,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes nebulosus,China rockfish,species,motu1407,ASV3710,Sebastes nebulosus,China rockfish,species,98.81,5.65e-81,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Sebastes paucispinis,Bocaccio rockfish,species,motu209,ASV454,Sebastes paucispinis,Bocaccio rockfish,species,100,2.61e-84,Eukaryota,Chordata,Teleostei,Perciformes,Sebastidae,Sebastes,0
 Seriola lalandi,Yellowtail amberjack,species,motu93,ASV129,Seriola lalandi,Yellowtail amberjack,species,100,7.31e-85,Eukaryota,Chordata,Teleostei,Carangiformes,Carangidae,Seriola,0

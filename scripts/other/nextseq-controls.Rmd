@@ -208,6 +208,12 @@ ggsave(here(plot_out, 'combinatorial_index.png'),
        height = 1500,
        unit = 'px')
 
+ggsave(here(plot_out, 'combinatorial_index.pdf'),
+       device = 'pdf',
+       width = 8.5,
+       height = 6,
+       unit = 'in')
+
 
 ggplot(nextseq_index_data) +
   geom_point(aes(x = index1_number,
