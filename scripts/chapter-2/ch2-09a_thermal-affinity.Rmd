@@ -243,18 +243,62 @@ ggsave(here(plotout, paste0(datefield, 'ctiyear_bysite_facetregion.png')),
 Realized upper thermal limit
 
 ```{r tbiasmax}
+# STI
 sti_peco <- edna_peco %>%
-  select(!c(region_code, decimal_latitude, decimal_longitude,
-            region_code_label)) %>%
+  select(!c(decimal_latitude, decimal_longitude,
+            extraction_blank, library,
+            seagrass_presence, seagrass_notes, describe_transect,
+            notes, collection_time_24h, notes_about_sample,
+            extraction_notes, organization_participants, reads_adjust,
+            filtration_comments, dna_extraction_date, biological_observations,
+            collection_method, treatment, evalue, identity_percentage,
+            relabund_wis_taxa, relabund_wis_motu, pcr_blank, 
+            #bsaredo, lab_notes, 
+            reads_adjust_fieldlab, reads_raw, reads_adjust_field,
+            reads_adjust_lab, kingdom, phylum, rain, asv)) %>%
   left_join(sti_obis) %>%
   filter(!is.na(max_temp)) %>%
   # temporary until I merge [1]
   janitor::remove_empty() %>%
   left_join(regions) %>%
-  select(!c(decimal_latitude, decimal_longitude, samples,
-            avg_region_lat, sites)) %>%
+  select(!c(decimal_latitude, decimal_longitude, samples, avg_region_lat,
+            sites, region_code_label, region_code, region_lat_name)) %>%
   distinct() %>%
-  relocate(sti_value, region_label, seq_method)
+  relocate(sti_value, region_label)
+  
+sti_environment <- sti_peco %>%
+  left_join(site_temps) %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE),
+         region_95 = mean(site_temp95, na.rm = TRUE),
+         region_75 = mean(site_temp75, na.rm = TRUE),
+         region_05 = mean(site_temp05, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(sst_mean = coalesce(sst_mean, region_mean),
+         site_temp95 = coalesce(site_temp95, region_95),
+         site_temp75 = coalesce(site_temp75, region_75),
+         site_temp05 = coalesce(site_temp05, region_05)) %>%
+  select(!c(region_95, region_75, region_05, region_mean,
+            site_temp90, site_temp25, site_temp10))
+
+
+# sti_peco <- edna_peco %>%
+#   select(!c(region_code, decimal_latitude, decimal_longitude,
+#             region_code_label)) %>%
+#   left_join(sti_obis) %>%
+#   filter(!is.na(max_temp)) %>%
+#   # temporary until I merge [1]
+#   janitor::remove_empty() %>%
+#   left_join(regions) %>%
+#   select(!c(decimal_latitude, decimal_longitude, samples,
+#             avg_region_lat, sites)) %>%
+#   distinct() %>%
+#   relocate(sti_value, region_label, seq_method)
 
 ggplot()+
   geom_point(data = sti_peco,
@@ -747,6 +791,12 @@ sti_peco %>%
 ## which decline
 
 ```{r warm-affinity}
+# shape palette
+shapeyear <- c('2021' = 15,
+               '2022' = 16,
+               '2023' = 17,
+               '2024' = 18)
+
 # what are the quantiles of stis
 sti_quantiles <- sti_peco %>%
   select(sti_value, found_taxa, common_name) %>%
@@ -780,17 +830,53 @@ affinity_warm <- sti_peco %>%
   # between top 2 gaps in histogram
   filter(sti_value >= 20) %>%
   select(c(sti_value, found_taxa, common_name, sample_id, relabund_vst_taxa,
-           year, site_code, region_label)) %>%
+           year, site_code, region_name, region_label)) %>%
   distinct() %>%
-  left_join(site_environment)
+  #left_join(site_environment) %>%
+    left_join(site_temps) %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE),
+         region_95 = mean(site_temp95, na.rm = TRUE),
+         region_75 = mean(site_temp75, na.rm = TRUE),
+         region_05 = mean(site_temp05, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(sst_mean = coalesce(sst_mean, region_mean),
+         site_temp95 = coalesce(site_temp95, region_95),
+         site_temp75 = coalesce(site_temp75, region_75),
+         site_temp05 = coalesce(site_temp05, region_05)) %>%
+  select(!c(region_95, region_75, region_05, region_mean,
+            site_temp90, site_temp25, site_temp10))
 
 affinity_cold <- sti_peco %>%
   # bottom of histogram
   filter(sti_value < 20) %>%
     select(c(sti_value, found_taxa, common_name, sample_id, relabund_vst_taxa,
-           year, site_code, region_label)) %>%
+           year, site_code, region_name, region_label)) %>%
   distinct() %>%
-  left_join(site_environment)
+  #left_join(site_environment) %>%
+    left_join(site_temps) %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE),
+         region_95 = mean(site_temp95, na.rm = TRUE),
+         region_75 = mean(site_temp75, na.rm = TRUE),
+         region_05 = mean(site_temp05, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(sst_mean = coalesce(sst_mean, region_mean),
+         site_temp95 = coalesce(site_temp95, region_95),
+         site_temp75 = coalesce(site_temp75, region_75),
+         site_temp05 = coalesce(site_temp05, region_05)) %>%
+  select(!c(region_95, region_75, region_05, region_mean,
+            site_temp90, site_temp25, site_temp10))
 
 # all regions
 affinity_warm %>%
@@ -801,6 +887,7 @@ affinity_warm %>%
                  shape = as.factor(year)
                  )) +
   scale_color_manual(values = pal_2or) +
+      scale_shape_manual(values = shapeyear)+
   labs(title = 'warm affinity') +
   facet_wrap('region_label', scales = 'free') +
       scale_y_continuous(limits = c(0,25)) +
@@ -817,6 +904,7 @@ affinity_cold %>%
                  shape = as.factor(year)
                  )) +
   scale_color_manual(values = pal_2or) +
+      scale_shape_manual(values = shapeyear)+
   labs(title = 'cool affinity') +
   facet_wrap('region_label', scales = 'free') +
       scale_y_continuous(limits = c(0,25)) +
@@ -835,6 +923,7 @@ affinity_warm %>%
                  shape = as.factor(year)
                  )) +
   scale_color_manual(values = pal_2or) +
+      scale_shape_manual(values = shapeyear)+
   scale_y_continuous(limits = c(0,25)) +
   labs(title = 'warm affinity, southern cali') +
   facet_wrap('region_label', scales = 'free') +
@@ -852,6 +941,7 @@ affinity_cold %>%
                  shape = as.factor(year)
                  )) +
   scale_color_manual(values = pal_2or) +
+      scale_shape_manual(values = shapeyear)+
     scale_y_continuous(limits = c(0,25)) +
   labs(title = 'cool affinity, southern cali') +
   facet_wrap('region_label', scales = 'free') +
@@ -870,6 +960,7 @@ affinity_warm %>%
                  shape = as.factor(year)
                  )) +
   scale_color_manual(values = pal_2or) +
+      scale_shape_manual(values = shapeyear)+
   scale_y_continuous(limits = c(0,25)) +
   labs(title = 'warm affinity',
        x = 'Mean summer SST',
@@ -893,6 +984,7 @@ affinity_cold %>%
                  )) +
   scale_color_manual(values = pal_2or) +
     scale_y_continuous(limits = c(0,25)) +
+      scale_shape_manual(values = shapeyear)+
   labs(title = 'cool affinity',
        x = 'Mean summer SST',
        y = 'Relative abundance') +
@@ -905,7 +997,52 @@ ggsave(here(plotout, paste0(datefield, 'vst-sst_coolaffinity-ca-mb.pdf')),
        width = 3,
        units = 'in')
 
+# morro bay only
+affinity_warm %>%
+  filter(region_name %in% c('CA_NC')) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = sst_mean,
+                 colour = region_label,
+                 shape = as.factor(year)
+                 )) +
+  scale_color_manual(values = pal_2or) +
+    scale_shape_manual(values = shapeyear)+
+  scale_y_continuous(limits = c(0,25)) +
+  labs(title = 'warm affinity',
+       x = 'Mean summer SST',
+       y = 'Relative abundance') +
+  facet_wrap('region_label', scales = 'free') +
+  theme_bw() + 
+  theme(legend.position = 'none')
 
+ggsave(here(plotout, paste0(datefield, 'vst-sst_warmaffinity-ca-bb.pdf')),
+       height = 6,
+       width = 3,
+       units = 'in')
+
+affinity_cold %>%
+  filter(region_name %in% c('CA_NC')) %>%
+  ggplot() +
+  geom_point(aes(y = relabund_vst_taxa,
+                 x = sst_mean,
+                 colour = region_label,
+                 shape = as.factor(year)
+                 )) +
+  scale_color_manual(values = pal_2or) +
+  scale_shape_manual(values = shapeyear)+
+    scale_y_continuous(limits = c(0,25)) +
+  labs(title = 'cool affinity',
+       x = 'Mean summer SST',
+       y = 'Relative abundance') +
+  facet_wrap('region_label', scales = 'free') +
+  theme_bw() + 
+  theme(legend.position = 'none')
+
+ggsave(here(plotout, paste0(datefield, 'vst-sst_coolaffinity-ca-bb.pdf')),
+       height = 6,
+       width = 3,
+       units = 'in')
 ```
 
 

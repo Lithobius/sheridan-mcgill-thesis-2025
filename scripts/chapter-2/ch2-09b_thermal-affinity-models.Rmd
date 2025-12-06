@@ -1105,6 +1105,122 @@ ggsave(here(plotout, paste0(datefield, 'sti-sstmean_haidagwaii-sitefacet.pdf')),
          units = 'in')
 
 ```
+```{r hg lms}
+
+hg_site_list <- unique(hg_subset$site_code)
+
+hg_output <- {}
+
+
+for (i in 1:length(hg_site_list)) {
+  print(hg_site_list[i])
+  
+  site_subset <- hg_subset %>%
+    filter(site_code == hg_site_list[i]) #%>%
+    #filter(year > 2021)
+  
+site_model <- lm(cti_value ~ sst_mean, 
+                       data = site_subset)
+
+print(summary(site_model))
+
+}
+
+hg_model <- lm(cti_value ~ sst_mean, data = hg_subset)
+summary(hg_model)
+
+
+hg_mean_subset <- hg_subset %>%
+  group_by(site_code) %>%
+  mutate(mean_cti = mean(cti_value),
+         mean_sst_mean = mean(sst_mean)) %>%
+  ungroup() %>%
+  dplyr::select(site_code, mean_cti, mean_sst_mean) %>%
+  distinct()
+
+hg_mean_model <- lm(mean_cti ~ mean_sst_mean, data = hg_mean_subset)
+summary(hg_mean_model)
+plot(hg_mean_model)
+
+
+hg_subset %>%
+  ggplot() +
+  geom_boxplot(aes(x = sst_mean,
+                 y = cti_value,
+                 colour = site_code)) +
+  theme_bw()
+
+hg_subset %>%
+  ggplot() +
+  geom_boxplot(aes(x = site_code,
+                 y = cti_value,
+                 colour = site_code)) +
+  theme_bw()
+
+hg_subset %>%
+  ggplot() +
+  geom_boxplot(aes(x = site_code,
+                 y = sst_mean,
+                 colour = site_code)) +
+  theme_bw()
+
+# make sure your variable is a factor for ANOVA
+hg_subset <- hg_subset %>%
+  mutate(site_code = as.factor(site_code))
+
+# anova: is there a difference in means between groups?
+site_cti_aov <- aov(cti_value ~ site_code, 
+                    data = hg_subset)
+
+summary(site_cti_aov)
+report::report(site_cti_aov)
+
+
+# anova: is there a difference in means between groups?
+site_sst_aov <- aov(sst_mean ~ site_code, 
+                    data = hg_subset)
+
+summary(site_sst_aov)
+report::report(site_sst_aov)
+
+# tukey; which group?
+library(multcomp)
+
+site_sst_aov$model$site_code = as.factor(site_sst_aov$model$site_code)
+
+site_sst_aov_posttest <- glht(site_sst_aov,
+                                        linfct = mcp(site_code = "Tukey"))
+
+summary(site_sst_aov_posttest)
+plot(site_sst_aov_posttest)
+
+
+TukeyHSD(seagrass_type_aov)
+plot(TukeyHSD(seagrass_type_aov))
+
+#install.packages('ggstatsplot')
+
+ggstatsplot::ggbetweenstats(data = hg_subset,
+                            x = site_code,
+                            y = sst_mean,
+                            type = 'parametric',
+                            var.equal = TRUE,
+                            plot.type = 'box',
+                            pairwise.display = 'significant',
+                            pairwise.comparisons = TRUE,
+                            centrality.plotting = FALSE,
+                            bf.message = FALSE) +
+  labs(y = 'mean summer sst',
+       x = '') +
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.text = element_text(size = 10))
+
+
+```
+
+
+
 # morro bay
 
 ```{r}

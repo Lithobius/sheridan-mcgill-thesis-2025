@@ -423,5 +423,12 @@ estimated_tagjumping <- demultiplex_rates %>%
   mutate(percent_2mismatch = percent_one_mismatch_index_reads/2) %>%
   mutate(estimated_2mismatch = number_perfect_index_reads * percent_2mismatch) %>%
   mutate(new_perfectreads = number_perfect_index_reads - estimated_2mismatch)
+
+
+estimated_tagjumping %>%
+  ggplot() +
+  geom_col(aes(x = reorder(index, number_one_mismatch_index_reads),
+               y = number_one_mismatch_index_reads))
+  #geom_histogram(aes(x = percent_2mismatch))
 ```
 
