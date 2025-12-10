@@ -419,16 +419,24 @@ ss_retention %>%
 
 ```
 
+check summary stats
 
-
-# new common names
 ```{r}
-edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
-                             '20251107_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
-  select(c(found_taxa, common_name)) %>%
-  distinct()
+ss_retention %>%
+  #filter(version == 'nextseq') %>%
+  select(!c(bsa_redo, percentraw_retainedby_cutadapt,
+            percent_retained_aftermerge, percent_notsingleton,
+            percent_notchimera, percent_retained_of_raw)) %>%
+  group_by(version) %>%
+  summarise(mean_raw = mean(raw_f),
+            median_raw = median(raw_f),
+            sd_raw = sd(raw_f),
+            mad_raw = mad(raw_f),
+            mean_kept = mean(nochimeras),
+            median_kept = median(nochimeras),
+            sd_kept = sd(nochimeras)) 
 
-write_csv(edna_peco, here('processeddata', 'splists', '20251111_peco-commonnames.csv'))
+240956-60135
 ```
 
 

@@ -1045,6 +1045,11 @@ ggsave(here(plotout, paste0(datefield, 'vst-sst_coolaffinity-ca-bb.pdf')),
        units = 'in')
 ```
 
+```{r}
+bb_affinity <- affinity_cold %>%
+  filter(region_name == 'CA_NC') %>%
+  filter(year == 2024)
+```
 
 
 
