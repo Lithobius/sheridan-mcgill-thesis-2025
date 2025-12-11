@@ -1,0 +1,121 @@
+---
+title: "coi compare species"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+```{r}
+library(arsenal)
+library(eulerr)
+library(tidyverse)
+library(here)
+
+dataedna <- here::here("processeddata", "2018calvert")
+plots <- here('output', 'splist_compare')
+
+
+datefield_in <- '20240222_'
+datefield_out <- '20240222_'
+runfield <- 'calvert2018_coi_'
+
+kingdom_cols <- c('Green plants' = 'darkolivegreen3',
+                 'Protists' = 'forestgreen', 
+                 'Bacteria' = 'gray50',
+                 'Fungi' = 'darkslateblue',
+                 'Animals' = 'steelblue3')
+```
+
+```{r}
+coi_compare <- read_csv(here(dataedna, 
+                             '20240222_calvert2018_coi_asvmatrix_run-columns_all.csv')) %>%
+   # remove controls
+  filter(!(sample_name %in% c('POS66', 'POS44', 'POS22'))) %>%
+  # remove no results + bad hits
+  filter(!(found_taxa %in% c('No Results', 'Potential chimera', 'BLAST failed'))) %>%
+    mutate(kingdom = case_when(kingdom == 'Viridiplantae' ~ 'Green plants', 
+                             kingdom %in% c('Sar', 'Amoebozoa', 'Haptista', 'Eukaryota') ~ 'Protists',
+                             kingdom == 'Metazoa' ~ 'Animals',
+                             TRUE ~ kingdom)) %>%
+    # only useful columns for this
+  select(sample_name, asv, motu, found_taxa, common_name, 
+         kingdom, phylum, class, order, family, genus,
+         reads_raw_gcsept, reads_raw_quadra1,
+         reads_raw_quadra3_rep1, reads_raw_quadra3_rep2, reads_raw_quadra3_rep3) %>%
+  # sum quadra3 instead of pcr reps
+  mutate_at(c('reads_raw_quadra3_rep1', 'reads_raw_quadra3_rep2', 
+              'reads_raw_quadra3_rep3'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(reads_raw_quadra3_total = reads_raw_quadra3_rep1 + 
+           reads_raw_quadra3_rep3 + reads_raw_quadra3_rep2) %>%
+  select(!c(reads_raw_quadra3_rep1, reads_raw_quadra3_rep2, reads_raw_quadra3_rep3))
+
+kingdom_phylum_match <- coi_compare %>%
+  select(kingdom, phylum) %>%
+  distinct() %>%
+  filter(!is.na(phylum))
+```
+
+```{r}
+coi_compare %>%
+  filter(!(is.na(kingdom))) %>%
+  group_by(kingdom) %>%
+  # summarize by which run to plot
+  summarise(totalreads = sum(reads_raw_quadra1, reads_raw_quadra3_total, 
+                             reads_raw_gcsept, na.rm = TRUE)) %>%
+  #filter(totalreads > 500) %>%
+  ggplot(aes(x = reorder(factor(kingdom), -totalreads), y = totalreads)) +
+  geom_col(aes(fill = kingdom)) +
+  scale_color_manual(values = kingdom_cols, aesthetics = 'fill') + 
+  labs(title = 'All runs', x = NULL, y = 'Total reads') +
+  scale_y_continuous(labels = scales::label_comma(),
+                     breaks = c(0, 500000, 
+                                1000000, 1500000, 
+                                2000000, 2500000,
+                                3000000, 3500000,
+                                4000000, 4500000)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none')
+
+ggsave(here(plots, paste0(datefield_out, runfield, 'kingdom_reads_gc.png')),
+       height = 750,
+       width = 750,
+       unit = 'px')
+
+
+
+coi_compare %>%
+  filter(!(is.na(phylum))) %>%
+  group_by(phylum) %>%
+  # summarize by which run to plot
+  summarise(totalreads = sum(reads_raw_quadra1, reads_raw_quadra3_total, 
+                             reads_raw_gcsept, na.rm = TRUE)) %>%
+  #filter(totalreads > 500) %>%
+  left_join(kingdom_phylum_match) %>%
+  ggplot(aes(x = reorder(factor(phylum), -totalreads), y = totalreads)) +
+  geom_col(aes(fill = kingdom)) +
+  scale_color_manual(values = kingdom_cols, aesthetics = 'fill') + 
+  labs( x = NULL, y = 'Total reads') +
+  scale_y_continuous(labels = scales::label_comma(),
+                     breaks = c(0, 500000, 
+                                1000000, 1500000, 
+                                2000000, 2500000,
+                                3000000, 3500000,
+                                4000000, 4500000)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none')
+
+ggsave(here(plots, paste0(datefield_out, runfield, 'phylum_reads_all.png')),
+       height = 1000,
+       width = 2500,
+       unit = 'px')
+
+ggsave(here(plots, paste0(datefield_out, runfield, 'phylum_reads_all.pdf')),
+       height = 7,
+       width = 11,
+       unit = 'in')
+```
+
+
+

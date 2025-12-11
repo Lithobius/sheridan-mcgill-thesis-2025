@@ -1,0 +1,127 @@
+---
+title: "start-here"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Start Here
+
+This file lists all packages and software that need to be installed for the scripts to run.
+
+The R version used is 4.3.1.
+
+This project uses `renv`. This means this project runs from its own environment. So, the project library in the 'renv' folder should contain all the packages needed to run the scripts but in case it doesn't, there are installation chunks below.
+
+# Package installation
+## general
+
+Some packages are required for both chapters and 'other' scripts. 
+
+```{r project}
+# these are the packages needed to run the project and markdown files
+
+#renv requires a restart of r
+# only uncomment if necessary
+#install.packages('renv')
+
+
+#not reproducible but having an issue
+#renv::hydrate('devtools')
+#install.packages('devtools')
+install.packages('remotes')
+install.packages('BiocManager')
+
+
+# load remotes
+library(remotes)
+# markdown
+install_version('rmarkdown', '2.30')
+install_version('knitr', '1.50')
+
+renv::status()
+renv::snapshot()
+```
+
+The code in this thesis relies heavily on tidyverse. 
+
+```{r both chapters}
+# plot related 
+install.packages('tidyverse', 'RColorBrewer', 'PNWColors', 'plotly',
+                 'ggrepel', 'ggstatsplot', 'ggeffects', 'ggmap', 'ggpubr', 'gt', 'pheatmap')
+devtools::install_github("cmartin/ggConvexHull")
+# issue with installing eulerr, using this version
+devtools::install_github("jolars/eulerr")
+
+# taxonomy-related
+install.packages('taxize', 'rfishbase')
+
+#renv::hydrate('robis')
+install.packages("robis")
+devtools::install_github("iobis/obistools")
+
+# mapping, spatial
+install.packages('rnaturalearth', 'geosphere', 'sf')
+
+# for processing sequence data
+BiocManager::install("dada2")
+BiocManager::install("phyloseq")
+BiocManager::install("DESeq2")
+install.packages('seqinr', 'vsn')
+devtools::install_github("tobiasgf/lulu")
+
+renv::hydrate('ggtree')
+#remotes::install_github("YuLab-SMU/ggtree")
+
+
+
+# terra 
+#install.packages('Rcpp')
+#remotes::install_github("rspatial/terra")
+
+install.packages('vegan', 'arsenal', 'report', 'recluster', 'blme',
+                 'lmerTest', 'multcomp', 'optimx', 'iNEXT')
+
+# also use here to improve ease of use with working directories
+# and janitor for data cleaning
+install.packages('here', 'janitor')
+```
+
+
+
+
+
+## scratch
+
+some issues ; seems like a lot of it is my version of osx; test on another computer
+
+
+```{r}
+
+renv::hydrate('Rmpfr')
+install.packages('Rmpfr')
+
+install.packages('roxygen2')
+install.packages('Rmpfr', type = "source", 
+                 configure.args=c('--with-mpfr-include=/opt/homebrew/Cellar/mpfr'))
+
+
+
+Sys.getenv('PKG_CONFIG_PATH')
+Sys.getenv('PATH')
+Sys.getenv()
+#install.packages("usethis", verbose=TRUE)
+#install.packages('withr')
+withr::local_path("/opt/X11/lib/pkgconfig", Sys.getenv("PATH"), "suffix")
+
+
+f <- function(x) {
+  withr::with_path("/opt/local/include/harfbuzz", Sys.getenv("PATH"), "suffix")
+  print(Sys.getenv("PATH"))
+  install.packages(x)
+}
+f('devtools')
+
+Sys.setenv(PKG_CONFIG_PATH = '/opt/local/include/harfbuzz')
+```
+

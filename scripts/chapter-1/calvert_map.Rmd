@@ -1,0 +1,84 @@
+---
+title: "ch1_maps"
+author: "Kate Sheridan"
+date: "12/12/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(here)
+library(tidyverse)
+library(ggpubr)
+library(ggmap)
+library(sf)
+
+# eDNA
+dataedna <- here::here("processeddata", "2018calvert")
+
+# save in
+map_out <- here::here("output", "maps")
+```
+
+```{r load-in}
+edna_hab_coords <- read_csv(here(dataedna, 
+                                   '20240323_calvert2018_12s_motumatrix_taxonomy-fish.csv')) %>%
+  select(location, macroveg_group, lat, long) %>%
+  distinct() %>%
+  filter(!is.na(lat))
+
+glimpse(edna_hab_coords)
+
+edna_hab_site <- edna_hab_coords %>%
+  select(location, lat, long, macroveg_group) %>%
+  group_by(location, macroveg_group) %>%
+  slice(1) %>%
+  ungroup()
+```
+
+
+
+```{r base map}
+# loadin shapefile
+## must have st_transform to "crs = 4326" to use regular coordinates
+bc <- st_read(here("rawdata","shapefiles", "BCcoast", "NTS_BC_COASTLINE_POLYS_125M","250_CST_PY_polygon.shp")) %>% 
+  st_make_valid() %>%
+  st_transform(crs = 4326)
+
+# determine bounding box and crop shapefile
+bbox <- c(xmin = -128.65, ymin = 51.38, xmax = -127.7, ymax = 52.15)
+bc_crop <- st_crop(bc, bbox)
+
+# basic plot
+ggplot(data = bc_crop) +
+  geom_sf()
+```
+
+hexes for colors:
+blue: #5b9bd5
+light blue: c1d9ef, #e1edf7
+warm light brown: #e5be9a, #f5e7db
+grey: #CCCCCC
+
+```{r sites by habitat}
+ggplot(bc_crop) + 
+  geom_sf(fill = 'white', color = 'grey50') +
+  geom_jitter(data = edna_hab_site, aes(x = long, y = lat, fill = macroveg_group), 
+             width = .01, height = .01, size = 2, shape = 21, color = 'grey20') +
+  scale_color_manual(values = c('#8d9f1d', '#AA9884', '#496630'), aesthetics = 'fill',
+                     labels = c('Macroalgae', 'None', 'Seagrass')) +
+  labs(fill = 'Vegetation type') +
+  theme_classic() +
+  theme(axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        panel.background = element_rect(fill = 'grey80'),
+        legend.position = c(.25,.15),
+        legend.box.background = element_rect(color = 'grey30', size = 1.5))
+
+ggsave(here(map_out, '20220525_2018Calvert_site.png'), device = png,
+       height = 7, width = 5, units = 'in')
+
+ggsave(here(map_out, '20220525_2018Calvert_site.pdf'), device = pdf,
+       height = 7, width = 5, units = 'in')
+```

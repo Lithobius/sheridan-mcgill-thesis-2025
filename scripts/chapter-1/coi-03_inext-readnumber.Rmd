@@ -1,0 +1,617 @@
+---
+title: "ch1_coi-03-inext-readnum-v3"
+output: html_document
+date: "2024-04-09"
+---
+
+Here we want to test what will happen if we have different numbers of reads
+
+We'll want to test some raw data but we'll start with the cleaned data, resampling reads to make a synthetic dataset of the size we want
+
+This version uses resampling at multiple QC levels and generates a table, and has been updated with functions instead of copypaste.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggpubr)
+library(iNEXT)
+library(here)
+
+
+# filepaths for use with here
+# eDNA
+dataedna <- here::here("processeddata", "2018calvert")
+# save in
+inextout <- here::here("output", "inext")
+datefield <- '20240417_'
+```
+
+Note that the reads for pcrs are split between columns
+```{r loadin}
+coi_asv <- read_csv(here::here(dataedna, 
+                                   '20240222_calvert2018_coi_asvmatrix_run-columns_inverts.csv')) %>%
+  filter(pa_quadra3 == 1) %>%
+  select(!c(pa_quadra1, pa_gcoct, pa_gcsept,
+            reads_raw_gcsept, reads_raw_gcoct, reads_raw_quadra1,
+            reads_raw_quadra3_NA,
+            found_taxa_motu, common_name_motu)) %>%
+  # also lets remove motu for now
+  dplyr::rename(asv_pa = pa_quadra3)
+
+# Reducing our dataset to only what we need
+asv_reduced <-  coi_asv %>%
+  select(sample_name, asv, asv_pa,
+         reads_raw_quadra3_rep1, reads_raw_quadra3_rep2,
+         reads_raw_quadra3_rep3,
+         found_taxa, rank) %>%
+  # combine pcr reads
+  pivot_longer(cols = c(reads_raw_quadra3_rep2, reads_raw_quadra3_rep1,
+                        reads_raw_quadra3_rep3),
+               names_to = 'pcr',
+               values_to = 'reads_raw') %>%
+  select(!pcr) %>%
+  filter(!is.na(reads_raw)) %>%
+  # generate reads for asv per sample and species per sample
+  mutate(asvsample = paste0(sample_name, '_', asv)) %>%
+  group_by(asvsample) %>%
+  mutate(reads_asvsample = sum(reads_raw)) %>%
+  ungroup() %>%
+  group_by(sample_name, found_taxa) %>%
+  mutate(reads_spsample = sum(reads_raw)) %>%
+  ungroup() %>%
+  select(!reads_raw) %>%
+  distinct()
+
+# Also generate stats for the full dataset
+full_stats <- read_csv(here('rawdata', '2018calvert',
+                            '20240127_coi_2018calvert_rerun3_quadra20200604_read-retention_coi_bysample.csv')) %>%
+  janitor::clean_names()
+
+full_reduced <- full_stats %>%
+  # clean sample name
+  separate(sample_id, into = c('date', 'sample_pool'), extra = 'drop', sep = '_') %>%
+  separate(sample_pool, into = c('pool', 'sample_name'), extra = 'drop', sep = '\\.') %>%
+  select(sample_name, raw_f, raw_r, cutadapt_f, cutadapt_r, 
+         denoised_f, denoised_r, merged, 
+         nosingletons, nochimeras) %>%
+  pivot_longer(!sample_name) %>%
+  # lets put fw and r together now
+  mutate(name = str_remove_all(name, '_f|_r')) %>%
+  pivot_wider(values_fn = sum)
+
+full_totals <- full_reduced %>%
+  pivot_longer(!sample_name) %>%
+  select(!sample_name) %>%
+  pivot_wider(values_fn = sum)
+```
+
+# Simulate
+
+
+## Empirical
+
+
+~ 28,253,178 raw after demultiplexing
+    - doesn't include unassigned to sample
+~ 40,000,000 reads off the machine; forward and reverse
+
+~ 10k difference: why?
+~~ note, may need to update processing script where it makes totals
+
+```{r empirical stats}
+# fw + r reads off the machine
+reads_total <- full_totals$raw
+  
+
+# 6,681,119 passed QC + on-target
+reads_passedqc <- sum(asv_reduced$reads_asvsample)
+
+# about 47.29% of total reads pass QC and on-target
+# taking into consideration that raw reads == fw, r separate
+postqc <- (reads_passedqc * 2)/reads_total
+# saving the ratio to determine how many reads to generate from raw read number
+# assuming the same ratio of QC/on-target
+
+# how many reads per sample,
+# what percent of total is in each sample
+by_sample_stats <- asv_reduced %>% 
+  left_join(full_reduced) %>%
+  group_by(sample_name) %>% 
+  mutate(reads_sample = sum(reads_asvsample)) %>%
+  select(sample_name, reads_sample, raw) %>%
+  ungroup() %>%
+  distinct() %>%
+  mutate(sample_percent = reads_sample/raw)
+
+# 43,667.44 mean reads per sample passed QC
+reads_avgsample <- mean(by_sample_stats$reads_sample)
+
+# each read here is a combo of fw and r so 
+# about .3% of total reads on target per each sample
+(reads_avgsample * 2)/reads_total
+
+# reads per asv-sample combo
+# how many average 
+by_asvsample_stats <- asv_reduced %>%
+  left_join(full_reduced) %>%
+  select(asvsample, sample_name, reads_asvsample, raw) %>%
+  distinct() %>%
+  mutate(asvsample_percent = reads_asvsample/raw) 
+```
+
+```{r all}
+set.seed(2018)
+sp_all <- coi_asv %>%
+  filter(rank == 'species') %>%
+  select(found_taxa, asv_pa, sample_name) %>%
+  group_by(found_taxa, sample_name) %>%
+  mutate(sample_read = sum(asv_pa)) %>%
+  ungroup() %>%
+  select(!(asv_pa)) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = sample_read) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(.cols = everything(), .fns = ~replace(., . > 0, 1))) %>%
+  mutate(across(.cols = everything(), .fns = ~replace(., is.na(.), 0))) %>%
+  as.incfreq()
+
+sp_all_incfreq <- iNEXT(sp_all, q=0, datatype="incidence_freq")
+```
+
+
+# Simulation
+
+## functions
+```{r simulation functions}
+simulate_qc <- function(target, postqc_reads, asvsample_stats){
+  # empty vectors to fill
+  qc = vector("character", target)
+  spsamp = vector("character", target)
+  #set the seed
+  set.seed(2018)
+  
+  #simulate the population, part one
+  #Assign origin
+  qc = sample(c("Pass","Fail"), size = target,
+                          prob=c(postqc_reads, 1 - postqc_reads),
+                          replace = TRUE)
+  
+  #simulate the population, part two
+  for (k in 1:target) {   
+    if(qc[k] == "Fail") {spsamp[k] = sample(c('offtarget'), 
+                                            size = 1,
+                                            prob = c(1),
+                                            replace = TRUE) } 
+    if(qc[k] == "Pass") {spsamp[k] = sample(asvsample_stats$asvsample, 
+                                           size = 1,
+                                           prob=asvsample_stats$asvsample_percent,
+                                           replace = TRUE) }
+  }
+  sim_result = as.data.frame(cbind(qc,spsamp)) %>%
+  add_count(spsamp, name = 'reads_sim') %>%
+  distinct() %>%
+  rename(asvsample = spsamp)
+  
+  return(sim_result)
+}
+
+simulate_inext_sp <- function(simulated_data){
+  pa_matrix <- simulated_data %>%
+  filter(rank == 'species') %>%
+  rename(species = found_taxa) %>%
+  mutate(asv_pa = 1) %>%
+  select(species, asv_pa, sample_name) %>%
+  group_by(species, sample_name) %>%
+  mutate(sample_read = sum(asv_pa)) %>%
+  ungroup() %>%
+  select(!(asv_pa)) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(species),
+              names_from = sample_name, 
+              values_from = sample_read) %>%
+  column_to_rownames('species') %>%
+  # make binary
+  mutate(across(.cols = everything(), .fns = ~replace(., . > 0, 1))) %>%
+  mutate(across(.cols = everything(), .fns = ~replace(., is.na(.), 0))) %>%
+  as.incfreq()
+  
+  sp_incfreq <- iNEXT(pa_matrix, q=0, datatype="incidence_freq")
+  
+  return(sp_incfreq)
+}
+
+```
+
+
+
+```{r simulations to target}
+# set our target number of reads
+target_half <- (reads_total * .5) / 2
+
+simhalf <- simulate_qc(target_half, postqc, by_asvsample_stats) %>%
+  left_join(asv_reduced)
+
+# set our target number of reads
+target_quarter <- (reads_total * .25) / 2
+
+simquarter <- simulate_qc(target_quarter, postqc, by_asvsample_stats) %>%
+  left_join(asv_reduced)
+
+# set our target number of reads
+target_tenth <- (reads_total * .1) / 2
+
+simtenth <- simulate_qc(target_tenth, postqc, by_asvsample_stats) %>%
+  left_join(asv_reduced)
+
+# set our target number of reads
+target_one <- (reads_total * .01) / 2
+
+simone <- simulate_qc(target_one, postqc, by_asvsample_stats) %>%
+  left_join(asv_reduced)
+
+#
+target_hundredth <- (reads_total * .001) / 2
+
+simhundredth <- simulate_qc(target_hundredth, postqc, by_asvsample_stats) %>%
+  left_join(asv_reduced)
+
+target_thousandth <- (reads_total * .0001) / 2
+
+simthousandth<- simulate_qc(target_thousandth, postqc, by_asvsample_stats) %>%
+  left_join(asv_reduced)
+
+
+
+```
+
+
+```{r simulations into inext}
+half_inext <- simulate_inext_sp(simhalf)
+quarter_inext <- simulate_inext_sp(simquarter)
+tenth_inext <- simulate_inext_sp(simtenth)
+one_inext <- simulate_inext_sp(simone)
+hundredth_inext <- simulate_inext_sp(simhundredth)
+thousandth_inext <- simulate_inext_sp(simthousandth)
+
+```
+
+
+```{r}
+inext_values <- sp_all_incfreq$iNextEst$coverage_based %>%
+  mutate(sim_version = '100%') %>%
+  bind_rows(half_inext$iNextEst$coverage_based) %>%
+  mutate(sim_version = ifelse(is.na(sim_version), '50%', sim_version)) %>%
+  # bind each dataframe
+  bind_rows(quarter_inext$iNextEst$coverage_based) %>%
+  mutate(sim_version = ifelse(is.na(sim_version), '25%', sim_version)) %>%
+  bind_rows(tenth_inext$iNextEst$coverage_based) %>%
+  mutate(sim_version = ifelse(is.na(sim_version), '10%', sim_version)) %>%
+  bind_rows(one_inext$iNextEst$coverage_based) %>%
+  mutate(sim_version = ifelse(is.na(sim_version), '1%', sim_version)) %>%
+  bind_rows(hundredth_inext$iNextEst$coverage_based) %>%
+  mutate(sim_version = ifelse(is.na(sim_version), '.1%', sim_version)) %>%
+  bind_rows(thousandth_inext$iNextEst$coverage_based) %>%
+  mutate(sim_version = ifelse(is.na(sim_version), '.01%', sim_version)) %>%
+  select(SC, t, Method, qD, sim_version) %>%
+  janitor::clean_names() %>%
+  # criteria to keep
+  mutate(keep = case_when(method == 'Observed' ~ 'observed',
+                          #t > 200 & sc < .989999 ~ 'low',
+                          t > 200 & sc > .999 ~ 'extra',
+                          t < 10 & sc < .869 ~ 'extra',
+                          sc < .91 & sc > .899 ~ '90%',
+                          sc < .96 & sc > .9499 ~ '95%',
+                          sc < .985 & sc > .9799 ~ '98%')) %>%
+  filter(!(keep %in% c('extra'))) %>%
+  # there has to be a better way to do this but i'm not focused enough to figure it out
+  group_by(sim_version) %>%
+  # all had 98%
+  #mutate(has_98 = ifelse(any(keep %in% c("98%")), 'yes', 'no')) %>%
+  mutate(has_95 = ifelse(any(keep %in% c("95%")), 'yes', 'no')) %>%
+  mutate(has_90 = ifelse(any(keep %in% c("90%")), 'yes', 'no')) %>%
+  ungroup() %>%
+  mutate(keep = case_when(has_90 == 'no' & sc < .92 ~ '90%',
+                          has_95 == 'no' & sc < .965 & sc > .94 ~ '95%',
+                          TRUE ~ keep)) %>%
+  # check again
+  group_by(sim_version) %>%
+  mutate(has_95 = ifelse(any(keep %in% c("95%")), 'yes', 'no')) %>%
+  mutate(has_90 = ifelse(any(keep %in% c("90%")), 'yes', 'no')) %>%
+  ungroup() %>%
+  # all yes, remove extras
+  filter(!(is.na(keep))) %>%
+  select(!c(has_90, has_95)) %>%
+  # smallest value within range
+  group_by(sim_version, keep) %>%
+  mutate(min_value = min(sc)) %>%
+  ungroup() %>%
+  filter(sc == min_value)
+
+inext_values_plot <- inext_values  %>%
+  # keep only 98% for now, the others might be useful later
+  filter(keep %in% c('observed', '98%') | sim_version == '.01%') %>%
+  add_count(sim_version) %>%
+  filter(n == 1 | keep == '98%') %>%
+    # remove below values for now
+  filter(sim_version %in% c("100%","50%", "25%", "10%"))
+
+```
+
+
+```{r bayes1 test inextplot}
+line_pal <- c("Rarefaction" = 'solid',
+               "Observed" = "solid",
+               "Extrapolation" = 'dashed'
+              )
+
+# blues dark to light with fewer reads
+sim_pal <- c("100%" = '#2a3e57',
+               "50%" = '#324a68', 
+               "25%" = '#436188',  
+               "10%" = '#688ab5', 
+               "1%" = '#89a3c5',  
+               ".1%" = '#9fb4d0',               
+               ".01%" = '#aabdd5'
+              )
+
+# for pdf
+ggplot() +
+  # ribbon for confidence interval
+  geom_ribbon(aes(ymin = sp_all_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = sp_all_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = sp_all_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+       geom_ribbon(aes(ymin = half_inext$iNextEst$coverage_based$qD.LCL,
+                   ymax = half_inext$iNextEst$coverage_based$qD.UCL,
+                   x = half_inext$iNextEst$coverage_based$t),
+                 alpha = .25, colour = NA, fill = 'grey40') +
+    geom_ribbon(aes(ymin = quarter_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax = quarter_inext$iNextEst$coverage_based$qD.UCL,
+                  x = quarter_inext$iNextEst$coverage_based$t),
+              alpha = .25, colour = NA, fill = 'grey40') +
+    geom_ribbon(aes(ymin = tenth_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax = tenth_inext$iNextEst$coverage_based$qD.UCL,
+                  x = tenth_inext$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+      geom_ribbon(aes(ymin = hundredth_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax =  hundredth_inext$iNextEst$coverage_based$qD.UCL,
+                  x = hundredth_inext$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+      geom_ribbon(aes(ymin = thousandth_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax = thousandth_inext$iNextEst$coverage_based$qD.UCL,
+                  x = thousandth_inext$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  geom_vline(aes(xintercept = inext_values_plot$t, colour = inext_values_plot$sim_version),
+             linetype = 'dashed') +
+  scale_color_manual(values = sim_pal) +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(sp_all_incfreq$DataInfo$T,
+                 sp_all_incfreq$DataInfo$S.obs), 
+             color = '#2a3e57', size = 4) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = sp_all_incfreq$iNextEst$coverage_based$t, 
+                y = sp_all_incfreq$iNextEst$coverage_based$qD, 
+                linetype = sp_all_incfreq$iNextEst$coverage_based$Method), 
+            color = '#2a3e57', size = 1) +
+  scale_linetype_manual(values = line_pal) +
+
+  # # point at t(samples) and S.obs (species observed)
+  geom_point(aes(half_inext$DataInfo$T,
+                  half_inext$DataInfo$S.obs), 
+             color = '#324a68', 
+             size = 4,
+             alpha = .7) +
+   # line for qD, different linetypes for interpolation and rarefaction
+   geom_line(aes(x = half_inext$iNextEst$coverage_based$t, 
+                 y = half_inext$iNextEst$coverage_based$qD, 
+                 linetype = half_inext$iNextEst$coverage_based$Method), 
+             color = '#324a68', 
+             size = 1,
+             alpha = .7) +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(quarter_inext$DataInfo$T,
+                 quarter_inext$DataInfo$S.obs),
+             color = '#436188', 
+             size = 4,
+             alpha = .7) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = quarter_inext$iNextEst$coverage_based$t,
+                y = quarter_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = '#436188', 
+            size = 1,
+            alpha = .7) +
+    # point at t(samples) and S.obs (species observed)
+  geom_point(aes(tenth_inext$DataInfo$T,
+                 tenth_inext$DataInfo$S.obs),
+             color = '#688ab5', 
+             size = 4,
+             alpha = .7) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = tenth_inext$iNextEst$coverage_based$t,
+                y = tenth_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = '#688ab5', 
+            size = 1,
+            alpha = .7) +
+      # point at t(samples) and S.obs (species observed)
+  geom_point(aes(one_inext$DataInfo$T,
+                 one_inext$DataInfo$S.obs),
+             color = '#89a3c5', 
+             size = 4,
+             alpha = .7) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = one_inext$iNextEst$coverage_based$t,
+                y = one_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = "#89a3c5", 
+            size = 1,
+            alpha = .7) +
+    geom_point(aes(hundredth_inext$DataInfo$T,
+                 hundredth_inext$DataInfo$S.obs),
+             color = '#9fb4d0',
+             size = 4) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = hundredth_inext$iNextEst$coverage_based$t,
+                y = hundredth_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = '#9fb4d0', size = 1) +
+      geom_point(aes(thousandth_inext$DataInfo$T,
+                 thousandth_inext$DataInfo$S.obs),
+             color = '#aabdd5', size = 4) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = thousandth_inext$iNextEst$coverage_based$t,
+                y = thousandth_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = '#aabdd5', size = 1) +
+  coord_cartesian(ylim = c(0,175), xlim = c(0,210))+
+  theme_classic() +
+    labs(x = 'Samples', y =  'Alpha diversity metric') +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        legend.position = 'none') 
+
+ggsave(here(inextout, paste0(datefield, "coi_readdepth-sim_b1-nolines.pdf")),
+       device = 'pdf',
+       height = 7,
+       width = 8,
+       units = 'in')
+
+```
+
+
+```{r}
+line_pal <- c("Rarefaction" = 'solid',
+               "Observed" = "solid",
+               "Extrapolation" = 'dashed'
+              )
+
+# blues dark to light with fewer reads
+sim_pal <- c("100%" = '#25140b',
+               "50%" = '#5c321d', 
+               "25%" = '#7C4428',  
+               "10%" = '#d29374'
+              )
+
+# for pdf
+ggplot() +
+      geom_point(aes(x = inext_values_plot$t,
+                 y = 4,
+                 colour = inext_values_plot$sim_version),
+             shape = 17,
+             size = 5) +
+  # ribbon for confidence interval
+  geom_ribbon(aes(ymin = sp_all_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = sp_all_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = sp_all_incfreq$iNextEst$coverage_based$t), 
+              alpha = .2, colour = NA, fill = 'grey40') + 
+  geom_ribbon(aes(ymin = half_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax = half_inext$iNextEst$coverage_based$qD.UCL,
+                  x = half_inext$iNextEst$coverage_based$t),
+              alpha = .2, colour = NA, fill = 'grey40') +
+    geom_ribbon(aes(ymin = quarter_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax = quarter_inext$iNextEst$coverage_based$qD.UCL,
+                  x = quarter_inext$iNextEst$coverage_based$t),
+              alpha = .2, colour = NA, fill = 'grey40') +
+    geom_ribbon(aes(ymin = tenth_inext$iNextEst$coverage_based$qD.LCL,
+                  ymax = tenth_inext$iNextEst$coverage_based$qD.UCL,
+                  x = tenth_inext$iNextEst$coverage_based$t), 
+              alpha = .2, colour = NA, fill = 'grey40') +
+  scale_color_manual(values = sim_pal) +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(sp_all_incfreq$DataInfo$T,
+                 sp_all_incfreq$DataInfo$S.obs), 
+             color = '#25140b', size = 4) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = sp_all_incfreq$iNextEst$coverage_based$t, 
+                y = sp_all_incfreq$iNextEst$coverage_based$qD, 
+                linetype = sp_all_incfreq$iNextEst$coverage_based$Method), 
+            color = '#25140b', size = 1) +
+  scale_linetype_manual(values = line_pal) +
+  # # point at t(samples) and S.obs (species observed)
+  geom_point(aes(half_inext$DataInfo$T,
+                  half_inext$DataInfo$S.obs), 
+             color = '#5c321d', 
+             size = 4,
+             alpha = .7) +
+   # line for qD, different linetypes for interpolation and rarefaction
+   geom_line(aes(x = half_inext$iNextEst$coverage_based$t, 
+                 y = half_inext$iNextEst$coverage_based$qD, 
+                 linetype = half_inext$iNextEst$coverage_based$Method), 
+             color = '#5c321d', 
+             size = 1,
+             alpha = .7) +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(quarter_inext$DataInfo$T,
+                 quarter_inext$DataInfo$S.obs),
+             color = '#7C4428', 
+             size = 4,
+             alpha = .7) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = quarter_inext$iNextEst$coverage_based$t,
+                y = quarter_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = '#7C4428', 
+            size = 1,
+            alpha = .7) +
+    # point at t(samples) and S.obs (species observed)
+  geom_point(aes(tenth_inext$DataInfo$T,
+                 tenth_inext$DataInfo$S.obs),
+             color = '#d29374', 
+             size = 4,
+             alpha = .7) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = tenth_inext$iNextEst$coverage_based$t,
+                y = tenth_inext$iNextEst$coverage_based$qD,
+                linetype = quarter_inext$iNextEst$coverage_based$Method),
+            color = '#d29374', 
+            size = 1,
+            alpha = .7) +
+
+  coord_cartesian(ylim = c(0,175), xlim = c(0,225),
+                  expand = FALSE)+
+  theme_classic() +
+    labs(x = 'Samples', y =  'Alpha diversity metric') +
+  theme(plot.title = element_text(hjust = 0.5, size = 10),
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        legend.position = 'none') 
+
+ggsave(here(inextout, paste0(datefield, "coi_readdepth-sim_b1-nolines.pdf")),
+       device = 'pdf',
+       height = 7,
+       width = 8,
+       units = 'in')
+```
+
+
+
+# table
+
+
+```{r}
+library(gt)
+
+sim_table <- inext_values %>%
+  rename(samples = t,
+         completeness = keep,
+         species = q_d,
+         percent_reads = sim_version) %>%
+  select(percent_reads, samples, completeness) %>%
+  gt() %>%
+  tab_header(title = 'COI', subtitle = 'simulated reads')
+
+sim_table
+
+options(chromote.headless = "new")
+
+gtsave(sim_table, here(inextout, paste0(datefield, "coi_readdepth-sim_table.png")))
+gtsave(sim_table, here(inextout, paste0(datefield, "coi_readdepth-sim_table.pdf")))
+```
+
+
+
+

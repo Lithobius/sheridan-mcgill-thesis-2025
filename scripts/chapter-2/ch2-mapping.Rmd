@@ -38,7 +38,7 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Coos Bay, Oregon" = "#EDB123",
              "Humboldt Bay, California" = "#ED9E11",
              "Bodega Bay, California" = "#ED8B00",
-             "San Fransisco Bay, California" = "#E97809",
+             "San Francisco Bay, California" = "#E97809",
              "Morro Bay, California" = "#E56512",
              "Los Angeles, California" = "#E1531B",
              "San Diego region, California" = "#DD4124")
@@ -53,7 +53,7 @@ edna_meta <- read_csv(here(plotdata,
   janitor::remove_empty()
 
 region_plotting <- read_csv(here(plotdata,
-                                 "20251107_peco_region-name-plotting.csv"))[-1] %>%
+                                 "20251113_peco_region-name-plotting.csv"))[-1] %>%
   rename(region_label = region_name_label)
 
 # set up labels and colors for region

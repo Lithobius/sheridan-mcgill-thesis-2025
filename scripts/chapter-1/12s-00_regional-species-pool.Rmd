@@ -1,0 +1,321 @@
+---
+title: "ch1_regional-species-pool"
+author: "Kate Sheridan"
+date: "3/29/2023"
+---
+
+Taken from my work building a regional database in the GAPP project
+
+This script pulls species data from OBIS to generate a species list for a defined region. By ecoregion section uses shapefiles from the MEOW nearshore ecoregions and PPOW pelagic provinces. 
+
+Currently it pulls and cleans a checklist() but can be updated later for occurrence()
+
+OBIS already uses the WoRMS taxonomic backbone so no adjustment to taxonomy was necessary.
+Note that currently Species and Subspecies is preserved; in some cases the species column for a subspecies is unique. 
+So when using these lists for analysis: `select(accepted_name) %>% distinct()` instead of `filter(taxon_rank == 'species')`
+
+Output includes:
+`accepted_name` -- The most up to date name from WoRMS
+`verbatim_name` -- column coalesced from subspecies and species, includes unaccepted names.
+`taxonomic_status` -- status of `verbatim_species`
+`taxon_rank` -- level of identification
+taxonomy: species, subspecies, genus, family, order, class, phylum (invertebrates only)
+`is_marine`, `is_brackish`, `is_freshwater`: true/false
+`taxon_id` -- should be WoRMS AphiaID for lowest found taxon
+`genus_id` -- (invertebrates only) to help look for NCBI IDs
+`ncbi_id` -- ID for taxon in NCBI
+`region` -- region found in, from MEOW or PPOW
+
+
+```{r setup, include=FALSE}
+library(rfishbase)
+library(robis)
+library(tidyverse)
+library(here)
+# spatial libraries
+library(rnaturalearth)
+library(sf)
+
+# here filepaths
+splists <- here('processeddata', 'species_lists')
+spatial <- here("rawdata", "shapefiles", "MEOW")
+```
+
+
+
+# By ecoregion
+
+```{r set up ecoregions}
+# World map
+# basemap
+world_map <- ne_countries(scale = 'small', returnclass = c("sf"))
+
+meow <- read_sf(here(spatial, "meow_ecos_simple.shp")) %>% #simplified in QGIS using Simplify function: method = Distance (Douglas-Peuker), Tolerance = 1
+  dplyr::select(c('ECOREGION', 'geometry')) %>%
+  rename(region = ECOREGION) %>%
+  mutate(type = 'meow')
+ppow <- read_sf(here(spatial, "ppow_simple_NEP.shp")) %>% #simplified in QGIS using Simplify function: method = Distance (Douglas-Peuker), Tolerance = 1
+  dplyr::select(c('PROVINC', 'geometry')) %>%
+  rename(region = PROVINC) %>%
+  mutate(type = 'ppow')
+
+regions <- rbind(meow,ppow)
+
+# Base map
+base_map <- ggplot() +
+  # fill = col to remove country borders
+  geom_sf(data = world_map, size = .2, fill = "gray80", col = "gray80") + 
+  theme(panel.grid.major = element_line(color = gray(0.9), 
+                                        linetype = "dashed"))
+
+```
+
+```{r checklist function}
+# requires robis to be loaded
+
+# takes a dataframe that has our shapefiles loaded in with two main columns:
+# wkt from st_as_txt() and region
+obis_checklist <- function(region_df) {
+  # make blank object
+  search <- tibble()
+  region_geo <- region_df$wkt
+  region_name <- region_df$region
+  # loop by region
+  for (i in 1:length(region_geo)) {
+    #region_geo <- region_df$wkt
+    print(paste0('searching for ', region_name[i]))
+    found_sp <- checklist(geometry = region_geo[i],
+                          startdate = '1945-01-01') %>%
+      # only keep animals
+      filter(kingdom == 'Animalia') %>%
+      # only keep things at the levels we want
+      filter(taxonRank %in% c('Species', 'Subspecies',
+                              'Tribe', 'Variety', 'Forma',
+                              'Genus', 'Subgenus', NA))
+      found_sp$region = paste(region_name[i])
+    message('done')
+    
+    search <- bind_rows(search, found_sp)
+  }
+  return(search)
+}
+```
+
+
+```{r meow checklist}
+#Ecoregions
+# check on map
+base_map +  
+  geom_sf(data = regions, 
+          aes(fill = region), 
+          linewidth = .2, 
+          col = 0, 
+          alpha=.3) +
+  ggtitle("Ecoregions") +
+  theme(legend.position = "none") +
+  coord_sf(expand = FALSE)
+
+
+#meow
+regions$wkt <- st_as_text(regions$geometry) #create well known text of ecoregions
+# make sure its all valid?
+st_is_valid(regions$geometry, reason = TRUE)
+
+# these regions are closest to our study area
+regions_nep <- regions %>%
+  filter(region %in% c("Gulf of Alaska", 
+                       "North American Pacific Fijordland", 
+                       "Puget Trough/Georgia Basin", 
+                       "Oregon, Washington, Vancouver Coast and Shelf",
+                       "California Current", "Subarctic Pacific"))
+
+# NEP Ecoregions
+# check on map
+base_map +  
+  geom_sf(data = regions_nep, 
+          aes(fill = region), 
+          linewidth = .2, 
+          col = 0, 
+          alpha=.3) +
+  ggtitle("Ecoregions") +
+  theme(legend.position = "none") +
+  coord_sf(expand = FALSE)
+
+# use function to extract species list by region
+regions_nep_checklist <- obis_checklist(regions_nep)
+
+```
+
+### Fish
+
+```{r meow-fish}
+nep_fish <- regions_nep_checklist %>%
+  # only species level records
+  filter(taxonRank %in% c('Species', 'Subspecies')) %>%
+  # only fish; polyphyletic so can be complicated
+  # class covers most of it, some sculpins lack class though
+  filter(class %in% c('Actinopteri', 'Elasmobranchii', 'Holocephali',
+                      'Petromyzonti', 'Myxini', 'Teleostei')) %>%
+  # only records that have accepted taxonomy for now
+  ## all were 'accepted'
+  #filter(taxonomicStatus == 'accepted') %>%
+  #select only useful columns for now
+  select(acceptedNameUsage, taxonomicStatus, species, subspecies, taxonRank,
+         class, order, family, genus, 
+         is_marine, is_brackish, is_freshwater,
+         taxonID, ncbi_id, region) %>%
+  # just in case
+  distinct() %>%
+  # rank to lowercase to match other databases
+  mutate(taxonRank = tolower(taxonRank)) %>%
+  # standardize column names
+  janitor::clean_names() %>%
+  mutate(verbatim_name = coalesce(subspecies, species)) %>%
+  relocate(verbatim_name, .after = 'accepted_name_usage') %>%
+  rename(accepted_name = accepted_name_usage) %>%
+  select(!subspecies)
+  
+
+
+
+write_csv(nep_fish, here(splists, '20250320_obis-fish_nep.csv'))
+
+bc_fish <- nep_fish %>%
+  filter(region %in% c("Oregon, Washington, Vancouver Coast and Shelf",
+                       "Puget Trough/Georgia Basin", "North American Pacific Fijordland")) %>%
+  select(!region) %>%
+  distinct()
+
+write_csv(bc_fish, here(splists, '20250320_obis-fish_bc.csv'))
+```
+
+### Filter to Fishbase-validated list
+
+Also make sure they all have NCBI ids! (? do we)
+
+```{r}
+# use the accepted name to get a species list from fishbase
+obisfish_base <- bc_fish %>%
+  mutate(fishbase_name = validate_names(species_list = .$accepted_name))
+
+#obisfish_base <- nep_fish %>%
+#  mutate(fishbase_name = validate_names(species_list = .$accepted_name))
+
+# make a search for distribution() from rfishbase
+obisfish_base_search <- obisfish_base %>%
+  filter(!(is.na(fishbase_name))) %>%
+  select(fishbase_name) %>%
+  distinct()
+
+# get distribution for fishbase names
+# first get the fish from fishbase
+fb_fish <- fb_tbl(tbl = "species", server = "fishbase") %>%
+   mutate(sci_name = paste(Genus, Species)) %>%
+  filter(sci_name %in% obisfish_base_search$fishbase_name) %>%
+  select(SpecCode, sci_name, FBname)
+
+# get names of fao regions
+fao_names <- fb_tbl("faoarref", "fishbase") %>%
+  select(!Modified)
+
+#combine fish and fao areas
+dist_fish <- fb_tbl(tbl='faoareas') %>%
+  select(!Modified) %>%
+  right_join(fb_fish) %>%
+  left_join(fao_names)
+
+# filter for species by FAO region
+# this should help account for errors in OBIS records
+fishbase_in_FAO <- dist_fish %>%
+  filter(FAO %in% 'Pacific, Northeast') %>%
+  select(c(sci_name)) %>%
+  distinct()
+
+# filter the obis results by FAO region
+obisfish_basefao <- obisfish_base %>%
+  filter(fishbase_name %in% fishbase_in_FAO$sci_name) %>%
+  distinct()
+```
+
+
+
+The species list traits will filter most of the species.
+We want saltwater, and with minimum depth above 200. ->>Check with Jenn if this is the right depth
+
+```{r traits to filter}
+trait_list <- c('SpecCode', 'Species', 'Genus', 'FBname',
+                # traits to filter for
+                'Fresh', 'Brack', 'Saltwater', 
+                'DemersPelag',
+                'AnaCat', 'DepthRangeComShallow',
+                'DepthRangeShallow', 'DepthRangeDeep',
+                'Comments'
+                )
+
+
+np_fish_trait_sp <- species(obisfish_basefao$fishbase_name, 
+                            fields = trait_list, 
+                            server = 'fishbase')
+
+np_fish_trait_sp2 <- np_fish_trait_sp %>%
+  # fill some NAs by using common shallow depth
+  mutate(depth_shallow = coalesce(DepthRangeShallow, DepthRangeComShallow)) %>%
+  # filter either; shallow depth less than 200m, 
+  # or na& deep range < 500 (usually 'type locality')
+  # or both are NA, to be checked later
+  filter(depth_shallow < 200 | 
+           is.na(depth_shallow) & DepthRangeDeep < 550 |
+           is.na(depth_shallow) & is.na(DepthRangeDeep))
+  
+# filter regional species list
+obisfish_basefao_trait <- obisfish_basefao %>%
+  filter(fishbase_name %in% np_fish_trait_sp2$Species)
+
+```
+
+
+
+```{r write filtered list}
+#write.csv(obisfish_base, here(splists, "20230922_obis-fish_fishbase_nep.csv"))
+write.csv(obisfish_basefao_trait, here(splists, "20250320_obis-fish_fishbase_bc.csv"))
+
+#obisfish_basefao_trait <- read_csv(here(splists, '20230922_obis-fish_fishbase_bc.csv'))[-1]
+```
+
+```{r combine-hakai}
+hakai_fish <- read.csv(here(splists, 'fishlist_HakaiSurveys_2020.csv'))
+
+hakai_fish_notin <- hakai_fish %>%
+  filter(!(genus_species %in% obisfish_basefao_trait$accepted_name)) %>%
+  # after review only 2 new
+  filter(genus_species %in% c('Cottus asper', 'Syngnathus leptorhynchus'))
+
+#hakai_new <- taxize::
+
+# load-in keys
+taxa_key <- read_csv(here('processeddata', 'species_lists', 'keys',
+                     '20230929_fish_ncbi-worms_by-accession.csv'))[-1]
+
+common_name <- read_csv(here('processeddata', 'species_lists',
+                             '20230929_12s_common-names.csv'))[-1]
+
+hakai_new <- hakai_fish_notin %>%
+  left_join(taxa_key, by = c('genus_species' = 'ncbi_sp')) %>%
+  select(genus_species, worms_sciname, found_taxa, rank, status,
+         class, order, family, genus, worms_aphiaid) %>%
+  distinct() %>%
+  rename(verbatim_name = genus_species,
+         accepted_name = worms_sciname,
+         taxon_id = worms_aphiaid,
+         taxon_rank = rank,
+         species = found_taxa,
+         taxonomic_status = status)
+
+full_splist <- hakai_new %>%
+  full_join(obisfish_basefao_trait) %>%
+  select(!fishbase_name)
+
+
+write.csv(full_splist, here(splists, "20250320_fishlist_obis-hakai.csv"))
+```
+

@@ -1,0 +1,1181 @@
+---
+title: "ch1_coi-03_iNEXT"
+output: html_document
+date: "2024-02-05"
+---
+
+This script has been updated to reflect the new methods for COI samples.
+
+setting seeds for each repeat so the values start in the same spot. seed = year = 2018
+
+palette == tan, darker tan, light grey, blue grey, light yellow-green, medium olive green, dark olive green, brighter green, lighter blue, darker blue
+" #AA9884, #9a806c, #7A7C7F, #38454C, #55804a, #496630, #3b412a, #3e6840, #518891, #29565f "
+
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggpubr)
+library(iNEXT)
+library(here)
+
+
+# filepaths for use with here
+# eDNA
+dataedna <- here::here("processeddata", "2018calvert")
+# save in
+inextout <- here::here("output", "inext")
+datefield <- '20240417_'
+runfield <- 'calvert2018_coi_'
+
+line_pal <- c("Rarefaction" = 'solid',
+               "Observed" = "solid",
+               "Extrapolation" = 'dashed'
+              )
+```
+
+```{r}
+coi_inverts <- read_csv(here(dataedna, 
+                             '20240222_calvert2018_coi_asvmatrix_run-columns_inverts.csv')) %>%
+   # remove controls
+  filter(!(sample_name %in% c('POS66', 'POS44', 'POS22'))) %>%
+  # remove no results + bad hits
+  filter(!(found_taxa %in% c('No Results', 'Potential chimera', 'BLAST failed')))
+
+```
+
+```{r}
+set.seed(2018)
+
+# by ASV
+coi_asvsamp <- coi_inverts %>%
+  # pivot wider by sample_name
+  select(asv, sample_name, pa_quadra3) %>%
+    # sum quadra3 instead of pcr reps
+  distinct() %>%
+  filter(!is.na(pa_quadra3)) %>%
+  pivot_wider(id_cols = c(asv),
+              names_from = sample_name, 
+              values_from = pa_quadra3) %>%
+  column_to_rownames('asv') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+coi_asvall_incfreq <- iNEXT(coi_asvsamp, q=0, datatype="incidence_freq")
+
+
+asv_all <- ggiNEXT(coi_asvall_incfreq, 
+        type = 1, 
+        se = TRUE, 
+        grey = FALSE) + 
+  labs(y = "# ASVs") +
+    theme_classic() +
+      theme(axis.title = element_text(size = 20),
+        axis.text = element_text(size = 10),
+        legend.position = "none"
+        ) 
+
+
+# this is the geom_point
+asv_all$layers[[1]]$aes_params$colour <- 'dodgerblue3'
+# this is the geom_line
+asv_all$layers[[2]]$aes_params$colour <- 'dodgerblue3'
+# this is the confidence interval
+asv_all$layers[[3]]$aes_params$fill <- 'grey40'
+
+asv_all
+
+
+
+ggsave(here::here(inextout, paste0(datefield, runfield, "asvxsite_rarefaction-all.pdf")))
+ggsave(here::here(inextout, paste0(datefield, runfield, "asvxsite_rarefaction-all.png")))
+
+# by species
+
+set.seed(2018)
+
+# By species
+# 
+# by ASV
+coi_spsamp <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(found_taxa, sample_name, pa_quadra3) %>%
+  distinct() %>%
+  filter(!is.na(pa_quadra3)) %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = pa_quadra3,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+coi_spall_incfreq <- iNEXT(coi_spsamp, q=0, datatype="incidence_freq")
+
+
+sp_all <- ggiNEXT(coi_spall_incfreq, 
+        type = 1, 
+        se = TRUE, 
+        grey = FALSE) + 
+  labs(y = "Species Detected", x = 'Samples', title = 'COI: All Samples') +
+  # define the x and y to include all ponits but not be too big
+  scale_y_continuous(limit = c(10,160)) +
+  scale_x_continuous(limit = c(0, 160)) +
+  theme_classic() +
+      theme(axis.title = element_text(size = 20),
+        axis.text = element_text(size = 10),
+        legend.position = "none"
+        )
+
+# this is the geom_point
+sp_all$layers[[1]]$aes_params$colour <- 'dodgerblue3'
+# this is the geom_line
+sp_all$layers[[2]]$aes_params$colour <- 'dodgerblue3'
+# this is the confidence interval
+sp_all$layers[[3]]$aes_params$fill <- 'grey40'
+
+sp_all
+
+
+
+ggsave(here(inextout, paste0(datefield, runfield, "spxsite_rarefaction-all.pdf")))
+ggsave(here(inextout, paste0(datefield, runfield, "spxsite_rarefaction-all.png")))
+
+coi_asvall_incfreq$iNextEst
+
+```
+
+
+
+# Breakdown figure; 98%
+
+```{r mapping}
+coi_spall_incfreq$iNextEst$coverage_based
+#SC 75% at t= (about?); qD ~ sp
+#SC 85% at t=; qD ~
+#SC 90% at t=; qD ~
+#SC 95% at t=; qD ~
+#SC 98% at t=; qD ~
+#SC 99% at t=; qD ~
+# Observed SC 99.825% at t=; qD = 
+#SC 99.98928 extrapolated at t=; qD ~
+
+
+coi_inextest <- as.data.frame(coi_spall_incfreq$iNextEst$coverage_based) %>%
+  # isolate only rows that represent 75, 85, 90, 95, 98, observed, max
+  mutate(keep = ifelse(Method == 'Observed', 1, 
+                       ifelse(SC >= .70 & SC <= .79, 1, 
+                              ifelse(SC >= .84 & SC <= .88, 1, 
+                                     ifelse(SC >= .89 & SC <= .91, 1, 
+                                            ifelse(SC >= .949 & SC <= .955, 1,
+                                                   # may have to adjust the decimal to get the first 98% & 99
+                                                   ifelse(SC >.97999 & SC <= .9816, 1,
+                                                          ifelse(SC >.99 & SC <= .9905, 1,
+                                                          # keep biggest value
+                                                          ifelse(SC == max(SC), 1, 0))))))))) %>%
+  filter(keep == 1) %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 0))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0))) %>% 
+  # our observed label will round to an already existing number
+  mutate(sc_label = ifelse(Method == 'Observed', round(SC*100, digits = 1), sc_label)) %>%
+  # remove rows beyond amount we want
+  filter(t<=250) %>%
+  filter(!t<10)
+
+```
+
+```{r}
+sp_all <- ggiNEXT(coi_spall_incfreq, 
+        type = 1, 
+        se = TRUE, 
+        grey = FALSE) + 
+  labs(y = "Species Detected", x = 'Samples', 
+       title = 'COI: All Samples', subtitle = 'Sample completeness paired with number of species') +
+  # define the x and y to include all ponits but not be too big
+  scale_y_continuous(limits = c(0, 200)) +
+  scale_x_continuous(limits = c(0, 300)) +
+  theme_bw() +
+      theme(
+        legend.position = "none",
+        panel.grid = element_blank()
+        ) 
+
+# this is the geom_point
+sp_all$layers[[1]]$aes_params$colour <- '#345976'
+# this is the geom_line
+sp_all$layers[[2]]$aes_params$colour <- '#345976'
+# this is the confidence interval
+sp_all$layers[[3]]$aes_params$fill <- 'grey40'
+
+
+# adjustments for the special plot
+# test to make sure it looks good before manual stacking
+sp_all +
+  # let lines go off the edges
+  coord_cartesian(ylim = c(20,175), xlim = c(0,250))+
+  # completeness label
+  geom_text(data = coi_inextest, aes(label = paste0(sc_label, '%'), x = t, y = 23), 
+            color = 'black',
+            size = 4
+            ) +
+  geom_text(data = coi_inextest, aes(label = paste0(as.character(t)), x = t, y = 20), 
+            color = 'black',
+            size = 4
+            ) +
+  geom_segment(data = coi_inextest, 
+               aes(y = 15, 
+                   yend = qD,
+                   xend = t,
+                   x = t), 
+               colour = 'gray90', 
+               linetype = 'twodash',
+               size = .75) +
+  geom_segment(data = coi_inextest, 
+               aes(y = qD, 
+                   yend = qD,
+                   x = 0,
+                   xend = t), 
+               colour = 'gray90', 
+               linetype = 'twodash', 
+               size = .75) +
+  geom_text(data = coi_inextest, aes(label = paste0(qd_label, ' sp'), y = qD, x = 0), 
+            color = 'black',
+            size = 4
+            ) +
+  geom_point(data = coi_inextest, aes(x = t, y = qD), 
+             color = 'black', 
+             size = 3) +
+  theme(axis.title = element_text(size = 15),
+        axis.text = element_text(size = 15),
+        title = element_text(size = 15))
+
+```
+
+```{r manual stacking}
+ggplot() +
+  geom_segment(data = coi_inextest, 
+               aes(y = 15, 
+                   yend = qD,
+                   xend = t,
+                   x = t), 
+               colour = 'gray92', 
+               linetype = 'twodash',
+               size = .75) +
+  geom_segment(data = coi_inextest, 
+               aes(y = qD, 
+                   yend = qD,
+                   x = 0,
+                   xend = t), 
+               colour = 'gray92', 
+               linetype = 'twodash', 
+               size = .75) +
+# ribbon for confidence interval
+  geom_ribbon(aes(ymin = coi_spall_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = coi_spall_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = coi_spall_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey50') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(coi_spall_incfreq$DataInfo$T,
+                 coi_spall_incfreq$DataInfo$S.obs), 
+             color = '#345976', size = 5) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = coi_spall_incfreq$iNextEst$coverage_based$t, 
+                y = coi_spall_incfreq$iNextEst$coverage_based$qD, 
+                linetype = coi_spall_incfreq$iNextEst$coverage_based$Method), 
+            color = '#345976', size = 1) +
+  scale_linetype_manual(values = line_pal) +
+  # completeness label
+  geom_text(data = coi_inextest, 
+            aes(label = paste0(sc_label, "%"), 
+                x = t, y = 35), 
+            color = 'black',
+            size = 4) +
+  geom_text(data = coi_inextest, 
+            aes(label = paste0(as.character(t)), 
+                x = t, y = 30), 
+            color = 'black',
+            size = 4) +
+  geom_text(data = coi_inextest, 
+            aes(label = paste0(qd_label, ' sp'), 
+                y = qD + 1, x = 0), 
+            color = 'black',
+            size = 4) +
+  geom_point(data = coi_inextest, 
+             aes(x = t, y = qD), 
+             color = 'black', 
+             size = 3) +
+  # let lines go off the edges
+  coord_cartesian(ylim = c(30,175), xlim = c(0,250))+
+  labs(y = "Marine Invertebrates Detected", x = 'Samples', 
+       title = 'COI: All Samples', 
+       subtitle = 'Sample completeness paired with number of species') +
+  theme_bw() +
+  theme(axis.title = element_text(size = 15),
+        axis.text = element_text(size = 15),
+        title = element_text(size = 15),
+        panel.grid = element_blank(),
+        legend.position = 'none')
+
+ggsave(here(inextout, 
+            paste0(datefield, 
+                         runfield, 
+                         "asvxsite_rarefaction_breakdown.pdf")),
+       height = 7,
+       width = 10,
+       units = 'in')
+```
+
+# ASV vs MOTU vs sp
+
+iNEXT on each type of data split
+
+```{r iNEXT}
+### Prepare matrices
+# motu
+# by ASV
+coi_motusamp <- coi_inverts %>%
+  # pivot wider by sample_name
+  select(motu, sample_name, pa_quadra3) %>%
+  distinct() %>%
+  filter(!is.na(pa_quadra3)) %>%
+  pivot_wider(id_cols = c(motu),
+              names_from = sample_name, 
+              values_from = pa_quadra3,
+              values_fn = sum) %>%
+  column_to_rownames('motu') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+coi_asvsamp2 <- coi_inverts %>%
+  # pivot wider by sample_name
+  select(asv, sample_name, pa_quadra3) %>%
+  filter(!is.na(pa_quadra3)) %>%
+    # sum quadra3 instead of pcr reps
+  distinct() %>%
+  pivot_wider(id_cols = c(asv),
+              names_from = sample_name, 
+              values_from = pa_quadra3) %>%
+  column_to_rownames('asv') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+# species if asv blast
+sp_samp <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  select(species, pa_quadra3, sample_name) %>%
+  filter(!is.na(pa_quadra3)) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(species),
+              names_from = sample_name, 
+              values_from = pa_quadra3,
+              values_fn = sum) %>%
+  column_to_rownames('species') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+
+
+#iNEXT on each
+set.seed(2018)
+motu_incfreq <- iNEXT(coi_motusamp, q=0, datatype="incidence_freq")
+asv2_incfreq <- iNEXT(coi_asvsamp2, q=0, datatype="incidence_freq")
+sp_incfreq <- iNEXT(sp_samp, q=0, datatype="incidence_freq")
+
+```
+MOTU: 
+88%: t=9, qD = 63
+95%: t = 51, qD = 120
+98%: not reached by t = 306, qD = 324
+
+ASV:
+85%: t = 101, qD = 521
+90% not reached by t = 306, qD = 1141
+
+SP from MOTUs:
+90%: t = 9, qD = 43
+95%: t=17, qD = 51
+98%: t = 42, qD = 60
+
+sp from ASVs
+90: ~10, qD 44
+95%: t = 17, qD = 53
+98%: t = 42, qD = 64
+
+```{r summary stats}
+motu_incfreq$iNextEst
+asv2_incfreq$iNextEst
+sp_incfreq$iNextEst
+
+
+
+motu_inextest <- as.data.frame(motu_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+asv2_inextest <- as.data.frame(asv2_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+sp_inextest <- as.data.frame(sp_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+
+motu_sponly <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(motu, pa_quadra3) %>%
+  distinct() %>%
+  filter(!is.na(pa_quadra3)) %>%
+  summarise(n_motu = sum(pa_quadra3))
+```
+
+
+Plot all three together
+
+
+
+```{r asv-motu-sp together}
+motusptog_plot <- ggplot() +
+  # ribbon for confidence interval
+  geom_ribbon(aes(ymin = motu_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = motu_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = motu_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(motu_incfreq$DataInfo$T,
+                 motu_incfreq$DataInfo$S.obs), 
+             color = '#437398', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = motu_incfreq$iNextEst$coverage_based$t, 
+                y = motu_incfreq$iNextEst$coverage_based$qD, 
+                linetype = motu_incfreq$iNextEst$coverage_based$Method), 
+            color = '#437398', size = 1) +
+  # to show if it was only sp-level ids
+  geom_point(aes(x = motu_inextest$t,
+                 y = motu_sponly$n_motu), 
+             color = '#437398', 
+             size = 3,
+             shape = 18) +
+  scale_linetype_manual(values = line_pal) +
+    geom_ribbon(aes(ymin = asv2_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = asv2_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = asv2_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asv2_incfreq$DataInfo$T,
+                 asv2_incfreq$DataInfo$S.obs), 
+             color = '#85abc9', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asv2_incfreq$iNextEst$coverage_based$t, 
+                y = asv2_incfreq$iNextEst$coverage_based$qD, 
+                linetype = asv2_incfreq$iNextEst$coverage_based$Method), 
+            color = '#85abc9', size = 1) +
+  geom_ribbon(aes(ymin = sp_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = sp_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = sp_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(sp_incfreq$DataInfo$T,
+                 sp_incfreq$DataInfo$S.obs), 
+             color = '#345976', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = sp_incfreq$iNextEst$coverage_based$t, 
+                y = sp_incfreq$iNextEst$coverage_based$qD, 
+                linetype = sp_incfreq$iNextEst$coverage_based$Method), 
+            color = '#345976', size = 1) +
+    labs(x = 'Samples', y =  'Marine Invertebrate alpha diversity metric') +
+  theme(plot.title = element_text(hjust = 0.5, size = 45),
+        axis.title = element_text(size = 40),
+        axis.text = element_text(size = 25),
+        legend.position = 'none') 
+
+
+# png version 
+motusptog_plot +
+    # Completeness labels for points
+  geom_text(data = motu_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10
+            ) +
+    geom_text(data = asv2_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 5, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10
+            ) +
+    geom_text(data = sp_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10
+            ) +
+  coord_cartesian(ylim = c(0,1000), xlim = c(0,210))+
+  theme_classic() +
+    theme(plot.title = element_text(hjust = 0.5, size = 45),
+        axis.title = element_text(size = 40),
+        axis.text = element_text(size = 25),
+        legend.position = 'none')
+
+
+ggsave(here(inextout, paste0(datefield, runfield, "coi_motuvsasvvssp.png")),
+       height = 7,
+       width = 8,
+       units = 'in')
+
+
+# update size of text etc for PDF version
+
+motusptog_plot +
+    # Completeness labels for points
+  geom_text(data = motu_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 25), 
+            color = 'black',
+            size = 4,
+            ) +
+    geom_text(data = asv2_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 5, 
+                y = qD - 25), 
+            color = 'black',
+            size = 4,
+            ) +
+    geom_text(data = sp_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 25), 
+            color = 'black',
+            size = 4,
+            ) +
+  coord_cartesian(ylim = c(0,1100), xlim = c(0,210),
+                  expand = FALSE)+
+  theme_classic() +
+    theme(plot.title = element_text(hjust = 0.5, size = 25),
+        axis.title = element_text(size = 20),
+        axis.text = element_text(size = 15),
+        legend.position = 'none')
+
+
+ggsave(here(inextout, paste0(datefield, runfield, "coi_motuvsasvvssp.pdf")),
+       device = 'pdf',
+       height = 7,
+       width = 8,
+       units = 'in')
+```
+
+
+
+# stacking runs
+
+```{r generate additive runs}
+# species if asv blast
+q3_spsamp <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  select(species, pa_quadra3, sample_name) %>%
+  distinct() %>%
+  filter(!is.na(pa_quadra3)) %>%
+  pivot_wider(id_cols = c(species),
+              names_from = sample_name, 
+              values_from = pa_quadra3,
+              values_fn = sum) %>%
+  column_to_rownames('species') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+q3q1_spsamp <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(found_taxa, sample_name, pa_quadra1, pa_quadra3) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('pa_quadra3', 'pa_quadra1'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = pa_quadra3 + pa_quadra1) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(pa_quadra3, pa_quadra1))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+q3q1gcsept_spsamp <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(found_taxa, sample_name, pa_quadra1, pa_quadra3, pa_gcsept) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('pa_quadra3', 'pa_quadra1', 'pa_gcsept'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = pa_quadra3 + pa_quadra1 + pa_gcsept) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(pa_quadra3, pa_quadra1, pa_gcsept))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+q4all_spsamp <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(found_taxa, sample_name, pa_quadra1, pa_quadra3, pa_gcsept, pa_gcoct) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('pa_quadra3', 'pa_quadra1', 'pa_gcsept', 'pa_gcoct'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = pa_quadra3 + pa_quadra1 + pa_gcsept + pa_gcoct) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(pa_quadra3, pa_quadra1, pa_gcsept, pa_gcoct))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+q3_sp_incfreq <- iNEXT(q3_spsamp, q=0, datatype="incidence_freq")
+asvsitepcr2_incfreq <- iNEXT(q3q1_spsamp, q=0, datatype="incidence_freq")
+q3q1gcsept_sp_incfreq <- iNEXT(q3q1gcsept_spsamp, q=0, datatype="incidence_freq")
+q4all_sp_incfreq <- iNEXT(q4all_spsamp, q=0, datatype="incidence_freq")
+
+q3_inextest <- as.data.frame(q3_sp_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+q3q1_inextest <- as.data.frame(asvsitepcr2_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+q3q1gcsept_inextest <- as.data.frame(q3q1gcsept_sp_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+q4all_inextest <- as.data.frame(q4all_sp_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+```
+
+
+```{r}
+
+stackrun_plot <- ggplot() +
+  # ribbon for confidence interval
+  geom_ribbon(aes(ymin = q3_sp_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = q3_sp_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = q3_sp_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(q3_sp_incfreq$DataInfo$T,
+                 q3_sp_incfreq$DataInfo$S.obs), 
+             color = 'dodgerblue1', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = q3_sp_incfreq$iNextEst$coverage_based$t, 
+                y = q3_sp_incfreq$iNextEst$coverage_based$qD, 
+                linetype = q3_sp_incfreq$iNextEst$coverage_based$Method), 
+            color = 'dodgerblue1', size = 1) +
+  scale_linetype_manual(values = line_pal) +
+    geom_ribbon(aes(ymin = asvsitepcr2_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr2_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr2_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr2_incfreq$DataInfo$T,
+                 asvsitepcr2_incfreq$DataInfo$S.obs), 
+             color = 'dodgerblue3', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr2_incfreq$iNextEst$coverage_based$t, 
+                y = asvsitepcr2_incfreq$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr2_incfreq$iNextEst$coverage_based$Method), 
+            color = 'dodgerblue3', size = 1) +
+  geom_ribbon(aes(ymin = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(q3q1gcsept_sp_incfreq$DataInfo$T,
+                 q3q1gcsept_sp_incfreq$DataInfo$S.obs), 
+             color = 'dodgerblue4', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$t, 
+                y = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$qD, 
+                linetype = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$Method), 
+            color = 'dodgerblue4', size = 1) +
+  geom_ribbon(aes(ymin = q4all_sp_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = q4all_sp_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = q4all_sp_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(q4all_sp_incfreq$DataInfo$T,
+                 q4all_sp_incfreq$DataInfo$S.obs), 
+             color = 'navy', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = q4all_sp_incfreq$iNextEst$coverage_based$t, 
+                y = q4all_sp_incfreq$iNextEst$coverage_based$qD, 
+                linetype = q3q1gcsept_sp_incfreq$iNextEst$coverage_based$Method), 
+            color = 'navy', size = 1) +
+  # Completeness labels for points
+  geom_text(data = q3_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+    geom_text(data = q3q1_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 5, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+    geom_text(data = q3q1gcsept_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+  geom_text(data = q4all_inextest, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+  coord_cartesian(ylim = c(0,175), xlim = c(0,210))+
+  theme_classic() +
+    labs(x = 'Samples', y =  'Alpha diversity metric') +
+  theme(plot.title = element_text(hjust = 0.5, size = 45),
+        axis.title = element_text(size = 40),
+        axis.text = element_text(size = 25),
+        legend.position = 'none') 
+
+
+stackrun_plot
+
+
+ggsave(here(inextout, paste0(datefield, "coi_additiveruns.png")),
+       height = 7,
+       width = 10,
+       units = 'in')
+```
+
+# PCR
+
+## by species
+
+```{r asvxsite}
+# by pcr
+asvsitepcr1_pa <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(found_taxa, sample_name, reads_raw_quadra3_rep1) %>%
+    # sum quadra3 instead of pcr reps
+  distinct() %>%
+  filter(!is.na(reads_raw_quadra3_rep1)) %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = reads_raw_quadra3_rep1,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+
+# 
+asvsitepcr2_pa <- coi_inverts %>%
+  filter(rank == 'species') %>%
+  # pivot wider by sample_name
+  select(found_taxa, sample_name, reads_raw_quadra3_rep1, reads_raw_quadra3_rep2) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('reads_raw_quadra3_rep1', 'reads_raw_quadra3_rep2'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = reads_raw_quadra3_rep2 + reads_raw_quadra3_rep1) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(reads_raw_quadra3_rep2, reads_raw_quadra3_rep1))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+
+# species if asv blast
+asvsitepcr3_pa <- coi_inverts %>%
+  filter(rank == 'species') %>%
+    select(found_taxa, sample_name, reads_raw_quadra3_rep1, 
+           reads_raw_quadra3_rep2, reads_raw_quadra3_rep3) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('reads_raw_quadra3_rep1', 'reads_raw_quadra3_rep2',
+              'reads_raw_quadra3_rep3'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = reads_raw_quadra3_rep2 + reads_raw_quadra3_rep1 +
+           reads_raw_quadra3_rep3) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(reads_raw_quadra3_rep2, reads_raw_quadra3_rep1,
+             reads_raw_quadra3_rep3))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(found_taxa),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('found_taxa') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+asvsitepcr1_incfreq <- iNEXT(asvsitepcr1_pa, q=0, datatype="incidence_freq")
+asvsitepcr2_incfreq <- iNEXT(asvsitepcr2_pa, q=0, datatype="incidence_freq")
+asvsitepcr3_incfreq <- iNEXT(asvsitepcr3_pa, q=0, datatype="incidence_freq")
+
+pcr1inext <- as.data.frame(asvsitepcr1_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+pcr1inext98 <- as.data.frame(asvsitepcr1_incfreq$iNextEst$coverage_based) %>%
+  mutate(keep = ifelse(SC > .9799 & SC < .981, 'yes', NA_character_)) %>%
+  filter(!is.na(keep)) %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+pcr2inext <- as.data.frame(asvsitepcr2_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+pcr2inext98 <- as.data.frame(asvsitepcr2_incfreq$iNextEst$coverage_based) %>%
+  mutate(keep = ifelse(SC > .9799 & SC < .981, 'yes', NA_character_)) %>%
+  filter(!is.na(keep)) %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+pcr3inext <- as.data.frame(asvsitepcr3_incfreq$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+pcr3inext98 <- as.data.frame(asvsitepcr3_incfreq$iNextEst$coverage_based) %>%
+  mutate(keep = ifelse(SC > .9799 & SC < .981, 'yes', NA_character_)) %>%
+  filter(!is.na(keep)) %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+
+asvsitepcr3_incfreq$iNextEst$coverage_based
+asvsitepcr2_incfreq$iNextEst$coverage_based
+asvsitepcr1_incfreq$iNextEst$coverage_based
+```
+
+
+```{r}
+ggplot() +  
+  geom_point(aes(x = pcr1inext98$t,
+                 y = 4),
+             shape = 17,
+             colour = '#c1be9d',
+             size = 5) +
+  geom_point(aes(x = pcr2inext98$t,
+                 y = 4),
+             shape = 17,
+             colour = '#938E5C',
+             size = 5) +
+  geom_point(aes(x = pcr3inext98$t,
+                 y = 4),
+             shape = 17,
+             colour = '#393e22',
+             size = 5) +
+geom_ribbon(aes(ymin = asvsitepcr1_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr1_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr1_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr1_incfreq$DataInfo$T,
+                 asvsitepcr1_incfreq$DataInfo$S.obs), 
+             color = '#c1be9d', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr1_incfreq$iNextEst$coverage_based$t, 
+                y = asvsitepcr1_incfreq$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr1_incfreq$iNextEst$coverage_based$Method), 
+            color = '#c1be9d', size = 1) +
+  scale_linetype_manual(values = line_pal) +
+    geom_ribbon(aes(ymin = asvsitepcr2_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr2_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr2_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr2_incfreq$DataInfo$T,
+                 asvsitepcr2_incfreq$DataInfo$S.obs), 
+             color = '#938E5C', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr2_incfreq$iNextEst$coverage_based$t, 
+                y = asvsitepcr2_incfreq$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr2_incfreq$iNextEst$coverage_based$Method), 
+            color = '#938E5C', size = 1) +
+  geom_ribbon(aes(ymin = asvsitepcr3_incfreq$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr3_incfreq$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr3_incfreq$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr3_incfreq$DataInfo$T,
+                 asvsitepcr3_incfreq$DataInfo$S.obs), 
+             color = '#393E22', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr3_incfreq$iNextEst$coverage_based$t, 
+                y = asvsitepcr3_incfreq$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr3_incfreq$iNextEst$coverage_based$Method), 
+            color = '#393E22', size = 1) +
+  # Completeness labels for points
+  # geom_text(data = pcr1inext, 
+  #           aes(label = paste0(sc_label,'%'), 
+  #               x = t + 3.75, 
+  #               y = qD - 5), 
+  #           color = 'black',
+  #           size = 4,
+  #           ) +
+  #   geom_text(data = pcr2inext, 
+  #           aes(label = paste0(sc_label,'%'), 
+  #               x = t + 5, 
+  #               y = qD - 5), 
+  #           color = 'black',
+  #           size = 4,
+  #           ) +
+  #   geom_text(data = pcr3inext, 
+  #           aes(label = paste0(sc_label,'%'), 
+  #               x = t + 3.75, 
+  #               y = qD - 5), 
+  #           color = 'black',
+  #           size = 4,
+  #           ) +
+    coord_cartesian(ylim = c(0,175), xlim = c(0,225),
+                  expand = FALSE)+
+  theme_classic() +
+    labs(x = 'Samples', y =  'Marine invertebrate species') +
+  theme(plot.title = element_text(hjust = 0.5, size = 15),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 15),
+        legend.position = 'none')
+
+
+
+ggsave(here(inextout, 
+            paste0(datefield, "coi_pcr.pdf")),
+       height = 7,
+       width = 8,
+       units = 'in')
+
+```
+
+## by motu
+
+```{r asvxsite}
+# by pcr
+asvsitepcr1_motu <- coi_inverts %>%
+  # pivot wider by sample_name
+  select(motu, sample_name, reads_raw_quadra3_rep1) %>%
+    # sum quadra3 instead of pcr reps
+  distinct() %>%
+  filter(!is.na(reads_raw_quadra3_rep1)) %>%
+  pivot_wider(id_cols = c(motu),
+              names_from = sample_name, 
+              values_from = reads_raw_quadra3_rep1,
+              values_fn = sum) %>%
+  column_to_rownames('motu') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+
+# 
+asvsitepcr2_motu <- coi_inverts %>%
+  # pivot wider by sample_name
+  select(motu, sample_name, reads_raw_quadra3_rep1, reads_raw_quadra3_rep2) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('reads_raw_quadra3_rep1', 'reads_raw_quadra3_rep2'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = reads_raw_quadra3_rep2 + reads_raw_quadra3_rep1) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(reads_raw_quadra3_rep2, reads_raw_quadra3_rep1))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = c(motu),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('motu') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+
+# species if asv blast
+asvsitepcr3_motu <- coi_inverts %>%
+    select(motu, sample_name, reads_raw_quadra3_rep1, 
+           reads_raw_quadra3_rep2, reads_raw_quadra3_rep3) %>%
+    # sum quadra3 instead of pcr reps
+  mutate_at(c('reads_raw_quadra3_rep1', 'reads_raw_quadra3_rep2',
+              'reads_raw_quadra3_rep3'),
+            ~ ifelse(is.na(.), 0, .)) %>%
+  mutate(pa_total = reads_raw_quadra3_rep2 + reads_raw_quadra3_rep1 +
+           reads_raw_quadra3_rep3) %>%
+  filter(!(pa_total == 0)) %>%
+  select(!(c(reads_raw_quadra3_rep2, reads_raw_quadra3_rep1,
+             reads_raw_quadra3_rep3))) %>%
+  pivot_wider(id_cols = c(motu),
+              names_from = sample_name, 
+              values_from = pa_total,
+              values_fn = sum) %>%
+  column_to_rownames('motu') %>%
+  # make binary
+  mutate(across(1:ncol(.), .fns = ~ifelse(is.na(.), 0, 1))) %>%
+  as.incfreq()
+
+
+asvsitepcr1_incfreq2 <- iNEXT(asvsitepcr1_motu, q=0, datatype="incidence_freq")
+asvsitepcr2_incfreq2 <- iNEXT(asvsitepcr2_motu, q=0, datatype="incidence_freq")
+asvsitepcr3_incfreq2 <- iNEXT(asvsitepcr3_motu, q=0, datatype="incidence_freq")
+
+pcr1inext <- as.data.frame(asvsitepcr1_incfreq2$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+pcr2inext <- as.data.frame(asvsitepcr2_incfreq2$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+pcr3inext <- as.data.frame(asvsitepcr3_incfreq2$iNextEst$coverage_based) %>%
+  filter(Method == 'Observed') %>%
+  mutate(sc_label = as.character(round(SC*100, digits = 1))) %>%
+  mutate(qd_label = as.character(round(qD, digits = 0)))
+```
+
+
+```{r}
+ggplot() +
+  geom_vline(xintercept = asvsitepcr1_incfreq2$DataInfo$T,
+             linetype = 'twodash',
+             colour = 'dodgerblue1') +
+    geom_vline(xintercept = asvsitepcr2_incfreq2$DataInfo$T,
+             linetype = 'twodash',
+             colour = 'dodgerblue3') +
+    geom_vline(xintercept = asvsitepcr3_incfreq2$DataInfo$T,
+             linetype = 'twodash',
+             colour = 'dodgerblue4') +
+  
+geom_ribbon(aes(ymin = asvsitepcr1_incfreq2$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr1_incfreq2$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr1_incfreq2$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr1_incfreq2$DataInfo$T,
+                 asvsitepcr1_incfreq2$DataInfo$S.obs), 
+             color = 'dodgerblue1', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr1_incfreq2$iNextEst$coverage_based$t, 
+                y = asvsitepcr1_incfreq2$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr1_incfreq2$iNextEst$coverage_based$Method), 
+            color = 'dodgerblue1', size = 1) +
+  scale_linetype_manual(values = line_pal) +
+    geom_ribbon(aes(ymin = asvsitepcr2_incfreq2$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr2_incfreq2$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr2_incfreq2$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr2_incfreq2$DataInfo$T,
+                 asvsitepcr2_incfreq2$DataInfo$S.obs), 
+             color = 'dodgerblue3', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr2_incfreq2$iNextEst$coverage_based$t, 
+                y = asvsitepcr2_incfreq2$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr2_incfreq2$iNextEst$coverage_based$Method), 
+            color = 'dodgerblue3', size = 1) +
+  geom_ribbon(aes(ymin = asvsitepcr3_incfreq2$iNextEst$coverage_based$qD.LCL,
+                  ymax = asvsitepcr3_incfreq2$iNextEst$coverage_based$qD.UCL,
+                  x = asvsitepcr3_incfreq2$iNextEst$coverage_based$t), 
+              alpha = .25, colour = NA, fill = 'grey40') +
+  # point at t(samples) and S.obs (species observed)
+  geom_point(aes(asvsitepcr3_incfreq2$DataInfo$T,
+                 asvsitepcr3_incfreq2$DataInfo$S.obs), 
+             color = 'dodgerblue4', size = 3) +
+  # line for qD, different linetypes for interpolation and rarefaction
+  geom_line(aes(x = asvsitepcr3_incfreq2$iNextEst$coverage_based$t, 
+                y = asvsitepcr3_incfreq2$iNextEst$coverage_based$qD, 
+                linetype = asvsitepcr3_incfreq2$iNextEst$coverage_based$Method), 
+            color = 'dodgerblue4', size = 1) +
+  # Completeness labels for points
+  geom_text(data = pcr1inext, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+    geom_text(data = pcr2inext, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 5, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+    geom_text(data = pcr3inext, 
+            aes(label = paste0(sc_label,'%'), 
+                x = t + 3.75, 
+                y = qD - 18), 
+            color = 'black',
+            size = 10,
+            ) +
+  coord_cartesian(ylim = c(0,750), xlim = c(0,210))+
+  theme_classic() +
+    labs(x = 'Samples', y =  'MOTUs') +
+  theme(plot.title = element_text(hjust = 0.5, size = 45),
+        axis.title = element_text(size = 40),
+        axis.text = element_text(size = 25),
+        legend.position = 'none')
+
+
+
+ggsave(here(inextout,
+            paste0(datefield, "coi_pcr-motu.png")),
+       height = 7,
+       width = 10,
+       units = 'in')
+
+```

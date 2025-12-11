@@ -1,0 +1,120 @@
+---
+title: "calvert-runstats"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Run Stats
+
+This script generates statistics for all runs from reads tracked through the pipeline.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+
+# eDNA
+datareads <- here::here("rawdata", "2018calvert")
+```
+
+## COI
+
+COI has 4 total runs that comprise this dataset
+
+```{r}
+# Also generate stats for the full dataset
+
+
+run1_stats <- read_csv(here(datareads,
+                            '20240127_coi_2018calvert_run1_quadra20200603_read-retention_coi_bysample.csv'))[-1] %>%
+  janitor::clean_names()
+
+# version from genome canada
+run1gc_stats <- read_csv(here(datareads,
+                            '20240205_coi_2018calvert_run1_gc20190923_read-retention_coi_bysample.csv'))[-1] %>%
+  janitor::clean_names()
+
+run1gc2_stats <- read_csv(here(datareads,
+                            '20240205_coi_2018calvert_run1_gc20191021_read-retention_coi_bysample.csv'))[-1] %>%
+  janitor::clean_names()
+
+rerun3_stats <- read_csv(here(datareads,
+                            '20240127_coi_2018calvert_rerun3_quadra20200604_read-retention_coi_bysample.csv'))[-1] %>%
+  janitor::clean_names()
+
+```
+clean them, because there are duplicated sample names we have to add them together ultimately
+```{r}
+run1_reduced <- run1_stats %>%
+  # clean sample name
+  separate(sample_id, into = c('date', 'sample_pool'), extra = 'drop', sep = '_') %>%
+  separate(sample_pool, into = c('pool', 'sample_name'), extra = 'drop', sep = '\\.') %>%
+  select(sample_name, raw_f, raw_r, cutadapt_f, cutadapt_r, 
+         denoised_f, denoised_r, merged, 
+         nosingletons, nochimeras) %>%
+  pivot_longer(!sample_name) %>%
+  # lets put fw and r together now
+  mutate(name = str_remove_all(name, '_f|_r')) %>%
+  pivot_wider(values_fn = sum) %>%
+  mutate(run = 'run1')
+
+run1gc_reduced <- run1gc_stats %>%
+  # clean sample name
+  separate(sample_id, into = c('date', 'sample_pool'), extra = 'drop', sep = '_') %>%
+  separate(sample_pool, into = c('pool', 'sample_name'), extra = 'drop', sep = '\\.') %>%
+  select(sample_name, raw_f, raw_r, cutadapt_f, cutadapt_r, 
+         denoised_f, denoised_r, merged, 
+         nosingletons, nochimeras) %>%
+  pivot_longer(!sample_name) %>%
+  # lets put fw and r together now
+  mutate(name = str_remove_all(name, '_f|_r')) %>%
+  pivot_wider(values_fn = sum) %>%
+  mutate(run = 'run1gc')
+
+run1gc2_reduced <- run1gc2_stats %>%
+  # clean sample name
+  separate(sample_id, into = c('date', 'sample_pool'), extra = 'drop', sep = '_') %>%
+  separate(sample_pool, into = c('pool', 'sample_name'), extra = 'drop', sep = '\\.') %>%
+  select(sample_name, raw_f, raw_r, cutadapt_f, cutadapt_r, 
+         denoised_f, denoised_r, merged, 
+         nosingletons, nochimeras) %>%
+  pivot_longer(!sample_name) %>%
+  # lets put fw and r together now
+  mutate(name = str_remove_all(name, '_f|_r')) %>%
+  pivot_wider(values_fn = sum) %>%
+  mutate(run = 'run1gc2')
+
+rerun3_reduced <- rerun3_stats %>%
+  # clean sample name
+  separate(sample_id, into = c('date', 'sample_pool'), extra = 'drop', sep = '_') %>%
+  separate(sample_pool, into = c('pool', 'sample_name'), extra = 'drop', sep = '\\.') %>%
+  select(sample_name, raw_f, raw_r, cutadapt_f, cutadapt_r, 
+         denoised_f, denoised_r, merged, 
+         nosingletons, nochimeras) %>%
+  pivot_longer(!sample_name) %>%
+  # lets put fw and r together now
+  mutate(name = str_remove_all(name, '_f|_r')) %>%
+  pivot_wider(values_fn = sum) %>%
+  mutate(run = 'run3')
+
+full_reduced <- run1_reduced %>%
+  bind_rows(run1gc_reduced, run1gc2_reduced, rerun3_reduced)
+```
+
+Get totals by run and overall
+```{r totals}
+full_totals_byrun <- full_reduced %>%
+  pivot_longer(!c(sample_name, run)) %>%
+  select(!sample_name) %>%
+  pivot_wider(values_fn = sum)
+
+full_totals <- full_totals_byrun %>%
+  pivot_longer(!c(run)) %>%
+  select(!run) %>%
+  pivot_wider(values_fn = sum)
+```
+
+
+
+
+## 12S
