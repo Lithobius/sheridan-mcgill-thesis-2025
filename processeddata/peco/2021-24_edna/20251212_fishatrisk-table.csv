@@ -1,0 +1,62 @@
+found_taxa,common_name,temp_95,region_mean_meansst,region_label,region_name
+Cryptacanthodes giganteus,Giant wrymouth,12.0389,12.8351,Southeast Alaska,AK_SE
+Hemilepidotus hemilepidotus,Red Irish lord,13.502,13.5753,"Haida Gwaii, British Columbia",BC_HG
+Liparis cyclopus,Ribbon snailfish,13.4769,13.5753,"Haida Gwaii, British Columbia",BC_HG
+Hemilepidotus hemilepidotus,Red Irish lord,13.502,14.3358,Central Coast British Columbia,BC_CC
+Ammodytes personatus,Pacific sandlance,15.6068,16.3801,"Inner Coast, British Columbia",BC_IC
+Artedius fenestralis,Padded sculpin,16.8227,16.3801,"Inner Coast, British Columbia",BC_IC
+Artedius harringtoni,Scalyhead sculpin,16.3535,16.3801,"Inner Coast, British Columbia",BC_IC
+Clupea pallasii,Pacific herring,15.0505,16.3801,"Inner Coast, British Columbia",BC_IC
+Cymatogaster aggregata,Shiner perch,16.17,16.3801,"Inner Coast, British Columbia",BC_IC
+Enophrys bison,Buffalo sculpin,16.5356,16.3801,"Inner Coast, British Columbia",BC_IC
+Gadus chalcogrammus,Alaska pollock,14.708,16.3801,"Inner Coast, British Columbia",BC_IC
+Gobiesox maeandricus,Northern clingfish,16.407,16.3801,"Inner Coast, British Columbia",BC_IC
+Hexagrammos decagrammus,Kelp greenling,15.3471,16.3801,"Inner Coast, British Columbia",BC_IC
+Hydrolagus colliei,Spotted ratfish,16.02,16.3801,"Inner Coast, British Columbia",BC_IC
+Lepidogobius lepidus,Bay goby,14.8127,16.3801,"Inner Coast, British Columbia",BC_IC
+Merluccius productus,North Pacific hake,16.22,16.3801,"Inner Coast, British Columbia",BC_IC
+Oncorhynchus clarkii,Cutthroat trout,15.1,16.3801,"Inner Coast, British Columbia",BC_IC
+Oncorhynchus gorbuscha,Pink salmon,16.0632,16.3801,"Inner Coast, British Columbia",BC_IC
+Oncorhynchus kisutch,Coho salmon,16,16.3801,"Inner Coast, British Columbia",BC_IC
+Oncorhynchus tshawytscha,Chinook salmon,15.8,16.3801,"Inner Coast, British Columbia",BC_IC
+Ophiodon elongatus,Lingcod,16.1133,16.3801,"Inner Coast, British Columbia",BC_IC
+Pleuronichthys coenosus,C-O sole,15.7508,16.3801,"Inner Coast, British Columbia",BC_IC
+Hemilepidotus hemilepidotus,Red Irish lord,13.502,14.2646,"Pacific Rim Park, British Columbia",BC_PP
+Clupea pallasii,Pacific herring,15.0505,14.4644,"Puget Sound & Padilla Bay, Washington",WA_PS
+Cryptacanthodes giganteus,Giant wrymouth,12.0389,14.4644,"Puget Sound & Padilla Bay, Washington",WA_PS
+Ammodytes personatus,Pacific sandlance,15.6068,16.2242,"Willapa Bay, Washington",WA_WB
+Clupea pallasii,Pacific herring,15.0505,16.2242,"Willapa Bay, Washington",WA_WB
+Cymatogaster aggregata,Shiner perch,16.17,16.2242,"Willapa Bay, Washington",WA_WB
+Gadus chalcogrammus,Alaska pollock,14.708,16.2242,"Willapa Bay, Washington",WA_WB
+Hexagrammos decagrammus,Kelp greenling,15.3471,16.2242,"Willapa Bay, Washington",WA_WB
+Lepidogobius lepidus,Bay goby,14.8127,16.2242,"Willapa Bay, Washington",WA_WB
+Merluccius productus,North Pacific hake,16.22,16.2242,"Willapa Bay, Washington",WA_WB
+Oncorhynchus clarkii,Cutthroat trout,15.1,16.2242,"Willapa Bay, Washington",WA_WB
+Oncorhynchus gorbuscha,Pink salmon,16.0632,16.2242,"Willapa Bay, Washington",WA_WB
+Oncorhynchus tshawytscha,Chinook salmon,15.8,16.2242,"Willapa Bay, Washington",WA_WB
+Thaleichthys pacificus,Eulachon,14.1884,16.2242,"Willapa Bay, Washington",WA_WB
+Hemilepidotus hemilepidotus,Red Irish lord,13.502,13.9298,"Bodega Bay, California",CA_NC
+Clupea pallasii,Pacific herring,15.0505,16.5995,"San Francisco Bay, California",CA_SF
+Cymatogaster aggregata,Shiner perch,16.17,16.5995,"San Francisco Bay, California",CA_SF
+Gadus chalcogrammus,Alaska pollock,14.708,16.5995,"San Francisco Bay, California",CA_SF
+Oncorhynchus gorbuscha,Pink salmon,16.0632,16.5995,"San Francisco Bay, California",CA_SF
+Citharichthys stigmaeus,Speckled sanddab,17.3313,19.9543,"Los Angeles, California",CA_LA
+Clupea pallasii,Pacific herring,15.0505,19.9543,"Los Angeles, California",CA_LA
+Cymatogaster aggregata,Shiner perch,16.17,19.9543,"Los Angeles, California",CA_LA
+Engraulis mordax,Californian anchovy,18.8887,19.9543,"Los Angeles, California",CA_LA
+Gasterosteus aculeatus,Three-spined stickleback,19.0996,19.9543,"Los Angeles, California",CA_LA
+Leptocottus armatus,Pacific staghorn sculpin,18.449,19.9543,"Los Angeles, California",CA_LA
+Merluccius productus,North Pacific hake,16.22,19.9543,"Los Angeles, California",CA_LA
+Syngnathus californiensis,Bay pipefish,18.9188,19.9543,"Los Angeles, California",CA_LA
+Citharichthys stigmaeus,Speckled sanddab,17.3313,20.6524,"San Diego region, California",CA_SD
+Clupea pallasii,Pacific herring,15.0505,20.6524,"San Diego region, California",CA_SD
+Cymatogaster aggregata,Shiner perch,16.17,20.6524,"San Diego region, California",CA_SD
+Engraulis mordax,Californian anchovy,18.8887,20.6524,"San Diego region, California",CA_SD
+Hydrolagus colliei,Spotted ratfish,16.02,20.6524,"San Diego region, California",CA_SD
+Oncorhynchus gorbuscha,Pink salmon,16.0632,20.6524,"San Diego region, California",CA_SD
+Oncorhynchus tshawytscha,Chinook salmon,15.8,20.6524,"San Diego region, California",CA_SD
+Pholis laeta,Crescent gunnel,19.5037,20.6524,"San Diego region, California",CA_SD
+Salmo salar,Atlantic salmon,16.896,20.6524,"San Diego region, California",CA_SD
+Sebastes entomelas,Widow rockfish,16.3639,20.6524,"San Diego region, California",CA_SD
+Syngnathus californiensis,Bay pipefish,18.9188,20.6524,"San Diego region, California",CA_SD
+Typhlogobius californiensis,Blind goby,20.0125,20.6524,"San Diego region, California",CA_SD

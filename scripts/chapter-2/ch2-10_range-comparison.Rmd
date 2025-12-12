@@ -19,9 +19,9 @@ library(ggpubr)
 bigdata <- here('processeddata','bigdata')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 # save in
-ranges <- here::here("output", "rangecomparison")
+ranges <- here::here("output", 'chapter2', "rangecomparison")
 
-datefield <- '20251111_'
+datefield <- '20251212_'
 
 # version of palette to extract values from
 pal<-  PNWColors::pnw_palette("Bay", 15, type = "continuous") 
@@ -754,7 +754,7 @@ Bars for latitude, colored by source
 
 ```{r loadin obis-gbif}
 bigdat_fish <-  read_csv(here('processeddata', 'bigdata',
-               '20250813_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
+               '20251212_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
   # taxonomic revision
   mutate(scientific_name = case_when(scientific_name == 'Syngnathus leptorhynchus' ~ 'Syngnathus californiensis',
                                      scientific_name == 'Gasterosteus aculeatus aculeatus' ~ 'Gasterosteus aculeatus',
@@ -933,7 +933,7 @@ range_lines +
         panel.grid.major.y = element_line(linetype = 'dashed', colour = 'grey45'),
         axis.text.y = element_text(size = 60))
 
-ggsave(here(ranges, '20250505_edna-bigdata_species-range-lines_presentation.png'), 
+ggsave(here(ranges, paste0(datefield, 'edna-bigdata_species-range-lines_presentation.png')), 
        height = 4500, width = 9000, units = 'px', 
        device = 'png')
 

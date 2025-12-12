@@ -17,8 +17,8 @@ library(matrixStats)
 # here filepaths
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
-plotout <- here('output', 'thermalaffinity')
-datefield <- '20251113_'
+plotout <- here('output', 'chapter2', 'thermalaffinity')
+datefield <- '20251212_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -700,7 +700,7 @@ whichfish <- sti_peco %>%
 write_csv(whichfish, here(dataedna, '20251111_fishatrisk.csv'))
 
 fish_for_table <- sti_peco %>%
-  select(site_code, region_lat_name, temp_95, sti_value, region_label, found_taxa, common_name) %>%
+  select(site_code, temp_95, sti_value, region_label, found_taxa, common_name) %>%
   distinct() %>% 
   left_join(cti_environment_site_distinct) %>%
   mutate(dangerlevel = case_when(temp_95 < site_last5_meansst ~ '4 highest',
@@ -715,8 +715,9 @@ fish_for_table <- sti_peco %>%
   select(!c(dangerlevel, sti_value, site_code, site_last5_meansst,
             site_last5_temp75, site_last5_temp95, decimal_latitude)) %>%
   distinct() %>%
+  left_join(region_order) %>%
   arrange(region_lat_name, found_taxa) %>%
-  select(!region_lat_name) %>%
+  select(!c(region_lat_name, avg_region_lat)) %>%
   mutate(temp_95 = round(temp_95, digits = 4),
          region_mean_meansst = round(region_mean_meansst, digits = 4))
   
@@ -1043,12 +1044,6 @@ ggsave(here(plotout, paste0(datefield, 'vst-sst_coolaffinity-ca-bb.pdf')),
        height = 6,
        width = 3,
        units = 'in')
-```
-
-```{r}
-bb_affinity <- affinity_cold %>%
-  filter(region_name == 'CA_NC') %>%
-  filter(year == 2024)
 ```
 
 

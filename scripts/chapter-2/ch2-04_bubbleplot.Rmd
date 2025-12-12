@@ -19,9 +19,9 @@ library(ggpubr)
 # eDNA
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 # save in
-ranges <- here("output",  "rangecomparison")
+ranges <- here("output", "chapter2", "rangecomparison")
 
-datefield <- '20251118_'
+datefield <- '20251212_'
 
 # or with 2 oregon regions
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",

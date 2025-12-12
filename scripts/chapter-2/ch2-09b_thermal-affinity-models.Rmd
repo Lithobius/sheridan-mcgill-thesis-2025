@@ -14,11 +14,9 @@ lmer for mixed effect models, blme when it is singular. no p values reported for
 
 
 ```{r setup, include=FALSE}
-#install.packages('optimx')
 library(tidyverse)
 library(here)
 library(matrixStats)
-#library(nlme) # remove if i remove?
 library(lme4)
 library(blme)
 library(lmerTest)
@@ -29,7 +27,7 @@ library(ggeffects)
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 plotout <- here('output', 'thermalaffinity', 'models')
-datefield <- '20251113_'
+datefield <- '20251212_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -1195,11 +1193,6 @@ summary(site_sst_aov_posttest)
 plot(site_sst_aov_posttest)
 
 
-TukeyHSD(seagrass_type_aov)
-plot(TukeyHSD(seagrass_type_aov))
-
-#install.packages('ggstatsplot')
-
 ggstatsplot::ggbetweenstats(data = hg_subset,
                             x = site_code,
                             y = sst_mean,
@@ -1311,7 +1304,7 @@ nv_stis %>%
   theme_bw()
 
 nv_stis %>%
-  select(sst_mean, cti_value, year, site_code) %>%
+  dplyr::select(sst_mean, cti_value, year, site_code) %>%
   distinct() %>%
   ggplot() +
   geom_point(aes(x = sst_mean,
@@ -1402,7 +1395,7 @@ sf_stis %>%
   theme_bw()
 
 sf_stis %>%
-  select(sst_mean, cti_value, year, site_code) %>%
+  dplyr::select(sst_mean, cti_value, year, site_code) %>%
   distinct() %>%
   ggplot() +
   geom_point(aes(x = sst_mean,
@@ -1482,7 +1475,7 @@ table_output <- cti_95_out %>%
   mutate(type = case_when(singular == TRUE ~ 'BLME',
                           singular == FALSE ~ 'LME')) %>%
   relocate(region_label, model, type, aic, random_variance, residual_variance) %>%
-  select(!c(region_name, avg_region_lat, region_lat_name)) %>%
+  dplyr::select(!c(region_name, avg_region_lat, region_lat_name)) %>%
   mutate(term = case_when(term == '(Intercept)' ~ "Intercept",
                           #term == '(Intercept)' ~ stringr::str_to_sentence(paste0(model, " intercept")),
                           term == 'beuti_year' ~ 'BEUTI index',
@@ -1490,15 +1483,15 @@ table_output <- cti_95_out %>%
                           term == 'site_temp75' ~ '75th percentile SST',
                           term == 'sst_mean' ~ 'Mean SST',
                           TRUE ~ term)) %>%
-  select(!c(singular))
+  dplyr::select(!c(singular))
 
 table_random <- cti_95_random %>%
   bind_rows(cti_75_random, cti_mean_random, cti_upwelling_random) %>%
-  select(!c(site_code, grpvar, term)) %>%
+  dplyr::select(!c(site_code, grpvar, term)) %>%
   left_join(region_order) %>%
   arrange(region_lat_name) %>%
     relocate(region_label) %>%
-  select(!c(region_name, avg_region_lat, region_lat_name)) 
+  dplyr::select(!c(region_name, avg_region_lat, region_lat_name)) 
 
 
 write_csv(table_output, here(plotout, paste0(datefield, 'table-out.csv')))

@@ -17,7 +17,7 @@ library(geosphere)
 # here filepath
 bigdata <- here('processeddata','bigdata')
 
-datefield <- '20251113_'
+datefield <- '20251212_'
 
 # from PNW colors, Bay
 # or with 2 oregon regions

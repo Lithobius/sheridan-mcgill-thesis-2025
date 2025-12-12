@@ -21,9 +21,9 @@ library(ape)
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 bigdata <- here('processeddata', 'bigdata')
 # save in
-pcoa_out <- here::here("output", "pcoa")
+pcoa_out <- here::here("output", "chapter2", "pcoa")
 
-datefield <- '20251117_'
+datefield <- '20251212_'
 
 # from PNW colors, Bay
 # or with 2 oregon regions
@@ -221,7 +221,7 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-siteyear-motu-
 
 ```{r obisgbif tree}
 obisgbif_cons_y <- read.tree(here(pcoa_out, 
-                                '20251117_obisgbif-mifish_clusters-site-year.tre'))
+                                paste0(datefield,'obisgbif-mifish_clusters-site-year.tre')))
 #check for polytomies? true = good
 is.binary(obisgbif_cons_y)
 
@@ -384,7 +384,7 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site-motu-all_
 
 ```{r obisgbif tree}
 obisgbif_cons <- read.tree(here(pcoa_out, 
-                                '20251117_obisgbif-mifish_clusters-mifish.tre'))
+                                paste0(datefield, 'obisgbif-mifish_clusters-mifish.tre')))
 #check for polytomies? true = good
 is.binary(obisgbif_cons)
 
@@ -513,7 +513,7 @@ ggsave(filename = here(pcoa_out, paste0(datefield, 'obisgbif_pcoa-site_unfiltere
 
 ```{r unfiltered-tree}
 unfilter_cons <- read.tree(here(pcoa_out, 
-                                '20251117_obisgbif-unfilter_clusters-site.tre'))
+                                paste0(datefield, 'obisgbif-unfilter_clusters-site.tre')))
 #check for polytomies? true = good
 is.binary(unfilter_cons)
 
