@@ -60,9 +60,11 @@ install.packages('taxize', 'rfishbase')
 #renv::hydrate('robis')
 install.packages("robis")
 devtools::install_github("iobis/obistools")
+install.packages('rgbif')
 
 # mapping, spatial
-install.packages('rnaturalearth', 'geosphere', 'sf')
+install.packages('rnaturalearth', 'geosphere', 'sf', 'countrycode',
+                 "rerddap", 'CFtime', 'tidyterra')
 
 # for processing sequence data
 BiocManager::install("dada2")

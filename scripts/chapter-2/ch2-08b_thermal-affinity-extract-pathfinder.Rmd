@@ -7,3 +7,2697 @@ output: html_document
 
 placeholder for extracting / calculating cti data
 
+NOTE pasted in from other repository but not tested yet 2025-12-12
+
+We will classify temperature for obis records bases on pathfinder data and calculate STI : species thermal index, that will then go into CTI; community thermal index
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(sf)
+library(rerddap)
+# needed to load data format
+library(ncdf4)
+# needed to parse times
+library(CFtime)
+# for rasters
+#nstall.packages('terra', repos = 'https://rspatial.r-universe.dev')
+library(terra)
+library(tidyterra)
+#install.packages('terra')
+
+datefield = '20250803_'
+
+erd_data <- here('rawdata', 'temp', 'erddap', 'forcti')
+# eDNA
+edna_combined <- here('processeddata', 'peco')
+obisdata <- here('rawdata', 'bigdata', 'obis_cti')
+```
+
+# bounding boxes and obis
+```{r}
+bounding_boxes <- read_csv(here('rawdata', 'spatial',
+                                '20241209_bounding_boxes.csv')) %>%
+  janitor::clean_names() %>%
+  filter(!is.na(box_name))
+
+obis_records <- read_csv(here(obisdata, '20250605_obis_cti-filtered.csv'))
+```
+
+
+```{r distinct times and bounding boxes}
+obis_distinct_spacetime <- obis_records %>%
+  select(date_year, month, decimal_latitude, decimal_longitude) %>%
+  distinct() %>%
+  # set up date range
+  mutate(start_day = '01') %>%
+  mutate(end_day = case_when(month %in% c(1,3,5,7,8,10,12) ~ '31',
+                             month %in% c(4,6,9,11) ~ '30',
+                             month == 2 & 
+                               date_year %in% c(2024,2020,2016,
+                                           2012,2008,2004,
+                                           2000,1996,1992,
+                                           1988,1984,1980,
+                                           1976,1972,1968,
+                                           1964,1960,1956,
+                                           1952,1948) ~ '29',
+                             month == 2 ~ '28')) %>%
+  mutate(date_start = paste0(as.character(date_year), '-',
+                             as.character(month), '-',
+                             start_day)) %>%
+  mutate(date_end = paste0(as.character(date_year), '-',
+                             as.character(month), '-',
+                             end_day)) %>%
+  select(!c(date_year, month, start_day, end_day)) %>%
+  mutate(decimal_longitude = case_when(decimal_longitude== -180 ~ -179.97,
+                              TRUE ~ decimal_longitude)) %>%
+  mutate(decimal_longitude = case_when(decimal_longitude == 180 ~ 179.97,
+                              TRUE ~ decimal_longitude))
+
+# turn into coordinate points
+obis_spacetime_sf <- st_as_sf(obis_distinct_spacetime, 
+                    coords = c('decimal_longitude', 'decimal_latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0",
+                    remove = FALSE)
+
+# turn bounding box into coordinates too
+
+bbox_sf <- bounding_boxes %>%
+    mutate(min_long = case_when(min_long == -180 ~ -179.99,
+                              TRUE ~ min_long)) %>%
+  mutate(max_long = case_when(max_long == 180 ~ 179.99,
+                              TRUE ~ max_long)) %>%
+  # 4 corners of box
+  pivot_longer(cols = c(min_lat, max_lat),
+               values_to = 'latitude') %>%
+  select(!name) %>%
+  pivot_longer(cols = c(min_long, max_long),
+               values_to ='longitude') %>%
+  select(!name) %>%
+  # corners to points
+  st_as_sf(coords = c('longitude', 'latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+  group_by(box_name) %>%
+  # make multipoints
+  summarise(geometry = st_combine(geometry)) %>%
+  ungroup() %>%
+  # box around multipoints
+  st_convex_hull()
+```
+
+# classify points by bounding boxes
+```{r if intermediate}
+obis_found <- obis_spacetime_bb %>%
+  mutate(found = paste0(decimal_latitude, '-', decimal_longitude, '-', date_start))
+
+obis_new <- obis_distinct_spacetime %>%
+  mutate(found = paste0(decimal_latitude, '-', decimal_longitude, '-', date_start)) %>%
+  filter(!(found %in% obis_found$found)) %>%
+  select(!found)
+
+# turn into coordinate points
+obis_spacetime_sf_new <- st_as_sf(obis_new, 
+                    coords = c('decimal_longitude', 'decimal_latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0",
+                    remove = FALSE)
+
+obis_spacetime_bb2 <- st_intersection(obis_spacetime_sf_new, bbox_sf)
+
+obis_spacetime_bb <- bind_rows(obis_spacetime_bb, obis_spacetime_bb2)
+```
+
+
+```{r}
+obis_spacetime_bb <- st_intersection(obis_spacetime_sf, bbox_sf)
+
+# if needed, st_intersection is long.
+write_rds(obis_spacetime_bb,here(obisdata, '20250722_obis_spacetime_bb.rds'))
+#obis_spacetime_bb <- read_rds(here(obisdata, '20250605_obis_spacetime_bb.rds'))
+obis_spacetime_bb <- read_rds(here(obisdata, '20250722_obis_spacetime_bb.rds'))
+
+to_extract <- obis_spacetime_bb %>%
+  # return to dataframe
+  st_drop_geometry() %>%
+  select(box_name, date_start, date_end) %>%
+  # some likely parsing issues? may have to backtrack to extraction
+  filter(!(date_start %in% c('2020-NA-01', '2021-NA-01', '2018-NA-01', '2022-NA-01'))) %>%
+  left_join(bounding_boxes) %>%
+  mutate(year = lubridate::year(date_start),
+         month = lubridate::month(date_start)) %>%
+  # pathfinder 3.1 goes to 2023
+  filter(year < 2024 & year > 1981) %>%
+  distinct() %>%
+  mutate(max_long = ifelse(max_long == 180, 179.9792, max_long)) %>%
+  mutate(min_long = ifelse(min_long == 180, 179.9792, min_long)) %>%
+  mutate(max_long = ifelse(max_long == -180, -179.9792, max_long)) %>%
+  mutate(min_long = ifelse(min_long == -180, -179.9792, min_long))
+```
+
+## extract bounding box data
+
+NOTE this downloads files! If you don't need to download files, skip this step.
+
+night monthly
+erdPH53sstnmday
+
+day monthly
+erdPH53sstdmday
+```{r extract from errdap}
+erd_day <- info('erdPH53sstdmday')
+
+erd_night <- info('erdPH53sstnmday')
+
+# extract daytime
+for (i in 1:nrow(to_extract)) {
+  print(to_extract[i,])
+  mursst_test <- griddap(erd_day, 
+                       latitude = c(to_extract[i,]$min_lat, to_extract[i,]$max_lat), 
+                       longitude = c(to_extract[i,]$min_long, to_extract[i,]$max_long),
+                       time = c(to_extract[i,]$date_start, to_extract[i,]$date_end),
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forcti', 'day')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# it errored out; write a loop for the error
+# new toextract is toextract[length of files in destination : length toextract,]
+# have to check the system2 type code for that
+
+complete <- length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'day')))
+
+to_extract2 <- to_extract[complete:nrow(to_extract),]
+
+for (i in 1:nrow(to_extract2)) {
+  print(to_extract2[i,])
+  mursst_test <- griddap(erd_day, 
+                       latitude = c(to_extract2[i,]$min_lat, to_extract2[i,]$max_lat), 
+                       longitude = c(to_extract2[i,]$min_long, to_extract2[i,]$max_long),
+                       time = c(to_extract2[i,]$date_start, to_extract2[i,]$date_end),
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forcti', 'day')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+
+# extract night
+for (i in 1:nrow(to_extract)) {
+  print(to_extract[i,])
+  mursst_test <- griddap(erd_night, 
+                       latitude = c(to_extract[i,]$min_lat, to_extract[i,]$max_lat), 
+                       longitude = c(to_extract[i,]$min_long, to_extract[i,]$max_long),
+                       time = c(to_extract[i,]$date_start, to_extract[i,]$date_end),
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 
+                                                'forcti', 'night')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+
+complete_n <- length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'night')))
+
+to_extract2_n <- to_extract[complete_n:nrow(to_extract),]
+
+for (i in 1:nrow(to_extract2_n)) {
+  mursst_test <- griddap(erd_night, 
+                       latitude = c(to_extract2_n[i,]$min_lat, to_extract2_n[i,]$max_lat), 
+                       longitude = c(to_extract2_n[i,]$min_long, to_extract2_n[i,]$max_long),
+                       time = c(to_extract2_n[i,]$date_start, to_extract2_n[i,]$date_end),
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 
+                                                'erddap', 'forcti', 'night')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+```
+
+# classify
+some of this just makes more sense to do in python...
+
+
+```{r stupid loop to extract bbox date filename}
+for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'day')))){
+  ncname <- list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'day'))[i]
+  sstfile = nc_open(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day',
+                     ncname))
+  # get variables
+  nclong <- ncvar_get(sstfile, 'longitude')
+  nclat <- ncvar_get(sstfile, 'latitude')
+  time <- ncvar_get(sstfile, 'time')
+  tunits <- ncatt_get(sstfile,"time","units")
+  # set CFtime to the units from the ncdf
+  cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+  timestamps <- as_timestamp(cfs)
+  
+  # don't pick a corner
+  nc_sf = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  
+  nc_sf2 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf3 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,1000)
+  
+  nc_sf4 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,2000)
+  
+  # if there is an intersection between the two...
+  if (!length(st_intersects(nc_sf, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day.csv')),
+            append = TRUE)
+  } else if (!length(st_intersects(nc_sf2, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf2, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day.csv')),
+            append = TRUE)
+    
+    print('moved point')
+  } else if (!length(st_intersects(nc_sf3, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf3, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day.csv')),
+            append = TRUE)
+    
+    print('buffer 1000')
+  } else if (!length(st_intersects(nc_sf4, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf4, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day.csv')),
+            append = TRUE)
+    
+    print('buffer 2000')
+  } else {
+    print('fail')
+  }
+  
+  nc_close(sstfile)
+}
+
+
+for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'night')))){
+  ncname <- list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'night'))[i]
+  sstfile = nc_open(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'night',
+                     ncname))
+  # get variables
+  nclong <- ncvar_get(sstfile, 'longitude')
+  nclat <- ncvar_get(sstfile, 'latitude')
+  time <- ncvar_get(sstfile, 'time')
+  tunits <- ncatt_get(sstfile,"time","units")
+  # set CFtime to the units from the ncdf
+  cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+  timestamps <- as_timestamp(cfs)
+  
+  # don't pick a corner
+  nc_sf = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  
+  nc_sf2 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf3 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,1000)
+  
+  nc_sf4 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,2000)
+  
+  # if there is an intersection between the two...
+  if (!length(st_intersects(nc_sf, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night.csv')),
+            append = TRUE)
+    print("ok")
+  } else if (!length(st_intersects(nc_sf2, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf2, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night.csv')),
+            append = TRUE)
+    
+    print('moved point')
+  } else if (!length(st_intersects(nc_sf3, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf3, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night.csv')),
+            append = TRUE)
+    
+    print('buffer 1000')
+  } else if (!length(st_intersects(nc_sf4, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf4, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night.csv')),
+            append = TRUE)
+    
+    print('buffer 2000')
+  } else {
+    print('fail')
+  }
+  
+  nc_close(sstfile)
+}
+
+
+# read in raw csvs
+extract_day_raw <- read_csv(here(erd_data, '20250722_obis_erddap_to-extract_pathfinder-day.csv'),
+                            col_names = c('box_name', 'date_1', 'date_2', 'filename'))
+extract_night_raw <- read_csv(here(erd_data,
+                                   '20250722_obis_erddap_to-extract_pathfinder-night.csv'),
+                            col_names = c('box_name', 'date_1', 'date_2', 'filename'))
+
+# reformat to key
+extract_day <- extract_day_raw %>%
+  # one row per layer-file combo
+  pivot_longer(cols = c('date_1', 'date_2'),
+               values_to = 'date') %>%
+  filter(!is.na(date)) %>%
+  mutate(layer_num = str_remove_all(name, 'date_')) %>%
+  select(!name) %>%
+  arrange(box_name)
+
+
+extract_night <- extract_night_raw %>%
+  # one row per layer-file combo
+  pivot_longer(cols = c('date_1', 'date_2'),
+               values_to = 'date') %>%
+  filter(!is.na(date)) %>%
+  mutate(layer_num = str_remove_all(name, 'date_')) %>%
+  select(!name) %>%
+  arrange(box_name)
+
+# combine all data together for one master csv for future scripts or easier reference
+extract_all <- extract_day %>%
+  mutate(version = 'day') %>%
+  bind_rows(extract_night) %>%
+  mutate(version = ifelse(is.na(version), 'night', version))
+
+write_csv(extract_all, here(erd_data, '20250722_pathfinder_extract_key.csv'))
+# if needed
+extract_all <- read_csv(here(erd_data, '20250731_pathfinder_extract_key.csv')) 
+
+extract_day <- extract_all %>% 
+  filter(version == 'day') %>%
+  select(!version) 
+extract_night <- extract_all %>% 
+  filter(version == 'night') %>%
+  select(!version) 
+```
+
+```{r missing bbs}
+missing_bbs <- to_extract %>%
+  filter(!(box_name %in% extract_all$box_name))%>%
+  mutate(date_start = case_when(date_start == '2023-4-01' ~ '2023-04-01',
+                                date_start == '2023-3-01' ~ '2023-03-01',
+                                date_start == '2023-2-01' ~ '2023-02-01',
+                                TRUE ~ date_start)) %>%
+  mutate(date_end = case_when(date_end == '2023-4-30' ~ '2023-04-30',
+                              date_end == '2023-3-31' ~ '2023-03-31',
+                              date_end == '2023-2-28' ~ '2023-02-28',
+                                TRUE ~ date_end)) %>%
+  filter(!(date_start %in% c('2023-6-01', '2023-7-01', '2023-8-01',
+                             '2023-9-01')))
+
+# extract daytime
+for (i in 1:nrow(missing_bbs)) {
+  print(missing_bbs[i,])
+  mursst_test <- griddap(erd_day, 
+                       latitude = c(missing_bbs[i,]$min_lat, missing_bbs[i,]$max_lat), 
+                       longitude = c(missing_bbs[i,]$min_long, missing_bbs[i,]$max_long),
+                       time = c(missing_bbs[i,]$date_start, missing_bbs[i,]$date_end),
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 
+                                                'forcti', 'day_missing')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# extract night
+for (i in 1:nrow(missing_bbs)) {
+  print(missing_bbs[i,])
+  mursst_test <- griddap(erd_night, 
+                       latitude = c(missing_bbs[i,]$min_lat, missing_bbs[i,]$max_lat), 
+                       longitude = c(missing_bbs[i,]$min_long, missing_bbs[i,]$max_long),
+                       time = c(missing_bbs[i,]$date_start, missing_bbs[i,]$date_end),
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 
+                                                'forcti', 'night_missing')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# classify new files
+for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 
+                                   'forcti', 'day_missing')))){
+  ncname <- list.files(here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'day_missing'))[i]
+  sstfile = nc_open(here('rawdata', 'temp', 
+                     'erddap', 'forcti',
+                     'day_missing',
+                     ncname))
+  # get variables
+  nclong <- ncvar_get(sstfile, 'longitude')
+  nclat <- ncvar_get(sstfile, 'latitude')
+  time <- ncvar_get(sstfile, 'time')
+  tunits <- ncatt_get(sstfile,"time","units")
+  # set CFtime to the units from the ncdf
+  cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+  timestamps <- as_timestamp(cfs)
+  
+  # don't pick a corner
+  nc_sf = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  
+  nc_sf2 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf3 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,1000)
+  
+  nc_sf4 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,2000)
+  
+  # if there is an intersection between the two...
+  if (!length(st_intersects(nc_sf, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day-missed.csv')),
+            append = TRUE)
+    print("ok")
+  } else if (!length(st_intersects(nc_sf2, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf2, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day-missed.csv')),
+            append = TRUE)
+    
+    print('moved point')
+  } else if (!length(st_intersects(nc_sf3, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf3, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day-missed.csv')),
+            append = TRUE)
+    
+    print('buffer 1000')
+  } else if (!length(st_intersects(nc_sf4, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf4, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-day-missed.csv')),
+            append = TRUE)
+    
+    print('buffer 2000')
+  } else {
+    print('fail')
+  }
+  
+  nc_close(sstfile)
+}
+
+
+for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 
+                                   'forcti', 'night_missing')))){
+  ncname <- list.files(here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'night_missing'))[i]
+  sstfile = nc_open(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 
+                     'night_missing',
+                     ncname))
+  # get variables
+  nclong <- ncvar_get(sstfile, 'longitude')
+  nclat <- ncvar_get(sstfile, 'latitude')
+  time <- ncvar_get(sstfile, 'time')
+  tunits <- ncatt_get(sstfile,"time","units")
+  # set CFtime to the units from the ncdf
+  cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+  timestamps <- as_timestamp(cfs)
+  
+  # don't pick a corner
+  nc_sf = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf2 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf3 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,1000)
+  
+  nc_sf4 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,2000)
+  
+  # if there is an intersection between the two...
+  if (!length(st_intersects(nc_sf, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+  } else if (!length(st_intersects(nc_sf2, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf2, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+    
+    print('moved point')
+  } else if (!length(st_intersects(nc_sf3, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf3, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+    
+    print('buffer 1000')
+  } else if (!length(st_intersects(nc_sf4, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf4, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+    
+    print('buffer 2000')
+  } else {
+    print('fail')
+  }
+  
+  nc_close(sstfile)
+}
+
+
+# read in raw csvs
+extract_day_raw2 <- read_csv(here(erd_data,
+                                 '20250722_obis_erddap_to-extract_pathfinder-day-missed.csv'),
+                            col_names = c('box_name', 'date_1', 'date_2', 'filename'))
+extract_night_raw2 <- read_csv(here(erd_data,
+                                   '20250722_obis_erddap_to-extract_pathfinder-night-missed.csv'),
+                            col_names = c('box_name', 'date_1', 'date_2', 'filename')) %>%
+  distinct()
+
+# reformat to key
+extract_day2 <- extract_day_raw2 %>%
+  # one row per layer-file combo
+  pivot_longer(cols = c('date_1', 'date_2'),
+               values_to = 'date') %>%
+  filter(!is.na(date)) %>%
+  mutate(layer_num = str_remove_all(name, 'date_')) %>%
+  select(!name) %>%
+  arrange(box_name)
+
+
+extract_night2 <- extract_night_raw2 %>%
+  # one row per layer-file combo
+  pivot_longer(cols = c('date_1', 'date_2'),
+               values_to = 'date') %>%
+  filter(!is.na(date)) %>%
+  mutate(layer_num = str_remove_all(name, 'date_')) %>%
+  select(!name) %>%
+  arrange(box_name)
+
+# combine all data together for one master csv for future scripts or easier reference
+extract_all <- extract_day %>%
+  bind_rows(extract_day2) %>%
+  mutate(version = 'day') %>%
+  bind_rows(extract_night) %>%
+  bind_rows(extract_night2) %>%
+  mutate(version = ifelse(is.na(version), 'night', version))
+
+write_csv(extract_all, here(erd_data, '20250722_pathfinder_extract_key.csv'))
+
+# update extract day and night for the next tasks
+# note rearrange this to be before extract all in the future
+extract_day <- extract_day %>%
+  bind_rows(extract_day2) %>% 
+  distinct()
+
+extract_night <- extract_night %>%
+  bind_rows(extract_night2) %>%
+  distinct()
+
+# move files from missing folders to main
+# using command line tool `mv`
+system2("mv", 
+        # specify its the files with "*.nc"
+        args = c(here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'day_missing',
+                      "*.nc"), 
+        here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'day/')))
+system2("mv", 
+        args = c(here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'night_missing',
+                      "*.nc"), 
+        here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'night/')))
+```
+
+
+
+Now we need to match the files and the combos to extract the temperature data
+```{r match files}
+extract_w_files <- extract_day %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date)) %>%
+  select(!date) %>%
+  # get start and end dates
+  left_join(to_extract) %>%
+  filter(!is.na(date_start)) %>%
+  # don't need
+  select(!c(max_lat, min_lat, max_long, min_long)) %>%
+  # add points that need searched
+  # this will have many matches but that's as intended.
+  left_join(obis_spacetime_bb) %>%
+  select(!c(date_start, date_end))
+
+# vector of filenames
+files_to_search <- extract_w_files %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+
+extract_w_files_n <- extract_night %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date)) %>%
+  select(!date) %>%
+  # get start and end dates
+  left_join(to_extract) %>%
+  filter(!is.na(date_start)) %>%
+  # don't need
+  select(!c(max_lat, min_lat, max_long, min_long)) %>%
+  # add points that need searched
+  # this will have many matches but that's as intended.
+  left_join(obis_spacetime_bb) %>%
+  select(!c(date_start, date_end))
+
+# vector of filenames
+files_to_search_n <- extract_w_files_n %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+for (ncfile in files_to_search$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,4000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+
+for (ncfile in files_to_search_n$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_n %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,4000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'night', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+# load in and give headers
+extracted_sst <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinder-day.csv'),
+                          col_names = c('id', 'sst', 'filename',
+                                        'layer',
+                                        'year', 'month', 'box_name', 
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry'
+                                        )) %>%
+  # don't need these anymore
+  select(!c(id, geometry)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year),
+         month = as.numeric(month))
+
+# load in and give headers
+extracted_sst_n <- read_csv(here(erd_data,
+                                 '20250803_obis_erddap_extract_pathfinder-night.csv'),
+                          col_names = c('id', 'sst_n', 'filename', 
+                                        'layer',
+                                       'year', 'month','box_name_n', 
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry')) %>%
+  # don't need these anymore
+  select(!c(id, geometry)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year),
+         month = as.numeric(month))
+
+```
+
+## match extracted to obis
+
+```{r match}
+merged_ssts <- extracted_sst %>%
+  select(!c(filename, layer)) %>%
+  left_join(extracted_sst_n) %>%
+  select(!c(filename, layer)) %>%
+  distinct() %>%
+  mutate(box_name_combine = coalesce(box_name, box_name_n)) %>%
+  select(!c(box_name, box_name_n)) %>%
+  relocate(box_name_combine, sst, sst_n) %>%
+  distinct() %>%
+  # when one coordinate is in two boxes
+  # remove duplicates
+  add_count(sst, year, month, decimal_latitude,decimal_longitude) %>%
+  group_by(sst, year, month, decimal_latitude,decimal_longitude) %>%
+  mutate(box_num = row_number()) %>%
+  ungroup() %>%
+  filter(box_num == 1) %>%
+  select(!c(n, box_num))
+
+obis_matched <- obis_records %>%
+  select(!c(water_body, basis_of_record, depth)) %>%
+  rename(year = date_year) %>%
+  filter(year > 1981) %>%
+  distinct(scientific_name, year, month, 
+           decimal_latitude, decimal_longitude, .keep_all = TRUE) %>%
+  left_join(merged_ssts) %>%
+  distinct() %>%
+  filter(year > 1981) %>%
+  filter(year < 2024) %>%
+    add_count(scientific_name, decimal_latitude, decimal_longitude, 
+            lubri_date, flags) #%>%
+  # filter records that got messed up, check them later
+  # year only, date only
+  mutate(remove = case_when(str_detect(event_date, '^([0-9]{4})$') ~ 'x',
+                            str_detect(event_date, '^([0-9]{2})$') ~ 'x',
+                            n > 1 & event_date %in% c('2016-04-21T08:30:00Z') ~ 'x',
+                            year == '1998' & event_date == '1996-06-26' ~ 'x',
+                            year == '1985' & event_date == '1986-01-06' ~ 'x',
+                            year == '2001' & event_date == '2002-01-22' ~ 'x',
+                            year == '2003' & event_date == '2002-07-01' ~ 'x',
+                            year == '2006' & event_date == '2007-01-04' ~ 'x',
+                            year == '1996' & event_date == '1997-01-01' ~ 'x',
+                            year == '1994' & event_date == '1995-01-01' ~ 'x',
+                            event_date %in% c('06-01') ~ 'x',
+                            # check these, multiple boxes for a record
+                            n == 2 & event_date == '1989-05-20T02:00Z' & box_name_combine == 'newfoundland_2' ~ 'x',
+                            n == 2 & box_name_combine == 'haiti' ~ 'x',
+                            n == 2 & box_name_combine == 'mex2' ~ 'x')) %>%
+  filter(is.na(remove))%>%
+  select(!c(remove, n))
+
+ggplot(obis_matched) +
+  geom_point(aes(x = decimal_longitude,
+                 y = decimal_latitude,
+                 colour = box_name_combine)) +
+  theme(legend.position = 'none')
+```
+
+```{r missed}
+missed <- obis_matched %>%
+  filter(is.na(box_name_combine)) %>%
+  filter(decimal_longitude < -100 & decimal_longitude > -135) %>%
+  filter(decimal_latitude > 20 & decimal_latitude < 60) %>%
+  select(!c(box_name_combine, sst, sst_n))
+
+obis_spacetime_tests <- obis_spacetime_bb %>%
+  st_drop_geometry() %>%
+   # some likely parsing issues? may have to backtrack to extraction
+  filter(!(date_start %in% c('2020-NA-01', '2021-NA-01', '2018-NA-01', '2022-NA-01'))) %>%
+  mutate(year = lubridate::year(date_start),
+         month = lubridate::month(date_start)) %>%
+  left_join(missed) #%>%
+  #filter(!is.na(scientific_name)) %>%
+  #filter(!str_detect(flags, 'ON_LAND|NO_DEPTH'))
+
+
+
+ggplot(missed) +
+  geom_point(aes(x = decimal_longitude,
+                 y = decimal_latitude))
+
+hist(missed$month)
+hist(obis_matched$month)
+hist(extract_w_files$month)
+
+hist(missed$year)
+
+obis_distinct_spacetime
+
+unique(obis_spacetime_bb$date_start)
+```
+# expand buffers
+
+```{r buffer expand}
+extract_w_files_buff <- extract_w_files %>%
+  left_join(extracted_sst) %>%
+  filter(is.na(sst)) %>%
+  select(!c(sst, layer))
+
+# vector of filenames
+files_to_search_buff <- extract_w_files_buff %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+
+extract_w_files_n_buff <- extract_w_files_n %>%
+    left_join(extracted_sst_n) %>%
+  filter(is.na(sst_n)) %>%
+  select(!c(sst_n, layer, box_name_n))
+
+# vector of filenames
+files_to_search_n_buff <- extract_w_files_n_buff %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+for (ncfile in files_to_search_buff$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_buff %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,8000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+
+for (ncfile in files_to_search_n_buff$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_n_buff %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,8000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'night', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+
+# load in and give headers
+extracted_sst_8000 <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinder-day_buff.csv'),
+                          col_names = c('id', 'sst', 'filename',
+                                         'layer',
+                                        'year', 'month', 'box_name',
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry')) %>%
+  # don't need these anymore
+  select(!c(id, geometry)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year)) %>%
+  mutate(buff_size = 8000) %>%
+  # may have run a few twice
+  distinct()
+
+# load in and give headers
+extracted_sst_n_8000 <- read_csv(here(erd_data,
+                                 '20250803_obis_erddap_extract_pathfinder-night_buff.csv'),
+                          col_names = c('id', 'sst_n', 'filename', 
+                                        'layer',
+                                       'year', 'month', 'box_name_n', 
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry')) %>%
+  # don't need these anymore
+  select(!c(id, geometry)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year)) %>%
+  mutate(buff_size = 8000) %>%
+  # may have run a few twice
+  distinct()
+
+```
+
+```{r match buffer}
+merged_ssts_8000 <- extracted_sst_8000 %>%
+  select(!c(filename, layer)) %>%
+  left_join(extracted_sst_n_8000) %>%
+  select(!c(filename, layer)) %>%
+  distinct() %>%
+  mutate(box_name_combine = coalesce(box_name, box_name_n)) %>%
+  select(!c(box_name, box_name_n)) %>%
+  relocate(box_name_combine, sst, sst_n) %>%
+  distinct() %>%
+  # when one coordinate is in two boxes
+  # remove duplicates
+  add_count(sst, year, month, decimal_latitude,decimal_longitude) %>%
+  group_by(sst, year, month, decimal_latitude,decimal_longitude) %>%
+  mutate(box_num = row_number()) %>%
+  ungroup() %>%
+  filter(box_num == 1) %>%
+  select(!c(n, box_num)) %>%
+  bind_rows(merged_ssts) %>%
+  mutate(buff_size = ifelse(is.na(buff_size), 4000, buff_size))
+
+obis_matched <- obis_records %>%
+  select(!c(water_body, basis_of_record, depth)) %>%
+  rename(year = date_year) %>%
+  filter(year > 1981) %>%
+  distinct(scientific_name, year, month, 
+           decimal_latitude, decimal_longitude, .keep_all = TRUE) %>%
+  left_join(merged_ssts_8000) %>%
+  distinct() %>%
+  filter(year > 1981) %>%
+  filter(year < 2024) %>%
+    add_count(scientific_name, decimal_latitude, decimal_longitude, 
+            lubri_date, flags)# %>%
+  # filter records that got messed up, check them later
+  # year only, date only
+  mutate(remove = case_when(str_detect(event_date, '^([0-9]{4})$') ~ 'x',
+                            str_detect(event_date, '^([0-9]{2})$') ~ 'x',
+                            n > 1 & event_date %in% c('2016-04-21T08:30:00Z') ~ 'x',
+                            year == '1998' & event_date == '1996-06-26' ~ 'x',
+                            year == '1985' & event_date == '1986-01-06' ~ 'x',
+                            year == '2001' & event_date == '2002-01-22' ~ 'x',
+                            year == '2003' & event_date == '2002-07-01' ~ 'x',
+                            year == '2006' & event_date == '2007-01-04' ~ 'x',
+                            year == '1996' & event_date == '1997-01-01' ~ 'x',
+                            year == '1994' & event_date == '1995-01-01' ~ 'x',
+                            event_date %in% c('06-01') ~ 'x',
+                            # check these, multiple boxes for a record
+                            n == 2 & event_date == '1989-05-20T02:00Z' & box_name_combine == 'newfoundland_2' ~ 'x',
+                            n == 2 & box_name_combine == 'haiti' ~ 'x',
+                            n == 2 & box_name_combine == 'mex2' ~ 'x')) %>%
+  filter(is.na(remove))%>%
+  select(!c(remove, n))
+
+ggplot(obis_matched) +
+  geom_point(aes(x = decimal_longitude,
+                 y = decimal_latitude,
+                 colour = box_name_combine)) +
+  theme(legend.position = 'none')
+
+missed <- obis_matched %>%
+  filter(is.na(box_name_combine)) %>%
+  filter(decimal_longitude < -100 & decimal_longitude > -135) %>%
+  filter(decimal_latitude > 20 & decimal_latitude < 60) %>%
+  select(!c(box_name_combine, sst, sst_n, buff_size))
+```
+
+```{r buffer16000}
+extract_w_files_buff2 <- extract_w_files_buff %>%
+  left_join(extracted_sst_8000) %>%
+  filter(is.na(sst)) %>%
+  select(!c(sst, layer))
+
+# vector of filenames
+files_to_search_buff2 <- extract_w_files_buff2 %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+
+extract_w_files_n_buff2 <- extract_w_files_n_buff %>%
+    left_join(extracted_sst_n_8000) %>%
+  filter(is.na(sst_n)) %>%
+  select(!c(sst_n, layer, box_name_n, buff_size))
+
+# vector of filenames
+files_to_search_n_buff2 <- extract_w_files_n_buff2 %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+for (ncfile in files_to_search_buff2$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_buff2 %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,16000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff2.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff2.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff2.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_buff2.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+
+for (ncfile in files_to_search_n_buff2$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_n_buff2 %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,16000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'night', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff2.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff2.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff2.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-night_buff2.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+
+# load in and give headers
+extracted_sst_16000 <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinder-day_buff2.csv'),
+                          col_names = c('id', 'sst', 'filename',
+                                         'layer',
+                                        'year', 'month','box_name',
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry')) %>%
+  # don't need these anymore
+  select(!c(id, geometry, X11)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year)) %>%
+  mutate(buff_size = 16000)
+
+# load in and give headers
+extracted_sst_n_16000 <- read_csv(here(erd_data,
+                                 '20250803_obis_erddap_extract_pathfinder-night_buff2.csv'),
+                          col_names = c('id', 'sst_n', 'filename', 
+                                        'layer',
+                                       'year', 'month', 'box_name_n',
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry')) %>%
+  # don't need these anymore
+  select(!c(id, geometry)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year)) %>%
+  mutate(buff_size = 16000)
+```
+
+```{r}
+merged_ssts_16000 <- extracted_sst_16000 %>%
+  select(!c(filename, layer)) %>%
+  left_join(extracted_sst_n_16000) %>%
+  select(!c(filename, layer)) %>%
+  distinct() %>%
+  mutate(box_name_combine = coalesce(box_name, box_name_n)) %>%
+  select(!c(box_name, box_name_n)) %>%
+  relocate(box_name_combine, sst, sst_n) %>%
+  distinct() %>%
+  # when one coordinate is in two boxes
+  # remove duplicates
+  add_count(sst, year, month, decimal_latitude,decimal_longitude) %>%
+  group_by(sst, year, month, decimal_latitude,decimal_longitude) %>%
+  mutate(box_num = row_number()) %>%
+  ungroup() %>%
+  filter(box_num == 1) %>%
+  select(!c(n, box_num)) %>%
+  bind_rows(merged_ssts_8000) 
+
+obis_matched <- obis_records %>%
+  select(!c(water_body, basis_of_record, depth)) %>%
+  rename(year = date_year) %>%
+  filter(year > 1981) %>%
+  distinct(scientific_name, year, month, 
+           decimal_latitude, decimal_longitude, .keep_all = TRUE) %>%
+  left_join(merged_ssts_16000) %>%
+  distinct() %>%
+  filter(year > 1981) %>%
+  filter(year < 2024) %>%
+    add_count(scientific_name, decimal_latitude, decimal_longitude, 
+            lubri_date, flags) #%>%
+  # filter records that got messed up, check them later
+  # year only, date only
+  mutate(remove = case_when(str_detect(event_date, '^([0-9]{4})$') ~ 'x',
+                            str_detect(event_date, '^([0-9]{2})$') ~ 'x',
+                            n > 1 & event_date %in% c('2016-04-21T08:30:00Z') ~ 'x',
+                            year == '1998' & event_date == '1996-06-26' ~ 'x',
+                            year == '1985' & event_date == '1986-01-06' ~ 'x',
+                            year == '2001' & event_date == '2002-01-22' ~ 'x',
+                            year == '2003' & event_date == '2002-07-01' ~ 'x',
+                            year == '2006' & event_date == '2007-01-04' ~ 'x',
+                            year == '1996' & event_date == '1997-01-01' ~ 'x',
+                            year == '1994' & event_date == '1995-01-01' ~ 'x',
+                            event_date %in% c('06-01') ~ 'x',
+                            # check these, multiple boxes for a record
+                            n == 2 & event_date == '1989-05-20T02:00Z' & box_name_combine == 'newfoundland_2' ~ 'x',
+                            n == 2 & box_name_combine == 'haiti' ~ 'x',
+                            n == 2 & box_name_combine == 'mex2' ~ 'x')) %>%
+  filter(is.na(remove))%>%
+  select(!c(remove, n))
+
+write_csv(obis_matched, here(erd_data, paste0(datefield, 'obis_sst_pathfinder_all.csv')))
+#obis_matched <- read_csv(here(erd_data, paste0(datefield, 'obis_sst_pathfinder_all.csv')))
+#obis_matched <- read_csv(here(erd_data, paste0('20250515_obis_sst_pathfinder_all.csv')))
+
+ggplot(obis_matched) +
+  geom_point(aes(x = decimal_longitude,
+                 y = decimal_latitude,
+                 colour = box_name_combine)) +
+  theme(legend.position = 'none')
+
+missed <- obis_matched %>%
+  filter(is.na(box_name_combine)) %>%
+  filter(decimal_longitude < -100 & decimal_longitude > -135) %>%
+  filter(decimal_latitude > 20 & decimal_latitude < 60) %>%
+  select(!c(box_name_combine, sst, sst_n, buff_size))
+```
+
+# STI calculation
+
+Use all extracted SSTs to calculate STI
+
+```{r calculate stis}
+obis_sti <- obis_matched %>%
+  filter(!is.na(sst) | !is.na(sst_n)) %>%
+  pivot_longer(cols = c('sst', 'sst_n'),
+               names_to = 'type_sst',
+               values_to = 'sst') %>%
+  filter(!is.na(sst)) %>%
+  group_by(scientific_name) %>%
+  summarise(max_temp = max(sst),
+            min_temp = min(sst),
+            temp_95 = quantile(sst, probs = .95),
+            temp_90 = quantile(sst, probs = .9),
+            temp_10 = quantile(sst, probs = .1),
+            temp_05 = quantile(sst, probs = .05),
+            # sti is median of averages
+            sti_value = median(mean(sst))) %>%
+  mutate(temp_q_span = temp_90 - temp_10) %>%
+  mutate(temp_q_span95 = temp_95 - temp_05) %>%
+  mutate(temp_span = max_temp - min_temp) %>%
+  ungroup() %>%
+  relocate(scientific_name, sti_value)
+
+
+
+write_csv(obis_sti, here(obisdata, 
+                         paste0(datefield, 'sti_errdap_pathfinder.csv')))
+
+sp_missed <- obis_matched %>%
+  select(scientific_name) %>%
+  filter(!(scientific_name %in% obis_sti$scientific_name)) %>%
+  distinct()
+
+# is it in our records; post 1981
+sp_missed2 <- obis_records %>%
+  select(scientific_name, date_year) %>%
+  filter(!(scientific_name %in% obis_sti$scientific_name)) %>%
+  filter(date_year > 1981) %>%
+  select(!date_year) %>%
+  distinct()
+
+## for north pacific records only
+# 31 total, - 17 with records after 2002, 14 only before 2002
+# With pathfinder, we're missing 6 species
+# the lower spatial resolution is likely the issue here
+
+
+sp_missed_records <- obis_records %>%
+  filter(scientific_name %in% sp_missed$scientific_name) %>%
+  filter(date_year > 1981) %>%
+  select(!c(basis_of_record)) %>%
+  distinct() %>%
+  add_count(scientific_name, lubri_date) %>%
+  add_count(scientific_name) %>%
+  relocate(n, nn)
+
+ggplot(sp_missed_records) +
+  geom_point(aes(x = decimal_longitude,
+                 y = decimal_latitude,
+                 colour = scientific_name)) +
+  theme(legend.position = 'none')
+
+```
+
+
+
+```{r missed}
+missed_again <- obis_matched %>%
+  filter(is.na(sst) | is.na(sst_n)) %>%
+  filter(year < 2024) %>%
+  select(year, month, decimal_latitude, decimal_longitude) %>%
+  distinct() %>%
+  mutate(date_start = paste0(as.character(year), '-',
+                             as.character(month), '-01')) %>%
+  left_join(obis_spacetime_bb) %>%
+  # some of these have 2 because they're between bbs
+  add_count(year, month, decimal_longitude, decimal_latitude)
+
+# note which we should have gotten
+should_have <- missed_again %>%
+  filter(!is.na(box_name)) %>%
+  add_count(box_name, name = 'missing_frombox')
+
+write_csv(should_have, here(obisdata, '20250725_should-have.csv'))
+
+
+# note which coordinates didn't match to a box
+bb_tomake <- missed_again %>%
+  filter(is.na(box_name)) %>%
+  select(decimal_latitude, decimal_longitude) %>%
+  distinct()
+
+write_csv(bb_tomake, here(obisdata, '20250725_bb-to-make.csv'))
+
+# it looks like a lot of these are still the ones that aren't really saving right
+ggplot(bb_tomake) +
+  geom_point(aes(x = decimal_longitude,
+                 y = decimal_latitude)) +
+  theme(legend.position = 'none')
+
+
+should_have %>%
+  select(box_name, missing_frombox) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = box_name, y = missing_frombox))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+should_have %>%
+  select(box_name, missing_frombox) %>%
+  distinct() %>%
+  arrange(-missing_frombox)
+```
+top 3 missing
+puget_sound	22598	now 16012		
+bc_vi2hg	16233 now 13136			
+bc_vancouverisland	13962 now 12054	
+
+# missing test
+```{r eval=FALSE, include=FALSE}
+matched_values <- obis_matched %>%
+  filter(!is.na(box_name_combine)) %>%
+  select(box_name_combine, year, month, decimal_latitude, decimal_longitude) %>%
+  distinct() %>%
+  mutate(matched_id = paste0(as.character(year), '_', as.character(month), '_', 
+                             as.character(decimal_latitude), '_', 
+                             as.character(decimal_longitude)))
+
+missing_sp_locations <- obis_matched %>%
+  filter(scientific_name %in% sp_missed$scientific_name) %>%
+  select(year, month, decimal_latitude, decimal_longitude) %>%
+  distinct() %>%
+  left_join(obis_spacetime_sf)%>%
+  # keep matching ones
+  mutate(keeps = ifelse(str_detect(date_start, as.character(year)), 'x', NA_character_)) %>%
+  filter(keeps == 'x') %>%
+  mutate(keeps2 = ifelse(str_detect(date_start, paste0('-', month, '-')), 'x', NA_character_)) %>%
+  filter(keeps2 == 'x') %>%
+  select(!c(keeps, keeps2))
+
+# lets just do a few alaska ones
+#miss_shouldhave <- obis_spacetime_bb %>%
+#  filter(box_name %in% c('puget_sound')) %>%
+#    mutate(year = lubridate::year(date_start),
+#         month = lubridate::month(date_start))
+
+miss_shouldhave <- should_have %>%
+  filter(box_name %in% c('ca2')) %>%
+  select(!c(missing_frombox, n, date_start, date_end)) 
+
+# select which files I should search
+# based on day and night keys
+errdap_extract_shouldhave <- extract_day %>%
+  filter(box_name %in% miss_shouldhave$box_name) %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date)) %>%
+  select(!date) 
+
+# which files to search and which coordinates
+extract_w_files_shouldhave <- miss_shouldhave %>%
+  left_join(errdap_extract_shouldhave) %>%
+  distinct() %>%
+  filter(!is.na(filename)) %>%
+    mutate(matched_id = paste0(as.character(year), '_', as.character(month), '_', 
+                             as.character(decimal_latitude), '_', 
+                             as.character(decimal_longitude))) %>%
+  filter(!(matched_id %in% matched_values$matched_id)) #%>%
+  distinct(matched_id, .keep_all = TRUE)
+
+  
+# vector of filenames
+files_to_search_shouldhave <- extract_w_files_shouldhave %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+
+for (ncfile in files_to_search_shouldhave$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_shouldhave %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisshouldhave <- terra::buffer(coords4extract,14000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisshouldhave,
+                             fun = mean)
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_shouldhave.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisshouldhave,
+                             fun = mean)
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_shouldhave.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisshouldhave,
+                             fun = mean)
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_shouldhave.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisshouldhave,
+                             fun = mean)
+    point_val_2 = terra::extract(sstlayer_2, obisshouldhave,
+                             fun = mean)
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day_shouldhave.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+
+# load in and give headers
+extracted_sst_shouldhave <- read_csv(here(erd_data,
+                                          '20250515_obis_erddap_extract_pathfinder-day_shouldhave.csv'),
+                          col_names = c('id', 'sst', 'box_name',
+                                        'filename', 'layer',
+                                        'year', 'month',
+                                        'decimal_latitude', 'decimal_longitude',
+                                        'geometry')) %>%
+  # don't need these anymore
+  select(!c(id, filename, layer, geometry)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         year = as.numeric(year)) %>%
+  distinct()
+
+```
+
+```{r missing testplots}
+# testplot of waht we have
+#ncfile = '03b070e2095d30f06ceecf240848ae55.nc'
+#ncfile = '8f249dc3d33c84b674d5c94e5a685dd7.nc'
+ncfile = '2aa50b071996e10c73d34ba67f37a588.nc'
+    
+    points_to_extract <- extract_w_files_shouldhave%>%
+      filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+obisshouldhave_plot <- terra::buffer(coords4extract,5000)
+  
+  # open ncfile as a raster
+sstfile_plot <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day', 
+                     ncfile))
+names(sstfile)
+sstlayer_plot <- sstfile['sea_surface_temperature']
+#point_val_1 = terra::extract(sstlayer_plot, obisshouldhave_plot,
+#                             fun = mean)
+
+ggplot() +
+  geom_spatraster(data = sstlayer_plot) +
+  geom_spatvector(data = obisshouldhave_plot,
+                  alpha = .4) + 
+  geom_spatvector(data = coords4extract,
+                  alpha = .4) + 
+  #geom_point(data = points_to_extract, 
+  #           aes(x = decimal_longitude, 
+  #               y = decimal_latitude),
+  #           alpha = .5) +
+  theme_bw() +
+  theme(legend.position = 'none',
+        axis.title = element_blank())
+
+ggsave(here('output', 'combined', 'cti', 'testing',
+            'puget-sound_201012.png'),
+       width = 1500,
+       height = 1000,
+       units = 'px')
+
+sstfile
+```
+
+
+
+# odd ctis test
+Some of these tropical species have very low ctis for what htey should have; why?
+One thought is low number of records
+```{r}
+obis_matched %>%
+  filter(!is.na(sst) | !is.na(sst_n)) %>%
+  add_count(scientific_name) %>%
+  select(scientific_name, n) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = reorder(scientific_name, n),
+               y = n)) +
+  theme_bw()
+
+# ok lots of low ones
+n_sprecords <- obis_matched %>%
+  add_count(scientific_name, name = 'records') %>%
+    filter(!is.na(sst) | !is.na(sst_n)) %>%
+  add_count(scientific_name, name = 'matched') %>%
+  select(scientific_name, records, matched) %>%
+  distinct()
+
+lowmatch_sp <- n_sprecords %>%
+  filter(matched < 15)
+```
+
+
+# scratch
+
+
+
+```{r not-extracting test eval=FALSE, include=FALSE}
+nightmiss <- data.frame(ncname = list.files(here('rawdata', 'temp', 'erddap', 
+                            'forcti', 'day', 'missing'))) %>%
+  filter(!(ncname %in% extract_day2$filename))
+
+
+
+
+for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 
+                                   'forcti', 'day', 'missing')))){
+  ncname <- 'd3607632773e0046c9cafcdc4036de8e.nc'
+  sstfile = nc_open(here('rawdata', 'temp', 
+                     'erddap', 'forcti',
+                     'night', 'missing',
+                     ncname))
+  # get variables
+  nclong <- ncvar_get(sstfile, 'longitude')
+  nclat <- ncvar_get(sstfile, 'latitude')
+  time <- ncvar_get(sstfile, 'time')
+  tunits <- ncatt_get(sstfile,"time","units")
+  # set CFtime to the units from the ncdf
+  cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+  timestamps <- as_timestamp(cfs)
+  
+  # don't pick a corner
+  nc_sf = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf2 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_sf3 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,1000)
+  
+  nc_sf4 = expand_grid(long = nclong, lat = nclat)[20,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,2000)
+  
+  # if there is an intersection between the two...
+  if (!length(st_intersects(nc_sf, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+  } else if (!length(st_intersects(nc_sf2, bbox_sf)[[1]]) == 0) {
+    # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+    
+    print('moved point')
+  } else if (!length(st_intersects(nc_sf3, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+    
+    print('buffer 500')
+  } else if (!length(st_intersects(nc_sf4, bbox_sf)[[1]]) == 0) {
+        # make your bbox match to save
+    nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+    
+    write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield, 'obis_erddap_to-extract_pathfinder-night-missed.csv')),
+            append = TRUE)
+    
+    print('buffer 1000')
+  } else {
+    print('fail')
+  }
+
+  
+  nc_sf3 = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,2000)  
+    
+ st_intersects(nc_sf3, bbox_sf)[[1]]
+  
+   
+  nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(date2 = timestamps[2]) %>%
+    mutate(filename = ncname)
+  
+  
+  nc_close(sstfile)
+}
+```
+
+
+
+```{r looptest, eval=FALSE, include=FALSE}
+extract_w_files <- extract_day %>%
+  mutate(year = lubridate::year(date),
+         month = lubridate::month(date)) %>%
+  select(!date) %>%
+  # get start and end dates
+  left_join(to_extract) %>%
+  filter(!is.na(date_start)) %>%
+  # don't need
+  select(!c(max_lat, min_lat, max_long, min_long)) %>%
+  # add points that need searched
+  # this will have many matches but that's as intended.
+  left_join(obis_spacetime_bb) %>%
+  select(!c(date_start, date_end))
+
+# vector of filenames
+files_to_search <- extract_w_files %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+
+files_to_search_test <- files_to_search[1:50,]
+
+# 1 layer
+ncfile ='08161d8c5ed4d229c5ccc96fbe701862.nc'
+
+
+# 2 layer
+ncfile = '000a3206863a5cd18b9bfce7f29c641e.nc'
+
+
+# issue
+ncfile = 'ce097f0f8fc2b54ae3c53ef76eaa6cf7.nc'
+ncfile = '1be56c1911dbd64abb6e9d6b250b568f.nc'
+
+## needs larger buffer
+#ncfile = '04f7061e954b78ff6e4c885ac890c2e7.nc'
+##ncfile = '0009b7de82268f083d015b7a0c04fb4c.nc'
+#ncfile = '001bb0f06477fd533eeda551b1cef73b.nc'
+for (ncfile in files_to_search$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files %>%
+    filter(filename == ncfile) %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,8000)
+  
+  n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forcti', 'day', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  # If there's only one layer in the file
+  if (length(n_layer) == 1){
+    if(n_layer == 1 & 'sea_surface_temperature' %in% sst_names){
+    # 
+    sstlayer <- sstfile['sea_surface_temperature']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+    
+    point_val_full <- point_val %>%
+          mutate(filename = ncfile) %>%
+          left_join(points_to_extract) %>%
+          filter(!(sea_surface_temperature == 'NaN')) %>%
+          filter(!is.na(box_name))
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-daytest.csv')),
+            append = TRUE)
+  } else if(n_layer == 1 & 'sea_surface_temperature_1' %in% sst_names) {
+    # if there's two layers in the file but we're extracting the first one only
+    sstlayer <- sstfile['sea_surface_temperature_1']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = mean)
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_1 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_1)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full,
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-daytest.csv')),
+            append = TRUE)
+  } else if(n_layer == 2){
+    # if there's two layers in the file and we're extracting only the second
+    sstlayer <- sstfile['sea_surface_temperature_2']
+  
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = mean)
+    
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      rename(sea_surface_temperature = sea_surface_temperature_2)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+        write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-daytest.csv')),
+            append = TRUE)
+  }} else if(length(n_layer) == 2){
+    # two layers we'll want to extract both
+    sstlayer_1 <- sstfile['sea_surface_temperature_1']
+    sstlayer_2 <- sstfile['sea_surface_temperature_2']
+    
+    point_val_1 = terra::extract(sstlayer_1, obisbuff2,
+                             fun = mean)
+    point_val_2 = terra::extract(sstlayer_2, obisbuff2,
+                             fun = mean)
+    
+    
+    point_val_full <- point_val_1 %>%
+      bind_rows(point_val_2) %>%
+      mutate(filename = ncfile) %>%
+      left_join(points_to_extract) %>%
+      # remove rows if they are the first layer or second layer but wrongly extracted
+      filter(!(sea_surface_temperature_1 == 'NaN' & layer_num == 1)) %>%
+      filter(!(sea_surface_temperature_2 == 'NaN' & layer_num == 2)) %>%
+      filter(!is.na(box_name)) %>%
+      # one sst column
+      mutate(sea_surface_temperature = coalesce(sea_surface_temperature_1,
+                                                sea_surface_temperature_2)) %>%
+      select(!c(sea_surface_temperature_1, sea_surface_temperature_2)) %>%
+      relocate(sea_surface_temperature, .before = filename)
+      write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-daytest.csv')),
+            append = TRUE)
+  }
+  
+  message('done')
+}
+
+diditwork <- extract_w_files_shouldhave
+
+sst_names
+length(n_layer)
+plot(sstlayer)
+```
+
+
+
+```{r test plots, eval=FALSE, include=FALSE}
+plot(bbox_sf)
+# obis points with bboxes
+ggplot(bbox_sf) +
+  geom_sf() +
+  geom_point(data = obis_distinct_spacetime, aes(x= decimal_longitude,
+                               y = decimal_latitude),
+             alpha = .03) +
+  theme_bw()
+
+
+
+extract_w_files %>% filter(filename == '002e3934e2b378396ffda1c3414f1956.nc')
+n_layer
+
+
+plot(sstlayer)
+names(sstfile)
+sst_names
+
+
+# why isn't it working
+ggplot() +
+  geom_spatraster(data = sstlayer) +
+  geom_spatvector(data = obisbuff2) + 
+  geom_point(data = points_to_extract, 
+             aes(x = decimal_longitude, 
+                 y = decimal_latitude))
+  theme_bw()
+
+plot(coords4extract)
+
+```
+
+# map of records vs bounding boxes
+
+```{r eval=FALSE, include=FALSE}
+obis_records %>%
+  filter(scientific_name == 'Mugil cephalus') %>%
+  ggplot() +
+  geom_point(aes(x = decimal_longitude, y = decimal_latitude)) +
+  theme_bw() +
+  theme(axis.title = element_blank())
+
+
+obis_records %>%
+  filter(scientific_name == 'Oncorhynchus gorbuscha') %>%
+  ggplot() +
+  geom_point(aes(x = decimal_longitude, y = decimal_latitude)) +
+  theme_bw() +
+  theme(axis.title = element_blank())
+
+```
+
+
+

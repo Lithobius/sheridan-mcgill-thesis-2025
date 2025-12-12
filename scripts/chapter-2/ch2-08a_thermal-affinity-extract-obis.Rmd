@@ -5,8 +5,7 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-placeholder for extracting / calculating cti data
-extract more code from cti-obis
+NOTE this script needs tested in this repository 2025-12-12
 
 This script scrapes data from OBIS based on species lists.
 Data cleaning includes: date, basis of record, animals of interest

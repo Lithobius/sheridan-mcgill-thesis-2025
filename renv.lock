@@ -401,6 +401,34 @@
       "Author": "Hervé Pagès [aut, cre], Patrick Aboyoun [aut], Robert Gentleman [aut], Saikat DebRoy [aut], Vince Carey [ctb], Nicolas Delhomme [ctb], Felix Ernst [ctb], Haleema Khan [ctb] (Converted 'matchprobes' vignette from Sweave to RMarkdown), Aidan Lakshman [ctb], Kieran O'Neill [ctb], Valerie Obenchain [ctb], Marcel Ramos [ctb], Albert Vill [ctb], Jen Wokaty [ctb] (Converted 'matchprobes' vignette from Sweave to RMarkdown), Erik Wright [ctb]",
       "Maintainer": "Hervé Pagès <hpages.on.github@gmail.com>"
     },
+    "CFtime": {
+      "Package": "CFtime",
+      "Version": "1.7.2",
+      "Source": "Repository",
+      "Title": "Using CF-Compliant Calendars with Climate Projection Data",
+      "Authors@R": "person(\"Patrick\", \"Van Laake\", , \"patrick@vanlaake.net\", role = c(\"aut\", \"cre\", \"cph\"))",
+      "Description": "Support for all calendars as specified in the Climate and Forecast  (CF) Metadata Conventions for climate and forecasting data. The CF Metadata  Conventions is widely used for distributing files with climate observations  or projections, including the Coupled Model Intercomparison Project (CMIP)  data used by climate change scientists and the Intergovernmental Panel on Climate Change (IPCC). This package specifically allows the user to work  with any of the CF-compliant calendars (many of which are not compliant with  POSIXt). The CF time coordinate is formally defined in the CF Metadata  Conventions document available at <https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#time-coordinate>.",
+      "License": "MIT + file LICENSE",
+      "Encoding": "UTF-8",
+      "RoxygenNote": "7.3.3",
+      "Imports": [
+        "R6"
+      ],
+      "Suggests": [
+        "rmarkdown",
+        "testthat (>= 3.0.0)",
+        "stringr"
+      ],
+      "URL": "https://r-cf.github.io/CFtime/, https://github.com/R-CF/CFtime",
+      "BugReports": "https://github.com/R-CF/CFtime/issues",
+      "Config/testthat/edition": "3",
+      "Collate": "'api.R' 'CFCalendar.R' 'CFCalendar360.R' 'CFCalendar365.R' 'CFCalendar366.R' 'CFCalendarJulian.R' 'CFCalendarNone.R' 'CFCalendarProleptic.R' 'CFCalendarStandard.R' 'CFCalendarTAI.R' 'CFCalendarUTC.R' 'CFClimatology.R' 'CFtime-package.R' 'CFtime.R' 'helpers.R' 'zzz.R'",
+      "Config/Needs/website": "rmarkdown",
+      "NeedsCompilation": "no",
+      "Author": "Patrick Van Laake [aut, cre, cph]",
+      "Maintainer": "Patrick Van Laake <patrick@vanlaake.net>",
+      "Repository": "CRAN"
+    },
     "DBI": {
       "Package": "DBI",
       "Version": "1.2.3",
@@ -3968,6 +3996,37 @@
       "Author": "Taiyun Wei [cre, aut], Viliam Simko [aut], Michael Levy [ctb], Yihui Xie [ctb], Yan Jin [ctb], Jeff Zemla [ctb], Moritz Freidank [ctb], Jun Cai [ctb], Tomas Protivinsky [ctb]",
       "Repository": "CRAN"
     },
+    "countrycode": {
+      "Package": "countrycode",
+      "Version": "1.6.1",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Convert Country Names and Country Codes",
+      "Authors@R": "c(person(given = \"Vincent\", family = \"Arel-Bundock\", role = c(\"aut\", \"cre\"), email = \"vincent.arel-bundock@umontreal.ca\", comment = c(ORCID = \"0000-0003-2042-7063\")), person(given = \"CJ\", family = \"Yetman\", role = \"ctb\", email = \"cj@cjyetman.com\", comment = c(ORCID = \"0000-0001-5099-9500\")), person(given = \"Nils\", family = \"Enevoldsen\", role = \"ctb\", email = \"nils@wlonk.com\", comment = c(ORCID = \"0000-0001-7195-4117\")), person(\"Etienne\", \"Bacher\", email = \"etienne.bacher@protonmail.com\", role = \"ctb\", comment = c(ORCID = \"0000-0002-9271-5075\")), person(given = \"Samuel\", family = \"Meichtry\", role = \"ctb\", email = \"samuel.meichtry@bj.admin.ch\", comment = c(ORCID = \"0000-0003-2165-791X\")))",
+      "Description": "Standardize country names, convert them into one of 40 different coding schemes, convert between coding schemes, and assign region descriptors.",
+      "License": "GPL-3",
+      "URL": "https://vincentarelbundock.github.io/countrycode/",
+      "BugReports": "https://github.com/vincentarelbundock/countrycode/issues",
+      "Depends": [
+        "R (>= 2.10)"
+      ],
+      "Suggests": [
+        "altdoc",
+        "eurostat",
+        "testthat",
+        "tibble",
+        "ISOcodes",
+        "utf8"
+      ],
+      "Encoding": "UTF-8",
+      "LazyData": "yes",
+      "LazyLoad": "yes",
+      "RoxygenNote": "7.3.2",
+      "NeedsCompilation": "no",
+      "Author": "Vincent Arel-Bundock [aut, cre] (<https://orcid.org/0000-0003-2042-7063>), CJ Yetman [ctb] (<https://orcid.org/0000-0001-5099-9500>), Nils Enevoldsen [ctb] (<https://orcid.org/0000-0001-7195-4117>), Etienne Bacher [ctb] (<https://orcid.org/0000-0002-9271-5075>), Samuel Meichtry [ctb] (<https://orcid.org/0000-0003-2165-791X>)",
+      "Maintainer": "Vincent Arel-Bundock <vincent.arel-bundock@umontreal.ca>",
+      "Repository": "CRAN"
+    },
     "cowplot": {
       "Package": "cowplot",
       "Version": "1.2.0",
@@ -7265,6 +7324,39 @@
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
       "Repository": "CRAN"
     },
+    "hoardr": {
+      "Package": "hoardr",
+      "Version": "0.5.5",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "Manage Cached Files",
+      "Description": "Suite of tools for managing cached files, targeting use in other R packages. Uses 'rappdirs' for cross-platform paths. Provides utilities to manage cache directories, including targeting files by path or by key; cached directories can be compressed and uncompressed easily to save disk space.",
+      "Authors@R": "c(person(\"Scott\", \"Chamberlain\", role = \"aut\",  comment = c(ORCID=\"0000-0003-2542-2202\")), person(\"Tamás\", \"Stirling\", role = c(\"ctb\", \"cre\"), email = \"stirling.tamas@gmail.com\"))",
+      "License": "MIT + file LICENSE",
+      "URL": "https://docs.ropensci.org/hoardr/, https://github.com/ropensci/hoardr",
+      "BugReports": "https://github.com/ropensci/hoardr/issues",
+      "VignetteBuilder": "knitr",
+      "Encoding": "UTF-8",
+      "Imports": [
+        "R6",
+        "rappdirs",
+        "digest"
+      ],
+      "Suggests": [
+        "testthat",
+        "knitr",
+        "rmarkdown"
+      ],
+      "RoxygenNote": "7.3.2",
+      "X-schema.org-applicationCategory": "Data",
+      "X-schema.org-keywords": "caching, data, files, xml, pdf",
+      "X-schema.org-isPartOf": "https://ropensci.org",
+      "Config/testthat/edition": "3",
+      "NeedsCompilation": "no",
+      "Author": "Scott Chamberlain [aut] (<https://orcid.org/0000-0003-2542-2202>), Tamás Stirling [ctb, cre]",
+      "Maintainer": "Tamás Stirling <stirling.tamas@gmail.com>",
+      "Repository": "CRAN"
+    },
     "htmlTable": {
       "Package": "htmlTable",
       "Version": "2.4.3",
@@ -9648,6 +9740,45 @@
       "Maintainer": "Torsten Hothorn <Torsten.Hothorn@R-project.org>",
       "Repository": "CRAN"
     },
+    "nanoparquet": {
+      "Package": "nanoparquet",
+      "Version": "0.4.2",
+      "Source": "Repository",
+      "Title": "Read and Write 'Parquet' Files",
+      "Authors@R": "c( person(\"Gábor\", \"Csárdi\", role = c(\"aut\", \"cre\"), email = \"csardi.gabor@gmail.com\"), person(\"Hannes\", \"Mühleisen\", role = c(\"aut\", \"cph\"), comment = c(ORCID = \"0000-0001-8552-0029\")), person(\"Google Inc.\", role = \"cph\"), person(\"Apache Software Foundation\", role = \"cph\"), person(\"Posit Software, PBC\", role = \"cph\"), person(\"RAD Game Tools\", role = \"cph\"), person(\"Valve Software\", role = \"cph\"), person(\"Tenacious Software LLC\", role = \"cph\"), person(\"Facebook, Inc.\", role = \"cph\"))",
+      "Description": "Self-sufficient reader and writer for flat 'Parquet' files. Can read most 'Parquet' data types. Can write many 'R' data types, including factors and temporal types. See docs for limitations.",
+      "Depends": [
+        "R (>= 4.0.0)"
+      ],
+      "License": "MIT + file LICENSE",
+      "URL": "https://github.com/r-lib/nanoparquet, https://nanoparquet.r-lib.org/",
+      "BugReports": "https://github.com/r-lib/nanoparquet/issues",
+      "Encoding": "UTF-8",
+      "Suggests": [
+        "arrow",
+        "bit64",
+        "DBI",
+        "duckdb",
+        "hms",
+        "mockery",
+        "pillar",
+        "processx",
+        "rprojroot",
+        "spelling",
+        "testthat",
+        "tzdb",
+        "withr"
+      ],
+      "RoxygenNote": "7.3.2.9000",
+      "Config/testthat/edition": "3",
+      "Config/Needs/website": "tidyverse/tidytemplate, r-lib/pkgdown, dplyr, gt, gtExtras, knitr, nycflights13, prettyunits, quarto, rmarkdown, sessioninfo, svglite",
+      "Language": "en-US",
+      "Biarch": "true",
+      "NeedsCompilation": "yes",
+      "Author": "Gábor Csárdi [aut, cre], Hannes Mühleisen [aut, cph] (<https://orcid.org/0000-0001-8552-0029>), Google Inc. [cph], Apache Software Foundation [cph], Posit Software, PBC [cph], RAD Game Tools [cph], Valve Software [cph], Tenacious Software LLC [cph], Facebook, Inc. [cph]",
+      "Maintainer": "Gábor Csárdi <csardi.gabor@gmail.com>",
+      "Repository": "CRAN"
+    },
     "natserv": {
       "Package": "natserv",
       "Version": "1.0.0",
@@ -9682,6 +9813,22 @@
       "NeedsCompilation": "no",
       "Author": "Scott Chamberlain [aut, cre] (<https://orcid.org/0000-0003-1444-9135>), rOpenSci [fnd] (https://ropensci.org/)",
       "Maintainer": "Scott Chamberlain <myrmecocystus@gmail.com>",
+      "Repository": "CRAN"
+    },
+    "ncdf4": {
+      "Package": "ncdf4",
+      "Version": "1.24",
+      "Source": "Repository",
+      "Date": "2025-03-25",
+      "Title": "Interface to Unidata netCDF (Version 4 or Earlier) Format Data Files",
+      "Authors@R": "person(given=\"David\", family=\"Pierce\", email=\"dpierce@ucsd.edu\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"0000-0002-2453-9030\"))",
+      "Description": "Provides a high-level R interface to data files written using Unidata's netCDF library (version 4 or earlier), which are binary data files that are portable across platforms and include metadata information in addition to the data sets.  Using this package, netCDF files (either version 4 or \"classic\" version 3) can be opened and data sets read in easily.  It is also easy to create new netCDF dimensions, variables, and files, in either version 3 or 4 format, and manipulate existing netCDF files.  This package replaces the former ncdf package, which only worked with netcdf version 3 files.  For various reasons the names of the functions have had to be changed from the names in the ncdf package.  The old ncdf package is still available at the URL given below, if you need to have backward compatibility.  It should be possible to have both the ncdf and ncdf4 packages installed simultaneously without a problem.  However, the ncdf package does not provide an interface for netcdf version 4 files.",
+      "SystemRequirements": "netcdf library version 4.1 or later",
+      "License": "GPL (>= 3)",
+      "URL": "https://cirrus.ucsd.edu/~pierce/ncdf/",
+      "NeedsCompilation": "yes",
+      "Author": "David Pierce [aut, cre] (<https://orcid.org/0000-0002-2453-9030>)",
+      "Maintainer": "David Pierce <dpierce@ucsd.edu>",
       "Repository": "CRAN"
     },
     "nlme": {
@@ -9787,6 +9934,41 @@
       "Maintainer": "Paul Gilbert <pgilbert.ttv9z@ncf.ca>",
       "URL": "http://optimizer.r-forge.r-project.org/",
       "NeedsCompilation": "no",
+      "Repository": "CRAN"
+    },
+    "oai": {
+      "Package": "oai",
+      "Version": "0.4.0",
+      "Source": "Repository",
+      "Type": "Package",
+      "Title": "General Purpose 'Oai-PMH' Services Client",
+      "Description": "A general purpose client to work with any 'OAI-PMH' (Open Archives Initiative Protocol for 'Metadata' Harvesting) service. The 'OAI-PMH' protocol is described at <http://www.openarchives.org/OAI/openarchivesprotocol.html>. Functions are provided to work with the 'OAI-PMH' verbs: 'GetRecord', 'Identify', 'ListIdentifiers', 'ListMetadataFormats', 'ListRecords', and 'ListSets'.",
+      "License": "MIT + file LICENSE",
+      "Authors@R": "c( person(\"Scott\", \"Chamberlain\", role = \"aut\", email = \"myrmecocystus@gmail.com\"), person(\"Michal\", \"Bojanowski\", role = c(\"aut\", \"cre\"), email = \"michal2992@gmail.com\", comment=c(ORCID=\"0000-0001-7503-852X\")), person(\"National Science Centre\", role = \"fnd\", comment = \"Supported MB through grant 2012/07/D/HS6/01971, <https://ncn.gov.pl>\") )",
+      "URL": "https://docs.ropensci.org/oai/, https://github.com/ropensci/oai",
+      "BugReports": "https://github.com/ropensci/oai/issues",
+      "VignetteBuilder": "knitr",
+      "LazyData": "true",
+      "Encoding": "UTF-8",
+      "Imports": [
+        "xml2 (>= 1.0.0)",
+        "httr (>= 1.2.0)",
+        "plyr (>= 1.8.4)",
+        "stringr (>= 1.1.0)",
+        "tibble (>= 1.2)"
+      ],
+      "Suggests": [
+        "DBI",
+        "knitr",
+        "RSQLite",
+        "testthat",
+        "markdown",
+        "covr"
+      ],
+      "RoxygenNote": "7.2.1",
+      "NeedsCompilation": "no",
+      "Author": "Scott Chamberlain [aut], Michal Bojanowski [aut, cre] (<https://orcid.org/0000-0001-7503-852X>), National Science Centre [fnd] (Supported MB through grant 2012/07/D/HS6/01971, <https://ncn.gov.pl>)",
+      "Maintainer": "Michal Bojanowski <michal2992@gmail.com>",
       "Repository": "CRAN"
     },
     "obistools": {
@@ -12360,6 +12542,52 @@
       "Maintainer": "Jennifer Bryan <jenny@posit.co>",
       "Repository": "CRAN"
     },
+    "rerddap": {
+      "Package": "rerddap",
+      "Version": "1.2.1",
+      "Source": "Repository",
+      "Title": "General Purpose Client for 'ERDDAP™' Servers",
+      "Description": "General purpose R client for 'ERDDAP™' servers. Includes functions to search for 'datasets', get summary information on 'datasets', and fetch 'datasets', in either 'csv' or 'netCDF' format. 'ERDDAP™' information:  <https://upwell.pfeg.noaa.gov/erddap/information.html>.",
+      "Date": "2025-03-19",
+      "License": "MIT + file LICENSE",
+      "Authors@R": "c( person(\"Scott\", \"Chamberlain\", role = \"aut\"), person(\"Ben\", \"Tupper\", role = \"ctb\"), person(\"Salvador Jesús Fernández\", \"Bejarano\", role = \"ctb\"), person(\"Roy\", \"Mendelssohn\", role = c(\"cre\", \"ctb\"), email = \"roy.mendelssohn@noaa.gov\") )",
+      "URL": "https://docs.ropensci.org/rerddap/, https://github.com/ropensci/rerddap",
+      "BugReports": "https://github.com/ropensci/rerddap/issues",
+      "LazyData": "true",
+      "Depends": [
+        "R (>= 4.00)"
+      ],
+      "Encoding": "UTF-8",
+      "Language": "en-US",
+      "Imports": [
+        "crul (>= 0.7.4)",
+        "dplyr (>= 0.5.0)",
+        "data.table (>= 1.12.0)",
+        "digest",
+        "hoardr (>= 0.5.2)",
+        "jsonlite (>= 1.6)",
+        "lubridate",
+        "methods",
+        "nanoparquet",
+        "ncdf4 (>= 1.16)",
+        "tibble",
+        "utils",
+        "xml2 (>= 1.2.0)"
+      ],
+      "Suggests": [
+        "knitr",
+        "rmarkdown"
+      ],
+      "RoxygenNote": "7.3.2",
+      "VignetteBuilder": "knitr",
+      "X-schema.org-applicationCategory": "Climate",
+      "X-schema.org-keywords": "earth, science, climate, precipitation, temperature, storm, buoy, NOAA",
+      "X-schema.org-isPartOf": "https://ropensci.org",
+      "NeedsCompilation": "no",
+      "Author": "Scott Chamberlain [aut], Ben Tupper [ctb], Salvador Jesús Fernández Bejarano [ctb], Roy Mendelssohn [cre, ctb]",
+      "Maintainer": "Roy Mendelssohn <roy.mendelssohn@noaa.gov>",
+      "Repository": "CRAN"
+    },
     "reshape": {
       "Package": "reshape",
       "Version": "0.8.10",
@@ -12491,6 +12719,55 @@
       "NeedsCompilation": "no",
       "Author": "Carl Boettiger [cre, aut] (<https://orcid.org/0000-0002-1642-628X>), Scott Chamberlain [aut] (<https://orcid.org/0000-0003-1444-9135>), Duncan Temple Lang [aut], Peter Wainwright [aut], Kevin Cazelles [ctb] (<https://orcid.org/0000-0001-6619-9874>), Guohuan Su [ctb] (<https://orcid.org/0000-0003-0091-9773>)",
       "Maintainer": "Carl Boettiger <cboettig@gmail.com>",
+      "Repository": "CRAN"
+    },
+    "rgbif": {
+      "Package": "rgbif",
+      "Version": "3.8.4",
+      "Source": "Repository",
+      "Title": "Interface to the Global Biodiversity Information Facility API",
+      "Description": "A programmatic interface to the Web Service methods provided by the Global Biodiversity Information Facility (GBIF; <https://www.gbif.org/developer/summary>). GBIF is a database of species occurrence records from sources all over the globe. rgbif includes functions for searching for taxonomic names, retrieving information on data providers, getting species occurrence records, getting counts of occurrence records, and using the GBIF tile map service to make rasters summarizing huge amounts of data.",
+      "License": "MIT + file LICENSE",
+      "Authors@R": "c( person(\"Scott\", \"Chamberlain\", role = \"aut\", comment = c(\"0000-0003-1444-9135\")), person(\"Damiano\", \"Oldoni\", role = \"aut\", comment = c(\"0000-0003-3445-7562\")), person(\"Vijay\", \"Barve\", role = \"ctb\", comment = c(\"0000-0002-4852-2567\")), person(\"Peter\", \"Desmet\", role = \"ctb\", comment = c(\"0000-0002-8442-8025\")), person(\"Laurens\", \"Geffert\", role = \"ctb\"), person(\"Dan\", \"Mcglinn\", role = \"ctb\", comment = c(\"0000-0003-2359-3526\")), person(\"Karthik\", \"Ram\", role = \"ctb\", comment = c(\"0000-0002-0233-1757\")), person(given = \"rOpenSci\", role = \"fnd\", comment = c(\"019jywm96\")), person(\"John\",\"Waller\", role = c(\"aut\", \"cre\"), email = \"jwaller@gbif.org\", comment = c(\"0000-0002-7302-5976\")) )",
+      "URL": "https://github.com/ropensci/rgbif (devel), https://docs.ropensci.org/rgbif/ (documentation)",
+      "BugReports": "https://github.com/ropensci/rgbif/issues",
+      "LazyLoad": "true",
+      "Encoding": "UTF-8",
+      "Language": "en-US",
+      "Imports": [
+        "xml2",
+        "ggplot2",
+        "crul (>= 0.7.4)",
+        "data.table",
+        "whisker",
+        "magrittr",
+        "jsonlite (>= 1.6)",
+        "oai (>= 0.2.2)",
+        "tibble",
+        "lazyeval",
+        "R6",
+        "stats",
+        "wk"
+      ],
+      "Suggests": [
+        "testthat",
+        "png",
+        "terra",
+        "magick",
+        "protolite (>= 2.0)",
+        "sf",
+        "vcr (>= 2.0.0)",
+        "knitr",
+        "rmarkdown",
+        "bit64"
+      ],
+      "RoxygenNote": "7.2.3",
+      "X-schema.org-applicationCategory": "Biodiversity",
+      "X-schema.org-keywords": "GBIF, specimens, API, web-services, occurrences, species, taxonomy",
+      "X-schema.org-isPartOf": "https://ropensci.org",
+      "NeedsCompilation": "no",
+      "Author": "Scott Chamberlain [aut] (0000-0003-1444-9135), Damiano Oldoni [aut] (0000-0003-3445-7562), Vijay Barve [ctb] (0000-0002-4852-2567), Peter Desmet [ctb] (0000-0002-8442-8025), Laurens Geffert [ctb], Dan Mcglinn [ctb] (0000-0003-2359-3526), Karthik Ram [ctb] (0000-0002-0233-1757), rOpenSci [fnd] (019jywm96), John Waller [aut, cre] (0000-0002-7302-5976)",
+      "Maintainer": "John Waller <jwaller@gbif.org>",
       "Repository": "CRAN"
     },
     "rhdf5": {
@@ -14617,6 +14894,58 @@
       "NeedsCompilation": "yes",
       "Author": "Lionel Henry [aut, cre], Hadley Wickham [aut], Posit Software, PBC [cph, fnd]",
       "Maintainer": "Lionel Henry <lionel@posit.co>",
+      "Repository": "CRAN"
+    },
+    "tidyterra": {
+      "Package": "tidyterra",
+      "Version": "0.7.2",
+      "Source": "Repository",
+      "Title": "'tidyverse' Methods and 'ggplot2' Helpers for 'terra' Objects",
+      "Authors@R": "c( person(\"Diego\", \"Hernangómez\", , \"diego.hernangomezherrero@gmail.com\", role = c(\"aut\", \"cre\", \"cph\"), comment = c(ORCID = \"0000-0001-8457-4658\")), person(\"Dewey\", \"Dunnington\", role = \"ctb\", comment = c(ORCID = \"0000-0002-9415-4582\", \"for ggspatial code\")), person(\"ggplot2 authors\", role = \"cph\", comment = \"for contour code\"), person(\"Andrea\", \"Manica\", role = \"ctb\") )",
+      "Description": "Extension of the 'tidyverse' for 'SpatRaster' and 'SpatVector' objects of the 'terra' package. It includes also new 'geom_' functions that provide a convenient way of visualizing 'terra' objects with 'ggplot2'.",
+      "License": "MIT + file LICENSE",
+      "URL": "https://dieghernan.github.io/tidyterra/, https://github.com/dieghernan/tidyterra",
+      "BugReports": "https://github.com/dieghernan/tidyterra/issues",
+      "Depends": [
+        "R (>= 3.6.0)"
+      ],
+      "Imports": [
+        "cli (>= 3.0.0)",
+        "data.table",
+        "dplyr (>= 1.0.0)",
+        "ggplot2 (>= 3.5.0)",
+        "magrittr",
+        "rlang",
+        "scales",
+        "sf (>= 1.0.0)",
+        "terra (>= 1.8-10)",
+        "tibble (>= 3.0.0)",
+        "tidyr (>= 1.0.0)"
+      ],
+      "Suggests": [
+        "hexbin",
+        "isoband",
+        "knitr",
+        "lifecycle",
+        "maptiles",
+        "rmarkdown",
+        "s2",
+        "testthat (>= 3.0.0)",
+        "vctrs",
+        "vdiffr"
+      ],
+      "VignetteBuilder": "knitr",
+      "Config/Needs/coverage": "covr",
+      "Config/Needs/website": "geodata, dieghernan/gitdevr, ragg, styler, metR, ggspatial, cpp11, remotes, gganimate, gifski",
+      "Config/testthat/edition": "3",
+      "Config/testthat/parallel": "false",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "RoxygenNote": "7.3.2",
+      "X-schema.org-keywords": "r, terra, ggplot-extension, r-spatial, rspatial, cran, cran-r, r-package, rstats, rstats-package",
+      "NeedsCompilation": "no",
+      "Author": "Diego Hernangómez [aut, cre, cph] (<https://orcid.org/0000-0001-8457-4658>), Dewey Dunnington [ctb] (<https://orcid.org/0000-0002-9415-4582>, for ggspatial code), ggplot2 authors [cph] (for contour code), Andrea Manica [ctb]",
+      "Maintainer": "Diego Hernangómez <diego.hernangomezherrero@gmail.com>",
       "Repository": "CRAN"
     },
     "tidytree": {

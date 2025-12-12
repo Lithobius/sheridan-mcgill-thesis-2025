@@ -5,6 +5,530 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-placeholder for ordering, fill later
+# Download OBIS and GBIF datasets
 
+NOTE; NEEDS OBJECT REMOVAL ADDED IN
+NEEDS TESTING; this is pasted in from previous scripts and as of 2025-12-12 has not yet been tested in this repository
+
+## GBIF
+This script sets up a gbif download, then cleans the resulting download.
+Download is based on taxon keys plus bounding box.
+
+NOTE This is the whole script, but if you want to use the official gbif download from the thesis, skip to "THESIS PIPELINE STARTS HERE" 
+
+```{r setup, include=FALSE}
+#note: I had trouble installing rgbif because of a dependency that didn't want to compile. 
+#The solution if something like this happens again is make sure the package Rcpp is up to date.
+# gbif
+library(rgbif)
+library(taxize)
+library(countrycode)
+# obis
+library(robis)
+library(obistools)
+
+# both
+library(tidyverse)
+library(sf)
+library(here)
+
+# dplyr is better for these
+library(conflicted)
+conflict_prefer('filter', 'dplyr')
+conflict_prefer('select', 'dplyr')
+
+# here filepaths
+spatial = here('rawdata', 'spatial')
+datefield <- '20251212_'
+```
+
+This function pulls from worms using worrms
+```{r worms-function}
+library(worrms)
+
+## requires worrms to be loaded
+# input is vector of species names
+# use wm_records_names to extract 
+# this doesn't need the + signs
+
+# right now this breaks if not-found
+search_records_worms <- function(spnames) {
+  search <- tibble()
+  for (i in spnames) {
+    print(paste0('searching for ', i))
+    record <- wm_records_names(i, marine_only = FALSE)
+    message('done')
+    search <- append(search, record)
+  }
+  names(search) <- spnames
+  search_output <- map_dfr(.x = search, ~ data.frame(.x), .id = 'query') %>%
+    janitor::clean_names() %>%
+    select(!(c(url, taxon_rank_id, citation, lsid, modified)))
+  return(search_output)
+}
+```
+
+This taxa list is only fish
+
+```{r taxa list}
+marine_taxa_fishonly <- c('Actinopterygii', # actinopterygii/actinopteri not part of gbif backbone
+                          'Elasmobranchii', 'Holocephali', 'Leptocardii', 
+                          'Myxini', 'Sarcopterygii',
+                          'Acipenseriformes', 'Albuliformes', 'Anguilliformes',
+                          'Ateleopodiformes', 'Atheriniformes', 'Aulopiformes', 
+                          'Batrachoidiformes', 'Beloniformes', 'Beryciformes', 
+                          'Cetomimiformes', 'Characiformes', 'Clupeiformes', 
+                          'Cypriniformes', 'Cyprinodontiformes', 'Elopiformes',
+                          'Esociformes', 'Gadiformes', 'Gasterosteiformes', 
+                          'Gobeisociformes', 'Gonorynchiformes', 'Lampriformes', 
+                          'Lepidosteiformes', 'Lophiiformes', 'Mugiliformes', 
+                          'Myctophiformes', 'Notacanthiformes', 'Ophiodiiformes', 
+                          'Osmeriformes', 'Osteoglossiformes', 'Perciformes',
+                          'Pleuronectiformes', 'Polymixiformes', 'Polypteriformes', 
+                          'Saccopharyngiformes', 'Salmoniformes', 'Scorpaeniformes', 
+                          'Siluriformes', 'Stephanoberyciformes', 'Stomiiformes', 
+                          'Synbranchiformes', 'Syngnathiformes', 'Tetraodontiformes', 
+                          'Zeiformes')
+
+```
+
+
+Taxize will get gbif keys for these
+```{r}
+gbif_taxon_keys <-
+  marine_taxa_fishonly %>%
+  get_gbifid_(method="backbone") %>% # match names to the GBIF backbone to get taxonkeys
+  imap(~ .x %>% mutate(original_sciname = .y)) %>% # add original name back into data.frame
+  bind_rows() %>% # combine all data.frames into one
+  filter(matchtype == "EXACT" & status == "ACCEPTED") %>% # get only accepted and matched names
+  filter(kingdom == "Animalia") # avoid homonyms with plants
+```
+
+
+Set up the download from gbif using bounding box
+Note this bounding box is larger than necessary, but the output will be filtered to our study area.
+```{r gbif download}
+#set bounding box
+#pacific coast to equator
+gbif_bb <- "POLYGON((-168 69, -168.7 64.8, -166 63.5, -168.3 60, -162.2 57, -160 54.4, -148 57, -138 58, -133 52, -125.6 48, -126 42.7, -123 34, -117 30, -107.5 19.3, -94 14, -87.3 10.5, -81.5 6.6, -79.4 2.3, -82.4 -1, -80 -1, -76.8 3.7, -77.25 7.25, -78.56 9.1, -79.5 9.2, -81.3 8.1, -85.71 11.23, -87.27 13.5, -91.34 14.38, -94.4 16.6, -96.6 15.9, -105 20.2, -104.9 21.8, -112.8 31.4, -120 34.75, -121.8 37.2, -121.6 38, -122.75 38.2, -124 40.4, -123.8 41.6, -124.3 42.85, -123 46, -122.3 47, -122 47.6, -122.4 49.4, -126.6 51.5, -129.6 54.6, -130.85 56.1, -133.6 58.4, -135.6 59.5, -137.5 58.9, -139.5 60, -143.9 60.2, -146 61.2, -149.7 61.6, -151.75 61.1, -157.6 59, -161.4 59.3, -163.8 60.6, -163.8 60, -165.4 61.7, -162.2 63.3, -160.7 63.5, -160.7 65, -159.5 66.5, -165.3 68.5, -156.7 71.1, -168 69))"
+
+# download data
+user <- "YOURUSERNAME"
+pwd <- "YOURPWD"
+email <- "YOUREMAIL"
+
+#specific taxa within bounding box
+occ_download(pred_in("taxonKey", unique(gbif_taxon_keys$usagekey)),
+             pred("hasCoordinate", TRUE), 
+             pred_within(gbif_bb), 
+             format = "SIMPLE_CSV", 
+             user = user, pwd = pwd, email = email)
+
+#then go to gbif to download the file or use download_get
+```
+
+Then download file from gbif, rename to proper format, move to folder.
+
+### THESIS PIPELINE STARTS HERE
+```{r load in gbif}
+#occ_download_wait('0070329-250525065834625')
+
+gbif_data <- occ_download_get('0070329-250525065834625') %>%
+    occ_download_import()
+```
+
+### clean gbif
+adopted from 'Big data biogeography' course from Physalia
+```{r gbif cleaning}
+glimpse(gbif_data)
+
+gbif_subset <- gbif_data %>%
+  # select only the columns we need
+  select(verbatimScientificName, decimalLongitude, decimalLatitude, countryCode,
+         stateProvince, gbifID, phylum, order, class, family, genus, species, 
+         taxonKey, taxonRank, coordinateUncertaintyInMeters, year, month,
+         basisOfRecord,occurrenceStatus, individualCount) %>% 
+  mutate(summer = ifelse(month >=5 & month <=9, 't', 'f')) %>%
+  #filter(month >=5 & month <=9)
+  mutate(countryCode = countrycode(gbif_data$countryCode, origin =  'iso2c', destination = 'iso3c'))
+
+# which do we have?
+unique(gbif_subset$class)
+
+# remove unsuitable data sources, especially fossils
+table(gbif_subset$basisOfRecord)
+
+# Age of records
+#older records may be less reliable so we can delete older records to a point. cutoff may vary depending on groups, the sample is 1945. for many regions, there has been enough change in recording practices and land use since world war 2, this is a reasonable cutoff
+table(gbif_subset$year)
+
+
+#the conclusion is that material sample is dna, etc. worth keeping for my work, but not all
+gbif_cl <- gbif_subset %>% 
+  # remove high uncertainty records, but keep NAs. It isn't always provided
+  filter(coordinateUncertaintyInMeters/1000 <= 100 | is.na(coordinateUncertaintyInMeters)) %>%
+  # removing Fossils, Machine observations, and "occurrence"?
+  filter(basisOfRecord == "HUMAN_OBSERVATION" | 
+           basisOfRecord == "OBSERVATION" | 
+           basisOfRecord == "PRESERVED_SPECIMEN" | 
+           basisOfRecord == "MATERIAL_SAMPLE" | 
+           is.na(basisOfRecord)) %>%
+  filter(occurrenceStatus == "PRESENT") %>%
+  filter(year > 1944) %>% # remove records from before second world war
+  mutate(taxonRank = tolower(taxonRank)) %>%
+  select(!(c(occurrenceStatus, coordinateUncertaintyInMeters))) %>%
+  # remove ones that have NAs in higher taxonomy where it shouldn't
+  filter(!(class == "" & order == "")) %>%
+  janitor::clean_names() %>%
+  mutate(gbif_id = as.numeric(gbif_id)) %>%
+  mutate(across(.cols = c(class, order, family, genus, species),
+                .fns = ~ na_if(., ""))) %>%
+  distinct()
+
+# temp intermediate file until taxize is finished. 
+# Sometimes restarting the script is necessary so reload here if needed
+saveRDS(gbif_cl, here('rawdata','bigdata','20250626_gbif_pretaxize.rds'))
+gbif_cl <- readRDS(here('rawdata','bigdata','20250626_gbif_pretaxize.rds'))
+```
+
+### GBIF Taxonomy
+
+Update the taxonomy from GBIF to the WoRMS backbone.
+ 
+```{r fish only}
+# fish only dataframe
+gbiffish <- gbif_cl %>%
+  # 'unranked' includes some messed up but otherwise perfectly usable data
+  filter(taxon_rank %in% c('species', 'subspecies', 'unranked')) %>%
+  # known issues that can make taxize mad
+  mutate(species = case_when(species == 'Beringraja inornate' ~ 'Beringraja inornata',
+                             species == 'Caranx fasciatus' ~ 'Caranx sexfasciatus',
+                             species == 'Gobiomorus dormitator' ~ 'Gobiomorus dormitor',
+                             # revisions
+                             species == 'Artedius asperulus' ~ 'Artedius fenestralis',
+                             species == 'Astyanax fasciatus' ~ 'Psaliodon fasciatus',
+                             species == 'Antennarius reticularis' ~ 'Antennatus strigatus',
+                             species == 'Bryconamericus peruanus' ~ 'Eretmobrycon peruanus',
+                             species == 'Bathytroctes alveatus' ~ 'Narcetes erimelas',
+                             species == 'Catostomus mniotiltus' ~ 'Catostomus occidentalis',
+                             species == 'Centropomus grandoculatus' ~ 'Centropomus medius',
+                             species == 'Dactyloscopus byersi' ~ 'Dactyloscopus byersorum',
+                             species == 'Icelinus strabo' ~ 'Icelinus borealis',
+                             species == 'Leptocephalus holti' ~ 'Neocyema erythrosoma',
+                             species == 'Lythrulon opalescens' ~ 'Haemulon flaviguttatum',
+                             species == 'Normichthys campbelli' ~ 'Mirorictus taningi',
+                             species == 'Oligocottus borealis' ~ 'Oligocottus maculosus',
+                             species == 'Ostracion cubicus' ~ 'Ostracion cubicum',
+                             species == 'Oxycirrhites seftoni' ~ 'Oxycirrhites typus',
+                             species == 'Raja inornata' ~ 'Beringraja inornata',
+                             species == 'Sebastodes ayresii' ~ 'Sebastes rosaceus',
+                             species == 'Sebastodes rosae' ~ 'Sebastes rosaceus',
+                             species == 'Syngnathus tweedliei' ~ 'Syngnathus auliscus',
+                             species == 'Synodus jenkinsi' ~ 'Synodus scituliceps',
+                             # species with unresolved name conflicts
+                             # or under revision and freshwater so not in WoRMS
+                             species %in% c('Eretmobrycon dahli',
+                                            'Eretmobrycon guaytarae', 'Hypsoblenniops rickettsi',
+                                            'Idiacanthus panamensis') ~ NA_character_,
+                             TRUE ~ species)) %>%
+  filter(!(is.na(species)))
+
+
+gbiffish_taxonomy <- gbiffish %>%
+  # reduce columns to only taxonomy related ones
+  select(phylum, class, order, family, genus, species, taxon_key, taxon_rank) %>%
+  distinct() %>%
+  # get rid of higher level unranked
+  filter(!(is.na(species))) %>%
+  # now we know they're all species
+  mutate(taxon_rank = ifelse(taxon_rank == 'unranked', 'species', taxon_rank)) %>%
+  distinct(species, .keep_all = TRUE)
+
+# inserting +'s for the temporary search issue
+worms_search_fish <- gbiffish_taxonomy %>%
+  select(species, taxon_key) %>%
+  mutate(query = gsub(" ", "+", species))
+
+worms_fish <- get_wormsid_(sci_com = worms_search_fish$query, 
+                           marine_only = FALSE, fuzzy = TRUE,
+                           accepted = FALSE)
+# get_wormsid_ gives back null and length 0 elements
+## first remove with compact and discard then map_dfr
+worms_fish2 <- worms_fish %>% 
+  compact() %>%
+  discard( ~ nrow(.x) == 0) %>%
+  map_dfr( ~ data.frame(.x), .id = 'query')
+
+# this cleaning step is relatively temporary until they fix the curl issue
+worms_fish2 <- worms_fish2 %>%
+  #rename(taxa = scientificname) %>%
+  left_join(worms_search_fish) %>%
+  rename(worms_aphiaid = AphiaID,
+        worms_sciname = scientificname) %>%
+  add_count(query, name = 'n_result') %>%
+  filter(!(n_result >= 2 & status != 'accepted')) %>%
+  distinct(query, .keep_all = TRUE) %>%
+  select(!n_result) %>%
+  filter(!(is.na(worms_sciname)))
+
+# extract higher and info about freshwater
+### this is my custom function!
+fish_records <- search_records_worms(worms_fish2$worms_sciname)
+
+# refine results to be useful
+fish_records2 <- fish_records %>%
+  # only animal hits
+  filter(kingdom == 'Animalia') %>%
+  # generate terrestrial-only and freshwater-only columns
+  mutate(freshwater_only = ifelse((is_marine %in% c(0, NA) ==TRUE) & (is_brackish %in% c(0,NA) == TRUE) & (is_freshwater == 1),  "1", "0")) %>%
+    mutate(terrestrial_only = ifelse((is_marine %in% c(0, NA) ==TRUE) & (is_brackish %in% c(0,NA) == TRUE) & (is_terrestrial == 1),  "1", "0")) %>%
+  distinct() %>%
+  # rename to format
+  rename(worms_aphiaid = valid_aphia_id,
+         original_aphiaid =aphia_id,
+         worms_match = scientificname,
+         worms_sciname = valid_name
+         ) %>%
+  # remove unneeded columns
+  select(!(c(authority, parent_name_usage_id, is_freshwater, 
+             is_terrestrial, is_marine, is_brackish, is_extinct, match_type, 
+             valid_authority))) %>%
+  relocate(c(worms_sciname, worms_aphiaid), .before = original_aphiaid) %>%
+  # rank lowercase
+  mutate(rank = tolower(rank)) %>%
+  # remove unaccepted duplicates
+  add_count(worms_match) %>%
+  filter(!(n > 1 & status != "accepted")) %>%
+  select(!(n)) %>%
+  distinct()
+
+gbif_fish_taxupdate <- gbiffish %>%
+  select(!(c(phylum, class, order, family, genus))) %>%
+  rename(gbif_species = species) %>%
+  right_join(fish_records2, by = c('gbif_species' = 'query')) %>%
+  select(!(c(gbif_id, individual_count, original_aphiaid,
+             status, unacceptreason, verbatim_scientific_name,
+             worms_match, terrestrial_only, taxon_rank))) %>%
+  distinct() %>%
+  mutate(scientific_name = coalesce(worms_sciname, gbif_species)) %>%
+  relocate(scientific_name)
+
+
+#save for now
+write_csv(gbif_fish_taxupdate, here("processeddata", "bigdata",
+                        paste0(datefield, "gbif-fish.csv")))
+
+```
+
+
+## OBIS
+
+We'll use Marine Ecoregions of the World to download OBIS.
+This shapefile has been Simplified from the original download using QGIS using the Simplify function: method = Distance (Douglas-Peuker), Tolerance = 1
+```{r set up ecoregions}
+regions <- read_sf(here(spatial, "MEOW", "meow_ecos_simple.shp")) %>% 
+  dplyr::select(c('ECOREGION', 'geometry')) %>%
+  rename(region = ECOREGION) %>%
+  mutate(type = 'meow')
+
+#meow
+regions$wkt <- st_as_text(regions$geometry) #create well known text of ecoregions
+
+# use fishbase FAO regions to refine output
+regions_nep <- regions %>% #filter for regions of interest
+  filter(region %in% c("Aleutian Islands", "Gulf of Alaska", 
+                       "North American Pacific Fijordland", 
+                       "Puget Trough/Georgia Basin", 
+                       "Oregon, Washington, Vancouver Coast and Shelf",
+                        "Northern California", "Southern California Bight"))
+```
+
+
+```{r checklist function}
+# requires robis to be loaded
+
+# takes a dataframe that has our shapefiles loaded in with two main columns:
+# wkt from st_as_txt() and region
+obis_occur <- function(region_df) {
+  # make blank object
+  search <- tibble()
+  region_geo <- region_df$wkt
+  region_name <- region_df$region
+  # loop by region
+  for (i in 1:length(region_geo)) {
+    #region_geo <- region_df$wkt
+    print(paste0('searching for ', region_name[i]))
+    found_sp <- occurrence(geometry = region_geo[i],
+                          startdate = '1945-01-01') %>%
+      # only keep animals
+      filter(kingdom == 'Animalia') %>%
+      # only keep things at the levels we want
+      filter(taxonRank %in% c('Species', 'Subspecies',
+                              'Tribe', 'Variety', 'Forma',
+                              'Genus', 'Subgenus', NA))
+      found_sp$region = paste(region_name[i])
+    message('done')
+    
+    search <- bind_rows(search, found_sp)
+  }
+  return(search)
+}
+```
+
+I had a lot of issues getting the whole download in one go, so to avoid restarting everything every time I split the regions so that they would download one or two at a time. Then saved the RDS in case the script or computer needed restarted.
+
+```{r scrape-regions}
+# use function to extract species list by region
+# a few at a time
+regions1 <- regions_nep[1:2,]
+regions2 <- regions_nep[3,]
+regions2_2 <- regions_nep[4,]
+regions3 <- regions_nep[5,]
+regions3_2 <- regions_nep[6,]
+regions3_3 <- regions_nep[7,]
+ 
+regions_nep_obis1 <- obis_occur(regions1)
+regions_nep_obis2 <- obis_occur(regions2)
+regions_nep_obis2_2 <- obis_occur(regions2_2)
+regions_nep_obis3 <- obis_occur(regions3)
+regions_nep_obis3_2 <- obis_occur(regions3_2)
+regions_nep_obis3_3 <- obis_occur(regions3_3)
+
+saveRDS(regions_nep_obis1, here('rawdata', 'bigdata', paste0(datefield, 'obis.RDS')))
+saveRDS(regions_nep_obis2, here('rawdata', 'bigdata', paste0(datefield, 'obis2.RDS')))
+saveRDS(regions_nep_obis2_2, here('rawdata', 'bigdata', paste0(datefield, 'obis2_2.RDS')))
+saveRDS(regions_nep_obis3, here('rawdata', 'bigdata', paste0(datefield, 'obis3.RDS')))
+saveRDS(regions_nep_obis3_2, here('rawdata', 'bigdata', paste0(datefield, 'obis3_2.RDS')))
+saveRDS(regions_nep_obis3_3, here('rawdata', 'bigdata', paste0(datefield, 'obis3_3.RDS')))
+
+# load if needed
+regions_nep_obis1 <- readRDS(here('rawdata', 'bigdata', '20250619_obis.RDS'))
+regions_nep_obis2 <- readRDS(here('rawdata', 'bigdata', '20250619_obis2.RDS'))
+regions_nep_obis2_2 <- readRDS(here('rawdata', 'bigdata', '20250619_obis2_2.RDS'))
+regions_nep_obis3 <- readRDS( here('rawdata', 'bigdata', '20250619_obis3.RDS'))
+regions_nep_obis3_2 <- readRDS( here('rawdata', 'bigdata', '20250619_obis3_2.RDS'))
+regions_nep_obis3_3 <- readRDS( here('rawdata', 'bigdata', '20250619_obis3_3.RDS'))
+
+
+regions_nep_obis2 <- regions_nep_obis2 %>%
+  bind_rows(regions_nep_obis2_2)
+
+regions_nep_obis3 <- regions_nep_obis3 %>%
+  bind_rows(regions_nep_obis3_2) %>%
+  bind_rows(regions_nep_obis3_3)
+
+
+```
+
+Also, my computer got mad a few times if I tried to filter the data after combining all regions. So here we are cleaning it in chunks and combining the whole dataset as needed.
+
+```{r reduce dataset}
+# Things to remove
+# might add insects and birds back in later
+# make sure nothing new sneaks in with future downloads!
+class_rem <- c('Insecta', 'Aves', 'Chilopoda')
+order_rem <- c('Araneae', 'Pseudoscorpionida')
+
+#smaller dataset with only name, coordinates, and a few taxonomic levels to filter
+obis1_sub <- regions_nep_obis1 %>%
+  filter(!is.na(eventDate)) %>%
+  filter(marine == "TRUE") %>%
+  filter(occurrenceStatus %in% c('Present', 'present', 'P', NA_character_)) %>%
+  filter(basisOfRecord == "Human observation" | basisOfRecord == "HumanObservation" | basisOfRecord == "PreservedSpecimen" | basisOfRecord == "MaterialSample" | basisOfRecord == 'LivingSpecimen' | is.na(basisOfRecord)) %>%
+  select(scientificName, decimalLatitude, decimalLongitude, date_year, eventDate, phylum, 
+                class, order, family, genus, species, taxonRank, vernacularName,
+         basisOfRecord, aphiaID, flags, region) %>%
+  drop_na(phylum) %>%
+  filter(!(class %in% class_rem)) %>%
+  filter(!(order %in% order_rem)) %>%
+  distinct()
+
+obis2_sub <- regions_nep_obis2 %>%
+  filter(!is.na(eventDate)) %>%
+  filter(marine == "TRUE") %>%
+  filter(occurrenceStatus %in% c('Present','present', 'P', NA_character_)) %>%
+  filter(basisOfRecord == "Human observation" | basisOfRecord == "HumanObservation" | basisOfRecord == "PreservedSpecimen" | basisOfRecord == "MaterialSample" | basisOfRecord == 'LivingSpecimen' | is.na(basisOfRecord)) %>%
+  select(scientificName, decimalLatitude, decimalLongitude, date_year, eventDate, phylum, 
+                class, order, family, genus, species, taxonRank, vernacularName, 
+         basisOfRecord, aphiaID, flags, region) %>%
+  drop_na(phylum) %>%
+  filter(!(class %in% class_rem)) %>%
+  filter(!(order %in% order_rem)) %>%
+  distinct()
+
+obis3_sub <- regions_nep_obis3 %>%
+  filter(!is.na(eventDate)) %>%
+  filter(marine == "TRUE") %>%
+  filter(occurrenceStatus %in% c('Present','present', 'P', NA_character_)) %>%
+  filter(basisOfRecord == "Human observation" | basisOfRecord == "HumanObservation" | basisOfRecord == "PreservedSpecimen" | basisOfRecord == "MaterialSample" | basisOfRecord == 'LivingSpecimen' | is.na(basisOfRecord)) %>%
+  select(scientificName, decimalLatitude, decimalLongitude, date_year, eventDate, phylum, 
+                class, order, family, genus, species, taxonRank, vernacularName, 
+         basisOfRecord, aphiaID, flags, region) %>%
+  drop_na(phylum) %>%
+  filter(!(class %in% class_rem)) %>%
+  filter(!(order %in% order_rem)) %>%
+  distinct()
+
+# combine
+obis_fish_region <- bind_rows(obis1_sub, obis2_sub, obis3_sub) %>%
+  janitor::clean_names() %>%
+  # add summer column
+  mutate(summer = ifelse(str_detect(event_date, '-06-|-07-|-08-'), 't', 'f')) %>%
+  # filter to fish only
+  filter(phylum == "Chordata") %>%
+  filter(class %in% c("Actinopteri", "Elasmobranchii", "Leptocardii",
+                      "Holocephali", "Myxini", "Petromyzonti", "Teleostei") |
+           order %in% c("Scorpaeniformes")) %>%
+  filter(!(genus %in% c(NA_character_))) %>%
+  distinct() %>%
+  janitor::clean_names()
+
+write.csv(obis_fish_region, here('processeddata', 'bigdata', 
+                                 paste0(datefield, 'obis-fish_region.csv')))
+
+```
+
+# remove previous objects
+
+to be added during testing
+
+```{r remove}
+
+```
+
+# combine obis and gbif
+
+```{r loadin}
+#fish
+gbif <- read_csv(here(bigdata, paste0(datefield, 'gbif-fish.csv')))
+
+obis <- read_csv(here(bigdata, paste0(datefield, 'obis-fish_region.csv')))[-1]
+
+# just fish, narrowed down to only coordinates and years
+bigdat_fish <- full_join(gbif, obis) %>%
+  # combine similar but different columns;
+  # update script to make them the same to start
+  mutate(year = coalesce(year, date_year),
+         worms_aphiaid = coalesce(worms_aphiaid, aphia_id),
+         species = coalesce(species, worms_sciname),
+         rank = coalesce(rank, taxon_rank)) %>% 
+  select(!(c(date_year, vernacular_name, flags,
+             aphia_id, worms_sciname, taxon_rank, 
+             kingdom, phylum, basis_of_record, event_date,
+             taxon_key))) %>%
+  mutate(rank = tolower(rank)) %>%
+  mutate(rank = ifelse(is.na(species), "genus", "species")) %>%
+  distinct()
+
+
+write_csv(bigdat_fish, here(bigdata, datefield('obis-gbif_merge-fish.csv')))
+
+# species list
+taxa_all <- bigdat_fish %>%
+  select(scientific_name, rank, class, order, family, genus, species) %>%
+  distinct()
+
+write.csv(taxa_all, here('processeddata','splists', 
+                         paste0(datefield,'obis-gbif_fishlist.csv')))
+```
 
