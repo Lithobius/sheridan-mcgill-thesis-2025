@@ -36,14 +36,19 @@ library(here)
 library(rnaturalearth)
 library(sf)
 
+# datefield
+datefield <- '20251212_'
+
 # here filepaths
-splists <- here('processeddata', 'species_lists')
-spatial <- here("rawdata", "shapefiles", "MEOW")
+splists <- here('processeddata', 'splists')
+spatial <- here("rawdata", "spatial", "MEOW")
 ```
 
 
 
 # By ecoregion
+
+Here we're using the MEOW ecoregions to define the species pools.
 
 ```{r set up ecoregions}
 # World map
@@ -143,7 +148,7 @@ base_map +
 
 # use function to extract species list by region
 regions_nep_checklist <- obis_checklist(regions_nep)
-
+# note when running this with renv I got an error here but it did not seem to affect the output
 ```
 
 ### Fish
@@ -178,7 +183,7 @@ nep_fish <- regions_nep_checklist %>%
 
 
 
-write_csv(nep_fish, here(splists, '20250320_obis-fish_nep.csv'))
+write_csv(nep_fish, here(splists, paste0(datefield, 'obis-fish_nep.csv')))
 
 bc_fish <- nep_fish %>%
   filter(region %in% c("Oregon, Washington, Vancouver Coast and Shelf",
@@ -186,7 +191,7 @@ bc_fish <- nep_fish %>%
   select(!region) %>%
   distinct()
 
-write_csv(bc_fish, here(splists, '20250320_obis-fish_bc.csv'))
+write_csv(bc_fish, here(splists, paste0(datefield, 'obis-fish_bc.csv')))
 ```
 
 ### Filter to Fishbase-validated list
@@ -271,14 +276,11 @@ np_fish_trait_sp2 <- np_fish_trait_sp %>%
 obisfish_basefao_trait <- obisfish_basefao %>%
   filter(fishbase_name %in% np_fish_trait_sp2$Species)
 
-```
 
+write.csv(obisfish_basefao_trait, here(splists, 
+                                       paste0(datefield, "obis-fish_fishbase_bc.csv")))
 
-
-```{r write filtered list}
-#write.csv(obisfish_base, here(splists, "20230922_obis-fish_fishbase_nep.csv"))
-write.csv(obisfish_basefao_trait, here(splists, "20250320_obis-fish_fishbase_bc.csv"))
-
+# if you need to read it in again
 #obisfish_basefao_trait <- read_csv(here(splists, '20230922_obis-fish_fishbase_bc.csv'))[-1]
 ```
 
@@ -293,10 +295,10 @@ hakai_fish_notin <- hakai_fish %>%
 #hakai_new <- taxize::
 
 # load-in keys
-taxa_key <- read_csv(here('processeddata', 'species_lists', 'keys',
+taxa_key <- read_csv(here(splists,
                      '20230929_fish_ncbi-worms_by-accession.csv'))[-1]
 
-common_name <- read_csv(here('processeddata', 'species_lists',
+common_name <- read_csv(here(splists,
                              '20230929_12s_common-names.csv'))[-1]
 
 hakai_new <- hakai_fish_notin %>%
@@ -316,6 +318,7 @@ full_splist <- hakai_new %>%
   select(!fishbase_name)
 
 
-write.csv(full_splist, here(splists, "20250320_fishlist_obis-hakai.csv"))
+write.csv(full_splist, here(splists, 
+                            paste0(datefield, "fishlist_obis-hakai.csv")))
 ```
 

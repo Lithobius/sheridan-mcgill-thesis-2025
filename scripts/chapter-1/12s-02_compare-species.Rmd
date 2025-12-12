@@ -23,10 +23,10 @@ library(eulerr)
 library(grid)
 
 # here filepaths
-splists <- here("processeddata", "species_lists")
+splists <- here("processeddata", "splists")
 dataedna <- here("processeddata", "2018calvert")
 
-datefield <- '20240429_'
+datefield <- '20251212_'
 ```
 
 Start with "all" broad lists, to be narrowed by habitat later.
@@ -55,10 +55,10 @@ hakai_all <- read_csv(here(splists, '2021_hakai-species-list.csv'))
 
 # BC list
 bcfishbase <- read_csv(here(splists,
-                        '20230922_obis-fish_fishbase_bc.csv'))[-1] 
+                        '20251212_obis-fish_fishbase_bc.csv'))[-1] 
 
 
-npfish <- read_csv(here(splists, '20230929_fishlist_obis-hakai.csv'))[-1] %>%
+npfish <- read_csv(here(splists, '20251212_fishlist_obis-hakai.csv'))[-1] %>%
   select(species) %>%
   rename(found_taxa = species) %>%
   distinct()
@@ -108,7 +108,7 @@ venn_all <- list(
 
 eulerfish <- euler(venn_all)
 
-pdf(file = here('output',
+pdf(file = here('output', 'chapter1',
                 'splist_compare',
                 paste0(datefield, 'fish_all-lists_venn.pdf')), 
     width = 7, height = 7)
@@ -212,6 +212,8 @@ write.csv(all_splist_compare, file = here(splists,
 ```
 scratch chunk to explore results
 
+just comment and uncomment what comparisons to see
+
 Note 10/6 going through which is where
 NOT in mifish but in hakai + obis lists
 Oligocottus rimensis is in NCBI BUT it has COI and other genes NOT 12S
@@ -264,7 +266,8 @@ ggplot(np_unique_family,
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-ggsave(here('output', 'splist_compare', '20231114_families-not-in-blast.png'), last_plot(), device = 'png')
+ggsave(here('output', 'chapter1', 'splist_compare', 
+            paste0(datefield, 'families-not-in-blast.png')), last_plot(), device = 'png')
 
 
 # top 10 versions
@@ -289,7 +292,8 @@ ggplot(family10,
         axis.text.y = element_text(size = 10),
         axis.title.y = element_text(size = 14))
 
-ggsave(here('output', 'splist_compare', '20231114_familes-not-in-blast_10.png'), last_plot(), device = 'png')
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, 'familes-not-in-blast_10.png')), last_plot(), device = 'png')
 
 
 np_unique_order <- np_unique_higher %>%
@@ -304,9 +308,6 @@ ggplot(np_unique_order,
   labs(y = 'species not in BLAST', title = 'Orders with species not in BLAST') +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-#ggsave(here('output', 'splist_compare', '20230911_orders-not-in-blast.png'), last_plot(), device = 'png')
-
 
 order10 <- np_unique_order %>%
   arrange(-n)
@@ -326,7 +327,8 @@ ggplot(order10,
         axis.text.y = element_text(size = 12),
         axis.title.y = element_text(size = 14))
 
-ggsave(here('output', 'splist_compare', '20230911_orders-not-in-blast_10.png'), last_plot(), device = 'png')
+ggsave(here('output', 'chapter1', 'splist_compare', 
+            paste0(datefield, 'orders-not-in-blast_10.png')), last_plot(), device = 'png')
 ```
 
 ```{r nice version of plots}
@@ -348,7 +350,8 @@ ggplot(np_unique_family,
         axis.title.x = element_text(size = 14),
         axis.title.y = element_text(size = 14))
 
-ggsave(here('output', 'splist_compare', '20231114_families-not-in-blast_flip.png'), 
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, 'families-not-in-blast_flip.png')), 
        last_plot(), 
        device = 'png',
        width = 6,
@@ -373,7 +376,8 @@ ggplot(np_unique_family,
         axis.title.x = element_text(size = 9),
         axis.title.y = element_text(size = 9))
 
-ggsave(here('output', 'splist_compare', '20231114_families-not-in-blast_flip.pdf'), 
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, '20231114_families-not-in-blast_flip.pdf')), 
        last_plot(), 
        device = 'pdf',
        width = 6,
@@ -426,7 +430,7 @@ plot(eulerveg,
 
 # save
 
-pdf(file = here('output',
+pdf(file = here('output',  'chapter1',
                 'splist_compare',
                 paste0(datefield, '12s_habitat-macroveggroup_venn.pdf')), 
     width = 7, height = 7)
@@ -448,13 +452,11 @@ surface <- edna_fish %>%
   select(found_taxa) %>%
   distinct()
 
-
 depth <- edna_fish %>%
   filter(depth == 'depth') %>%
   filter(rank_asv == 'species') %>%
   select(found_taxa) %>%
   distinct()
-
 
 
 # by macroveg
@@ -475,7 +477,7 @@ plot(eulerdepth,
 
 # save
 
-pdf(file = here('output',
+pdf(file = here('output',  'chapter1',
                 'splist_compare',
                 paste0(datefield, '12s_habitat-depth_venn.pdf')), 
     width = 7, height = 7)
@@ -486,4 +488,3 @@ pdf(file = here('output',
      main = 'Unique fish species')
     dev.off()
 ```
-

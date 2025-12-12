@@ -30,8 +30,8 @@ library(here)
 # eDNA
 dataedna <- here::here("processeddata", "2018calvert")
 # save in
-inextout <- here::here("output", "inext")
-datefield <- '20240429_'
+inextout <- here::here("output", "chapter1", "inext")
+datefield <- '20251212_'
 runfield <- 'calvert2018_12s_'
 
 line_pal <- c("Rarefaction" = 'solid',
