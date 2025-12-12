@@ -48,7 +48,8 @@ The code in this thesis relies heavily on tidyverse.
 ```{r both chapters}
 # plot related 
 install.packages('tidyverse', 'RColorBrewer', 'PNWColors', 'plotly',
-                 'ggrepel', 'ggstatsplot', 'ggeffects', 'ggmap', 'ggpubr', 'gt', 'pheatmap')
+                 'ggrepel', 'ggstatsplot', 'ggeffects', 'ggmap', 'ggpubr',
+                 'gt', 'pheatmap', 'webshot2')
 devtools::install_github("cmartin/ggConvexHull")
 # issue with installing eulerr, using this version
 devtools::install_github("jolars/eulerr")

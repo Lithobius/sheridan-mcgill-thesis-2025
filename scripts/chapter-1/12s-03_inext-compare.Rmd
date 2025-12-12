@@ -198,7 +198,7 @@ sp_a_inextest
 
 # breakdown figure
 
-```{r}
+```{r breakdown pdf version}
 sp_a_incfreq$iNextEst$coverage_based
 
 breakdown_inextest <- as.data.frame(sp_a_incfreq$iNextEst$coverage_based) %>%
@@ -221,9 +221,8 @@ breakdown_inextest <- as.data.frame(sp_a_incfreq$iNextEst$coverage_based) %>%
   mutate(sc_label = ifelse(t > 300, round(SC*100, digits = 2), sc_label)) %>%
   # for other plots
   filter(t < 250)
-```
 
-```{r breakdown pdf version}
+
 ggplot() +
   geom_segment(data = breakdown_inextest, 
                aes(y = 15, 
@@ -297,13 +296,9 @@ ggsave(here(inextout, paste0(datefield, runfield,
 ```
 
 
-
-
 # alpha diversity figure
 
 Plot all three together
-
-
 
 ```{r asv-motu-sp together}
 # for pdf
@@ -427,15 +422,13 @@ ggplot(species_metrics,
         axis.title.y = element_text(size = 20))
 
 
-ggsave(here('output', 'splist_compare', paste0(datefield, 'asv-vs-motu.pdf')), 
+ggsave(here('output', 'chapter1', 'splist_compare', 
+            paste0(datefield, 'asv-vs-motu.pdf')), 
        last_plot(), device = 'pdf', 
        width = 20, height = 6, 
        units = 'in')
 
 
-```
-
-```{r barplot common name}
 asvspecies <- mifish_motu %>%
   filter(rank_asv == 'species') %>%
   dplyr::rename(common_name = common_name_asv) %>%
@@ -480,7 +473,8 @@ ggplot(species_metrics,
         axis.title.y = element_text(size = 20))
 
 
-ggsave(here('output', 'splist_compare', paste0(datefield, 'asv-vs-motu-cn.pdf')), 
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, 'asv-vs-motu-cn.pdf')), 
        last_plot(), device = 'pdf', 
        width = 15, height = 5, units = 'in')
 
@@ -496,7 +490,8 @@ ggplot(species_metrics_10,
         axis.title.y = element_text(size = 10),
         legend.position = 'none')
 
-ggsave(here('output', 'splist_compare', paste0(datefield, 'asv-vs-motu_top-n-cn.pdf')), 
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, 'asv-vs-motu_top-n-cn.pdf')), 
        last_plot(), device = 'pdf', 
        width = 6, 
        height = 5, 
@@ -632,7 +627,7 @@ pcr3inext98 <- as.data.frame(asvsitepcr3_incfreq$iNextEst$coverage_based) %>%
 
 
 
-```{r}
+```{r pcr-figure}
 ggplot() +  
     geom_vline(xintercept = asvsitepcr1_incfreq$DataInfo$T,
              linetype = 'twodash',
