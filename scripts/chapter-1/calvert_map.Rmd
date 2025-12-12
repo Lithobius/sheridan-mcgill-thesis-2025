@@ -40,7 +40,8 @@ edna_hab_site <- edna_hab_coords %>%
 ```{r base map}
 # loadin shapefile
 ## must have st_transform to "crs = 4326" to use regular coordinates
-bc <- st_read(here("rawdata","shapefiles", "BCcoast", "NTS_BC_COASTLINE_POLYS_125M","250_CST_PY_polygon.shp")) %>% 
+bc <- st_read(here("rawdata","spatial", "BCcoast", 
+                   "NTS_BC_COASTLINE_POLYS_125M","250_CST_PY_polygon.shp")) %>% 
   st_make_valid() %>%
   st_transform(crs = 4326)
 
@@ -76,9 +77,9 @@ ggplot(bc_crop) +
         legend.position = c(.25,.15),
         legend.box.background = element_rect(color = 'grey30', size = 1.5))
 
-ggsave(here(map_out, '20220525_2018Calvert_site.png'), device = png,
+ggsave(here(map_out, '2018Calvert_site.png'), device = png,
        height = 7, width = 5, units = 'in')
 
-ggsave(here(map_out, '20220525_2018Calvert_site.pdf'), device = pdf,
+ggsave(here(map_out, '2018Calvert_site.pdf'), device = pdf,
        height = 7, width = 5, units = 'in')
 ```

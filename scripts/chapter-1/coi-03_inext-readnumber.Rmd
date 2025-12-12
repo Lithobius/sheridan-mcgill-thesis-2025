@@ -21,8 +21,8 @@ library(here)
 # eDNA
 dataedna <- here::here("processeddata", "2018calvert")
 # save in
-inextout <- here::here("output", "inext")
-datefield <- '20240417_'
+inextout <- here::here("output", "chapter1", "inext")
+datefield <- '20251212_'
 ```
 
 Note that the reads for pcrs are split between columns

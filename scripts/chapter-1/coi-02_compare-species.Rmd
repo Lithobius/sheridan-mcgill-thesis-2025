@@ -11,11 +11,11 @@ library(tidyverse)
 library(here)
 
 dataedna <- here::here("processeddata", "2018calvert")
-plots <- here('output', 'splist_compare')
+plots <- here('output', 'chapter1', 'splist_compare')
 
 
 datefield_in <- '20240222_'
-datefield_out <- '20240222_'
+datefield_out <- '20251212_'
 runfield <- 'calvert2018_coi_'
 
 kingdom_cols <- c('Green plants' = 'darkolivegreen3',
