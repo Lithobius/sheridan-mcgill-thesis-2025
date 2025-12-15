@@ -59,3 +59,15 @@ processeddata/bigdata/20250626_obis-gbif_merge-fish.csv
 output/controls/method-comparison.vectornator
 processeddata/bigdata/20251212_obis-gbif_region-peco-bysite_unfiltered.csv
 *.nc
+processeddata/blastdb/blastdb_202410/20241015_crabs_mifish.fasta
+processeddata/blastdb/blastdb_202410/crabs-mifish.ndb
+processeddata/blastdb/blastdb_202410/crabs-mifish.nhr
+processeddata/blastdb/blastdb_202410/crabs-mifish.nin
+processeddata/blastdb/blastdb_202410/crabs-mifish.njs
+processeddata/blastdb/blastdb_202410/crabs-mifish.nog
+processeddata/blastdb/blastdb_202410/crabs-mifish.nos
+processeddata/blastdb/blastdb_202410/crabs-mifish.not
+processeddata/blastdb/blastdb_202410/crabs-mifish.nsq
+processeddata/blastdb/blastdb_202410/crabs-mifish.ntf
+processeddata/blastdb/blastdb_202410/crabs-mifish.nto
+*.RDS

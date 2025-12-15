@@ -1,0 +1,139 @@
+---
+title: "ch1_customdb-outgroups"
+output: html_document
+date: "2023-09-05"
+---
+
+Updated for Crabs 1.0.0 release
+
+
+This script is to be used if you are updating a previous list.
+It functions like the previous script, where you load in all your outgroup lists, but after they are loaded in you filter them based on what already has been searched and downloaded. The outgroups represent a considerable part of the mifish database and re-downloading them is extremely time consuming.
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+datefield <- '20241006_'
+```
+
+# load in
+```{r loadin}
+top500_mifish <- read.delim(here("database12s", "referencefiles",
+                                  "2023_GAPP_12S_ASV_sequences.length_var.blast.out"),
+                           h = TRUE, fill = TRUE) %>%
+  # standardize names and remove overhanging x
+  janitor::clean_names() %>%
+  rename_with(., ~str_remove_all(string = .,
+                 pattern = "x_")) %>%
+  separate_wider_delim(taxonomy, delim = ' / ',
+                       names = c('kingdom', 'phylum', 'class', 'order',
+                                 'family', 'genus', 'species')) %>%
+  rename(accession = subject_accession)
+
+
+top10_mifish <- read.delim(here("database12s", "referencefiles",
+                                  "202211_12S_ASV_sequences.length_var.blast.out.txt"),
+                           h = TRUE, fill = TRUE) %>%
+    # standardize names and remove overhanging x
+  janitor::clean_names() %>%
+  rename_with(., ~str_remove_all(string = .,
+                 pattern = "x_")) %>%
+  rename(accession = subject_accession)
+
+
+
+reblast_mifish <- read.delim(here("database12s", "referencefiles",
+                                  "20231023_reblast_out-parsed.tsv"),
+                           h = TRUE, fill = TRUE)
+
+reblast_mifish_incl2023 <- read.delim(here("database12s", "referencefiles",
+                                  "20240925_reblast_out-parsed.tsv"),
+                           h = TRUE, fill = TRUE)
+
+
+
+# BUT ALSO the existing lists
+existing_outgroups <- read_csv(here('database12s', 'referencefiles',
+                                    'existing_outgroups',
+                                    '20241006_outgrouptest.csv'))
+
+existing_outgroups_toolong <- read_csv(here('database12s', 'referencefiles',
+                                            'existing_outgroups',
+                                    '20241006_outgroup-toolong-test.csv'))
+
+```
+
+# extract and merge accessions
+```{r}
+fish_list <- top500_mifish %>%
+  select(accession, class, species) %>%
+  distinct() %>%
+  filter(class %in% c('Actinopteri'))
+
+
+top500_mifish_accns <- top500_mifish %>%
+  select(subject, accession) %>%
+  distinct() %>%
+  filter(!(accession %in% c('', fish_list$accession))) %>%
+  rename(description = subject)
+
+top10_mifish_accns <- top10_mifish %>%
+  select(subject, accession) %>%
+  distinct() %>%
+  filter(!(accession %in% c('', fish_list$accession))) %>%
+  rename(description = subject)
+
+reblast_accns <- reblast_mifish %>%
+  select(description, accession) %>%
+  distinct() %>%
+  filter(!(accession %in% c('', fish_list$accession)))
+
+reblast_accns_incl2023 <- reblast_mifish_incl2023 %>%
+  select(description, accession) %>%
+  distinct() %>%
+  filter(!(accession %in% c('', fish_list$accession)))
+```
+
+
+# combine + make search
+
+```{r combine lists}
+# combine existing outgroup lists
+found_accessions <- existing_outgroups %>%
+  bind_rows(existing_outgroups_toolong) %>%
+  distinct()
+
+notfish <- top10_mifish_accns%>%
+  rbind(top500_mifish_accns) %>%
+  rbind(reblast_accns) %>%
+  rbind(reblast_accns_incl2023) %>%
+  distinct(accession, .keep_all = TRUE) %>%
+  mutate(remove = case_when(str_detect(description, 'Ammodytes|Amphistichus|Artedius|Aulorhynchus|Brosmophycis')|
+                              str_detect(description, 'Citharichthys|Clevelandia|Chimaera|Engraulis')|
+                              str_detect(description, 'Gobiesox|Gasterosteus|Gibbonsia')|
+                              str_detect(description, 'Hemilepidotus|Hydrolagus|Hyperoplus|Icosteus|Liparis')|
+                              str_detect(description, 'Mola|Masturus|Polypera')|
+                              str_detect(description, 'Rhacochilus|Syngnathus|Scomber')~ 'x')) %>%
+  filter(is.na(remove)) %>%
+  select(!c(remove, description)) %>%
+  distinct() %>%
+# make NCBI search
+  mutate(ncbi_search = paste(accession, "[ACCN]", sep = "")) %>%
+  filter(!(accession %in% found_accessions$accession))
+
+ncbi_string <- toString(notfish$ncbi_search) %>%
+  gsub(' ', '',.)
+
+
+```
+
+```{r save}
+# paste into search here: https://www.ncbi.nlm.nih.gov/nuccore/advanced
+# It's probably too long haha...
+# or save
+write_file(ncbi_string,
+           file = here("database12s", "crabs",
+                       paste0(datefield, '12s_outgroups-ncbi-accn.txt')))
+
+```

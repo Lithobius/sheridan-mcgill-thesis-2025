@@ -4,7 +4,7 @@
 Code for chapters with intermediate data files.
 
 Begin at scripts > start here 
-	under construction 2025-12-12
+	under construction 2025-12-15
 	need to test renv on second computer
 
 
@@ -14,9 +14,36 @@ Currently matches PeerJ submitted code
 
 to do; 
 	add pipeline
+	add space to build blast database
 	instructions from ncbi
 	update runstats with 12S
 	
+	
+scripts
+	calvert_map
+		rmarkdown
+		map of calvert island and sampling locations
+	calvert-runstats
+		tracks reads throughout qc
+	12s-00_regional-species-pool
+		rmarkdown
+		makes regional species pool for fish
+	12s-02_compare-species
+		rmarkdown
+		compares venn diagrams of regional species pool, blast database, and eDNA results
+	12s-03a_inext-compare
+		rmarkdown
+		compares iNEXT of different subsets
+	12s-03b_inext-readnumber
+		rmarkdown
+		simulates read numbers and makes relevant iNEXT plots
+	coi-02_compare species
+	coi-03a_inext-compare
+		same as 12s but coi
+	coi-03b_inext-readnumber
+		same as 12s but coi
+	
+
 ## Chapter 2
 
 Analyses from intermediate files ready
@@ -26,6 +53,7 @@ Note the OBIS-GBIF files and raw spatial files must be generated from scratch as
 to do;
 	add pipeline
 	obis-gbif test
+	add upwelling to get-environment
 	add thermal affinity download scripts 
 	test thermal affinity download scripts
 	
@@ -90,6 +118,25 @@ scripts
 ## other
 
 Includes nextseq control analysis
+
+CRABS
+### Reference Database Instructions
+	First, we need to run CRABS from the CRABS folder to generate the initial database.
+
+The latest version was generated from a CRABS database from my chapter 1 repository.
+Right now there are a few possible methods in the folder for extracting NCBI info.
+UPDATE to most recent version
+note this might make slightly different assignments than thesis because the database is too large for github
+To access the database used, created on 2024-10-21: https://zenodo.org/records/17943978 ; doi 10.5281/zenodo.17943977
+Place this into the following directory: ./processeddata/blastdb/blastdb_202410
+
+	`00` scripts are to process initial downloads/etc.
+		`extract-taxonomy` would be from a NCBI summary file
+		`extract-taxonomy_tinyseq` would be from an NCBI tinyseq file
+		`extract_ncbinum` is from the crabs database FASTA
+	`01_fish_ncbi-efetch-taxonomy.py` takes the output from `extract-ncbinum` or any txt file that's a list of ncbi numbers to query ncbi for taxonomy using efetch. Currently it does not have a method to handle problems from NCBI and will sometimes throw an error and stop the loop. But there is nothing wrong with the record, it just needs to be restarted.
+	`01a_trimlist.py` will trim the list of accession numbers for when efetch-taxonomy hangs up and stops. This way the script can be easily restarted and won't have to rewrite numbers
+	`02_fish_ncbi2worms.Rmd` Goes through the output from efetch taxonomy to: indicate gene(s) from accession number, generate a verbatim name to match, match with worms
 
 to do;
 	add crabs pipeline here as well

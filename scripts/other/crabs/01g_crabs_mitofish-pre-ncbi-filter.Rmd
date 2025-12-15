@@ -1,0 +1,36 @@
+---
+title: "crabs-mitofish-pre-ncbi-filter"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+filter the mitofish list
+
+We don't want to waste time searching things we already have
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+# here filepaths
+crabsdb <- here('database12s', 'crabs')
+datefield <- '20241010_'
+```
+
+
+```{r loadin}
+mitofishdb <- read_csv(here('database12s', 'referencefiles', 'existing_mitofish', '20240226_mitofish_ncbi-taxonomy.csv')) %>%
+  select(!desc_verbatim)
+
+mitofish_newlist <- read_csv(here(crabsdb, '20241010_mitofish-accns.txt'),
+                             col_names = FALSE) %>%
+  rename(accession = X1)
+
+found_accns <- mitofishdb %>%
+  select(accession) %>%
+  mutate(accession = str_remove_all(accession, '\\..*$'))
+
+new_accns <- mitofish_newlist %>%
+  filter(!(accession %in% found_accns$accession))
+
+write_delim(new_accns, here(crabsdb, paste0(datefield, 'mitofish-accns_newonly.txt')),
+            col_names = FALSE)
+```
