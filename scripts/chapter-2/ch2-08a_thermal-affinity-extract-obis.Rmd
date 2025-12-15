@@ -18,11 +18,11 @@ library(here)
 
 # here filepaths
 obisdata <- here('rawdata', 'bigdata', 'obis_cti')
-datefield <- '20250927_'
+datefield <- '20251212_'
 
 # species list
 mifish_edna <- read_csv(here('processeddata', 'peco', '2021-24_edna',
-                             '20250711_peco-combined_12s_asvmatrix_fish.csv')) %>%
+                             '20251113_peco-combined_12s_asvmatrix_fish.csv')) %>%
   filter(rank == 'species') %>%
   select(found_taxa) %>%
   distinct() %>%
@@ -66,31 +66,38 @@ sp_chunk1 <- mifish_edna[1:30,]
 sp_chunk2 <- mifish_edna[31:45,]
 sp_chunk3 <- mifish_edna[46:60,]
 sp_chunk4 <- mifish_edna[61:90,]
-sp_chunk5 <- mifish_edna[91:139,]
+sp_chunk5 <- mifish_edna[91:137,]
 
 sp_chunk_obis1 <- obis_occur_sp(sp_chunk1)
 saveRDS(sp_chunk_obis1, here(obisdata, paste0(datefield, 'obis_spchunk1.RDS')))
-sp_chunk_obis1 <- readRDS(here(obisdata, '20250927_obis_spchunk1.RDS'))
+
 
 sp_chunk_obis2 <- obis_occur_sp(sp_chunk2)
 saveRDS(sp_chunk_obis2, here(obisdata, paste0(datefield, 'obis_spchunk2.RDS')))
-sp_chunk_obis2 <- readRDS(here(obisdata, '20250927_obis_spchunk2.RDS'))
+
 
 sp_chunk_obis3 <- obis_occur_sp(sp_chunk3)
 saveRDS(sp_chunk_obis3, here(obisdata, paste0(datefield, 'obis_spchunk3.RDS')))
-sp_chunk_obis3 <- readRDS(here(obisdata, '20250927_obis_spchunk3.RDS'))
+
 
 sp_chunk_obis4 <- obis_occur_sp(sp_chunk4)
 saveRDS(sp_chunk_obis4, here(obisdata, paste0(datefield, 'obis_spchunk4.RDS')))
-sp_chunk_obis4 <- readRDS(here(obisdata, '20250927_obis_spchunk4.RDS'))
+
 
 sp_chunk_obis5 <- obis_occur_sp(sp_chunk5)
 saveRDS(sp_chunk_obis5, here(obisdata, paste0(datefield, 'obis_spchunk5.RDS')))
-sp_chunk_obis4 <- readRDS(here(obisdata, '20250927_obis_spchunk5.RDS'))
+
+
+# reload if needed
+# sp_chunk_obis1 <- readRDS(here(obisdata, paste0(datefield, 'obis_spchunk1.RDS')))
+# sp_chunk_obis2 <- readRDS(here(obisdata, paste0(datefield, 'obis_spchunk2.RDS')))
+# sp_chunk_obis3 <- readRDS(here(obisdata, paste0(datefield, 'obis_spchunk3.RDS')))
+# sp_chunk_obis4 <- readRDS(here(obisdata, paste0(datefield, 'obis_spchunk4.RDS')))
+# sp_chunk_obis5 <- readRDS(here(obisdata, paste0(datefield 'obis_spchunk5.RDS')))
+
 
 sp_chunk_obisall <- sp_chunk_obis1 %>%
   bind_rows(sp_chunk_obis2) %>%
-  bind_rows(sp_chunk_obis2_2) %>%
   bind_rows(sp_chunk_obis3) %>%
   bind_rows(sp_chunk_obis4) %>%
   bind_rows(sp_chunk_obis5)

@@ -58,3 +58,4 @@ processeddata/bigdata/20251113_obis-gbif_region-peco-bysite_unfiltered.csv
 processeddata/bigdata/20250626_obis-gbif_merge-fish.csv
 output/controls/method-comparison.vectornator
 processeddata/bigdata/20251212_obis-gbif_region-peco-bysite_unfiltered.csv
+*.nc
