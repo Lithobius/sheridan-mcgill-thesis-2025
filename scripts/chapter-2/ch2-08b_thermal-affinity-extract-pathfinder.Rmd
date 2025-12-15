@@ -25,11 +25,11 @@ library(terra)
 library(tidyterra)
 #install.packages('terra')
 
-datefield = '20250803_'
+datefield = '20251212_'
 
 erd_data <- here('rawdata', 'temp', 'erddap', 'forcti')
 # eDNA
-edna_combined <- here('processeddata', 'peco')
+dataedna <- here('processeddata', 'peco')
 obisdata <- here('rawdata', 'bigdata', 'obis_cti')
 ```
 
@@ -40,7 +40,7 @@ bounding_boxes <- read_csv(here('rawdata', 'spatial',
   janitor::clean_names() %>%
   filter(!is.na(box_name))
 
-obis_records <- read_csv(here(obisdata, '20250605_obis_cti-filtered.csv'))
+obis_records <- read_csv(here(obisdata, '20251212_obis_cti-filtered.csv'))
 ```
 
 
@@ -105,34 +105,15 @@ bbox_sf <- bounding_boxes %>%
 ```
 
 # classify points by bounding boxes
-```{r if intermediate}
-obis_found <- obis_spacetime_bb %>%
-  mutate(found = paste0(decimal_latitude, '-', decimal_longitude, '-', date_start))
 
-obis_new <- obis_distinct_spacetime %>%
-  mutate(found = paste0(decimal_latitude, '-', decimal_longitude, '-', date_start)) %>%
-  filter(!(found %in% obis_found$found)) %>%
-  select(!found)
-
-# turn into coordinate points
-obis_spacetime_sf_new <- st_as_sf(obis_new, 
-                    coords = c('decimal_longitude', 'decimal_latitude'),
-                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0",
-                    remove = FALSE)
-
-obis_spacetime_bb2 <- st_intersection(obis_spacetime_sf_new, bbox_sf)
-
-obis_spacetime_bb <- bind_rows(obis_spacetime_bb, obis_spacetime_bb2)
-```
-
+if you need to reload the script, save obis_spacetime_bb as an rdf
 
 ```{r}
 obis_spacetime_bb <- st_intersection(obis_spacetime_sf, bbox_sf)
 
 # if needed, st_intersection is long.
-write_rds(obis_spacetime_bb,here(obisdata, '20250722_obis_spacetime_bb.rds'))
-#obis_spacetime_bb <- read_rds(here(obisdata, '20250605_obis_spacetime_bb.rds'))
-obis_spacetime_bb <- read_rds(here(obisdata, '20250722_obis_spacetime_bb.rds'))
+write_rds(obis_spacetime_bb,here(obisdata, '20251212_obis_spacetime_bb.rds'))
+obis_spacetime_bb <- read_rds(here(obisdata, '20251212_obis_spacetime_bb.rds'))
 
 to_extract <- obis_spacetime_bb %>%
   # return to dataframe

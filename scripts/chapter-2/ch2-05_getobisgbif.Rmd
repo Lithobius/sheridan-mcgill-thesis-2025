@@ -318,6 +318,10 @@ gbif_fish_taxupdate <- gbiffish %>%
 write_csv(gbif_fish_taxupdate, here("processeddata", "bigdata",
                         paste0(datefield, "gbif-fish.csv")))
 
+# remove gbif objects
+# UPDATE
+rm(gbif_cl)
+
 ```
 
 

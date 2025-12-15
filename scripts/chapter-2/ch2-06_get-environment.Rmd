@@ -17,18 +17,23 @@ https://upwell.pfeg.noaa.gov/erddap/info/jplMURSST41mday/index.html
 
 Then matches the sites to the downloaded raster for each year
 
+It also extracts the upwelling data using `erdBEUTIdaily`.
+
 
 ```{r setup}
 # needed to load data format
 library(ncdf4)
 # NOTE raster masks dplyr::select
 library(raster)
+# needed to parse times
+library(CFtime)
 library(rerddap)
 library(tidyverse)
 library(here)
 
 # temperature data
 erd_data <- here('rawdata', 'temp', 'erddap')
+erd_upwell <- here('rawdata', 'upwelling', 'erddap')
 # eDNA
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 # for plots I don't think this makes plots? delete if not
@@ -424,3 +429,77 @@ write_csv(site_matrix_ready, here(dataedna,
 ```
 
 
+# BEUTI
+
+```{r}
+# This sends you to the webpage
+#browse('erdBEUTIdaily')
+
+# Lat, long, and time limits!
+erd_lat_up <- c(31.0, 47.0)
+erd_long_up <- c(-149.3, -110.3)
+erd_info_up <- info('erdBEUTIdaily')
+
+
+beuti_download <- griddap(erd_info_up, 
+                       latitude = erd_lat_up, 
+                       #longitude = erd_long,
+                       #time = c("2020-06-01", "2020-08-31"),
+                       #fields = 'all',
+                       store = disk(path = here('rawdata', 'upwelling', 
+                                                'erddap')),
+                       read = FALSE
+                       )
+
+```
+
+
+```{r}
+beuti_stack = nc_open(here('rawdata', 'upwelling', 
+                     'erddap',
+                     '81e67b0a9e72e90f6ab8ce935cbe4c61.nc'))
+
+time <- ncvar_get(beuti_stack, 'time')
+tunits <- ncatt_get(beuti_stack,"time","units")
+  # set CFtime to the units from the ncdf
+cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+timestamps <- as_timestamp(cfs)
+
+nclat <- ncvar_get(beuti_stack, 'latitude')
+
+# build object
+# extract beauti values, rows are latitude
+ncbeuti <- as.data.frame(ncvar_get(beuti_stack, 'BEUTI')) %>%
+  # add latitude
+  mutate(latitude = nclat) %>%
+  # columns are dates so we need to switch those to rows
+  pivot_longer(cols = !latitude,
+               names_to = 'remove',
+               values_to = 'beuti') %>%
+  # now rows are date and columns are latitude
+  pivot_wider(names_from = latitude,
+              values_from = beuti) %>%
+  # add time and remove old column names
+  bind_cols('timestamps' = timestamps) %>%
+  relocate(timestamps) %>%
+  select(!remove) %>%
+  # make long again
+  pivot_longer(cols = !timestamps,
+               names_to = 'latitude',
+               values_to = 'beuti')
+
+beuti_peco <- ncbeuti %>%
+  mutate(year = lubridate::year(timestamps)) %>%
+  filter(year > 2020) %>%
+  mutate(month = lubridate::month(timestamps)) %>%
+  filter(month > 5 & month < 9)
+
+write_csv(ncbeuti, here(erd_upwell,
+                           paste0(datefield,
+                                  'beuti-1degdaily_all.csv')))
+
+write_csv(beuti_peco, here(erd_upwell,
+                           paste0(datefield,
+                                  'beuti-1degdaily_peco-summer.csv')))
+```

@@ -6,6 +6,7 @@ Code for chapters with intermediate data files.
 Begin at scripts > start here 
 	under construction 2025-12-15
 	need to test renv on second computer
+	need to set up pyenv
 
 
 ## Chapter 1
@@ -53,7 +54,6 @@ Note the OBIS-GBIF files and raw spatial files must be generated from scratch as
 to do;
 	add pipeline
 	obis-gbif test
-	add upwelling to get-environment
 	add thermal affinity download scripts 
 	test thermal affinity download scripts
 	
@@ -89,6 +89,7 @@ scripts
 		rmarkdown
 		uses rerddap to get sea surface temperature data from the dataset: NOAA ERD and CoastWatch West Coast Regional Node,Multi-scale Ultra-high Resolution (MUR) SST Analysis fv04.1, Global, 0.01°, 2002-present Monthly	
 		then calculates seasonal values, makes a raster, and assigns summary statistics to PECO sites
+		also downloads BEUTI upwelling
 	07_pcoa
 		rmarkdown
 		PCoA for OBIS/GBIF subsets and eDNA data; all years and all years together
@@ -121,7 +122,6 @@ Includes nextseq control analysis
 
 CRABS
 ### Reference Database Instructions
-	First, we need to run CRABS from the CRABS folder to generate the initial database.
 
 The latest version was generated from a CRABS database from my chapter 1 repository.
 Right now there are a few possible methods in the folder for extracting NCBI info.
@@ -130,14 +130,16 @@ note this might make slightly different assignments than thesis because the data
 To access the database used, created on 2024-10-21: https://zenodo.org/records/17943978 ; doi 10.5281/zenodo.17943977
 Place this into the following directory: ./processeddata/blastdb/blastdb_202410
 
+
+First, we need to run CRABS from the CRABS folder to generate the initial database.
+todo; test and update these; find the description from the other readme (gapp folder?)
 	`00` scripts are to process initial downloads/etc.
-		`extract-taxonomy` would be from a NCBI summary file
-		`extract-taxonomy_tinyseq` would be from an NCBI tinyseq file
-		`extract_ncbinum` is from the crabs database FASTA
+	`extract-taxonomy` would be from a NCBI summary file
+	`extract-taxonomy_tinyseq` would be from an NCBI tinyseq file
+	`extract_ncbinum` is from the crabs database FASTA
 	`01_fish_ncbi-efetch-taxonomy.py` takes the output from `extract-ncbinum` or any txt file that's a list of ncbi numbers to query ncbi for taxonomy using efetch. Currently it does not have a method to handle problems from NCBI and will sometimes throw an error and stop the loop. But there is nothing wrong with the record, it just needs to be restarted.
 	`01a_trimlist.py` will trim the list of accession numbers for when efetch-taxonomy hangs up and stops. This way the script can be easily restarted and won't have to rewrite numbers
 	`02_fish_ncbi2worms.Rmd` Goes through the output from efetch taxonomy to: indicate gene(s) from accession number, generate a verbatim name to match, match with worms
 
 to do;
-	add crabs pipeline here as well
-	redirect blast from both chapters to the output
+	redirect blast from both chapters to the directory
