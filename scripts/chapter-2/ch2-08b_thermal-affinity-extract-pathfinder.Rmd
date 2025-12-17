@@ -107,12 +107,17 @@ bbox_sf <- bounding_boxes %>%
 # classify points by bounding boxes
 
 if you need to reload the script, save obis_spacetime_bb as an rdf
+It is also part of the zenodo!
 
-```{r}
+```{r st_intersection}
 obis_spacetime_bb <- st_intersection(obis_spacetime_sf, bbox_sf)
 
 # if needed, st_intersection is long.
 write_rds(obis_spacetime_bb,here(obisdata, '20251212_obis_spacetime_bb.rds'))
+```
+
+start here if restarting script or skipping st_intersection generally
+```{r}
 obis_spacetime_bb <- read_rds(here(obisdata, '20251212_obis_spacetime_bb.rds'))
 
 to_extract <- obis_spacetime_bb %>%
@@ -126,17 +131,41 @@ to_extract <- obis_spacetime_bb %>%
          month = lubridate::month(date_start)) %>%
   # pathfinder 3.1 goes to 2023
   filter(year < 2024 & year > 1981) %>%
+  filter(!(year == 2023 & month > 5)) %>%
+  # this fixes things sometimes?
+  mutate(date_start = case_when(date_start == '2023-5-01' ~ '2023-05-01',
+                                date_start == '2023-4-01' ~ '2023-04-01',
+                                date_start == '2023-3-01' ~ '2023-03-01',
+                                date_start == '2023-2-01' ~ '2023-02-01',
+                                date_start == '2023-1-01' ~ '2023-01-01',
+                                TRUE ~ date_start)) %>%
+  mutate(date_end = case_when(date_end == '2023-5-31' ~ '2023-05-31',
+                              date_end == '2023-4-30' ~ '2023-04-30',
+                              date_end == '2023-3-31' ~ '2023-03-31',
+                              date_end == '2023-2-28' ~ '2023-02-28',
+                              date_end == '2023-1-31' ~ '2023-01-31',
+                                TRUE ~ date_end)) %>%
   distinct() %>%
   mutate(max_long = ifelse(max_long == 180, 179.9792, max_long)) %>%
   mutate(min_long = ifelse(min_long == 180, 179.9792, min_long)) %>%
   mutate(max_long = ifelse(max_long == -180, -179.9792, max_long)) %>%
-  mutate(min_long = ifelse(min_long == -180, -179.9792, min_long))
+  mutate(min_long = ifelse(min_long == -180, -179.9792, min_long)) %>%
+  # temp issue?
+  filter(!(box_name == 'aus_11' & year == 2010 & month == 9)) %>%
+  filter(!(box_name == 'ca2' & year == 2013 & month == 12)) %>%
+  filter(!(box_name == 'ca2' & year == 2015 & month == 12))
 ```
 
 ## extract bounding box data
 
 NOTE this downloads files! If you don't need to download files, skip this step.
 
+Importantly, there are a few limitations and issues with the R API.
+Like many APIs, it frequently drops from the server. However, sometimes it crashes R. So currently, the restart system is just to start the extract from where we left off rather than writing an error catching loop. It's not ideal and requires a bit of babysitting but it works until I get it working with Python. I suspect Python would only time out rather than crash so error handling should be doable.
+
+Sometimes when the API drops or R crashes it has downloaded the header but the file is empty. This breaks the following chunk so it's a good idea to delete any 0kb files before proceeding.
+
+These are the datasets:
 night monthly
 erdPH53sstnmday
 
@@ -162,6 +191,7 @@ for (i in 1:nrow(to_extract)) {
 }
 
 # it errored out; write a loop for the error
+# r also periodically crashes while running it so probably starting here is best
 # new toextract is toextract[length of files in destination : length toextract,]
 # have to check the system2 type code for that
 
@@ -441,7 +471,7 @@ for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'night
 
 
 # read in raw csvs
-extract_day_raw <- read_csv(here(erd_data, '20250722_obis_erddap_to-extract_pathfinder-day.csv'),
+extract_day_raw <- read_csv(here(erd_data, '20251212_obis_erddap_to-extract_pathfinder-day.csv'),
                             col_names = c('box_name', 'date_1', 'date_2', 'filename'))
 extract_night_raw <- read_csv(here(erd_data,
                                    '20250722_obis_erddap_to-extract_pathfinder-night.csv'),
@@ -487,6 +517,7 @@ extract_night <- extract_all %>%
 
 ```{r missing bbs}
 missing_bbs <- to_extract %>%
+  #filter(!(box_name %in% extract_day$box_name))%>%
   filter(!(box_name %in% extract_all$box_name))%>%
   mutate(date_start = case_when(date_start == '2023-4-01' ~ '2023-04-01',
                                 date_start == '2023-3-01' ~ '2023-03-01',
