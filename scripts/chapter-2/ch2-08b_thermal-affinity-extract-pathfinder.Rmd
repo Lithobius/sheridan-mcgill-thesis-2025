@@ -1140,8 +1140,8 @@ for (ncfile in files_to_search_n$filename){
 # load in and give headers
 extracted_sst <- read_csv(here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day.csv')),
                           col_names = c('id', 'sst', 'filename',
-                                        'layer',
-                                        'year', 'month', 'box_name', 
+                                        'box_name','layer',
+                                        'year', 'month',  
                                         'decimal_latitude', 'decimal_longitude',
                                         'geometry'
                                         )) %>%
@@ -1155,8 +1155,8 @@ extracted_sst <- read_csv(here(erd_data, paste0(datefield, 'obis_erddap_extract_
 extracted_sst_n <- read_csv(here(erd_data,
                                  paste0(datefield, 'obis_erddap_extract_pathfinder-night.csv')),
                           col_names = c('id', 'sst_n', 'filename', 
-                                        'layer',
-                                       'year', 'month','box_name_n', 
+                                        'box_name_n','layer',
+                                       'year', 'month', 
                                         'decimal_latitude', 'decimal_longitude',
                                         'geometry')) %>%
   # don't need these anymore
@@ -1201,23 +1201,14 @@ obis_matched <- obis_records %>%
     add_count(scientific_name, decimal_latitude, decimal_longitude, 
             lubri_date, flags) #%>%
   # filter records that got messed up, check them later
-  # year only, date only
-  mutate(remove = case_when(str_detect(event_date, '^([0-9]{4})$') ~ 'x',
-                            str_detect(event_date, '^([0-9]{2})$') ~ 'x',
-                            n > 1 & event_date %in% c('2016-04-21T08:30:00Z') ~ 'x',
-                            year == '1998' & event_date == '1996-06-26' ~ 'x',
-                            year == '1985' & event_date == '1986-01-06' ~ 'x',
-                            year == '2001' & event_date == '2002-01-22' ~ 'x',
-                            year == '2003' & event_date == '2002-07-01' ~ 'x',
-                            year == '2006' & event_date == '2007-01-04' ~ 'x',
-                            year == '1996' & event_date == '1997-01-01' ~ 'x',
-                            year == '1994' & event_date == '1995-01-01' ~ 'x',
-                            event_date %in% c('06-01') ~ 'x',
+  # likely a point on the edge
+  mutate(remove = case_when(
                             # check these, multiple boxes for a record
-                            n == 2 & event_date == '1989-05-20T02:00Z' & box_name_combine == 'newfoundland_2' ~ 'x',
                             n == 2 & box_name_combine == 'haiti' ~ 'x',
-                            n == 2 & box_name_combine == 'mex2' ~ 'x')) %>%
-  filter(is.na(remove))%>%
+                            n == 2 & box_name_combine == 'mex2' ~ 'x',
+                            n == 2 & box_name_combine == 'denmark' ~ 'x',
+                            n == 2 & box_name_combine == 'arctic_ak1' ~ 'x')) %>%
+  filter(is.na(remove))#%>%
   select(!c(remove, n))
 
 ggplot(obis_matched) +

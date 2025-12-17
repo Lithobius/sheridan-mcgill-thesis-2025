@@ -23,22 +23,34 @@ to do;
 scripts
 	calvert_map
 		rmarkdown
-		map of calvert island and sampling locations
+			input: shapefile of BC, edna coordinates
+			output: map of calvert island and sampling locations
 	calvert-runstats
-		tracks reads throughout qc
-	12s-00_regional-species-pool
 		rmarkdown
-		makes regional species pool for fish
-	12s-02_compare-species
+			input: read tracking from all runs
+			output: reads throughout qc
+		NOTE: needs 12S
+	12s-02a_regional-species-pool
 		rmarkdown
-		compares venn diagrams of regional species pool, blast database, and eDNA results
+			input: MEOW shapefiles, species list from Hakai, key for taxonomy
+			output regional species pool for fish from OBIS and Hakai
+	12s-02b_compare-species
+		rmarkdown
+			input: 12S MOTU matrix, species list from crabs database, species list from hakai, output species list from 12s-02a
+			output: venn diagrams of regional species pool, blast database, and eDNA results
 	12s-03a_inext-compare
 		rmarkdown
+			input: 12S MOTU matrix
+			output: iNEXT of whole survey, barplots of asv vs motu vs species, iNEXT of MOTU-ASV-species, iNEXT of PCR, iNEXT by habitat, iNEXT by depth
 		compares iNEXT of different subsets
 	12s-03b_inext-readnumber
 		rmarkdown
-		simulates read numbers and makes relevant iNEXT plots
+			input: 12S MOTU matrix, read retention by sample per run
+			output: iNEXT with simulated read numbers at different amounts per sample
 	coi-02_compare species
+		rmarkdown
+			input: COI asv matrix with all taxonomy
+			output: barplots by kingdom, phylum
 	coi-03a_inext-compare
 		same as 12s but coi
 	coi-03b_inext-readnumber

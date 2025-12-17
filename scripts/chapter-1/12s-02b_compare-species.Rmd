@@ -1,0 +1,490 @@
+---
+title: "ch1_12s-02_motuvasv"
+output: html_document
+date: "2023-08-31"
+---
+
+
+Of what fish we could find, what do we find:
+
+-   Regional/BC species pool?
+
+-   What is the species pool found by Hakai in seine data?
+
+-   Of those, what is possible to find in MiFish?
+
+-   Of that what do we find in our eDNA samples? using ASV? using mOTU?
+
+```{r setup, include=FALSE}
+library(here)
+library(tidyverse)
+library(arsenal)
+library(eulerr)
+library(grid)
+
+# here filepaths
+splists <- here("processeddata", "splists")
+dataedna <- here("processeddata", "2018calvert")
+
+datefield <- '20251212_'
+```
+
+Start with "all" broad lists, to be narrowed by habitat later.
+
+Species lists to load in:
+-   mifish
+-   Hakai surveys
+-   BC list?
+-   North Pacific list?
+-   eDNA result list
+
+```{r load-in}
+# 12s blast database
+# sp list from blast
+mifish <- read_csv(here(splists,
+                     '20241015_12s_crabs_taxonomy-key.csv')) %>%
+    #select(!hybrid) %>%
+  mutate(found_taxa = case_when(taxonomy_search %in% c('Brachymystax tsinlingensis',
+                                                       'Macquaria wujalwujalensis') ~ taxonomy_search,
+                                found_taxa == 'Oxyjulis californica' ~ 'Halichoeres californica',
+                                TRUE ~ found_taxa)) %>%
+  janitor::remove_empty()
+
+# Hakai list
+hakai_all <- read_csv(here(splists, '2021_hakai-species-list.csv'))
+
+# BC list
+bcfishbase <- read_csv(here(splists,
+                        '20251212_obis-fish_fishbase_bc.csv'))[-1] 
+
+
+npfish <- read_csv(here(splists, '20251212_fishlist_obis-hakai.csv'))[-1] %>%
+  select(species) %>%
+  rename(found_taxa = species) %>%
+  distinct()
+
+
+edna_fish <- read_csv(here(dataedna, 
+                                   '20240323_calvert2018_12s_motumatrix_taxonomy-fish.csv')) %>%
+  rename(found_taxa = found_taxa_asv) %>%
+  # freshwater
+  #filter(!(found_taxa %in% c('Prosopium williamsoni', 'Rhinichthys cataractae'))) %>%
+  select(!c(reads_raw_sample, raw_reads, sample_id,
+            ctrl_mean, reads_adjust, reads_adjust_sample)) %>%
+  distinct() 
+```
+
+```{r make and clean lists}
+mifishlist <- mifish %>%
+  filter(rank == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+add_in <-data.frame(found_taxa = c('Prosopium williamsoni', 'Rhinichthys cataractae',
+                                   'Liparis fucensis'))
+
+npfish <- bcfishbase %>% 
+  filter(taxon_rank == 'species') %>%
+  select(accepted_name) %>%
+  distinct() %>%
+  rename(found_taxa = accepted_name) %>%
+  full_join(hakai_all) %>%
+  full_join(add_in)
+
+ednaasv <- edna_fish %>%
+  filter(rank_asv == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+```
+
+
+```{r venn-diagrams}
+venn_all <- list(
+  mifish = mifishlist$found_taxa,
+  northpacific = npfish$found_taxa,
+  asv = ednaasv$found_taxa
+                 )
+
+eulerfish <- euler(venn_all)
+
+pdf(file = here('output', 'chapter1',
+                'splist_compare',
+                paste0(datefield, 'fish_all-lists_venn.pdf')), 
+    width = 7, height = 7)
+plot(eulerfish,
+     quantities = list(type = 'counts', cex = .8, fontface = 2),
+     fills = c('white','#cbcfd4','#55804a'),
+     legend = list(labels = c('MiFish BLAST database', 'North Pacific Species Pool',
+                              'Calvert Island eDNA survey'), 
+                   side = 'bottom', nrow=2, ncol=2
+                   ),
+     adjust_labels = TRUE,
+     main = 'Unique Fish Species'
+     )
+dev.off()
+```
+dataframe for exploration
+
+```{r extract-differences}
+## write a function to do all this stuff? then it will be quicker to run multiple lists rather than setting up a million variables. then when they're all extracted set up larger dataframe
+
+#both dataframes must have a column called 'species' to compare
+
+# full comparison
+splist_compare <- function(sp1, sp2){
+  df1 <- deparse(substitute(sp1)) # extract the names of dataframes as string
+  df2 <- deparse(substitute(sp2))
+  
+  sp1sp2_compared <- comparedf(sp1, sp2, by = 'found_taxa') # arsenal
+  
+  # extract differences and transform to presence/absence columns
+  sp1sp2_diff <- diffs(sp1sp2_compared, what = 'observations')
+  sp1sp2_diff <- sp1sp2_diff %>%
+    mutate(version = recode(version,
+                            x = df1,
+                            y = df2)) %>%
+    mutate(contains = 1) %>%
+    select(!(observation)) %>%
+    pivot_wider(., names_from = version, 
+                values_from = contains, values_fill = 0)
+  
+  #combine sp lists for filtering to shared
+  sp1sp2_splist <- unique(c(sp1$found_taxa, sp2$found_taxa)) 
+  sp1sp2_splist <- enframe(sp1sp2_splist)
+  
+  # get the shared spp, indicate presence in dataframe
+  shared_sp <- sp1sp2_splist %>%
+    select(value) %>%
+    filter(!(value %in% sp1sp2_diff$found_taxa)) %>%
+    mutate(insp1 = 1,
+           insp2 = 1) %>%
+    rename(found_taxa = value) %>%
+    rename_with(., ~df1, insp1) %>%
+    rename_with(., ~df2, insp2)
+
+  # combine for output
+  all_sp <- full_join(shared_sp, sp1sp2_diff)
+  all_sp <- all_sp %>%
+    mutate_all(~replace(., is.na(.), 0)) # just in case one set is contained by another
+  
+}
+
+#all comparisons
+hakai_v_asv <- splist_compare(hakai_all, ednaasv)
+mifish_v_asv <- splist_compare(mifishlist, ednaasv)
+hakai_v_mifish <- splist_compare(hakai_all, mifishlist)
+np_v_mifish <- splist_compare(npfish, mifishlist)
+np_v_asv <- splist_compare(npfish, ednaasv)
+np_v_hakai <- splist_compare(npfish, hakai_all)
+
+
+#full joins
+#process here is:
+## left join, only by species
+## coalesce duplicate columns to collapse NAs
+## remove extra columns
+## next
+
+all_splist_compare <- hakai_v_mifish %>%
+  full_join(np_v_mifish, by = 'found_taxa') %>%
+  mutate(
+         mifishlist = coalesce(mifishlist.x, mifishlist.y)) %>%
+  select(!(c(ends_with('.x'), ends_with('.y')))) %>%
+  full_join(np_v_hakai, by = 'found_taxa') %>%
+  mutate(npfish = coalesce(npfish.x, npfish.y),
+         hakai_all = coalesce(hakai_all.x, hakai_all.y)) %>%
+  select(!(c(ends_with('.x'), ends_with('.y'))))  %>%
+  full_join(hakai_v_asv, by = 'found_taxa') %>%
+  mutate(hakai_all = coalesce(hakai_all.x, hakai_all.y)) %>%
+  select(!(c(ends_with('.x'), ends_with('.y'))))  %>%
+  full_join(mifish_v_asv, by = 'found_taxa') %>%
+  mutate(ednaasv = coalesce(ednaasv.x, ednaasv.y),
+         mifishlist = coalesce(mifishlist.x, mifishlist.y)) %>%
+  select(!(c(ends_with('.x'), ends_with('.y')))) %>%
+  full_join(np_v_asv, by = 'found_taxa') %>%
+  mutate(ednaasv = coalesce(ednaasv.x, ednaasv.y),
+         npfish = coalesce(npfish.x, npfish.y)) %>%
+  select(!(c(ends_with('.x'), ends_with('.y'))))
+
+write.csv(all_splist_compare, file = here(splists,
+                                          paste0(datefield,'venn_splists.csv')))
+```
+scratch chunk to explore results
+
+just comment and uncomment what comparisons to see
+
+Note 10/6 going through which is where
+NOT in mifish but in hakai + obis lists
+Oligocottus rimensis is in NCBI BUT it has COI and other genes NOT 12S
+Sebastes diaconus is in NCBI with SRA/sequence read archive entries and a genomic entry but to get those in the BLAST database seems somewhat complicated
+In ncbi adn hakai but not obis
+Cottus asper: listed as 'America, North -- Inland waters' FAO area
+
+```{r}
+all_splist_compare %>% subset(ednaasv == 1 &
+                                #ednaasv == 0 &
+                                #hakai_all == 0 &
+                                npfish == 0 &
+                                mifishlist == 1
+                              )
+
+```
+
+Lets look closer at the 121 not-shared north pacific fish
+Note, 43 now
+
+Also 'order' has gotten less useful since recent reclassifications stuck all the sculpins in perciformes
+```{r extract-list}
+np_unique <- all_splist_compare %>% 
+  subset(#ednamotu == 0 &
+           #ednaasv == 0 &
+           #hakai_all == 0 &
+           npfish == 1 &
+           mifishlist == 0) %>%
+  select(found_taxa)
+
+#write.csv(np_unique, here(splists, '20230911_np_not-in-mifish.csv'))
+
+# now check if taxonomically non-random just with summary stats
+np_unique_higher <- bcfishbase %>%
+  filter(species %in% np_unique$found_taxa) %>%
+  select(species, genus, family, order, class) %>%
+  distinct()
+
+np_unique_family <- np_unique_higher %>%
+  filter(!(is.na(family))) %>%
+  group_by(family) %>%
+  tally()
+
+
+# complete versions
+ggplot(np_unique_family, 
+       aes(x = reorder(family, -n), y = n)) +
+  geom_col(fill = '#518891') +
+  labs(y = 'species not in BLAST', title = 'Families with species not in BLAST') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave(here('output', 'chapter1', 'splist_compare', 
+            paste0(datefield, 'families-not-in-blast.png')), last_plot(), device = 'png')
+
+
+# top 10 versions
+family10 <- np_unique_family %>%
+  arrange(-n)
+family10 <- family10[1:10,]
+
+
+ggplot(family10, 
+       aes(x = reorder(family, -n), y = n)) +
+  #geom_col(fill = 'darkslategray3') +
+  geom_col(fill = '#cbcfd4') +
+  labs(y = 'Number of species missing',
+       x = NULL,
+       title = 'Families'
+       #x = 'Fish families', 
+       #title = 'Top 10 North Pacific fish families not in BLAST database'
+       ) +
+  scale_y_continuous(limits = c(0,10), breaks = seq(0,10, by = 2)) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_text(size = 14))
+
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, 'familes-not-in-blast_10.png')), last_plot(), device = 'png')
+
+
+np_unique_order <- np_unique_higher %>%
+  filter(!is.na(order)) %>%
+  group_by(order) %>%
+  tally()
+
+
+ggplot(np_unique_order, 
+       aes(x = reorder(order, -n), y = n)) +
+  geom_col(fill = 'blue') +
+  labs(y = 'species not in BLAST', title = 'Orders with species not in BLAST') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+order10 <- np_unique_order %>%
+  arrange(-n)
+order10 <- order10[1:8,]
+
+ggplot(order10, 
+       aes(x = reorder(order, -n), y = n)) +
+  geom_col(fill = 'darkslategray4') +
+  labs(y = 'Number of species missing',
+       x = NULL,
+       title = 'Orders'
+       #x = 'Fish orders', 
+       #title = 'Top 10 North Pacific fish orders not in BLAST database'
+       ) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+        axis.text.y = element_text(size = 12),
+        axis.title.y = element_text(size = 14))
+
+ggsave(here('output', 'chapter1', 'splist_compare', 
+            paste0(datefield, 'orders-not-in-blast_10.png')), last_plot(), device = 'png')
+```
+
+```{r nice version of plots}
+# PNG version
+ggplot(np_unique_family, 
+       aes(x = reorder(family, n), y = n)) +
+  geom_col(fill = '#cbcfd4') +
+  labs(y = 'Number of species missing',
+       x = NULL
+       ) +
+  scale_y_continuous(limits = c(0,10), 
+                     breaks = seq(0,10, by = 2), 
+                     expand = c(0,0),
+                     position = 'right') +
+  coord_flip()+
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 20),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14))
+
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, 'families-not-in-blast_flip.png')), 
+       last_plot(), 
+       device = 'png',
+       width = 6,
+       height = 4,
+       units = 'in')
+
+# PDF version
+ggplot(np_unique_family, 
+       aes(x = reorder(family, n), y = n)) +
+  geom_col(fill = '#cbcfd4') +
+  labs(y = 'Species missing from BLAST',
+       x = NULL
+       ) +
+  scale_y_continuous(limits = c(0,10), 
+                     breaks = seq(0,10, by = 2), 
+                     expand = c(0,0),
+                     position = 'right') +
+  coord_flip()+
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 9),
+        axis.text.y = element_text(size = 9),
+        axis.title.x = element_text(size = 9),
+        axis.title.y = element_text(size = 9))
+
+ggsave(here('output', 'chapter1', 'splist_compare',
+            paste0(datefield, '20231114_families-not-in-blast_flip.pdf')), 
+       last_plot(), 
+       device = 'pdf',
+       width = 6,
+       height = 4,
+       units = 'in')
+
+```
+
+
+
+# compare by habitat
+
+```{r}
+# macrovegetation group
+seagrass <- edna_fish %>%
+  filter(macroveg_group == 'seagrass') %>%
+  filter(rank_asv == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+
+macroalgae <- edna_fish %>%
+  filter(macroveg_group == 'macroalgae') %>%
+  filter(rank_asv == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+noveg <- edna_fish %>%
+  filter(macroveg_group == 'none') %>%
+  filter(rank_asv == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+# by macroveg
+
+# make a list of lists
+venn_all <- list(seagrass = seagrass$found_taxa,
+                 macroalgae = macroalgae$found_taxa,
+                 noveg = noveg$found_taxa)
+
+# run eulerr
+eulerveg <- euler(venn_all)
+
+# plot output
+plot(eulerveg,
+     quantities = list(type = 'counts', cex = .75, fontface = 2),
+     adjust_labels = TRUE,
+     fills = c('#55804a', '#8D9F1D', '#aa9884'),
+     main = 'Unique fish species')
+
+# save
+
+pdf(file = here('output',  'chapter1',
+                'splist_compare',
+                paste0(datefield, '12s_habitat-macroveggroup_venn.pdf')), 
+    width = 7, height = 7)
+    plot(eulerveg,
+     quantities = list(type = 'counts', cex = .75, fontface = 2),
+     adjust_labels = TRUE,
+     fills = c('#55804a', '#8D9F1D', '#aa9884'),
+     main = 'Unique fish species')
+    dev.off()
+```
+
+
+
+```{r depth}
+# macrovegetation group
+surface <- edna_fish %>%
+  filter(depth == 'surface') %>%
+  filter(rank_asv == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+depth <- edna_fish %>%
+  filter(depth == 'depth') %>%
+  filter(rank_asv == 'species') %>%
+  select(found_taxa) %>%
+  distinct()
+
+
+# by macroveg
+
+# make a list of lists
+venn_depth <- list(surface = surface$found_taxa,
+                 depth = depth$found_taxa)
+
+# run eulerr
+eulerdepth <- euler(venn_depth)
+
+# plot output
+plot(eulerdepth,
+     quantities = list(type = 'counts', cex = .75, fontface = 2),
+     adjust_labels = TRUE,
+     fills = c('deepskyblue1', 'dodgerblue2'),
+     main = 'Unique fish species')
+
+# save
+
+pdf(file = here('output',  'chapter1',
+                'splist_compare',
+                paste0(datefield, '12s_habitat-depth_venn.pdf')), 
+    width = 7, height = 7)
+    plot(eulerdepth,
+     quantities = list(type = 'counts', cex = .75, fontface = 2),
+     adjust_labels = TRUE,
+     fills = c('deepskyblue1', 'dodgerblue2'),
+     main = 'Unique fish species')
+    dev.off()
+```
