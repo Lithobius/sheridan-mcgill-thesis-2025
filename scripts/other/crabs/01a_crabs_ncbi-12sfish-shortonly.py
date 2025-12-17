@@ -96,8 +96,8 @@ def fasta_by_search(query_list, outfile_path, outfile_name, errors):
 if __name__ == "__main__":
 
     # set emails
-    Entrez.email = "kate.sheridan@mail.mcgill.ca"
-    Entrez.api_key = "330c561fca772258d2c869e4caefe8c98b09"
+    Entrez.email = "YOUR-EMAIL"
+    Entrez.api_key = "YOUR-API-KEY"
     # Path to fasta output,
     # name of fasta file currently defined in function (change)
     fasta_out_path = ("./database12s/crabs/")

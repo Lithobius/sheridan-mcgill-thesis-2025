@@ -14,7 +14,7 @@ Analyses from intermediate files ready
 Currently matches PeerJ submitted code
 
 to do; 
-	add pipeline
+	add eDNA pipeline
 	add space to build blast database
 	instructions from ncbi
 	update runstats with 12S
@@ -66,12 +66,13 @@ Note the OBIS-GBIF files and raw spatial files must be generated from scratch as
 to do;
 	add pipeline
 	obis-gbif test
-	add thermal affinity download scripts 
 	test thermal affinity download scripts
 	
 scripts
 	01_ednaprocessing
-		R markdown, contains pipeline (needs updated for all years)
+		R markdown, combines sequence tables and clusters
+			input: sequence tables from all runs
+			output: separate ASV tables for all years, combined ASV tables, MOTU table
 		Note in the current form there are steps where you have to run the corresponding python script before continuing.
 	01b_seqtable2swarm.py
 		python; needs run before SWARM.
@@ -131,24 +132,42 @@ scripts
 ## other
 
 Includes nextseq control analysis
+	rmarkdown
 
-CRABS
-### Reference Database Instructions
+### CRABS Reference Database Instructions
 
-The latest version was generated from a CRABS database from my chapter 1 repository.
-Right now there are a few possible methods in the folder for extracting NCBI info.
-UPDATE to most recent version
-note this might make slightly different assignments than thesis because the database is too large for github
+Note if you run this from scratch, it might make slightly different assignments than thesis because the database itself is too large for Github
 To access the database used, created on 2024-10-21: https://zenodo.org/records/17943978 ; doi 10.5281/zenodo.17943977
 Place this into the following directory: ./processeddata/blastdb/blastdb_202410
 
+`crabs` needs installed from https://github.com/gjeunen/reference_database_creator
+This is a command line program, but there are full instructions on the github as well as a Docker. There is a conda package but this pipeline uses the command line version
 
+The numbering in this section matches the Modules in CRABS.
+
+#### Module 1; download data
+
+Once it is installed, we deviate from the 'recommended' crabs pipeline by extracting the records we need from NCBI independently, including outgroups so that we do get "bacteria" and "human" identifications without having to download all of NCBI.
+
+01a_crabs_ncbi-12sfish-shortonly.py
+	Python script to extract short fish sequences from NCBI. Note this does exclude complete genomes. Accessions for fish that are 'too long' are recorded in a separate file, where later we can check if any of them are missing from the database. These are primarily whole genome exports
+	
+	
+	
+Under construction below ~~~
+
+ crabs can search multiple databases
+ At this step you need to download a taxonomy file too
+
+pasted in from other readme, to be interleaved as this one is updated
 First, we need to run CRABS from the CRABS folder to generate the initial database.
 todo; test and update these; find the description from the other readme (gapp folder?)
+
 	`00` scripts are to process initial downloads/etc.
 	`extract-taxonomy` would be from a NCBI summary file
 	`extract-taxonomy_tinyseq` would be from an NCBI tinyseq file
 	`extract_ncbinum` is from the crabs database FASTA
+	
 	`01_fish_ncbi-efetch-taxonomy.py` takes the output from `extract-ncbinum` or any txt file that's a list of ncbi numbers to query ncbi for taxonomy using efetch. Currently it does not have a method to handle problems from NCBI and will sometimes throw an error and stop the loop. But there is nothing wrong with the record, it just needs to be restarted.
 	`01a_trimlist.py` will trim the list of accession numbers for when efetch-taxonomy hangs up and stops. This way the script can be easily restarted and won't have to rewrite numbers
 	`02_fish_ncbi2worms.Rmd` Goes through the output from efetch taxonomy to: indicate gene(s) from accession number, generate a verbatim name to match, match with worms
