@@ -7,7 +7,10 @@ output: html_document
 
 placeholder for extracting / calculating cti data
 
-NOTE pasted in from other repository but not tested yet 2025-12-12
+NOTE pasted in from other repository
+2025-12-16:
+Tested through DAY
+Bringing NIGHT from other repository for now
 
 We will classify temperature for obis records bases on pathfinder data and calculate STI : species thermal index, that will then go into CTI; community thermal index
 ```{r setup, include=FALSE}
@@ -117,7 +120,7 @@ write_rds(obis_spacetime_bb,here(obisdata, '20251212_obis_spacetime_bb.rds'))
 ```
 
 start here if restarting script or skipping st_intersection generally
-```{r}
+```{r to extract list}
 obis_spacetime_bb <- read_rds(here(obisdata, '20251212_obis_spacetime_bb.rds'))
 
 to_extract <- obis_spacetime_bb %>%
@@ -159,6 +162,7 @@ to_extract <- obis_spacetime_bb %>%
 ## extract bounding box data
 
 NOTE this downloads files! If you don't need to download files, skip this step.
+Also note its ~26k files for about 12gb. I've been able to severely reduce the amount of compute by using the bounding boxes, if we accept the limitations and assumptions of using the bounding boxes.
 
 Importantly, there are a few limitations and issues with the R API.
 Like many APIs, it frequently drops from the server. However, sometimes it crashes R. So currently, the restart system is just to start the extract from where we left off rather than writing an error catching loop. It's not ideal and requires a bit of babysitting but it works until I get it working with Python. I suspect Python would only time out rather than crash so error handling should be doable.
@@ -190,7 +194,7 @@ for (i in 1:nrow(to_extract)) {
                        )
 }
 
-# it errored out; write a loop for the error
+# it errored out; write a loop for the error when move to python
 # r also periodically crashes while running it so probably starting here is best
 # new toextract is toextract[length of files in destination : length toextract,]
 # have to check the system2 type code for that
@@ -228,6 +232,7 @@ for (i in 1:nrow(to_extract)) {
                        )
 }
 
+# same error issues here, start here if it crashes or hangs up.
 
 complete_n <- length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'night')))
 
@@ -249,10 +254,11 @@ for (i in 1:nrow(to_extract2_n)) {
 ```
 
 # classify
-some of this just makes more sense to do in python...
 
+This takes a while so leave it overnight probably.
+It opens each file, finds a point, and creates a CSV to catalog the output
 
-```{r stupid loop to extract bbox date filename}
+```{r loop to extract bbox date filename}
 for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'day')))){
   ncname <- list.files(here('rawdata', 'temp', 'erddap', 'forcti', 'day'))[i]
   sstfile = nc_open(here('rawdata', 'temp', 
@@ -503,9 +509,9 @@ extract_all <- extract_day %>%
   bind_rows(extract_night) %>%
   mutate(version = ifelse(is.na(version), 'night', version))
 
-write_csv(extract_all, here(erd_data, '20250722_pathfinder_extract_key.csv'))
+write_csv(extract_all, here(erd_data, paste0(datefield, 'pathfinder_extract_key.csv')))
 # if needed
-extract_all <- read_csv(here(erd_data, '20250731_pathfinder_extract_key.csv')) 
+#extract_all <- read_csv(here(erd_data, '20251212_pathfinder_extract_key.csv')) 
 
 extract_day <- extract_all %>% 
   filter(version == 'day') %>%
@@ -514,6 +520,10 @@ extract_night <- extract_all %>%
   filter(version == 'night') %>%
   select(!version) 
 ```
+
+Its possible there are missing bounding boxes.
+There weren't when I tested day 2025-12-16.
+This does not account for missing years
 
 ```{r missing bbs}
 missing_bbs <- to_extract %>%
@@ -785,10 +795,11 @@ for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap',
 
 # read in raw csvs
 extract_day_raw2 <- read_csv(here(erd_data,
-                                 '20250722_obis_erddap_to-extract_pathfinder-day-missed.csv'),
+                                 paste0(datefield, 'obis_erddap_to-extract_pathfinder-day-missed.csv')),
                             col_names = c('box_name', 'date_1', 'date_2', 'filename'))
 extract_night_raw2 <- read_csv(here(erd_data,
-                                   '20250722_obis_erddap_to-extract_pathfinder-night-missed.csv'),
+                                   paste0(datefield,
+                                      'obis_erddap_to-extract_pathfinder-night-missed.csv')),
                             col_names = c('box_name', 'date_1', 'date_2', 'filename')) %>%
   distinct()
 
@@ -849,9 +860,10 @@ system2("mv",
                             'forcti', 'night/')))
 ```
 
+# match files
 
-
-Now we need to match the files and the combos to extract the temperature data
+Now we need to match the files and the combos to extract the temperature data.
+This also takes a long time and is good to leave for overnight.
 ```{r match files}
 extract_w_files <- extract_day %>%
   mutate(year = lubridate::year(date),
@@ -1126,7 +1138,7 @@ for (ncfile in files_to_search_n$filename){
 
 
 # load in and give headers
-extracted_sst <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinder-day.csv'),
+extracted_sst <- read_csv(here(erd_data, paste0(datefield, 'obis_erddap_extract_pathfinder-day.csv')),
                           col_names = c('id', 'sst', 'filename',
                                         'layer',
                                         'year', 'month', 'box_name', 
@@ -1141,7 +1153,7 @@ extracted_sst <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinde
 
 # load in and give headers
 extracted_sst_n <- read_csv(here(erd_data,
-                                 '20250803_obis_erddap_extract_pathfinder-night.csv'),
+                                 paste0(datefield, 'obis_erddap_extract_pathfinder-night.csv')),
                           col_names = c('id', 'sst_n', 'filename', 
                                         'layer',
                                        'year', 'month','box_name_n', 
