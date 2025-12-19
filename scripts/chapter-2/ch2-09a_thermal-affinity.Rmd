@@ -59,33 +59,12 @@ site_order2 <- regions %>%
   arrange(decimal_latitude)
 
 # region/site environmental data
-region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
-                                    '20250713_mean-summer-sst_by-region.csv')) %>%
-    mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_label)) %>%
+region_environment <- read_csv(here(dataedna,
+                                    '20251212_environment_region.csv')) %>%
   select(!avg_region_lat) 
 
-region_temps <- region_environment %>%
-  filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  distinct() 
-
-site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
-                                    '20251113_summer-sst-summary-stats_by-site.csv')) #%>%
-  #   mutate(region_label = case_when(site_code == 'NC_WP' ~ 'Bodega Bay, California',
-  #                                   region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-  #                                      TRUE ~ region_label)) %>%
-  # mutate(site_code = case_when(site_code == 'HB_SB' ~ 'HB_SR',
-  #                              TRUE ~ site_code)) %>%
-  # select(!avg_region_lat) %>%
-  # mutate(decimal_latitude = case_when(site_code == 'HB_SR' ~ 40.77235,
-  #                                     TRUE ~ decimal_latitude)) %>%
-  #   mutate(decimal_longitude = case_when(site_code == 'HB_SR' ~ -124.2124,
-  #                                     TRUE ~ decimal_longitude)) %>%
-  # distinct(site_code, year, .keep_all = TRUE)
-
-site_temps <- site_environment %>%
-  filter(year %in% c(2021, 2022, 2023, 2024)) %>%
-  select(!c(decimal_latitude, decimal_longitude)) 
+site_environment <- read_csv(here(dataedna,
+                                    '20251212_environment_site.csv')) 
 
 # species list
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
@@ -97,7 +76,7 @@ edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
   filter(!(sample_id %in% c('pecoe-0207')))
   
 sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
-                          '20250803_sti_errdap_pathfinder.csv')) %>%
+                          '20251212_sti_errdap_pathfinder.csv')) %>%
   # match edna
   rename(found_taxa = scientific_name) 
 ```

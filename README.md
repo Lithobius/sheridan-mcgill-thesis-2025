@@ -135,6 +135,7 @@ Includes nextseq control analysis
 	rmarkdown
 
 ### CRABS Reference Database Instructions
+Note script filepaths etc need updated to match this repository.
 
 Note if you run this from scratch, it might make slightly different assignments than thesis because the database itself is too large for Github
 To access the database used, created on 2024-10-21: https://zenodo.org/records/17943978 ; doi 10.5281/zenodo.17943977
@@ -150,9 +151,19 @@ The numbering in this section matches the Modules in CRABS.
 Once it is installed, we deviate from the 'recommended' crabs pipeline by extracting the records we need from NCBI independently, including outgroups so that we do get "bacteria" and "human" identifications without having to download all of NCBI.
 
 01a_crabs_ncbi-12sfish-shortonly.py
-	Python script to extract short fish sequences from NCBI. Note this does exclude complete genomes. Accessions for fish that are 'too long' are recorded in a separate file, where later we can check if any of them are missing from the database. These are primarily whole genome exports
+	Python script to extract short fish sequences from NCBI. Note this does exclude complete genomes. Accessions for fish that are 'too long' are recorded in a separate file, where later we can check if any of them are missing from the database. These are primarily whole genome exports and typically fish with whole genomes have mitochondrial records.
 	
+01b_crabs_ncbi-12s-outgroups-update-existinglist.py
+	Python script to improve outgroup coverage. This is only necessary if you are updating an existing database and found missing outgroups eg beaver.	
 	
+01c_crabs_ncbi-12s-outgroups_query.Rmd
+	Rmarkdown that generates the enterez query for outgroups if you are updating an existing database. This lets you filter out what you have already downloaded in a previous database to save time.
+	
+01d_crabs_ncbi-12s-outgroups-shortonly.py
+	Python script to query outgroups. Like the fish query, it excludes accessions that are too long and records them in a list. We don't need a whole bunch of complete human genomes to recognize a 12S MiFish sequence is human.
+	
+01e_crabs_mitofish-and-ncbi-taxonomy.sh
+	A shell script to download mitofish and the NCBI taxonomy file using crabs
 	
 Under construction below ~~~
 

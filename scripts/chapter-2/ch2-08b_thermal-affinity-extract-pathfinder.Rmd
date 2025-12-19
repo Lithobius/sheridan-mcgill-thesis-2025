@@ -7,10 +7,11 @@ output: html_document
 
 placeholder for extracting / calculating cti data
 
-NOTE pasted in from other repository
+NOTE 
 2025-12-16:
 Tested through DAY
 Bringing NIGHT from other repository for now
+Works with old version of NIGHT
 
 We will classify temperature for obis records bases on pathfinder data and calculate STI : species thermal index, that will then go into CTI; community thermal index
 ```{r setup, include=FALSE}
@@ -1169,6 +1170,7 @@ extracted_sst_n <- read_csv(here(erd_data,
 
 ## match extracted to obis
 
+First we will match points, but then expand the buffer to catch more coastal records.
 ```{r match}
 merged_ssts <- extracted_sst %>%
   select(!c(filename, layer)) %>%
@@ -1199,7 +1201,7 @@ obis_matched <- obis_records %>%
   filter(year > 1981) %>%
   filter(year < 2024) %>%
     add_count(scientific_name, decimal_latitude, decimal_longitude, 
-            lubri_date, flags) #%>%
+            lubri_date, flags) %>%
   # filter records that got messed up, check them later
   # likely a point on the edge
   mutate(remove = case_when(
@@ -1208,7 +1210,7 @@ obis_matched <- obis_records %>%
                             n == 2 & box_name_combine == 'mex2' ~ 'x',
                             n == 2 & box_name_combine == 'denmark' ~ 'x',
                             n == 2 & box_name_combine == 'arctic_ak1' ~ 'x')) %>%
-  filter(is.na(remove))#%>%
+  filter(is.na(remove))%>%
   select(!c(remove, n))
 
 ggplot(obis_matched) +
@@ -1241,13 +1243,14 @@ ggplot(missed) +
   geom_point(aes(x = decimal_longitude,
                  y = decimal_latitude))
 
+# missed records shouldn't have a bias
 hist(missed$month)
 hist(obis_matched$month)
 hist(extract_w_files$month)
 
 hist(missed$year)
 
-obis_distinct_spacetime
+#obis_distinct_spacetime
 
 unique(obis_spacetime_bb$date_start)
 ```
@@ -1510,10 +1513,10 @@ for (ncfile in files_to_search_n_buff$filename){
 
 
 # load in and give headers
-extracted_sst_8000 <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinder-day_buff.csv'),
+extracted_sst_8000 <- read_csv(here(erd_data, '20251212_obis_erddap_extract_pathfinder-day_buff.csv'),
                           col_names = c('id', 'sst', 'filename',
-                                         'layer',
-                                        'year', 'month', 'box_name',
+                                          'box_name', 'layer',
+                                        'year', 'month',
                                         'decimal_latitude', 'decimal_longitude',
                                         'geometry')) %>%
   # don't need these anymore
@@ -1526,10 +1529,10 @@ extracted_sst_8000 <- read_csv(here(erd_data, '20250803_obis_erddap_extract_path
 
 # load in and give headers
 extracted_sst_n_8000 <- read_csv(here(erd_data,
-                                 '20250803_obis_erddap_extract_pathfinder-night_buff.csv'),
+                                 '20251212_obis_erddap_extract_pathfinder-night_buff.csv'),
                           col_names = c('id', 'sst_n', 'filename', 
-                                        'layer',
-                                       'year', 'month', 'box_name_n', 
+                                       'box_name_n', 'layer',
+                                       'year', 'month',
                                         'decimal_latitude', 'decimal_longitude',
                                         'geometry')) %>%
   # don't need these anymore
@@ -1574,24 +1577,15 @@ obis_matched <- obis_records %>%
   filter(year > 1981) %>%
   filter(year < 2024) %>%
     add_count(scientific_name, decimal_latitude, decimal_longitude, 
-            lubri_date, flags)# %>%
+            lubri_date, flags) %>%
   # filter records that got messed up, check them later
-  # year only, date only
-  mutate(remove = case_when(str_detect(event_date, '^([0-9]{4})$') ~ 'x',
-                            str_detect(event_date, '^([0-9]{2})$') ~ 'x',
-                            n > 1 & event_date %in% c('2016-04-21T08:30:00Z') ~ 'x',
-                            year == '1998' & event_date == '1996-06-26' ~ 'x',
-                            year == '1985' & event_date == '1986-01-06' ~ 'x',
-                            year == '2001' & event_date == '2002-01-22' ~ 'x',
-                            year == '2003' & event_date == '2002-07-01' ~ 'x',
-                            year == '2006' & event_date == '2007-01-04' ~ 'x',
-                            year == '1996' & event_date == '1997-01-01' ~ 'x',
-                            year == '1994' & event_date == '1995-01-01' ~ 'x',
-                            event_date %in% c('06-01') ~ 'x',
+  # likely a point on the edge
+  mutate(remove = case_when(
                             # check these, multiple boxes for a record
-                            n == 2 & event_date == '1989-05-20T02:00Z' & box_name_combine == 'newfoundland_2' ~ 'x',
                             n == 2 & box_name_combine == 'haiti' ~ 'x',
-                            n == 2 & box_name_combine == 'mex2' ~ 'x')) %>%
+                            n == 2 & box_name_combine == 'mex2' ~ 'x',
+                            n == 2 & box_name_combine == 'denmark' ~ 'x',
+                            n == 2 & box_name_combine == 'arctic_ak1' ~ 'x')) %>%
   filter(is.na(remove))%>%
   select(!c(remove, n))
 
@@ -1865,10 +1859,10 @@ for (ncfile in files_to_search_n_buff2$filename){
 
 
 # load in and give headers
-extracted_sst_16000 <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pathfinder-day_buff2.csv'),
+extracted_sst_16000 <- read_csv(here(erd_data, '20251212_obis_erddap_extract_pathfinder-day_buff2.csv'),
                           col_names = c('id', 'sst', 'filename',
-                                         'layer',
-                                        'year', 'month','box_name',
+                                         'box_name', 'layer',
+                                        'year', 'month',
                                         'decimal_latitude', 'decimal_longitude',
                                         'geometry')) %>%
   # don't need these anymore
@@ -1879,10 +1873,10 @@ extracted_sst_16000 <- read_csv(here(erd_data, '20250803_obis_erddap_extract_pat
 
 # load in and give headers
 extracted_sst_n_16000 <- read_csv(here(erd_data,
-                                 '20250803_obis_erddap_extract_pathfinder-night_buff2.csv'),
+                                 '20251212_obis_erddap_extract_pathfinder-night_buff2.csv'),
                           col_names = c('id', 'sst_n', 'filename', 
-                                        'layer',
-                                       'year', 'month', 'box_name_n',
+                                        'box_name_n','layer',
+                                       'year', 'month', 
                                         'decimal_latitude', 'decimal_longitude',
                                         'geometry')) %>%
   # don't need these anymore
@@ -1923,24 +1917,15 @@ obis_matched <- obis_records %>%
   filter(year > 1981) %>%
   filter(year < 2024) %>%
     add_count(scientific_name, decimal_latitude, decimal_longitude, 
-            lubri_date, flags) #%>%
+            lubri_date, flags) %>%
   # filter records that got messed up, check them later
-  # year only, date only
-  mutate(remove = case_when(str_detect(event_date, '^([0-9]{4})$') ~ 'x',
-                            str_detect(event_date, '^([0-9]{2})$') ~ 'x',
-                            n > 1 & event_date %in% c('2016-04-21T08:30:00Z') ~ 'x',
-                            year == '1998' & event_date == '1996-06-26' ~ 'x',
-                            year == '1985' & event_date == '1986-01-06' ~ 'x',
-                            year == '2001' & event_date == '2002-01-22' ~ 'x',
-                            year == '2003' & event_date == '2002-07-01' ~ 'x',
-                            year == '2006' & event_date == '2007-01-04' ~ 'x',
-                            year == '1996' & event_date == '1997-01-01' ~ 'x',
-                            year == '1994' & event_date == '1995-01-01' ~ 'x',
-                            event_date %in% c('06-01') ~ 'x',
+  # likely a point on the edge
+  mutate(remove = case_when(
                             # check these, multiple boxes for a record
-                            n == 2 & event_date == '1989-05-20T02:00Z' & box_name_combine == 'newfoundland_2' ~ 'x',
                             n == 2 & box_name_combine == 'haiti' ~ 'x',
-                            n == 2 & box_name_combine == 'mex2' ~ 'x')) %>%
+                            n == 2 & box_name_combine == 'mex2' ~ 'x',
+                            n == 2 & box_name_combine == 'denmark' ~ 'x',
+                            n == 2 & box_name_combine == 'arctic_ak1' ~ 'x')) %>%
   filter(is.na(remove))%>%
   select(!c(remove, n))
 
@@ -1954,6 +1939,9 @@ ggplot(obis_matched) +
                  colour = box_name_combine)) +
   theme(legend.position = 'none')
 
+# check which ones, some of these are reasonable
+# some of them may need new bounding boxes in future versions
+# some may just be too close to the coast
 missed <- obis_matched %>%
   filter(is.na(box_name_combine)) %>%
   filter(decimal_longitude < -100 & decimal_longitude > -135) %>%
@@ -2047,7 +2035,7 @@ should_have <- missed_again %>%
   filter(!is.na(box_name)) %>%
   add_count(box_name, name = 'missing_frombox')
 
-write_csv(should_have, here(obisdata, '20250725_should-have.csv'))
+write_csv(should_have, here(obisdata, '20251212_should-have.csv'))
 
 
 # note which coordinates didn't match to a box
@@ -2056,7 +2044,7 @@ bb_tomake <- missed_again %>%
   select(decimal_latitude, decimal_longitude) %>%
   distinct()
 
-write_csv(bb_tomake, here(obisdata, '20250725_bb-to-make.csv'))
+write_csv(bb_tomake, here(obisdata, '20251212_bb-to-make.csv'))
 
 # it looks like a lot of these are still the ones that aren't really saving right
 ggplot(bb_tomake) +
@@ -2078,7 +2066,11 @@ should_have %>%
   distinct() %>%
   arrange(-missing_frombox)
 ```
+To explore missing you can look through the files individually for specific bounding boxes, 
+this is not required of course.
+
 top 3 missing
+
 puget_sound	22598	now 16012		
 bc_vi2hg	16233 now 13136			
 bc_vancouverisland	13962 now 12054	
@@ -2105,12 +2097,8 @@ missing_sp_locations <- obis_matched %>%
   filter(keeps2 == 'x') %>%
   select(!c(keeps, keeps2))
 
-# lets just do a few alaska ones
-#miss_shouldhave <- obis_spacetime_bb %>%
-#  filter(box_name %in% c('puget_sound')) %>%
-#    mutate(year = lubridate::year(date_start),
-#         month = lubridate::month(date_start))
 
+# PICK A BOX HERE
 miss_shouldhave <- should_have %>%
   filter(box_name %in% c('ca2')) %>%
   select(!c(missing_frombox, n, date_start, date_end)) 
@@ -2259,7 +2247,7 @@ for (ncfile in files_to_search_shouldhave$filename){
 
 # load in and give headers
 extracted_sst_shouldhave <- read_csv(here(erd_data,
-                                          '20250515_obis_erddap_extract_pathfinder-day_shouldhave.csv'),
+                                          '20251212_obis_erddap_extract_pathfinder-day_shouldhave.csv'),
                           col_names = c('id', 'sst', 'box_name',
                                         'filename', 'layer',
                                         'year', 'month',

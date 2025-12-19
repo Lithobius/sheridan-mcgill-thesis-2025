@@ -1,0 +1,571 @@
+---
+title: "ch2-06a_get-environment"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+Updating ch2-06_get-environment to go from erddap to summary stats.
+
+This script uses ERDDAP to extract sea surface temperature statistics from the dataset:
+NOAA ERD and CoastWatch West Coast Regional Node
+Multi-scale Ultra-high Resolution (MUR) SST Analysis fv04.1, Global, 0.01°, 2002-present,
+Monthly
+
+https://upwell.pfeg.noaa.gov/erddap/info/jplMURSST41mday/index.html
+
+Then matches the sites to the downloaded raster for each year
+
+It also extracts the upwelling data using `erdBEUTIdaily`.
+ TO ADD
+
+```{r setup}
+# needed to load data format
+library(ncdf4)
+# NOTE raster masks dplyr::select
+library(raster)
+# needed to parse times
+library(CFtime)
+library(sf)
+# for rastrs
+# # for rasters
+library(terra)
+library(tidyterra)
+
+library(rerddap)
+library(tidyverse)
+library(here)
+
+# temperature data
+erd_data <- here('rawdata', 'temp', 'erddap')
+erd_upwell <- here('rawdata', 'upwelling', 'erddap')
+# eDNA
+dataedna <- here('processeddata', 'peco', '2021-24_edna')
+# for plots I don't think this makes plots? delete if not
+#plot_out <- here('output', 'combined', 'ranges')
+
+datefield = '20251212_'
+```
+
+
+# bounding boxes 
+```{r bboxes}
+bounding_boxes <- read_csv(here('rawdata', 'spatial',
+                                '20250417_regionbbox.csv')) %>%
+  janitor::clean_names() %>%
+  filter(!is.na(box_name))
+
+# turn bounding box into coordinates
+bbox_sf <- bounding_boxes %>%
+  # 4 corners of box
+  pivot_longer(cols = c(min_lat, max_lat),
+               values_to = 'latitude') %>%
+  select(!name) %>%
+  pivot_longer(cols = c(min_long, max_long),
+               values_to ='longitude') %>%
+  select(!name) %>%
+  # corners to points
+  st_as_sf(coords = c('longitude', 'latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+  group_by(box_name) %>%
+  # make multipoints
+  summarise(geometry = st_combine(geometry)) %>%
+  ungroup() %>%
+  # box around multipoints
+  st_convex_hull()
+
+```
+
+# ERDDAP
+```{r}
+erd_info <- info('jplMURSST41')
+
+
+# 2019
+for (i in 1:nrow(bounding_boxes)) {
+  print(bounding_boxes[i,])
+  mursst_test <- griddap(erd_info, 
+                       latitude = c(bounding_boxes[i,]$min_lat, bounding_boxes[i,]$max_lat), 
+                       longitude = c(bounding_boxes[i,]$min_long, bounding_boxes[i,]$max_long),
+                       time = c("2019-06-01", "2019-08-31"),
+                       fields = 'analysed_sst',
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forsitesst')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# 2020
+for (i in 1:nrow(bounding_boxes)) {
+  print(bounding_boxes[i,])
+  mursst_test <- griddap(erd_info, 
+                       latitude = c(bounding_boxes[i,]$min_lat, bounding_boxes[i,]$max_lat), 
+                       longitude = c(bounding_boxes[i,]$min_long, bounding_boxes[i,]$max_long),
+                       time = c("2020-06-01", "2020-08-31"),
+                       fields = 'analysed_sst',
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forsitesst')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# 2021
+for (i in 1:nrow(bounding_boxes)) {
+  print(bounding_boxes[i,])
+  mursst_test <- griddap(erd_info, 
+                       latitude = c(bounding_boxes[i,]$min_lat, bounding_boxes[i,]$max_lat), 
+                       longitude = c(bounding_boxes[i,]$min_long, bounding_boxes[i,]$max_long),
+                       time = c("2021-06-01", "2021-08-31"),
+                       fields = 'analysed_sst',
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forsitesst')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+
+# 2022
+for (i in 1:nrow(bounding_boxes)) {
+  print(bounding_boxes[i,])
+  mursst_test <- griddap(erd_info, 
+                       latitude = c(bounding_boxes[i,]$min_lat, bounding_boxes[i,]$max_lat), 
+                       longitude = c(bounding_boxes[i,]$min_long, bounding_boxes[i,]$max_long),
+                       time = c("2022-06-01", "2022-08-31"),
+                       fields = 'analysed_sst',
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forsitesst')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# 2023
+for (i in 1:nrow(bounding_boxes)) {
+  print(bounding_boxes[i,])
+  mursst_test <- griddap(erd_info, 
+                       latitude = c(bounding_boxes[i,]$min_lat, bounding_boxes[i,]$max_lat), 
+                       longitude = c(bounding_boxes[i,]$min_long, bounding_boxes[i,]$max_long),
+                       time = c("2023-06-01", "2023-08-31"),
+                       fields = 'analysed_sst',
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forsitesst')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+
+# 2024
+for (i in 1:nrow(bounding_boxes)) {
+  print(bounding_boxes[i,])
+  mursst_test <- griddap(erd_info, 
+                       latitude = c(bounding_boxes[i,]$min_lat, bounding_boxes[i,]$max_lat), 
+                       longitude = c(bounding_boxes[i,]$min_long, bounding_boxes[i,]$max_long),
+                       time = c("2024-06-01", "2024-08-31"),
+                       fields = 'analysed_sst',
+                       # store the ncf
+                       store = disk(path = here('rawdata', 'temp', 'erddap', 'forsitesst')),
+                       # don't immediately read it into R
+                       read = FALSE
+                       )
+}
+# classify files
+for (i in 1:length(list.files(here('rawdata', 'temp', 'erddap', 'forsitesst')))){
+  ncname <- list.files(here('rawdata', 'temp', 'erddap', 'forsitesst'))[i]
+  sstfile = nc_open(here('rawdata', 'temp', 
+                     'erddap', 'forsitesst',
+                     ncname))
+  # get variables
+  nclong <- ncvar_get(sstfile, 'longitude')
+  nclat <- ncvar_get(sstfile, 'latitude')
+  time <- ncvar_get(sstfile, 'time')
+  tunits <- ncatt_get(sstfile,"time","units")
+  # set CFtime to the units from the ncdf
+  cfs <- CFtime(tunits$value, calendar = 'proleptic_gregorian', time)
+  # extract the date of the map
+  timestamps <- as_timestamp(cfs)
+  
+  # don't pick a corner
+  nc_sf = expand_grid(long = nclong, lat = nclat)[25,] %>%
+    # convert to points
+    st_as_sf(., 
+           coords = c('long', 'lat'),
+           crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0") %>%
+    # add a buffer in case its on a line
+    st_buffer(.,200)
+  
+  nc_bboxmatch <- st_intersection(nc_sf, bbox_sf) %>%
+    st_drop_geometry() %>%
+    mutate(date = timestamps[1]) %>%
+    mutate(filename = ncname)
+  
+   write_csv(nc_bboxmatch, 
+            here(erd_data, paste0(datefield,'site_erddap_key.csv')),
+            append = TRUE)
+  
+  nc_close(sstfile)
+}
+
+
+```
+
+# extract site values
+
+```{r to-extract}
+extract_key <- read_csv(here(erd_data, '20251212_site_erddap_key.csv'),
+                            col_names = c('box_name', 'date', 'filename'))
+
+regions <- read_csv(here(dataedna,
+                         '20251113_peco_region-name-plotting.csv'))[-1] %>%
+    rename(region_label = region_name_label) 
+
+
+# site based lats and longs
+# Note this isn't really different from 'regions' but 
+# the code is set up to take this dataframe so lets just keep it
+by_site <- regions %>%
+  dplyr::select(!c(avg_region_lat, samples, sites)) %>%
+  distinct()
+
+# turn sites into coordinate points
+site_sf <- st_as_sf(by_site, 
+                    coords = c('decimal_longitude', 'decimal_latitude'),
+                    crs = "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0",
+                    remove = FALSE)
+
+# match sites and bboxes
+site_bb <- st_intersection(site_sf, bbox_sf)
+
+# to extract
+extract_w_files <- extract_key %>%
+  mutate(year = lubridate::year(date)) %>%
+  select(!date) %>%
+  # match sites with boxes for extraction
+  left_join(site_bb) 
+
+# vector of filenames
+files_to_search <- extract_w_files %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+```
+
+## extraction loops
+
+```{r extraction loop}
+for (ncfile in files_to_search$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files %>%
+    filter(filename == ncfile) %>%
+    distinct() %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 2 km buffer, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,2000)
+  
+  #n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forsitesst', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  for (i in 1:length(sst_names)){
+    # that layer
+    sstlayer <- sstfile[[i]]
+    # sst with buffer
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      mutate(date = terra::time(sstlayer)) %>%
+      # one column for sst
+      rename(sea_surface_temperature = paste0('analysed_sst_',as.character(i))) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      dplyr::select(!c(ID, geometry, region_code, region_code_label)) %>%
+      # order columns specifically
+      relocate(sea_surface_temperature, filename, date, box_name, year, site_code, 
+               region_name, region_label, region_lat_name,
+               decimal_latitude, decimal_longitude)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+       write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'sitesst_erddap_extract.csv')),
+            append = TRUE)
+  }
+
+  message('done')
+}
+
+
+```
+
+
+# find missing
+
+```{r}
+# load in and give headers
+extracted_sst <- read_csv(here(erd_data, '20251212_sitesst_erddap_extract.csv'),
+                          col_names = c('sst', 'filename', 'date', 'box_name', 
+                                        'year', 'site_code', 'region_name', 
+                                        'region_label', 'region_lat_name',
+                                        'decimal_latitude', 'decimal_longitude')) %>%
+  distinct()
+
+missing_sites <- by_site %>%
+  filter(!(site_code %in% extracted_sst$site_code))
+
+extract_w_files_missed <- extract_w_files %>%
+  filter(site_code %in% missing_sites$site_code)
+
+# vector of filenames
+files_to_search_missed <- extract_w_files_missed %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+```
+
+## extract missing
+Increase the buffer 
+
+```{r}
+for (ncfile in files_to_search_missed$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_missed %>%
+    filter(filename == ncfile) %>%
+    distinct() %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 4 km buffer for missedsites, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,4000)
+  
+  #n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forsitesst', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  for (i in 1:length(sst_names)){
+    # that layer
+    sstlayer <- sstfile[[i]]
+    # sst with buffer
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      mutate(date = terra::time(sstlayer)) %>%
+      # one column for sst
+      rename(sea_surface_temperature = paste0('analysed_sst_',as.character(i))) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+            dplyr::select(!c(ID, geometry, region_code, region_code_label)) %>%
+      # order columns specifically
+      relocate(sea_surface_temperature, filename, date, box_name, year, site_code, 
+               region_name, region_label, region_lat_name,
+               decimal_latitude, decimal_longitude)
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+       write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'sitesst_erddap_extract_missed.csv')),
+            append = TRUE)
+  }
+
+  message('done')
+}
+
+missing_sst <- read_csv(here(erd_data, '20251212_sitesst_erddap_extract_missed.csv'),
+                          col_names = c('sst', 'filename', 'date', 'box_name', 
+                                        'year', 'site_code', 'region_name', 
+                                        'region_label', 'region_lat_name',
+                                        'decimal_latitude', 'decimal_longitude')) 
+
+still_missing_sites <- missing_sites %>%
+  filter(!(site_code %in% missing_sst$site_code))
+
+extract_w_files_still_missed <- extract_w_files %>%
+  filter(site_code %in% still_missing_sites$site_code)
+
+# vector of filenames
+files_to_search_still_missed <- extract_w_files_still_missed %>%
+  select(filename) %>%
+  distinct() %>%
+  arrange(filename)
+
+# still missing try 10k buffer
+
+for (ncfile in files_to_search_still_missed$filename){
+  # lets be up to date on this...
+  message(paste0('searching in ', ncfile))
+  
+  #filter points
+  points_to_extract <- extract_w_files_still_missed %>%
+    filter(filename == ncfile) %>%
+    distinct() %>%
+    #for easy joining
+    rownames_to_column('ID') %>%
+    mutate(ID = as.numeric(ID))
+  
+  coords4extract <- points_to_extract %>%
+    select(decimal_longitude, decimal_latitude) %>%
+    vect(., geom=c("decimal_longitude", "decimal_latitude"), 
+         crs="WGS84", keepgeom=FALSE)
+    
+  # add a 10 km buffer for missed missed sites, the way ID is done in terra extract its easier to just do all of it
+    # I may need to think about a better way to reduce time
+  obisbuff2 <- terra::buffer(coords4extract,10000)
+  
+  #n_layer = unique(points_to_extract$layer_num)
+  
+  # open ncfile as a raster
+  sstfile <- rast(here('rawdata', 'temp', 
+                     'erddap', 'forsitesst', 
+                     ncfile))
+  sst_names <- names(sstfile)
+  for (i in 1:length(sst_names)){
+    # that layer
+    sstlayer <- sstfile[[i]]
+    # sst with buffer
+    point_val = terra::extract(sstlayer, obisbuff2,
+                             fun = function(x) mean(x, na.rm = T))
+
+    point_val_full <- point_val %>%
+      mutate(filename = ncfile) %>%
+      mutate(date = terra::time(sstlayer)) %>%
+      # one column for sst
+      rename(sea_surface_temperature = paste0('analysed_sst_',as.character(i))) %>%
+      left_join(points_to_extract) %>%
+      filter(!(sea_surface_temperature == 'NaN')) %>%
+      filter(!is.na(box_name)) %>%
+      dplyr::select(!c(ID, geometry, region_code, region_code_label)) %>%
+      # order columns specifically
+      relocate(sea_surface_temperature, filename, date, box_name, year, site_code, 
+               region_name, region_label, region_lat_name,
+               decimal_latitude, decimal_longitude)
+    
+        # write directly to csv so it isn't stored in memory
+        # # Note also this is not giving column names so we'll want to read it in and fix that asap
+       write_csv(point_val_full, 
+            here(erd_data, paste0(datefield, 'sitesst_erddap_extract_missed2.csv')),
+            append = TRUE)
+  }
+
+  message('done')
+}
+
+missing_sst2 <- read_csv(here(erd_data, '20251212_sitesst_erddap_extract_missed2.csv'),
+                          col_names = c('sst', 'filename', 'date', 'box_name', 
+                                        'year', 'site_code', 'region_name', 
+                                        'region_label', 'region_lat_name',
+                                        'decimal_latitude', 'decimal_longitude')) 
+
+still_missing_sites2 <- still_missing_sites %>%
+  filter(!(site_code %in% missing_sst2$site_code))
+
+# bind into original object
+extracted_sst <- extracted_sst %>%
+  bind_rows(missing_sst) %>%
+  bind_rows(missing_sst2) %>%
+  distinct()
+```
+
+```{r extractions summary}
+sst_summarystats <- extracted_sst %>%
+  filter(year > 2020) %>%
+  group_by(site_code) %>%
+  summarise(sst_max = max(sst),
+            sst_min = min(sst),
+            sst_median = median(sst),
+            sst_mean = mean(sst),
+            sst_sd = sd(sst),
+            last5_temp95 = quantile(sst, probs = .95),
+            last5_temp90 = quantile(sst, probs = .9),
+            last5_temp75 = quantile(sst, probs = .75),
+            last5_temp25 = quantile(sst, probs = .25),
+            last5_temp10 = quantile(sst, probs = .1),
+            last5_temp05 = quantile(sst, probs = .05)
+            ) %>%
+  left_join(regions) %>%
+  dplyr::select(!c(samples, sites, avg_region_lat))
+
+write_csv(sst_summarystats, here(erd_data, paste0(datefield, 'sitesst_last5_summarystats.csv')))
+
+sst_by_regionyear <- extracted_sst %>%
+  select(!c(filename, date, box_name)) %>%
+  distinct() %>%
+  group_by(region_name, year) %>%
+  mutate(sst_max = max(sst),
+         sst_min = min(sst),
+            sst_median = median(sst),
+            sst_mean = mean(sst),
+            sst_sd = sd(sst),
+            region_temp95 = quantile(sst, probs = .95),
+            region_temp90 = quantile(sst, probs = .9),
+            region_temp75 = quantile(sst, probs = .75),
+            region_temp25 = quantile(sst, probs = .25),
+            region_temp10 = quantile(sst, probs = .1),
+            region_temp05 = quantile(sst, probs = .05)) %>%
+  ungroup() %>%
+  group_by(region_name) %>%
+  mutate(avg_region_lat = mean(decimal_latitude)) %>%
+  ungroup() %>%
+  select(!c(site_code, sst, decimal_longitude, decimal_latitude)) %>%
+  distinct() %>%
+  arrange(region_lat_name)
+
+write_csv(sst_by_regionyear, here(erd_data, paste0(datefield, 'mean-summer-sst_by-region.csv')))
+
+sst_by_siteyear <- extracted_sst %>%
+  select(!c(filename, date, box_name)) %>%
+  distinct() %>%
+  group_by(site_code, year) %>%
+  summarise(sst_max = max(sst),
+            sst_min = min(sst),
+            sst_median = median(sst),
+            sst_mean = mean(sst),
+            sst_sd = sd(sst),
+            site_temp95 = quantile(sst, probs = .95),
+            site_temp90 = quantile(sst, probs = .9),
+            site_temp75 = quantile(sst, probs = .75),
+            site_temp25 = quantile(sst, probs = .25),
+            site_temp10 = quantile(sst, probs = .1),
+            site_temp05 = quantile(sst, probs = .05)
+            ) %>%
+  ungroup() %>%
+  distinct() %>% 
+  left_join(regions) %>%
+  select(!c(region_code, region_code_label, samples, sites)) %>%
+  arrange(region_lat_name)
+
+write_csv(sst_by_siteyear, here(erd_data, paste0(datefield, 'summer-sst-summary-stats_by-site.csv')))
+```
