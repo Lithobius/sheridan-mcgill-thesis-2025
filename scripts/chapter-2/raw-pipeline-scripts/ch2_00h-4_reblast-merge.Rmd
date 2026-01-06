@@ -1,0 +1,847 @@
+---
+title: "ch2_00e-4_reblast-merge"
+output: html_document
+date: "2023-10-26"
+---
+
+This script takes the output of reblasting, assesses the results, and merges them back into the main matrix
+
+the october 22 2024 run had no new fish, skipping this step
+
+```{r}
+library(tidyverse)
+library(taxize)
+library(here)
+
+# here filepaths
+pecofastq <- here('rawdata', 'peco', 'fastq', 'allyears') 
+datefield <- '20241022_'
+datefield_reblast <- '20241022_'
+runfield <- 'peco-combined_12s_'
+
+# Destination folders
+processededna <- here('processeddata', 'peco', '2021_2022_2023_edna')
+
+# load-in keys
+taxa_key <- read_csv(here('processeddata', 'sp_lists', 'keys',
+                     '20241015_12s_crabs_taxonomy-key.csv')) %>%
+  #select(!hybrid) %>%
+  mutate(found_taxa = case_when(taxonomy_search %in% c('Brachymystax tsinlingensis',
+                                                       'Macquaria wujalwujalensis') ~ taxonomy_search,
+                                found_taxa == 'Oxyjulis californica' ~ 'Halichoeres californica',
+                                TRUE ~ found_taxa)) 
+
+
+common_name <- read_csv(here('processeddata', 'sp_lists', 'keys',
+                             '20241001_fish_common-names.csv'))[-1] %>%
+  rename(common_name_key = common_name)
+```
+
+
+# load in
+
+```{r cleanup-motus}
+# top 10 list
+motu_50blast <- read_delim(here(pecofastq, '20241022_reblast_out-parsed.tsv'),
+                           delim = '\t') %>%
+  janitor::clean_names() %>%
+  rename(motu = seed_asv_reads)
+
+# motu numbers to join with the blast results
+motu_key <- read_csv(here(pecofastq, '20241001_peco-combined_12s_lulu_motu2asv.csv')) %>%
+  rename(motu = motu_lulu)
+
+
+# Give blast results MOTU#s
+motu_50blast2 <- motu_50blast %>%
+  left_join(motu_key) %>%
+  relocate(motu)
+
+length(unique(motu_50blast2$motu))
+```
+
+# Assign
+
+```{r update taxa}
+# strip and replace higher taxonomy
+# remove out of region and hybrids
+motu50blast_updatetaxa <- motu_50blast2 %>%
+      # filter out odd sequences
+  filter(!(accession %in% c( # hybrids
+                            'NC_082285', 'OQ656297', 'OQ656298', 
+                            'OQ656299','LC145951', 'NC_027522',
+                            'NC_034784',
+                            # genus level IDs
+                            'MT025508', 'MW181768', 'LC578888',
+                            'MW181767', 'MW181766', 'MZ597980',
+                            'LC277738', 'LC741215', 'LC772864',
+                            'LC772862', 'LC772863', 'LC739781',
+                            'LC739782', 'KF668288',
+                            # family level IDs
+                            'NC_026537', 'OQ846303',
+                            'OQ789493',
+                            # 'uncultured organism
+                            'FJ349779'))) %>%
+    # remove columns that will be duplicated
+  left_join(taxa_key) %>%
+  # update found taxa to include info for outgroups
+  # # these will be really rough compared to the rest of the data
+  mutate(found_taxa = case_when(description == 'No Results' ~ 'No BLAST hit',
+                                # Unknowns
+                                str_detect(description, 'Uncultured eukaryote|Uncultured phototrophic eukaryote|Uncultured eukaryotic|Uncultured marine eukaryote|Eukaryote|picoeukaryote') ~ 'Unknown Eukaryote',
+                                str_detect(description, 'soil sample|Uncultured organism|Uncultured microorganism|Uncultured marine microorganism|Endosymbiont of|endosymbiont 16S|environmental sample clone|marine organism clone|Environmental clone|enrichment clone|synthetic construct') ~ 'Unknown',
+                                ## BACTERIA
+                                str_detect(description, 'bacterium|Bacterium|Aquimarina|Pseudomonas|Nitrincola|uncultured Bacterium|uncultured bacterium|Burkholderia|Crocinitomix|Psychromonas|Bradyrhizobium|Pseudoruegeria|Polaribacter|Nostoc|Uncultured prokaryote|Ralstonia|Staphylococcus|Streptococcus|Enterobacter|Klebsiella|bacterioplankton|Wenyingzhuangia|Bacteroidetes|Edaphocola|Flavobacteriaceae|Rhodoplanes|Mesorhizobium|Rhodobaculum|Amaricoccus|Prochlorococcus|Acidovorax|Variovorax|Aeromonas|Pseudoalteromonas|Pseudospirillum|Aquiluna|barophile|Alcaligenes|Cycloclasticus|Leucothrix|Synechococcus|planctomycete|Arcobacter|Poseidonibacter|Pyramimonas|Verrucomicrobium|Salinispira|Spirochaeta|Alkalispirochaeta|Sulfurimonas|Planktotalea|Thalassobius|Maritimibacter|Celeribacter|Tepidibacter|Saccharophagus|Gilvimarinus|Tolumonas|Vibrio|Umboniibacter|Sulfitobacter|Pelagibacter|Escherichia|Reinekea|Alkalimarinus|Spongiibacter|Thalassiosira|Richelia|Calothrix|Heteroscytonema|Betaproteobacteria|Pelomonas|Paucibacter|Kinneretia|Fluviicola|Accumulibacter|Thioglobus|Pseudothioglobus|Arthrobacter|Tychonema|Ascidiaceihabitans|Rubripirellula|Roseobacter|Edwardsiella|Dongia|Magnetococcus|Desulfovibrio|Psychrobium|Wolbachia|Nitrotoga|Pseudoduganella|Chitinolyticbacter|Paracoccus|Hirschia|Salinisphaera|Paraferrimonas|Shewanella|Amylibacter|Phaeobacter|Serratia|Alteromonas|Fusibacter|Cyanobium|Paceibacter|Lutibacter|Comamonas|Taibaiella|Thiohalocapsa|Parashewanella|Moritella|Octadecabacter|Rubritalea|Verrucomicrobia|Rhodobacter|Oceaniferula|Propionigenium|Sinorhizobium|Ilyobacter|Acidobacteria|Haliea|Aliiroseovarius|Winogradskyella|Lentibacter|Litoreibacter|Bartonella|Amniobacter|Planktomarina|Cupriavidus|Bacterioplanes|Yersinia|Rahnella|actinomycete|Robiginitalea|Owenweeksia|Camptylonemopsis|Anabaena|Roseibacillus|Rhizobacter|Achromobacter|verrucomicrobium|Paroceanicella|Gemmobacter|Oceanicella|Yoonia|Loktanella|Pelotomaculum|Perellula|Massilia|Stenotrophomonas|Cytophaga|Nereida|Acinetobacter|Delftia|Parahaliea|Pirellula|Rhodovulvum|Roseateles|Paraluminiphilus|Nautella|Thalassovita|Erwinia|Shigella|Leclercia|Uncultured bacteria|Planctomycete|Aminobacter|Mycoplasma|Aliikangiella|Kangiella|Loriellopsis|Thalassolituus|Bythopirellula|Saccharibacteria|Ochrovirga|Ulvibacter|Megasphaera|Bdellovibrio|Myroides|Blastopirellula|Diaphorobacter|Jindonia|Enhydrobacter|Polaromonas|Afpia|Hydrogenophaga|Altererythrobacter|Litoribacillus|Tetracoccus|Tenacibaculum|Clostridium|Algisphaera|Ilumatobacter|Rhodovulum|Leisingera|Afipia|Phormidium|Paludibacter|Pelagimonas|Paenimyroides') ~ "Bacteria",
+                                str_detect(description, 'archaeon|euryarchaeote|Nitrosopumilus') ~ 'Archaea', 
+                                ## Eukaryotes
+                                str_detect(description, 'Ziziphus|Prosopanche|Chenopodium|Polygonum') ~ 'Terrestrial plant',
+                                str_detect(description, 'uncultured fungus|Cylindrotheca|Cyphellophora|Nothophytophthora|Peronospora|Pseudoperonospora') ~ 'Fungus',
+                                str_detect(description, 'Phocoena') ~ 'Seal',
+                                str_detect(description, 'Skeletonema|Attheya|Eucampia|Nitzschia|nitzschia|Actinocyclus|Tryblionella|Odontella|Chaetoceros|Minutocellus|Fistulifera|Gomphonema|Halamphora|Psammoneis|Navicula|Guinardia|Stephanopyxis|Hemiaulus|Phaeodactylum|Didymosphenia|Haslea|Fragilariopsis|Lithodesmioides|Lithodesmium') ~ 'Diatom',
+                                str_detect(description, 'Phalacroma') ~ 'Dinoflagellate',
+                                str_detect(description, 'Emiliania|Gephyrocapsa') ~ 'Coccolithophore',
+                                str_detect(description, 'Eutreptiella|euglenozoan|oomycete|Pythium|Phytopythium|Ephelota|alveolate|Acineta|Phytophthora') ~ 'Other protist',
+                                str_detect(description, 'chrysophyte|Chlorophyta|Cymbomonas|haptophyte|Pyramimonadales|marine algae|Porphyridium|Codium|Cylindorotheca|Scherffelia|Tetraselmis|Ostreobium|Bathycoccus|Ochromonas|prasinophyte|Microspora|pelagophyte|Phaeocystis|Klebsormidium|Helicotheca') ~ 'Algae',
+                                
+                                #Fish
+                               str_detect(description, 'Abantennarius coccineus') ~ 'Abantennarius coccineus',
+                                str_detect(description, 'Anisotremus davidsonii') ~ 'Anisotremus davidsonii',
+                               str_detect(description, 'Anisarchus medius') ~ 'Anisarchus medius',
+                                str_detect(description, 'Artedius harringtoni') ~ 'Artedius harringtoni',
+                               str_detect(description, 'Artedius lateralis') ~ 'Artedius lateralis',
+                               str_detect(description, 'Artedius corallinus') ~ 'Artedius corallinus',
+                               str_detect(description, 'Ammodytes personatus') ~ 'Ammodytes personatus',
+                               str_detect(description, 'Ammodytes hexapterus') ~ 'Ammodytes hexapterus',
+                               str_detect(description, 'Brachygenys californiensis') ~ 'Brachygenys californiensis',
+                               str_detect(description, 'Cheilotrema saturnum') ~ 'Cheilotrema saturnum',
+                               str_detect(description, 'Clevelandia ios') ~ 'Clevelandia ios',
+                               str_detect(description, 'Clinocottus acuticeps') ~ 'Clinocottus acuticeps',
+                               str_detect(description, 'Clinocottus embryum') ~ 'Clinocottus embryum',
+                               str_detect(description, 'Clinocottus globiceps') ~ 'Clinocottus globiceps',
+                               str_detect(description, 'Clinocottus recalvus') ~ 'Clinocottus recalvus',
+                               str_detect(description, 'Cosmocampus arctus') ~ 'Cosmocampus arctus',
+                               str_detect(description, 'Ctenogobius sagittula') ~ 'Ctenogobius sagittula',
+                               str_detect(description, 'Cryptacanthodes aleutensis') ~ 'Cryptacanthodes aleutensis',
+                               str_detect(description, 'Cryptacanthodes giganteus') ~ 'Cryptacanthodes giganteus',
+                               str_detect(description, 'Cynoscion parvipinnis') ~ 'Cynoscion parvipinnis',
+                               str_detect(description, 'Eumesogrammus praecisus') ~ 'Eumesogrammus praecisus',
+                               str_detect(description, 'Gibbonsia elegans') ~ 'Gibbonsia elegans',
+                               str_detect(description, 'Gibbonsia metzi') ~ 'Gibbonsia metzi',
+                               str_detect(description, 'Gibbonsia montereyensis') ~ 'Gibbonsia montereyensis',
+                               str_detect(description, 'Gillichthys mirabilis') ~ 'Gillichthys mirabilis',
+                               str_detect(description, 'Gobiesox rhessodon') ~ 'Gobiesox rhessodon',
+                               str_detect(description, 'Gobiesox maeandricus') ~ 'Gobiesox maeandricus',
+                               str_detect(description, 'Genyonemus lineatus') ~ 'Genyonemus lineatus',
+                               str_detect(description, 'Hexagrammos agrammus') ~ 'Hexagrammos agrammus',
+                               str_detect(description, 'Hexagrammos lagocephalus ') ~ 'Hexagrammos lagocephalus',
+                               str_detect(description, 'Hexagrammos stelleri') ~ 'Hexagrammos stelleri',
+                               str_detect(description, 'Heterostichus rostratus') ~ 'Heterostichus rostratus',
+                               str_detect(description, 'Hypsoblennius gentilis') ~ 'Hypsoblennius gentilis',
+                               str_detect(description, 'Hypsoblennius gilberti') ~ 'Hypsoblennius gilberti',
+                               str_detect(description, 'Hypsoblennius jenkinsi') ~ 'Hypsoblennius jenkinsi',
+                               str_detect(description, 'Icelinus filamentosus') ~ 'Icelinus filamentosus',
+                               str_detect(description, 'Icelinus tenuis') ~ 'Icelinus tenuis',
+                               str_detect(description, 'Inu sp') ~ 'Luciogobius',
+                               str_detect(description, 'Kasatkia seigeli') ~ 'Kasatkia seigeli',
+                               str_detect(description, 'Liparis fucensis') ~ 'Liparis fucensis',
+                               str_detect(description, 'Leiocottus hirundo') ~ 'Leiocottus hirundo',
+                               str_detect(description, 'Merluccius productus') ~ 'Merluccius productus',
+                               str_detect(description, 'Morone saxatilis') ~ 'Morone saxatilis',
+                               str_detect(description, 'Microlepidotus inornatus') ~ 'Microlepidotus inornatus',
+                               str_detect(description, 'Micrometrus aurora') ~ 'Micrometrus aurora',
+                               str_detect(description, 'Micrometrus minimus') ~ 'Micrometrus minimus',
+                               str_detect(description, 'Oligocottus maculosus') ~ 'Oligocottus maculosus',
+                               str_detect(description, 'Oligocottus snyderi') ~ 'Oligocottus snyderi',
+                               str_detect(description, 'Orthonopias triacis') ~ 'Orthonopias triacis',
+                               str_detect(description, 'Paralabrax nebulifer') ~ 'Paralabrax nebulifer',
+                               str_detect(description, 'Quietula y-cauda') ~ 'Quietula y-cauda',
+                               str_detect(description, 'Paralabrax clathratus') ~ 'Paralabrax clathratus',
+                               str_detect(description, 'Paralabrax maculatofasciatus') ~ 'Paralabrax maculofasciatus',
+                               str_detect(description, 'Peprilus simillimus') ~ 'Peprilus simillimus',
+                               str_detect(description, 'Pristigenys serrula') ~ 'Pristigenys serrula',
+                               str_detect(description, 'Rhinogobiops nicholsii') ~ 'Rhinogobiops nicholsii',
+                               str_detect(description, 'Roncador stearnsii') ~ 'Roncador stearnsii',
+                                str_detect(description, 'Sebastes babcocki') ~ 'Sebastes babcocki',
+                                str_detect(description, 'Sebastes constellatus') ~ 'Sebastes constellatus',
+                                str_detect(description, 'Sebastes chlorostictus') ~ 'Sebastes chlorostictus',
+                                str_detect(description, 'Sebastes eos') ~ 'Sebastes eos',
+                                str_detect(description, 'Sebastes ensifer') ~ 'Sebastes ensifer',
+                                str_detect(description, 'Sebastes flavidus') ~ 'Sebastes flavidus',
+                                str_detect(description, 'Sebastes helvomaculatus') ~ 'Sebastes helvomaculatus',
+                                str_detect(description, 'Sebastes lentiginosus') ~ 'Sebastes lentiginosus',
+                                str_detect(description, 'Sebastes melanops') ~ 'Sebastes melanops',
+                                str_detect(description, 'Sebastes moseri') ~ 'Sebastes moseri',
+                                str_detect(description, 'Sebastes mystinus') ~ 'Sebastes mystinus',
+                                str_detect(description, 'Sebastes nigrocinctus') ~ 'Sebastes nigrocinctus',
+                                str_detect(description, 'Sebastes rosaceus') ~ 'Sebastes rosaceus',
+                                str_detect(description, 'Sebastes rosenblatti') ~ 'Sebastes rosenblatti',
+                                str_detect(description, 'Sebastes serranoides') ~ 'Sebastes serranoides',
+                                str_detect(description, 'Sebastes simulator') ~ 'Sebastes simulator',
+                                str_detect(description, 'Sebastes umbrosus') ~ 'Sebastes umbrosus',
+                               str_detect(description, 'Seriphus politus') ~ 'Seriphus politus',
+                               str_detect(description, 'Strongylura exilis') ~ 'Strongylura exilis',
+                               str_detect(description, 'Synchirus gilli') ~ 'Synchirus gilli',
+                               str_detect(description, 'Umbrina roncador') ~ 'Umbrina roncador',
+                                # specific outgroups
+                                str_detect(description, 'Gallus gallus') ~ 'Gallus gallus',
+                               str_detect(description, 'Corvus') ~ 'Crow',
+                                str_detect(description, 'Orcinus orca') ~ 'Orcinus orca',
+                                str_detect(description, 'Delphinus delphis') ~ 'Delphinus delphis',
+                                str_detect(description, 'Eubalaena japonica') ~ 'Eubalaena japonica',
+                                str_detect(description, 'Stenella coeruleoalba') ~ 'Stenella coeruleoalba',
+                                str_detect(description, 'Balaenoptera acutorostrata') ~ 'Balaenoptera acutorostrata',
+                                str_detect(description, 'Odocoileus virginianus|O\\.virginianus') ~ 'Odocoileus virginianus',
+                                str_detect(description, 'Odocoileus hemionus') ~ 'Odocoileus hemionus',
+                                str_detect(description, 'Rangifer tarandus') ~ 'Rangifer tarandus',
+                                str_detect(description, 'Enhydra lutris|E\\.lutris') ~ 'Enhydra lutris',
+                                str_detect(description, 'Lutra lutra') ~ 'Lutra lutra',
+                                str_detect(description, 'Martes') ~ 'Martes',
+                                str_detect(description, 'Phalacrocorax') ~ 'Phalacrocorax',
+                                str_detect(description, 'Nannopterum auritus') ~ 'Nannopterum auritus',
+                                str_detect(description, 'PREDICTED: Ostrea') ~ 'Unknown metazoa',
+                                str_detect(description, 'Epeorus|Planococcus citri|Stenacron|Cryptocephalus|Empis') ~ 'Insect',
+                                str_detect(description, 'Patiria miniata') ~ 'Patiria miniata',
+                                str_detect(description, 'Homo sapiens') ~ 'Homo sapiens',
+                                str_detect(description, 'Argis') ~ 'Argis',
+                                str_detect(description, 'Montipora') ~ 'Coral',
+                                str_detect(description, 'Callyspongia|Petrosia') ~ 'Sponge',
+                                # out of region
+                                # Fish
+                                str_detect(description, 'Merluccius angustimanus|Merluccius merluccius|Sebastes mentella|Sebastes hubbsi|Sebastes inermis|Sebastes cheni|Sebastes pachycephalus|Sebastes joyneri|Sebastes baramenuke|Sebastes viviparus|Sebastes norvegicus|Sebastes mentella|Sebastes koreanus|Sebastes exsul|Sebastes capensis|Sebastes oculatus|Sebastes notius|Miichthys miiuy|Scartella cristata|Chirolophis wui|Chirolophis saitone|Antennatus|Clinitrachus|Gymnogobius|Merluccius merluccius|Merluccius polli|Merluccius albidus|Merluccius australis|Merluccius bilinearis|Merluccius capensis|Merluccius gayi|Merluccius hubbsi|Merluccius senegalensis|Schultzea beta|Ammodytes japonicus|Ammodytes marinus|Ammodytes tobianus|Ammodytes dubius|Ammodytes americanus|Pomadasys stridens|Pomadasys argenteus|Pomadasys kaakan|Morone americana|Morone chrysops|Peprilus paru|Peprilus burti|Peprilus triacanthus|Paralabrax auroguttatus|Hypsoblennius ionthas|Ctenogobius boleosoma|Oxyurichthys cornutus|Rhinogobius telma|Aplodinotus grunniens|Strongylura marina|Parablennius thysanius|Parablennius yatabei|Pogonias cromis|Anisotremus scapularis|Orthopristis chrysoptera|Haemulon plumierii|Hyperoplus lanceolatus|Stichaeopsis nana||Pholidapus dybowskii|Ulvaria subbifurcata|Chirolophis japonicus|Morone mississippiensis|Leiostomus xanthurus|Opisthocentrus zonope|Kasatkia memorabilis|Opisthocentrus ocellatus|Opisthocentrus tenuis|Dicentrarchus labrax|Cynoscion nothus|Cynoscion arenarius|Cynoscion nebulosus|Cynoscion regalis|Haemulon flaviguttatum|Haemulon sciurus|Stellifer lanceolatus|Alcichthys elongatus|Hyperoplus immaculatus|Bero elegans|Askoldia variegata|Xenolumpenus longipterus') ~ 'out of region',
+                                # Cetaceans
+                                str_detect(description, 'Eubalaena glacialis|Eubalaena australis|Globicephala melas|Hyperoodon ampullatus|Lagenorhynchus albirostris') ~ 'out of region',
+                                # Other vertebrates
+                                str_detect(description, 'Mazama|Pudu|Nannopterum brasilianus|Hydrictis|Pongo|Meles') ~ 'out of region',
+                                # Invertebrates
+                                str_detect(description, 'Acleris sparsana|Patiria pectinifera|Patiria chilensis') ~ 'out of region',
+                                TRUE ~ found_taxa)) %>%
+  # assign rank
+  mutate(rank = case_when(found_taxa %in% c('Artedius lateralis', 'Artedius corallinus',
+                                            'Artedius harringtoni', 'Abantennarius coccineus',
+                                            'Anisotremus davidsonii', 'Ammodytes personatus',
+                                            'Ammodytes hexapterus', 'Anisarchus medius',
+                                            'Brachygenys californiensis', 'Cheilotrema saturnum',
+                                            'Cryptacanthodes aleutensis', 'Cryptacanthodes giganteus',
+                                            'Clevelandia ios', 'Ctenogobius sagittula',
+                                            'Cosmocampus arctus', 'Clinocottus acuticeps',
+                                            'Clinocottus embryum','Clinocottus globiceps',
+                                            'Clinocottus recalvus', 'Cynoscion parvipinnis',
+                                            'Eumesogrammus praecisus', 
+                                            'Genyonemus lineatus', 'Gibbonsia elegans',
+                                            'Gibbonsia metzi','Gibbonsia montereyensis',
+                                            'Gobiesox rhessodon', 'Gobiesox maeandricus',
+                                            'Gillichthys mirabilis', 'Heterostichus rostratus', 
+                                            'Hypsoblennius gentilis', 'Hypsoblennius jenkinsi', 
+                                            'Hypsoblennius gilberti', 'Hexagrammos agrammus', 
+                                            'Hexagrammos lagocephalus', 'Hexagrammos stelleri', 
+                                            'Icelinus filamentosus', 'Icelinus tenuis', 
+                                            'Kasatkia seigeli', 'Leiocottus hirundo',
+                                            'Merluccius productus', 'Microlepidotus inornatus',
+                                            'Micrometrus aurora', 'Micrometrus minimus',
+                                            'Morone saxatilis',
+                                            'Oligocottus maculosus', 'Oligocottus snyderi',
+                                            'Paralabrax maculofasciatus', 'Paralabrax nebulifer',
+                                            'Paralabrax clathratus',
+                                            'Peprilus simillimus', 'Pristigenys serrula',
+                                            'Quietula y-cauda', 'Rhinogobiops nicholsii',
+                                            'Roncador stearnsii', 'Seriphus politus',
+                                            'Sebastes babcocki',
+                                            'Sebastes constellatus', 'Sebastes rosenblatti',
+                                            'Sebastes chlorostictus','Sebastes eos',
+                                            'Sebastes ensifer', 'Sebastes lentiginosus',
+                                            'Sebastes flavidus','Sebastes helvomaculatus',
+                                            'Sebastes melanops', 'Sebastes moseri','Sebastes mystinus',
+                                            'Sebastes nigrocinctus','Sebastes rosaceus',
+                                            'Sebastes rosenblatti','Sebastes serranoides', 
+                                            'Sebastes simulator', 'Sebastes umbrosus',
+                                            'Strongylura exilis', 'Synchirus gilli',
+                                            'Umbrina roncador') ~ 'species', 
+                          found_taxa %in% c('Luciogobius') ~ 'genus',
+                          found_taxa %in% c('Unknown', 'Bacteria', 'Fungus', 'Archaea', 'Unknown Eukaryote', 'Unknown metazoa', 'Diatom', 'Other protist', 'Algae', 'Coral', 'Insect', 'Coccolithophore', 'Rhizochromulina','Argis', 'Phalacrocorax', 'Martes', 'Seal', 'Gallus gallus', 'Eubalaena japonica', 'Crow',
+                                            'Balaenoptera acutorostrata', 'Odocoileus virginianus',
+                                            'Odocoileus hemionus', 'Nannopterum auritus', 
+                                            'Lutra lutra', 'Rangifer tarandus', 'Delphinus delphis',
+                                            'Homo sapiens', 'Patiria miniata', 'Orcinus orca', 'Stenella coeruleoalba',
+                                            'Enhydra lutris',
+                                            'Dinoflagellate', 'Terrestrial plant',
+                                            'Haptista', 'Sponge') ~ 'offtarget',
+                          TRUE ~ rank)) %>%
+  # remove out of region species
+  filter(!(found_taxa %in% c('out of region',
+                             # possible options from key
+                             'Amphisticus argenteus', 'Anisotremus scapularis', 
+                            'Alcichthys elongatus', 'Alburnus alburnus', 
+                            'Anisotremus surinamensis', 'Aspiolucius esocinus',
+                            'Acanthogobius stigmothonus', "Anisotremus virginicus",
+                            'Acanthogobius hasta', 'Alosa alosa', 'Alosa fallax',
+                            'Ammodytes japonicus', 'Ammodytes marinus', 'Ammodytes tobianus',
+                            'Ammodytes dubius', 'Ammodytes americanus', 
+                            'Argyrosomus amoyensis', 'Argyrosomus japonicus',
+                            'Anchoa mitchilli', 'Atheresthes evermanni', 
+                            'Aplodinotus grunniens', 'Askoldia variegata',
+                            #'Barbatula barbatula', 'Barbatula hispanica', 
+                            'Brachygenys chrysargyreum', 'Ballerus sapa',
+                            'Bairdiella chrysoura', 'Bero elegans',
+                            'Bahaba taipingensis', 'Boesemania microlepis',
+                            'Batrachocottus talievi', 'Batrachocottus nikolskii', 
+                            'Batrachocottus multiradiatus', 'Brachyopsis segaliensis',
+                            'Chondrostoma nasus', "Clariger papillosus",
+                            'Chirolophis saitone', 'Chirolophis ascanii', 
+                            'Chirolophis wui', 'Chirolophis japonicus',
+                            'Cleisthenes pinetorum', 'Cleisthenes herzensteini',
+                            'Collichthys lucidus',
+                            'Cottus gobio', 'Comephorus dybowskii', 'Cottus bairdii',
+                            'Cottus pollux', 'Cottus szanaga', 'Cottus poecilopus', 
+                            'Cottus czerskii', 'Cottus perifretum', 'Cottus hangiongensis',
+                            'Clupea harengus', 'Conodon nobilis', 
+                            'Cottocomephorus grewingki', 'Cottocomephorus grewingkii',
+                            'Cottocomephorus inermis', 'Comephorus baikalensis',
+                            'Cosmocampus elucens', 'Cryptacanthodes bergi',
+                            'Ctenogobius boleosoma', 'Ctenogobius saepepallens',
+                            'Ctenogobius shufeldti',
+                            "Cryptacanthodes maculatus", 'Cynoscion nothus',
+                            'Cynoscion arenarius', 'Cynoscion nebulosus',
+                            'Cynoscion regalis',
+                            'Ditrema jordani', 'Dicentrarchus labrax',
+                            'Dicentrarchus punctatus',
+                            'Ernogrammus hexagrammus', 'Eques lanceolatus',
+                            'Equetus punctatus', 'Evorthodus lyricus',
+                            'Gadus morhua','Gadus finnmarchicus',
+                            'Gasterosteus nipponicus', 'Gasterosteus wheatlandi',
+                            'Glyptocephalus stelleri', 'Gymnogobius macrognathos',
+                            'Glyptocephalus cynoglossus', 'Gasterosteus nipponicus',
+                            'Hyperoplus immaculatus', 'Hippoglossus hippoglossus',
+                            'Hexagrammos agrammus', 'Hexagrammos otakii', 
+                            'Haemulon carbonarium', 'Haemulon flavolineatum',
+                            'Haemulon macrostomum', 'Haemulon plumierii',
+                            'Hypomesus japonicus',
+                            'Hyperoplus lanceolatus', 'Hozukius emblemarius', 
+                            'Haemulon aurolineatum', 'Hypsoblennius ionthas',
+                            'Hypleurochilus geminatus', 'Hypleurochilus springeri',
+                            'Kasatkia memorabilis', 'Leuciscus baicalensis',
+                            'Leuciscus merzbacheri', 'Leiostomus xanthurus',
+                            'Liparis fabricii',
+                            'Liparis miostomus', 'Liparis tessellatus', 
+                            'Liparis tanakae', 'Liparis inquilinus',
+                            'Leuciscus leuciscus', 'Limanda limanda', 'Limanda sakhalinensis',
+                            'Lepidopsetta mochigarei', 'Liopsetta pinnifasciata', 
+                            'Leuciscus idus', 'Leuciscus oxyrrhis', 'Lutjanus griseus',
+                            'Leuciscus burdigalensis', 'Lutjanus argentimaculatus',
+                            'Myzopsetta ferruginea', 'Microstomus achne',
+                            'Myoxocephalus scorpius', 'Malacocottus gibber',
+                            'Melanogrammus aeglefinus', 'Menticirrhus littoralis',
+                            'Miichthys miiuy', 'Netuma thalassina',
+                            # there is a gbif record in alaskan panhandle
+                            #'Myoxocephalus jaok',
+                            'Oncorhynchus kawamurae', 'Opisthocentrus tenuis',
+                            'Oncorhynchus gilae', 'Opisthocentrus ocellatus',
+                            'Oreochromis niloticus', 'Occella iburia',
+                            'Orthopristis chrysoptera',
+                            'Parahucho perryi', 'Procottus major', 
+                            'Pareques umbrosus', 'Parablennius thysanius',
+                            'Parablennius yatabei',
+                            'Paralichthys olivaceus', 'Paralichthys adspersus',
+                            'Platichthys flesus', 'Pholis gunnellus', 
+                            'Pholis nebulosa', 'Pholis crassispina', 
+                            'Pholis picta', 'Peprilus medius', 
+                            'Pogonias cromis', 'Pungitius laevis',
+                            'Pomadasys stridens', 'Pomadasys argenteus',
+                            'Pomadasys kaakan', 'Peprilus triacanthus',
+                            'Peprilus burti', 'Peprilus paru',
+                            'Psenopsis anomala',
+                            'Rutilus rutilus', 'Scardinius erythrophthalmus',
+                            'Salvelinus elgyticus', 'Salvethymus svetovidovi',
+                            'Salvelinus boganidae', 'Salvelinus kuznetzovi',
+                            'Salvelinus taranetzi', 'Salvlinus albus',
+                            'Salvelinus schmidti', 'Salvelinus levanidovi',
+                            'Salvelinus kronocius', 'Salvelinus drjagini',
+                            'Salvelinus drjagini', 'Salvelinus albus',
+                            'Salvelinus leucomaenis', 'Scomber scombrus',
+                            'Scartella emarginata', 'Scartella cristata',
+                            'Serranus scriba', 'Serranus cabrilla',
+                            'Sebastes mentella', 'Sebastes hubbsi',
+                            'Sebastes inermis', 'Sebastes wakiyai',
+                            'Sebastes cheni', 'Sebastes pachycephalus',
+                            'Sebastes joyneri', 'Sebastes baramenuke',
+                            'Sebastes viviparus', 'Sebastes norvegicus',
+                            'Sebastes mentella', 'Sebastes koreanus',
+                            'Sprattus sprattus', 'Squalius cephalus',
+                            'Squalus acanthias', 'Squalus japonicus',
+                            'Squalus mitsukurii', 'Sciaenops ocellatus',
+                            'Squalius carolitertii', 'Squalius pyrenaicus',
+                            'Squalius alburnoides', 'Strongylura marina',
+                            'Syngnathus fuscus', 'Stellifer lanceolatus',
+                            'Syngnathus louisianae', 'Syngnathus floridae',
+                            'Stichaeopsis nana', 'Sebastiscus marmoratus',
+                            'Scomber colias', 'Stichaeopsis nevelskoi',
+                            'Strongylura timucu', 'Stromateus brasiliensis',
+                            'Taurocottus bergii', 'Thunnus thynnus',
+                            'Trachurus picturatus', 'Tilesina gibbosa',
+                            'Ulvaria subbifurcata',
+                            # extinct
+                            'Salmo pallayri',
+                            # deep sea
+                            'Embassichthys bathybius', # synonimized to microstomus
+                            # arctic canada, gulf of alaska
+                            'Arctogadus glacialis', 'Boreogadus saida',
+                            'Myzopsetta proboscidea', 'Bryozoichthys lysimus',
+                            # Gulf of California; may be seen sampling if expanded south
+                            'Gillichthys seta', 'Scomber australasicus',
+                            'Totoaba macdonaldi', 'Paralabrax auroguttatus',
+                            # freshwater?
+                            'Morone chrysops', 'Morone americana'
+                            #'Prosopium williamsoni', 'Rhinichthys cataractae'
+                            ))) %>%
+  relocate(asv, motu, found_taxa, rank)
+
+# populate higher fish taxonomy
+motu50blast_updatetaxa_higher <- motu50blast_updatetaxa %>%
+  separate(found_taxa, into = 'genus_split', " ", 
+           remove = FALSE, extra = 'drop') %>%
+  filter(genus_split %in% taxa_key$genus & is.na(class)) %>%
+  select(found_taxa, genus_split) %>%
+  distinct() %>%
+  rename(genus = genus_split,
+         found_taxa_keep = found_taxa) %>%
+  left_join(taxa_key) %>%
+  select(!c(taxa_verbatim, found_taxa, accession, rank, taxonomy_search,
+            worms_sciname, common_name)) %>%
+  distinct() %>%
+  rename(found_taxa = found_taxa_keep) %>%
+  # remove duplicate
+  filter(!(found_taxa == 'Luciogobius' & freshwater_only == 1))
+
+
+motu50blast_updatetaxa_higher2 <- motu50blast_updatetaxa %>%
+  filter(found_taxa %in% motu50blast_updatetaxa_higher$found_taxa & is.na(class)) %>%
+  select(!c(kingdom, phylum, class, order, family, genus, freshwater_only)) %>%
+  left_join(motu50blast_updatetaxa_higher) %>%
+  distinct()
+
+
+# dataframe with updated taxonomy ready to use
+motu50blast_updatetaxa2 <- motu50blast_updatetaxa %>%
+  filter(!(found_taxa %in% motu50blast_updatetaxa_higher2$found_taxa & is.na(class))) %>%
+  rbind(motu50blast_updatetaxa_higher2) %>%
+  mutate(kingdom = case_when(found_taxa %in% c('Bacteria', 'Archaea', 'Unknown') ~ found_taxa,
+                             found_taxa %in% c('Diatom', 'Algae', 'Fungus', 'Insect',
+                                               'Sponge', 'Seal', 'Unknown Eukaryote',
+                                               'Argis', 'Other protist', 'Orcinus orca',
+                                               'Delphinus delphis', 'Stenella coeruleoalba',
+                                               'Terrestrial plant', 'Unknown metazoa',
+                                               'Crow') ~ 'Eukaryota',
+                             TRUE ~ kingdom)) %>%
+  # add genus for everyone
+  separate(found_taxa, into = 'genus_split', " ", 
+           remove = FALSE, extra = 'drop') %>%
+  mutate(genus = coalesce(genus, genus_split)) %>%
+  # na character for things that aren't genera
+  mutate(genus = ifelse(found_taxa %in% c('No BLAST hit', 'Terrestrial plant', 'Unknown metazoa',
+                                               'Crow', 'Bacteria', 'Unknown', 'Other protist',
+                                          'Unknown Eukaryote', 'Sponge', 'Insect',
+                                          'Diatom', 'Algae'), NA_character_, genus)) %>%
+  select(!c(genus_split, taxonomy_search, worms_sciname, taxa_verbatim))
+
+```
+
+
+
+
+```{r assign}
+# the original pipeline assumed we were working from a matrix with taxonomy already assigned.
+# Here we're going to assign to MOTUs from scratch
+# First; assign all MOTUs with 100% one species
+blast_assign <- motu50blast_updatetaxa2 %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+  # indicate keep rows with 100% same species
+  mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
+  group_by(asv, found_taxa) %>%
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
+                                (any(sp_percent <= .25) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(identity_percentage >= 99) & any(identity_percentage <= 97.5)) |
+                                identity_percentage <= 96.5 ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(one_hit == 'no' & unlikely %in% c('x') & identity_percentage <= 99.5)) %>%
+  # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  # filter for anything 100%/98% that passed the original filter
+  group_by(asv) %>%
+  mutate(unlikely = case_when((hit_remain > 1 & any(identity_percentage == 100) & any(identity_percentage <= 99.5)) ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(unlikely %in% c('x') & identity_percentage <= 99.5)) %>%
+  # assign asvs with one hit remaining after unlikely and < 100% frequency
+  # # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  filter(hit_remain == 1) %>%
+  select(!(c(hit_remain, unlikely, one_hit, sp_percent, num_blast, sp_freq, description)))
+  
+
+# identify ASVs that have conflicts in their top 10
+# This removes ASVs without conflicts, leaving only the potential problems.
+blast_conflict <- motu50blast_updatetaxa2 %>%
+  filter(!(asv %in% blast_assign$motu)) %>%
+  filter(!(found_taxa %in% c('Unknown bacteria', 'Unknown organism',
+                             'Unknown Eukaryote', 'Unknown algae',
+                             'Unknown protist', 'Unknown'))) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  mutate(max_keep = ifelse(max_sp_id == identity_percentage, 'keep', 'toss')) %>%
+  filter(max_keep == 'keep') %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  group_by(asv, found_taxa) %>%
+  # remove hits with less than 98.5%% when an ID in the list has 100%,
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
+                                (any(sp_percent <= .2) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(identity_percentage >= 99) & any(identity_percentage <= 97.5)) |
+                                 identity_percentage <= 96.5 ~ 'x')) %>%
+  ungroup() %>%
+  filter(!(unlikely %in% c('x') & identity_percentage <= 98 |
+             identity_percentage <= 97)) %>%
+  select(!(c(unlikely))) %>%
+  group_by(asv) %>%
+    # how many blast hits, update count
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+    #remove anything that's more than .5 lower
+  group_by(asv) %>%
+  # what is the highest identity percentage on that MOTU
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  # if the species max is .5% lower than the max
+  # this seems to be about as far away as makes sense for this data
+  # Note that maybe for other data it might be different.
+  # May also need more solid empirical justification than 
+  # my past experience handling NCBI data
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .5) %>%
+  select(!(c(max_id, max_sp_id, point_diff, max_keep))) %>%
+    # recalculate species percent
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+  mutate(contains_bacteria = ifelse(any(found_taxa %in% c('Bacteria', 'Archaea')), 1, 0)) %>%
+  mutate(contains_eukaryote = ifelse(any(found_taxa != 'Bacteria'), 1, 0)) %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  mutate(types_karyote = sum(contains_eukaryote, contains_bacteria)) %>%
+  mutate(updated_taxa = case_when(types_karyote >=2 ~ 'Unknown',
+                                  sp_percent == 1 ~ found_taxa,
+                                  sp_percent < 1 & str_detect(found_taxa, 'Sebastes') ~ 'Sebastes')) %>%
+  ungroup() %>%
+  select(!(c(found_taxa, types_karyote, contains_bacteria, 
+             contains_eukaryote, sp_percent))) %>%
+  distinct(asv, updated_taxa, .keep_all = TRUE) %>%
+  relocate(updated_taxa) %>%
+  # if all 1 move on
+  add_count(asv, name='n_remain') %>%
+  mutate(found_taxa = updated_taxa) %>%
+  select(!(c(num_blast, n_remain, updated_taxa, 
+             sp_freq, description))) %>%
+  distinct(asv, found_taxa, .keep_all = TRUE) %>%
+  mutate(rank = case_when(found_taxa == 'Unknown' ~ 'offtarget',
+                          found_taxa == 'Sebastes' ~ 'genus',
+                          TRUE ~ rank))
+
+
+outstanding_conflicts <- motu50blast_updatetaxa2 %>%
+  filter(!(asv %in% c(blast_assign$asv, blast_conflict$asv))) %>%
+  #filter(!(found_taxa %in% c('Unknown', 'Unknown Eukaryote'))) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  ## what is the highest identity percentage per species, to eliminate duplicates
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  group_by(asv) %>%
+  # what is the highest identity percentage on that MOTU
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  # if the species max is .5 points or about 99.5% lower than the max for the motu
+  # eliminate that hit
+  #mutate(percent_diff = max_sp_id/max_id) %>%
+  #filter(percent_diff > .995) %>%
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .5) %>%
+  # recalculate species percent and remove 100s
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+   group_by(asv) %>%
+  mutate(contains_bacteria = ifelse(any(found_taxa == 'Bacteria'), 1, 0)) %>%
+  mutate(contains_eukaryote = ifelse(any(found_taxa != 'Bacteria'), 1, 0)) %>%
+  ungroup() %>%
+  mutate(types_karyote = contains_eukaryote + contains_bacteria) %>%
+  group_by(asv,found_taxa) %>%
+  mutate(updated_taxa = case_when(types_karyote >=2 ~ 'Unknown',
+                                  sp_percent == 1 ~ found_taxa)) %>%
+  ungroup() %>%
+  select(!(c(types_karyote, contains_bacteria, contains_eukaryote, sp_percent))) %>%
+  distinct(asv, found_taxa, updated_taxa, .keep_all = TRUE) %>%
+  relocate(updated_taxa) %>%
+  add_count(asv, name='n_remain') %>%
+  add_count(asv, found_taxa, name = 'ids_left') %>%
+  mutate(sp_percent = ids_left/n_remain) %>%
+  separate(found_taxa, into = 'genus_split', " ", 
+           remove = FALSE, extra = 'drop') %>%
+  mutate(family = case_when(genus_split %in% c('Oligocottus', 'Leiocottus') ~ 'Cottidae',
+                            genus_split %in% c('Cryptacanthodes') ~ 'Cryptacanthodidae',
+                            genus_split %in% c('Eumesogrammus') ~ 'Stichaeidae')) %>%
+  mutate(order = case_when(family %in% c('Cottidae', 'Cryptacanthodidae', 'Serranidae',
+                                         'Stichaeidae') ~ 'Perciformes')) %>%
+  group_by(asv) %>%
+  mutate(updated_taxa = case_when(is.na(updated_taxa) & length(unique(genus_split)) == 1 ~ genus_split,
+                                  is.na(updated_taxa) & length(unique(family)) == 1 ~ family,
+                                  is.na(updated_taxa) & length(unique(order)) == 1 ~ order,
+                                  TRUE ~ updated_taxa)) %>%
+  ungroup() %>%
+  mutate(found_taxa = updated_taxa) %>%
+  mutate(rank = case_when(found_taxa %in% c('Icelinus') ~ 'genus',
+                          found_taxa %in% c('Cottidae') ~ 'family',
+                          found_taxa %in% c('Perciformes') ~ 'order',
+                           TRUE ~ rank)) %>%
+  select(!(c(sp_percent, num_blast, n_remain, updated_taxa, sp_freq,
+             max_id, max_sp_id, point_diff, description, genus_split, 
+             ids_left))) %>%
+  distinct(asv, found_taxa, .keep_all = TRUE)
+  
+```
+
+
+
+# export to merge
+
+```{r export}
+
+motu_taxonomy_export <- blast_assign %>%
+  rbind(blast_conflict) %>%
+  rbind(outstanding_conflicts) %>%
+  left_join(common_name) %>%
+  mutate(common_name = case_when(found_taxa == "No BLAST hit" ~ "No BLAST hit",
+                                 found_taxa %in% c('Bacteria', 'Diatom', 'Sponge',
+                                                   'Algae', 'Insect', 'Unknown', 'Crow',
+                                                   'Unknown metazoa', 'Other protist') ~ found_taxa,
+                                 found_taxa == 'Gallus gallus' ~ 'Chicken',
+                                 found_taxa == 'Phalacrocorax' ~ 'Cormorant',
+                                 found_taxa == 'Patiria miniata' ~ 'Bat star',
+                                 found_taxa == 'Balaenoptera acutorostrata' ~ 'Minke whale',
+                                 found_taxa == 'Eubalaena japonica' ~ 'North Pacific right whale',
+                                 found_taxa == 'Enhydra lutris' ~ 'Sea otter',
+                                 found_taxa == 'Argis' ~ 'Decapod',
+                                 found_taxa == 'Cosmocampus arctus' ~ 'Snubnose pipefish',
+                                 # temporary?
+                                 #found_taxa == 'Chirolophis japonicus' ~ 'Warbonnet species',
+                                 found_taxa == 'Anisotremus davidsonii' ~ 'Xantic sargo',
+                                 found_taxa == 'Artedius harringtoni' ~ 'Scalyhead sculpin',
+                                 
+                                 found_taxa == 'Clinocottus globiceps' ~ 'Mosshead sculpin',
+                                 found_taxa == 'Clinocottus acuticeps' ~ 'Sharpnose sculpin',
+                                 found_taxa == 'Clevelandia ios' ~ 'Arrow goby',
+                                 found_taxa == 'Cheilotrema saturnum' ~ 'Black croaker',
+                                 found_taxa == 'Cryptacanthodes aleutensis' ~ 'Dwarf wrymouth',
+                                 found_taxa == 'Cryptacanthodes giganteus' ~ 'Giant wrymouth',
+                                 
+                                 found_taxa == 'Gibbonsia montereyensis' ~ 'Crevice kelpfish',
+                                 found_taxa == 'Gobiesox maeandricus' ~ 'Northern clingfish',
+                                 found_taxa == 'Eumesogrammus praecisus' ~ 'Fourline snakeblenny',
+                                 
+                                 
+                                 found_taxa == 'Icelinus filamentosus' ~ 'Threadfin sculpin',
+                                 found_taxa == 'Icelinus tenuis' ~ 'Spotfin sculpin',
+                                 found_taxa == 'Leiocottus hirundo' ~ 'Lavender sculpin',
+                                 found_taxa == 'Micrometrus minimus' ~ 'Dwarf perch',
+                                 found_taxa == 'Merluccius productus' ~ 'North Pacific hake',
+                                 found_taxa == 'Morone saxatilis' ~ 'Striped bass',
+                                 found_taxa == 'Oligocottus maculosus' ~ 'Tidepool sculpin',
+                                 found_taxa == 'Oligocottus snyderi' ~ 'Fluffy sculpin',
+                                 found_taxa == 'Paralabrax nebulifer' ~ 'Barred sand bass',
+                                 found_taxa == 'Paralabrax clathratus' ~ 'Kelp bass',
+                                 found_taxa == 'Paralabrax maculofasciatus' ~ 'Spotted sand bass',
+                                 
+                                 
+                                 
+                                 found_taxa == 'Rhinogobiops nicholsii' ~ 'Blackeye goby',
+                                 
+                                 
+                                 found_taxa == 'Sebastes' ~ 'Rockfish species',
+                                 found_taxa == 'Icelinus' ~ 'Icelinus sculpin species',
+                                 found_taxa == 'Cottidae' ~ 'Cottidae sculpin family',
+                                 found_taxa == 'Perciformes' ~ 'Perch-like fish order',
+                                 TRUE ~ common_name)) %>%
+  relocate(motu, found_taxa, common_name, rank) %>%
+  # probably temp?
+  mutate(genus = case_when(is.na(genus) & found_taxa %in% c('Icelinus filamentosus', 
+                                                            'Icelinus tenuis') ~ 'Icelinus',
+                           found_taxa %in% c('Artedius harringtoni') ~ 'Artedius',
+                           found_taxa %in% c('Roncador stearnsii') ~ 'Roncador',
+                           found_taxa %in% c('Cryptacanthodes aleutensis') ~ 'Cryptacanthodes',
+                           found_taxa %in% c('Eumesogrammus praecisus') ~ 'Eumesogrammus',
+                           found_taxa %in% c('Leiocottus hirundo') ~ 'Leiocottus',
+                           found_taxa %in% c('Oligocottus snyderi') ~ 'Oligocottus',
+                           found_taxa %in% c('Anisotremus davidsonii') ~ 'Anisotremus',
+                           TRUE ~ genus)) %>%
+  mutate(family = case_when(genus %in% c('Clevelandia', 'Quietula', 'Rhinogobiops') ~ 'Gobiidae',
+                            genus %in% c('Gibbonsia', 'Heterostichus') ~ 'Clinidae',
+                            genus %in% c('Cryptacanthodes') ~ 'Cryptacanthodidae',
+                            genus %in% c('Anisotremus') ~ 'Haemulidae',
+                            genus %in% c('Merluccius') ~ 'Merlucciidae',
+                            genus %in% c('Micrometrus') ~ 'Embiotocidae',
+                            genus %in% c('Artedius', 'Icelinus', 'Leiocottus', 
+                                         'Oligocottus', 'Synchirus') ~ 'Cottidae',
+                            genus %in% c('Paralabrax') ~ 'Serranidae',
+                            genus %in% c('Roncador', 'Umbrina') ~ 'Sciaenidae',
+                            genus %in% c('Eumesogrammus') ~ 'Stichaeidae',
+                           TRUE ~ family)) %>%
+  mutate(order = case_when(family %in% c('Gobiidae') ~ 'Gobiiformes',
+                           family %in% c('Clinidae') ~ 'Blenniformes',
+                           family %in% c('Merlucciidae') ~ 'Gadiformes',
+                           family %in% c('Haemulidae', 'Sciaenidae') ~ 'Eupercaria incertae sedis',
+                           family %in% c('Embiotocidae') ~ 'Ovalentaria incertae sedis',
+                           family %in% c('Cottidae', 'Cryptacanthodidae', 'Serranidae',
+                                         'Stichaeidae') ~ 'Perciformes',
+                           TRUE ~ order)) %>%
+  mutate(class = case_when(order %in% c('Blenniformes', 'Eupercaria incertae sedis', 'Gobiiformes',
+                                        'Gadiformes', 'Ovalentaria incertae sedis',
+                                        'Perciformes') ~ 'Teleostei',
+                           TRUE ~ class)) %>%
+  mutate(phylum = case_when(class %in% c('Teleostei')|
+                              found_taxa %in% c('Crow', 'Balaenoptera acutorostrata') ~ 'Chordata',
+                            found_taxa %in% c('Argis', 'Insect') ~ 'Arthropoda',
+                           TRUE ~ phylum)) %>%
+  mutate(kingdom = case_when(phylum %in% c('Chordata', 'Arthropoda') ~ 'Eukaryota',
+                             found_taxa %in% c('Bacteria') ~ 'Bacteria',
+                           TRUE ~ kingdom)) %>%
+  select(!c(accession, bitscore)) %>%
+  distinct() %>%
+  add_count(asv, name = 'n_dups') %>%
+  group_by(asv) %>%
+  mutate(n_king = length(unique(kingdom))) %>%
+  mutate(n_class = length(unique(class))) %>%
+  mutate(n_gen = length(unique(genus))) %>%
+  mutate(n_fresh = length(unique(freshwater_only))) %>%
+  mutate(n_tax = length(unique(found_taxa))) %>%
+  ungroup() %>%
+  group_by(asv) %>%
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  mutate(max_keep = ifelse(max_id == identity_percentage, 'keep', 'toss')) %>%
+  mutate(remove = case_when(n_king > n_tax & is.na(kingdom) ~ 'x',
+                            n_class > n_tax & is.na(class) ~ 'c',
+                            n_gen > n_tax & is.na(genus) ~ 'g',
+                            n_fresh > n_tax & is.na(freshwater_only) ~ 'f',
+                            n_dups > 1 & found_taxa == 'Unknown' ~ 'unk')) %>%
+  filter(is.na(remove) & max_keep == 'keep') %>%
+  add_count(asv, name = 'n_dups') %>%
+  select(!c(n_dups, n_king, n_fresh, n_class, n_gen, 
+            n_fresh, n_tax, remove, max_keep, max_id))
+
+#write_csv(motu_taxonomy_export, here(processededna, paste0(datefield_reblast, runfield, 'reblasted.csv')))
+```
+
+Make sure there is nothing left
+
+```{r fix up}
+
+remaining <- motu_50blast2 %>%
+  filter(!(asv %in% motu_taxonomy_export$asv)) %>%
+  # grab family level IDs if nothing was found
+  mutate(found_taxa = case_when(str_detect(description, 'Ctenogobius|Oligolepis|Rhinogobius') ~ 'Gobiidae',
+                                str_detect(description, 'Chirolophis') ~ 'Chirolophis')) %>%
+  relocate(found_taxa) %>%
+  filter(!is.na(found_taxa)) %>%
+  distinct(asv, found_taxa, .keep_all = TRUE) %>%
+  select(!c(description, identity_percentage, evalue, bitscore, accession)) %>%
+  mutate(rank = case_when(found_taxa %in% c('Chirolophis') ~ 'genus',
+                          found_taxa %in% c('Gobiidae') ~ 'family')) %>%
+  mutate(genus = case_when(rank == 'genus' ~ found_taxa)) %>%
+  mutate(family = case_when(rank == 'family' ~ found_taxa,
+                            genus %in% c('Chirolophis') ~ 'Stichaeidae')) %>%
+  mutate(order = case_when(family %in% c('Gobiidae') ~ 'Gobiiformes',
+                           family %in% c('Clinidae') ~ 'Blenniformes',
+                           family %in% c('Merlucciidae') ~ 'Gadiformes',
+                           family %in% c('Haemulidae', 'Sciaenidae') ~ 'Eupercaria incertae sedis',
+                           family %in% c('Embiotocidae') ~ 'Ovalentaria incertae sedis',
+                           family %in% c('Cottidae', 'Cryptacanthodidae', 'Serranidae',
+                                         'Stichaeidae') ~ 'Perciformes')) %>%
+  mutate(class = case_when(order %in% c('Blenniformes', 'Eupercaria incertae sedis', 'Gobiiformes',
+                                        'Gadiformes', 'Ovalentaria incertae sedis',
+                                        'Perciformes') ~ 'Teleostei')) %>%
+  mutate(phylum = case_when(class %in% c('Teleostei')|
+                              found_taxa %in% c('Crow', 'Balaenoptera acutorostrata') ~ 'Chordata')) %>%
+  mutate(kingdom = case_when(phylum %in% c('Chordata', 'Arthropoda') ~ 'Eukaryota',
+                             found_taxa %in% c('Bacteria') ~ 'Bacteria')) %>%
+  mutate(common_name = case_when(found_taxa %in% c('Chirolophis') ~ 'Chirolophis warbonnet species',
+                                 found_taxa %in% c('Gobiidae') ~ 'Goby species')) %>%
+  full_join(motu_taxonomy_export) %>%
+  relocate(motu,asv, found_taxa, common_name, rank)
+
+# add motu columns, relocate
+taxonomy_assigned_full <- motu_taxonomy_export %>%
+  relocate(found_taxa_motu, common_name_motu, rank_motu,
+           .before = seed_asv) %>%
+  rename(found_taxa_asv = found_taxa,
+         rank_asv = rank,
+         common_name_asv = common_name) %>%
+  relocate(motu, asv)
+
+```
+
+
+# Merge!
+
+```{r merge-stat}
+taxonomy_initial <- read_csv(here(processededna, '20241022_peco-combined_12s_taxonomy_initial.csv'))
+
+taxonomy_full <- taxonomy_initial %>%
+  filter(!(asv %in% remaining$asv)) %>%
+  rbind(taxonomy_assigned_full) %>%
+  arrange(motu, asv)
+
+write_csv(taxonomy_full, here(processededna, paste0(datefield_reblast, runfield, 'taxonomy_full.csv')))
+```
+

@@ -1,0 +1,367 @@
+---
+title: "ch1eDNAQC-12s"
+author: "Kate Sheridan"
+date: "11/27/2021"
+output: html_document
+---
+
+Version of Sunday Lab eDNA QC pipeline modified from Trawl Project 2020, scripts by Anya Mueller, Jenn Sunday, Ben Millard-Martin
+
+Main difference with this version is that it is eDNA-only, with no cleaning of trawl related files, and Hakai samples. Updated August 2022 with key replacement
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(vegan)
+# for PCR replicates
+library(usedist) 
+library(here)
+
+# filepaths for use with here, basic files
+#mifish <- here("rawdata", "2018calvert", "12S")
+mifish <- here("rawdata", "2018calvert", "fastq", "12S_Calvert2018_Re-run20210903", "processed")
+
+# Destination folders
+processededna <- here('processeddata', '2018calvert', 'qcstages')
+
+datefield <- '20240323_'
+runfield <- 'calvert2018_12s_'
+```
+
+## 00 - Load In
+
+Initial cleaning includes: cleaning eDNA data to be more usable. Modified from Anya's 2020 script
+
+here you want to read in any markers and metadata
+These will be sequence + ASV merged tables, saved as a .txt file, with metadata as .csv
+Filenames if directly from Hakai will be a mix of . and _ separators, be careful entering
+NOTE: watch COI vs CO1, some files my use a letter I vs a number 1. 
+
+```{r 01-initialcleaning-loadin, message=FALSE}
+mifish_asvmatrix <- read.table(here::here(mifish, 
+                                           "20240315_12s_2018calvert_rerun20210903_sequence-table_12S-merged-w-ASV-names.txt"), 
+                               header = TRUE)
+
+motu2asv <- read_csv(here(mifish, '20240315_calvert2018_12s_motu2asv.csv')) %>%
+  select(!asv_reads)
+
+taxonomy_12s <- read_csv(here(processededna,
+                              '20240323_calvert2018_12s_taxonomy.csv'))
+
+edna_metadata <- read_csv(here('processeddata', '2018calvert', "2018calvert_eDNA_metadata.csv"))[-1]
+
+```
+
+
+# 01 - ASV to MOTU + metadata
+
+First cleaning the data and generating matrix
+
+To do read subtraction at the ASV level, we will first make our matrix an ASV matrix, then rotate it to MOTU after subtracting controls.
+
+
+We will match our ASV table to MOTUs to collapse and add metadata.
+
+```{r 02 asv2motu}
+
+mifish_asvmatrix_meta <-  mifish_asvmatrix %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  mutate(totalread = rowSums(select(., contains("ASV")))) %>%
+  filter(!(totalread == 0)) %>%
+  # first change the columns from ASV to motu
+  pivot_longer(cols = !row_names,
+               names_to = 'asv',
+               values_to = 'raw_reads') %>% 
+  separate(row_names, 
+           c("sample_name", 
+             "pcr_rep" 
+             ), #separate row_name label into vectors of information, 
+                   #which info you need will vary based on how it was recorded and processed
+           sep="-") %>%
+  #make unique identifier for each row
+  mutate(sample_id=paste(sample_name, pcr_rep, sep="-")) %>% 
+  mutate(pcr_rep = tolower(pcr_rep),
+         sample_id = tolower(sample_id),
+         sample_name = tolower(sample_name)) %>%
+  filter(!(asv == 'totalread')) %>%
+  left_join(edna_metadata) %>%
+  # this removes samples that didn't make it through run processing
+  filter(!(is.na(asv))) %>%
+  distinct() %>%
+  left_join(motu2asv) %>%
+  filter(!(raw_reads == 0))
+
+
+
+mifish_motumatrix <- mifish_asvmatrix %>%
+  # first change the columns from ASV to motu
+  pivot_longer(cols = !row_names,
+               names_to = 'asv',
+               values_to = 'reads') %>%
+  # use the key for which asvs collapse into an motu
+  left_join(motu2asv) %>%
+  select(row_names, motu, reads) %>%
+  # new table; motu x sample-pcrrep
+  pivot_wider(names_from = motu,
+              values_from = reads, 
+              values_fn = sum) %>%
+  separate(row_names, 
+           c("sample_name", 
+             "pcr_rep" 
+             ), #separate row_name label into vectors of information, 
+                   #which info you need will vary based on how it was recorded and processed
+           sep="-") %>%
+  #make unique identifier for each row
+  mutate(sample_id=paste(sample_name, pcr_rep, sep="-")) %>% 
+  #bring to front
+  relocate(sample_id, .before = 'motu1') %>% 
+  # get rid of the NAs added from columns with no value
+  mutate(sample_id=str_replace(sample_id, "-NA", "")) %>% 
+  mutate(pcr_rep = tolower(pcr_rep),
+         sample_id = tolower(sample_id),
+         sample_name = tolower(sample_name)) %>%
+  # this 'sample' doesn't seem useful?
+  filter(!(sample_name == 'undetermined')) %>%
+  #mutate(pcr_rep = ifelse(is.na(pcr_rep) == TRUE, 'pooled', pcr_rep)) %>% 
+  mutate(totalread = rowSums(select(., contains("motu")))) %>%
+  filter(!(totalread == 0)) %>%
+  pivot_longer(cols = !c(sample_name, sample_id, pcr_rep),
+               names_to = 'motu',
+               values_to = 'raw_reads') %>%
+  # join metadata
+  full_join(edna_metadata) %>%
+  # this removes samples that didn't make it through run processing
+  filter(!(is.na(motu))) %>%
+  distinct()
+
+```
+
+# 02 Controls
+
+Normally we'd subtract reads or something here but we have insufficient metadata for what the controls represent, and the PCR blanks didn't make it to FASTQ files?
+
+```{r 02-12s}
+controls <- mifish_asvmatrix_meta %>%
+  filter(sample_name %in% c('neg1', 'neg2', 'neg3') & raw_reads >= 1) %>%
+  select(sample_name, pcr_rep, asv, raw_reads, sample_id) %>%
+  mutate(pcr_asv = paste0(pcr_rep, '_', asv)) %>%
+  group_by(pcr_asv) %>%
+  mutate(ctrl_mean = round(mean(raw_reads))) %>%
+  ungroup() %>%
+  select(pcr_rep, asv, ctrl_mean) %>%
+  distinct()
+
+# read subtract version
+mifish_motumatrix_nc <- mifish_asvmatrix_meta %>%
+  left_join(controls) %>%
+  # make any NAs 0
+  mutate(ctrl_mean = ifelse(is.na(ctrl_mean), 0, ctrl_mean)) %>%
+  # subtract reads by pcr rep
+  mutate(reads_adjust = raw_reads - ctrl_mean) %>%
+  # remove named controls, edit to be what is in dataframe
+  filter(!grepl("neg", sample_name)) %>%
+  # make negatives 0s
+  mutate(reads_adjust = ifelse(reads_adjust < 0, 0, reads_adjust)) %>%
+  # collapse and switch to motus
+  group_by(motu, sample_name) %>%
+  mutate(reads_adjust_sample = sum(reads_adjust)) %>%
+  mutate(reads_raw_sample = sum(raw_reads)) %>%
+  ungroup() %>%
+  #select(!c(asv_reads))%>%
+  relocate(motu, reads_adjust_sample, reads_raw_sample, .before = asv)
+
+
+
+# 
+# # remove control version
+# mifish_motumatrix_nc <- mifish_motumatrix %>%
+#   # remove named controls, edit to be what is in dataframe
+#   filter(!grepl("neg", sample_name)) 
+
+```
+
+Old 03 Dataset singletons
+
+One method to remove putative self positives; remove all dataset-wide singletons
+
+Due to revisions of the pipeline, we'll skip this step for now.
+We had already removed low-read singleton ASVs during dada2 pipeline.
+
+```{r 03b-singletons-12s}
+# # whole-dataset singleton removal
+# 
+# # presence-absence, removal of columns that sum to 0 or 1
+# mifish_asvmatrix_nc_pa <- mifish_asvmatrix_nc %>%
+#   # must be all numbers!
+#   column_to_rownames(var = 'sample_id') %>%
+#   # vegan's decostand to convert
+#   decostand(method = 'pa') %>%
+#   # removing control-only asvs 
+#   select(where(~ sum(.) != 0)) %>%
+#   #removing one observation asvs. 
+#   ## not sure about this, went from 1726 to 373? match to taxon table, might be ok cause mifish?
+#   select(where(~ sum(.) != 1)) %>%
+#   rownames_to_column(var = 'sample_id')
+# 
+# # create vector of retained asvs
+# mifish_retainedasv <- mifish_asvmatrix_nc_pa %>%
+#   select(!(sample_id)) %>%
+#   colnames() %>%
+#   enframe(name = NULL, value = "asv_r")
+# 
+# # reduce asv matrix + matrix/metadata
+# mifish_asvmatrix_nc2 <- mifish_asvmatrix_nc %>%
+#   select(c(sample_id, mifish_retainedasv$asv_r))
+# 
+# mifish_asvmatrix_metadata_nc2 <- mifish_asvmatrix_metadata_nc %>%
+#   select(!(starts_with("ASV"))) %>%
+#   full_join(mifish_asvmatrix_nc2, by = 'sample_id')
+# 
+# # saving again if needed
+# write_csv(mifish_asvmatrix_nc2, here::here(processededna, "12S_asvmatrix_03b.csv"))
+
+```
+
+## 03 PCR dissimilarity
+
+If applicable. Not all data will have pcr reps, if it doesn't skip. From Anya 2020 script
+
+Here we are removing samples with highly dissimilar PCR replicates
+
+```{r 03-pcr-dissimilarity}
+# Code is reused a lot here and we don't need the dat object again
+# So I keep the renaming from orginal scripts.
+dat <- mifish_motumatrix_nc %>%
+  select(sample_id, sample_name, motu, reads_adjust_sample) %>%
+  distinct() %>%
+  filter(!(motu == 'totalread')) %>%
+  pivot_wider(names_from = motu, 
+              values_from = reads_adjust_sample) %>%
+  # NA to 0
+  mutate_all(~replace(., is.na(.), 0))
+   
+
+#extract useful bits: t1 <- sample names; t2 <- ASV x site
+t1 <- dat %>%
+  select(sample_id, sample_name, starts_with('motu')) 
+
+#calculate bray curtis dissimilarity
+t2 <- vegdist(t1[,3:ncol(t1)], method = "bray", binary = T)
+
+# calculate distance from group centroid using Multivariate homogeneity of groups dispersions (variances)
+t3 <- betadisper(t2, group = t1$sample_name, type = "centroid")
+
+#plot with 95% CI elipses
+ plot(t3, hull = F, ellipse = T, conf = 0.95, label = F, pch = 5, main = "95% CI elipse around sample replicates")
+
+#extract distances
+t4 <- cbind(dat$sample_id, dat$sample_name, as.data.frame(t3$distances)) 
+colnames(t4) <- c("sample_id", "sample_name", "distances")
+
+#calculate 95% CIs
+t4 <- t4 %>%
+  group_by(sample_name) %>%
+  mutate(meandis = mean(distances), # mutate when grouped applies the summary to each row
+         SDdis = sd(distances),
+         CIdis = 1.96*SDdis/sqrt(3), 
+         upperCIdis=meandis+CIdis) %>% #calculate upper end of 95% CI 
+  ungroup()
+
+#check that PCR reps are within CIs
+t4$diff <- ifelse(t4$upperCIdis < t4$distances, "problem", "ok")
+
+#list for later filtering
+problemlist <- t4 %>%
+  subset(diff == "problem") %>%
+  distinct(sample_name, sample_id)
+
+#now we want to remove the samples identified as problems (whole samples or just pcr reps?)
+# I am just going to remove the replicate itself
+mifish_motumatrix_nc_95ci <- mifish_motumatrix_nc %>%
+  filter(!(sample_id %in% problemlist$sample_id))
+
+#not going to keep the replicate information past here
+```
+
+## 03-B -- Occupancy model QC-type
+
+We are skipping this for now, since Erikson/Mize doesn't use it. May want to re-add for other analyses?
+
+I may want to replace the pcr step with this.
+
+
+## 04 -- Taxonomy
+
+Since we QCd the taxonomy assignment at the BLAST step, here we are simply merging the file.
+
+```{r 04-taxonomy-12s}
+# merge taxonomy file with motu table
+mifish_motumatrix_taxonomy <- mifish_motumatrix_nc_95ci %>%
+  filter(reads_adjust_sample> 0) %>%
+  # totalread is useless
+  filter(!(motu == 'totalread')) %>%
+  left_join(taxonomy_12s) %>%
+  select(!(c(#seed_asv_reads, seed_reads, motu_reads,
+             volume_filtered, lab_notes, hakai_project,
+             hakai_link_data, sample_type, veg_sub, vegcom_sub
+             ))) %>%
+  relocate(motu, reads_adjust_sample, found_taxa_motu, common_name_motu, 
+           rank_motu, location, macroveg_group, macroveg_community,
+           .before = pcr_rep)
+
+# sort out unidentified motus
+mifish_motumatrix_unknown <- mifish_motumatrix_taxonomy %>%
+  filter(common_name_motu == 'No BLAST hit')
+
+# write out problems
+write.csv(mifish_motumatrix_unknown, here(processededna, 
+                                          paste0(datefield, runfield,
+                                                 'motumatrix_taxonomy-problems.csv')))
+
+
+```
+
+
+## Final matrices
+
+remove unidentified motus, add p/a column
+
+```{r mifish-finalmatrix}
+# species list
+motu_splist <- mifish_motumatrix_taxonomy %>%
+  filter(class %in% c('Teleostei', 'Holocephali')) %>%
+  select(found_taxa_motu, common_name_motu, rank_motu) %>%
+  distinct()
+
+#save whole list
+write_csv(motu_splist, here('processeddata', 'species_lists', 
+                            paste0(datefield, runfield,
+                                          'motu_splist.csv')))
+
+mifish_motumatrix_final <- mifish_motumatrix_taxonomy %>%
+  filter(!(is.na(class))) %>%
+  mutate(motu_pa = 1) %>%
+  relocate(motu_pa, .before = found_taxa_motu)
+
+
+#save whole list
+write_csv(mifish_motumatrix_final, here(processededna,
+                                          paste0(datefield, runfield,
+                                                 'motumatrix_taxonomy.csv')))
+
+
+
+mifish_motumatrix_final_fish <- mifish_motumatrix_final %>%
+  filter(class %in% c('Teleostei', 'Holocephali'))
+
+#save whole list
+write_csv(mifish_motumatrix_final_fish, here(processededna,
+                                          paste0(datefield, runfield,
+                                                 'motumatrix_taxonomy-fish.csv')))
+
+```
+
+
+
+
+

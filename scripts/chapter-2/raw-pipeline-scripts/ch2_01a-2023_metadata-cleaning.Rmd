@@ -1,0 +1,53 @@
+---
+title: "ch2_01a-2023_metadata-cleaning"
+output: html_document
+date: "2024-06-04"
+---
+
+Currently samples and coordinates are not properly assigned
+
+```{r setup, include=FALSE}
+library(here)
+library(tidyverse)
+```
+
+```{r}
+edna_metadata_field <- read_csv(here('rawdata',
+                               'peco',
+                               '2023_edna',
+                               '20240925_peco2023_metadata.csv')) %>% 
+  mutate(sample_id = tolower(sample_id))
+
+```
+
+# clean
+
+
+```{r}
+metadata2023 <- edna_metadata_field %>%
+  mutate(notes = case_when(is.na(general_notes) & !is.na(notes_about_sample) ~ notes_about_sample,
+                           !is.na(general_notes) & is.na(notes_about_sample) ~ general_notes,
+                           !is.na(general_notes) & !is.na(notes_about_sample) ~ paste0(general_notes, ', ', notes_about_sample))) %>%
+  select(!c(site_or_sampling_description, 
+            tech_responsible, collection_time, filter_time,
+            general_notes, notes_about_sample, extraction_date)) %>%
+  # give all sites the same coordinates
+  group_by(site_code) %>%
+  mutate(site_lat = mean(lat),
+         site_long = mean(long)) %>%
+  ungroup() %>%
+  mutate(lat = coalesce(site_lat, lat),
+         long = coalesce(site_long, long)) %>%
+  select(!c(site_lat, site_long)) %>%
+  mutate(treatment = case_when(sample_id %in% c('pecoe-1289') ~ 'Field blank',
+                               site_code == 'NV_KI' ~ 'Sample',
+                               TRUE ~ treatment)) %>%
+  mutate(sample_id = str_remove_all(sample_id, '-2023$'))
+  #add_count(sample_id, name = 'n_dups')
+
+
+write_csv(metadata2023, here('processeddata', 'peco',
+                                    '2023_edna',
+                                    '20240925_peco2023_metadata.csv')) 
+```
+

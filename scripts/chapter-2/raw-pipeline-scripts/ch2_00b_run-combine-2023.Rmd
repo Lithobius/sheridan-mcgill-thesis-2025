@@ -1,0 +1,328 @@
+---
+title: "ch2_00b_run-combine-2023"
+output: html_document
+date: "2024-06-04"
+---
+
+Note: this script adds the new sequences to the previously combined sequence_table
+
+
+Combining runs for taxonomy assignment: all runs per year, all years.
+Modified from Evan's combining_runs.dada2.12s.PECO.R
+
+Sequence tables
+Input: sequence tables from each run
+Output: sequence table per year, master sequence table from all years
+
+Read retention
+Input: read retention log from each run
+Output: read retention by year and total
+
+
+NOTE ON FILEPATHS:
+datefield by year is the date the run was last processed -- not today's date! That's regular `datefield`!
+
+```{r setup, include=FALSE}
+####Libraries####
+library(tidyverse)
+library(dada2)
+library(seqinr)
+
+library(here)
+# here filepaths
+# combined
+fastq_combined <- here('rawdata', 'peco', 'fastq', 'allyears')
+datefield <- '20241001_'
+runfield <- 'peco-combined_12s_'
+
+# 2021 + 2022
+pecofastq2122 <- here('rawdata', 'peco', 'fastq', 
+                  'allyears') 
+datefield2122 <- '20231023_'
+runfield2122 <- 'peco-combined_12s_'
+
+
+
+# 2021
+pecofastq2021 <- here('rawdata', 'peco', 'fastq', 
+                  'peco2021_raw-miseq') 
+datefield2021 <- '20230819_'
+runfield2021 <- 'peco2021-combined_12s_'
+
+# 2022
+pecofastq2022 <- here('rawdata', 'peco', 'fastq', 
+                  'peco2022_raw-miseq') 
+datefield2022 <- '20231013_'
+runfield2022 <- 'peco2022-combined_12s_'
+
+
+# 2023
+pecofastq2023 <- here('rawdata', 'peco', 'fastq', 
+                  '12S_PECO2023_Run20240907', 'Analysis',
+                  '1', 'Data', 'fastq', 'fixed', 'processed') 
+datefield2023 <- '20241001_'
+runfield2023 <- 'peco2023_12s_20240907_'
+
+```
+
+# eDNA data
+
+## 2021
+
+
+```{r merge2021}
+####read in sequence tables####
+#peco run 1
+seqtab_2021_1 <- read_delim(here(pecofastq2021,
+                                 '12S_PECO_Run1_20220829', 'processed',
+                                 "20240611_12s_PECO_Run1_20220829_sequence-table_12S-merged.txt")) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+#peco run 2
+seqtab_2021_2 <- read_delim(here(pecofastq2021,'12S_PECO_2021_Lib2_Run20221108', 
+                                'processed', "20240611_12S_PECO_2021_Lib2_Run20221108_sequence-table_12S-merged.txt")) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+seqtab_2021_2redo <- read_delim(here(pecofastq2021,'12S_PECO_BSA_Redos_Run20230109', 'processed',
+                                        "20240611_12s_peco_redos_run20230109_sequence-table_12S-merged.txt")) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+####merge sequence tables####
+#ASVs are combined on sequence alone. exact matches are simply merged
+seqtab_2021 <- mergeSequenceTables(seqtab_2021_1, seqtab_2021_2, seqtab_2021_2redo) 
+```
+
+
+## 2022
+
+2022 had two runs on Miseq
+
+```{r 2022}
+#peco run 2
+seqtab_2022_1 <- read_delim(here(pecofastq2022, 
+                                 '12S_PECO2022_Run1_20230523', 'processed',
+                                 '20221023_peco2022_12s_run1-20230523_sequence-table_12S-merged.txt')) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+#peco run 2
+seqtab_2022_2 <- read_delim(here(pecofastq2022, 
+                                 '12S_PECO2022_Run2_20230629', 'processed', 
+                                '20221023_peco2022_12s_run2-20230629_sequence-table_12S-merged.txt')) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+####merge sequence tables####
+#ASVs are combined on sequence alone. exact matches are simply merged
+seqtab_2022 <- mergeSequenceTables(seqtab_2022_1, seqtab_2022_2) 
+```
+
+
+```{r merge2023}
+# only one run for 2023
+#peco 2023
+seqtab_2023 <- read_delim(here(pecofastq2023,
+                               "20241001_peco2023_12s_20240907_sequence-table_12S-merged.txt")) %>%
+ filter(!(row_names == 'Undetermined')) %>%
+ column_to_rownames('row_names') %>%
+ as.matrix()
+```
+
+# Combine eDNA
+
+All sequence tables should be merged into one master table. This means that every identical sequence in every year will be given the same ASV number. This master combined table should be exported and run through seqtable2swarm.py before moving on to clustering and taxonomy assignment.
+
+```{r merge-all-tables}
+####merge sequence tables####
+#ASVs are combined on sequence alone. exact matches are simply merged
+seqtab_all <- mergeSequenceTables(seqtab_2021, seqtab_2022, seqtab_2023) 
+
+
+####save sequences as fasta, give sequences human-readable names, save modified sequence table####
+
+
+#saving the new names and sequences as a .fasta file in your project working directory, and save a table that shows the mapping of sequences to new ASV names
+asvtab_all <- t(as.data.frame(seqtab_all)) 
+#transposed (OTUs are rows) data frame. 
+# unclassing the otu_table() output avoids type/class errors later on
+
+#re-save sequence table w updated names
+write.table(data.frame("row_names"=rownames(seqtab_all), seqtab_all),
+            here(fastq_combined,
+                 paste0(datefield, runfield, "sequence-table.txt")), row.names=FALSE, quote=F, sep="\t")
+
+ASV.seq <- as.character(unclass(row.names(asvtab_all))) #store sequences in character vector
+ASV.num <- paste0("ASV", seq(ASV.seq), sep='') #create new names
+
+asv_map <- cbind(asv = ASV.num, seq = ASV.seq) %>%
+  as.data.frame()
+
+write.table(asv_map, here(fastq_combined, 
+                          paste0(datefield, runfield,
+                                 "asv-sequences_name-mapping.txt")),
+            sep="\t", quote=F, row.names=F, col.names=F)
+
+
+
+write.fasta(sequences=as.list(ASV.seq), names=ASV.num, 
+            here(fastq_combined, 
+                 paste0(datefield, runfield, "asv-sequences.fasta"))) #save sequences with new names in fasta format
+
+
+
+#IMPORTANT: sanity checks
+colnames(seqtab_all) == ASV.seq #only proceed if this tests as true for all elements
+
+#rename your ASVs in the taxonomy table and sequence table objects
+colnames(seqtab_all) <- ASV.num
+
+#re-save sequence table w updated names
+write.table(data.frame("row_names"=rownames(seqtab_all),seqtab_all),
+            here(fastq_combined,
+                 paste0(datefield, runfield, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+
+```
+
+## ASV tables by year
+
+These will be used for eDNA QC after taxonomy assignment.
+
+```{r yearly sequence tables}
+asvtab_2021 <- seqtab_2021 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2021,
+            here(pecofastq2021,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2021.txt")), row.names=FALSE, quote=F, sep="\t")
+
+# 2022
+asvtab_2022 <- seqtab_2022 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2022 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2022,
+            here(pecofastq2022,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2022.txt")), row.names=FALSE, quote=F, sep="\t")
+
+
+# 2023
+asvtab_2023 <- seqtab_2023 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2023,
+            here(pecofastq2023,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2023.txt")), row.names=FALSE, quote=F, sep="\t")
+
+```
+
+# Read retention summary statistics
+
+REDO 2023 FOR THESE FILES AND MERGE LATER
+
+
+These files map where the reads went throughout the entire QC process
+
+```{r load-in read retention}
+
+# 2022 run 2
+retention_2022_2 <- read_csv(here(pecofastq2022, 
+                                   '12S_PECO2022_Run2_20230629', 'qc_plots',
+                                   '20240603_peco2022_12s_run2-20230629_read-retention_12s_bysample.csv'))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2022)
+
+
+
+```
+
+```{r merge-retention}
+
+retention_all <- retention_2021_1 %>%
+  bind_rows(retention_2021_2) %>%
+  bind_rows(retention_2021_2redo) %>%
+  bind_rows(retention_2022_1) %>%
+  bind_rows(retention_2022_2) 
+
+retention_summary <- retention_all %>%
+  group_by(year) %>%
+  summarize(n_samp = length(sample_id),
+            raw = sum(raw_f) + sum(raw_r),
+            after_cutadapt = sum(cutadapt_f) + sum(cutadapt_r),
+            # get the rs for this on the summary
+            after_filtertrim = sum(filtertrim_f) + sum(filtertrim_r),
+            after_denoise = sum(denoised_f) + sum (denoised_r),
+            merged = sum(merged),
+            nosingletons = sum(nosingletons),
+            nochimeras = sum(nochimeras)) %>%
+  ungroup() %>%
+  janitor::adorn_totals('row')
+
+
+write.csv(retention_summary, here(fastq_combined, 
+                                  paste0(datefield, runfield,
+                                         "read_retention.csv")))
+```
+
+
+
+
+# Dereplicate FASTA test
+
+Right now it looks like all these are unique?
+
+```{r dereplicate}
+library(ips)
+
+asvtab_all <- t(as.data.frame(seqtab_all))
+
+seq_list <- asvtab_all %>%
+  as.data.frame() %>%
+  rownames_to_column('asv_seq') %>%
+  select(asv_seq) %>%
+  mutate(temp_asv = paste0("tempasv_", seq(asv_seq))) %>%
+  column_to_rownames('temp_asv')
+
+write.fas(seq_list, here(fastq_combined, '20231023_tempasvs.fasta'))
+seq_list2 <- read.fas(here(fastq_combined, '20231023_tempasvs.fasta'))
+
+seq_align <- mafft(seq_list2)
+write.fas(seq_align, here(fastq_combined, '20231023_tempasvs_align.fasta'))
+
+seq_derep <- dada2:::derepFasta(here(fastq_combined, '20231023_tempasvs_align.fasta'))
+
+uniq<-seq_derep$uniques %>%
+  as.data.frame()
+
+```
+

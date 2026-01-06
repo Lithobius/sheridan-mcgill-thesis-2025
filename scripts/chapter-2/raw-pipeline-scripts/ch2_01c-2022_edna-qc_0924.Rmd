@@ -1,0 +1,251 @@
+---
+title: "edna_01b_2022edna-qc"
+output: html_document
+date: "2023-05-29"
+---
+
+Updated with new merged format October 7 2024
+Updated for MOTUs and lulu September 25, 2024
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+
+# here filepaths
+# In
+fastq <- here('rawdata', 'peco', 'fastq', 
+              '12S_PECO_2022_Redos_Run20250301',
+              'Analysis', '1', 'Data', 
+              'fastq', 'fixed', 'processed') 
+# Out
+edna_combined <- here('processeddata', 'peco', '2021-24_edna')
+edna_out <- here('processeddata', 'peco', '2022_edna')
+
+# fields
+datefield_out <- '20250711_'
+runfield <- 'peco-2022_12s_'
+```
+
+
+# Load In
+
+```{r load-in}
+metadata <- read_csv(here(edna_combined, '20240925_peco-combined_metadata.csv')) %>%
+  filter(year == 2022)
+
+taxonomy <- read_csv(here(edna_combined, '20250528_peco-combined_12s_taxonomy.csv'))
+
+motu2asvs <- read_csv(here('rawdata', 'peco', 
+                           'fastq', 'allyears', 
+                           '20250528_peco-combined_12s_lulu_motu2asv.csv'))
+
+asvtable <- read_delim(here(fastq,
+                            '20250528_peco-combined_12s_sequence-table_asv-names_2022.txt'))
+
+```
+
+
+```{r merge}
+motumatrix_metadata <- asvtable %>%
+  # pivot to long so sequence can map to ASV
+  pivot_longer(cols = !sample,
+               names_to = 'asv') %>%
+  filter(value >= 1) %>% 
+  mutate(sample = tolower(sample)) %>%
+  mutate(sample_id = sample) %>%
+    mutate(sample_id = case_when(str_detect(sample_id, 'pecoe-') ~ 
+                                 str_replace_all(sample_id, 'pecoe-', 'pecoe-0'),
+                               sample_id == 'neg-pcr1' ~ 'negpcr-2022-1',
+                               sample_id == 'peco2022-negpcr2' ~ 'negpcr-2022-2',
+                               str_detect(sample_id, 'exblank-2022-') ~ 
+                                 str_replace_all(sample_id, 'exblank-2022-', 'exblank-2022-0'),
+                               TRUE ~ sample_id)) %>%
+  #filter(sample_id2 %in% metadata$sample_id2) %>%
+  left_join(taxonomy) %>%
+  mutate(motu_pa = 1) %>%
+  rename(reads_raw = value) %>%
+  left_join(metadata) %>%
+  # remove columns that don't matter this year
+  janitor::remove_empty() %>%
+  # check before removing
+  select(!c(motu_swarm, curated, lulu_rank, sample)) %>%
+  mutate(extraction_blank = case_when(str_detect(extraction_blank, 'pecoxn') ~ str_replace_all(extraction_blank, 'pecoxn', 'exblank-2022-'),
+                                      TRUE ~ extraction_blank))
+```
+
+
+# eDNA data
+
+singletons, pcr dissimilarity
+
+
+## Lab controls
+
+Subtracting reads from pcr / extraction controls
+
+
+RIGHT NOW there is an issue with the metadata not showing the lab controls, this should be fixed with a new miseq or whatever anyway
+
+labs; 
+extraction negative -- group = extraction date | extraction blank = xn###
+pcr negative -- group == library
+Field blank -- group = site
+
+```{r control-subtract}
+# this will need to be expanded with more data + lab metadata
+pcr_ctrl <- motumatrix_metadata %>%
+  filter(treatment == 'PCR blank') %>%
+  select(sample_id, library, asv, reads_raw, found_taxa) %>%
+  mutate(pcrasv = paste0(library, '_', asv)) %>%
+  select(pcrasv, library, reads_raw, found_taxa) %>%
+  rename(reads_control = reads_raw)
+
+# needs done when extraction info is given
+extract_ctrl <- motumatrix_metadata %>%
+  filter(treatment == 'Extraction blank') %>%
+  select(sample_id, asv, reads_raw, found_taxa) %>%
+  # make single code that combines site and motu
+  mutate(extractasv = paste0(sample_id, '_', asv)) %>%
+  select(extractasv, reads_raw, found_taxa) %>%
+  rename(reads_control = reads_raw)
+
+motumatrix_metadata_nolab <- motumatrix_metadata %>%
+  # insert minus part here
+  # subtract extraction controls
+  # single code to combine site and motu
+  mutate(extractasv = paste0(extraction_blank, '_', asv)) %>%
+  # merge to have field control values for each site-motu combo
+  left_join(extract_ctrl) %>%
+  mutate(in_ctrl_extract = ifelse(reads_control > 0, 'yes', NA_character_)) %>%
+  #subtract control reads from regular reads
+  mutate(reads_adjust = reads_raw - reads_control) %>%
+  mutate(reads_adjust = coalesce(reads_adjust, reads_raw)) %>%
+  mutate(reads_adjust = ifelse(reads_adjust <= 0, 0, reads_adjust)) %>%
+  ## keeping motus that are negative for now to look into removal
+  # only samples that still have reads
+  #filter(reads_adjust > 0) %>%
+  select(!(c(reads_control, extractasv))) %>%
+  # subtract pcr controls by library
+  # single code to combine library and motu
+  mutate(pcrasv = paste0(library, '_', asv)) %>%
+  #merge to have field control values for each site-motu combo
+  left_join(pcr_ctrl) %>%
+  mutate(in_ctrl_pcr = ifelse(reads_control > 0, 'yes', NA_character_)) %>%
+  #subtract control reads from regular reads
+  mutate(reads_adjust_lab = reads_adjust - reads_control) %>%
+  mutate(reads_adjust_lab = coalesce(reads_adjust_lab, reads_adjust)) %>%
+  mutate(reads_adjust_lab = ifelse(reads_adjust_lab <= 0, 0, reads_adjust_lab)) %>%
+  # keeping motus without reads for now
+  #only motus that still have reads
+  filter(reads_adjust_lab > 0) %>%
+  select(!(c(reads_control, reads_adjust, pcrasv))) %>%
+  # n site code = lab control
+  filter(!(is.na(site_code))) %>%
+  mutate(ctrl_lab0 = ifelse(reads_adjust_lab == 0, 'yes', 'no')) %>%
+  # remove unneeded lab based columns
+  #select(!(c(sample_box, extraction_notes, extraction_staff, extraction_date,
+  #           lab_notes))) %>%
+  relocate(in_ctrl_extract, in_ctrl_pcr, reads_adjust_lab, ctrl_lab0, .before = kingdom)
+  
+
+```
+
+
+## Field controls
+
+Here we are subtracting reads in field controls from all samples in that site.***
+
+Currently I have adjusted this to be an annotation of asvs that are in controls, also indicating if they would have been removed given previous criteria
+
+```{r field-control}
+field_ctrl <- motumatrix_metadata_nolab %>%
+  filter(treatment == 'Field blank') %>%
+  select(site_code, asv, reads_raw, found_taxa) %>%
+  # make single code that combines site and motu
+  mutate(siteasv = paste0(site_code, '_', asv)) %>%
+  select(siteasv, reads_raw, found_taxa) %>%
+  rename(reads_control = reads_raw)
+
+motumatrix_metadata_nofield <- motumatrix_metadata_nolab %>%
+  # single code to combine site and motu
+  mutate(siteasv = paste0(site_code, '_', asv)) %>%
+  # merge to have field control values for each site-motu combo
+  left_join(field_ctrl) %>%
+  #subtract control reads from regular reads
+  mutate(reads_adjust = reads_adjust_lab - reads_control) %>%
+  mutate(reads_adjust = coalesce(reads_adjust, reads_adjust_lab)) %>%
+  mutate(reads_adjust = ifelse(reads_adjust <= 0, 0, reads_adjust)) %>%
+  mutate(ctrl_fieldlab0 = ifelse(reads_adjust == 0, 'yes', 'no')) %>%
+  mutate(in_ctrl_field = ifelse(reads_control > 0, 'yes', 'no')) %>%
+  # only samples that still have reads
+  #filter(reads_adjust > 0) %>%
+  #subtract control reads from raw reads
+  mutate(reads_adjust_field = reads_raw - reads_control) %>%
+  mutate(reads_adjust_field = coalesce(reads_adjust_field, reads_raw)) %>%
+  mutate(reads_adjust_field = ifelse(reads_adjust_field <= 0, 0, reads_adjust_field)) %>%
+  select(!(c(reads_control, siteasv))) %>%
+  #relocate(reads_adjust, .before = reads_raw) %>%
+  mutate(ctrl_field0 = ifelse(reads_adjust_field == 0, 'yes', 'no')) %>%
+  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) %>%
+  select(!c(n_dups))
+
+
+write_csv(motumatrix_metadata_nofield, here(edna_out,
+                                              paste0(datefield_out, 
+                                                     runfield, 'motumatrix_complete.csv')))
+```
+
+
+# Taxonomy
+
+Add taxonomy for now to filter the ASV table to fish, then we'll do the refinement in the next step
+
+```{r}
+#check options
+#unique(motumatrix_metadata_nosingles$class)
+
+#select only fish
+motumatrix_metadata_fish <- motumatrix_metadata_nofield %>%
+  filter(class %in% c('Teleostei', 'Holocephali', 'Elasmobranchii'))
+
+write_csv(motumatrix_metadata_fish, here(edna_out, paste0(datefield_out, 
+                                                          runfield, 'asvmatrix_fish.csv')))
+
+unique(motumatrix_metadata_nofield$class)
+```
+
+
+
+## collect problems
+
+also need to put in found taxa == NA, these are likely the below-species level IDs
+Also likely lots of uncultured bacteria; still odd not to get any hits though
+```{r}
+problems <- motumatrix_metadata_nofield %>%
+  #select(asv) %>%
+  distinct() %>%
+  # depending on how you want to filter
+  filter(!(motu %in% c(motumatrix_metadata_fish$motu))) %>%
+  filter(!(class %in% c('Teleostei', 'Holocephali', 'Elasmobranchii'))) %>%
+  filter(common_name %in% c('No BLAST hit', 'Unknown'))
+
+
+write_csv(problems, here(edna_out, '20250505_peco2022_12s_problems-asvs.csv'))
+
+```
+
+## save controls
+
+```{r}
+all_ctrl <- motumatrix_metadata %>%
+  filter(treatment %in% c('Extraction blank', 'PCR blank', 'Field blank')) %>%
+  select(sample_id, motu, reads_raw, found_taxa, common_name, site_code, 
+         region_name, region_code, decimal_latitude, decimal_longitude,
+         genus, family, order, class)
+  
+
+write_csv(all_ctrl, here(edna_out, 
+                         '20250707_peco2022_12s_controls.csv'))
+```
+

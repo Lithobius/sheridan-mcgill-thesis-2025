@@ -1,0 +1,161 @@
+---
+title: "ch1_coi-01b_swarm"
+output: html_document
+date: "2023-08-22"
+---
+
+Here we're going to be testing swarm, according to brandt et al 2021 (https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13398), they used swarm on asv tables from dada2.
+That being the case, we can start with the data from Evan for chapter 1.
+
+
+Swarm was installed then made available to users as explained on the github: https://github.com/torognes/swarm
+the binary from the installation copied to /usr/local/bin, which is on `$PATH`
+
+Here we will use a similar strategy to Evan's dada2 scripts and use system2 to call swarm
+
+```{r}
+library(tidyverse)
+library(here)
+
+# filepaths for use with here, basic files
+coi_in <- here("rawdata", "2018calvert", "fastq",
+               'coi_kate', 'combined_runs')
+# Destination folders
+coi_out <- here('processeddata', '2018calvert', 'qcstages')
+
+# datefield might be different
+datefield_in <- '20240219_'
+datefield_out <- '20240220_'
+runfield <- 'calvert2018_coi_'
+```
+
+
+right now i don't have sequence tables for this data, only asv tables.
+I guess step 1 is to turn the sequence table INTO an asv table?
+I think this is a lot easier in python I probably shouldn't waste my time here at the moment.
+
+
+Note I then need to take the sequence tables and turn them into a fasta formatted for swarm
+
+Now that they're formatted for swarm we can run swarm??
+
+For using system2, we need to generate filepaths for the arguments in the call.
+```{r filepaths}
+# filepath to fasta formatted for swarm
+swarmfasta <- file.path(here(coi_in, 
+                             paste0(datefield_in, runfield,
+                                    "sequence-table_swarm-format.fasta")))
+
+#generate filenames for output
+swarmout <- file.path(here(coi_in, 
+                           paste0(datefield_out, runfield, 
+                                  'swarm_outputfile.txt')))
+swarmstats <- file.path(here(coi_in, 
+                             paste0(datefield_out, runfield, 
+                                    'swarm_statsfile.tsv')))
+swarmlog <- file.path(here(coi_in, 
+                           paste0(datefield_out, runfield, 
+                                  'swarm_log.txt')))
+swarmreps <- file.path(here(coi_in, 
+                            paste0(datefield_out, runfield, 
+                                   'swarm_clusterreps.fasta')))
+```
+
+
+```{r swarm call}
+system2("swarm", args = "-v")
+
+system2("swarm", args = c(swarmfasta,
+                          "-w", swarmreps,
+                          "-o", swarmout,
+                          "-s", swarmstats,
+                          "-l", swarmlog,
+                          "-f"))
+
+```
+
+# input swarm output to generate motus
+
+should probably add 'curate with lulu' step before assigning motus; temp num to start?
+
+```{r input swarm}
+
+swarm_stat <- read_delim(here(coi_in, 
+                             paste0(datefield_out, runfield, 
+                                    'swarm_statsfile.tsv')),
+                         # give columns names
+                        col_names = c('n_in_cluster', 'motu_reads', 
+                                      'seed_asv', 'seed_reads', 'n_1readamplicon',
+                                      'max_iterations_to_limit', 'cumulative_steps')) 
+
+swarm_stat <- swarm_stat %>%
+ mutate(motu = paste0('motu', seq.int(from = 1, to = nrow(swarm_stat)))) 
+
+
+swarm_out <- read_delim(here(coi_in, 
+                             paste0(datefield_out, runfield, 'swarm_outputfile.txt')),
+                        col_names = FALSE, delim = " ")
+
+
+# format
+swarm_out <- swarm_out %>%
+  # identify seeds for taxonomy assignment ~TEMPORARY~
+  rename(seed_asv = X1) %>%
+  # make sure the seed itself is part of the key
+  mutate(X3 = seed_asv) %>%
+  # add 'motu' numbers
+  mutate(motu = paste0('motu', seq.int(from = 1, to = nrow(swarm_out)))) %>%
+  # make long, no more NAs
+  pivot_longer(cols = !c(motu, seed_asv)) %>%
+  select(!name) %>%
+  # if its a cluster of 1, keep the value in
+  mutate(value = ifelse(is.na(value), seed_asv, value)) %>%
+  # separate out members of cluster
+  separate_wider_delim(value, delim = " ", names_sep = "_", too_few = 'align_start') %>%
+  # pair seed and each member
+  pivot_longer(cols = !c(motu, seed_asv)) %>%
+  # clean pivot, NA's useless here
+  select(!name) %>%
+  filter(!(is.na(value))) %>%
+  # asv + reads each get their own column
+  separate_wider_delim(value, delim = "_", names = c("asv", "asv_reads")) %>%
+  # seed reads are different
+  separate_wider_delim(seed_asv, delim = "_", names = c("seed_asv", "seed_reads"))
+  
+  
+write_csv(swarm_out, here(coi_out, paste0(datefield_out, runfield, 'motu2asv.csv')))
+
+
+
+# to do; replace asv names in fasta
+```
+
+
+
+# update eDNA
+
+After BLAST, run top 10 for the MOTU versions
+this is still the mifish version. the COI version might look quite different
+
+top 10 taxonomy for MOTU
+
+In this version we are going to merge all ASV annotations and motu annotations so here we just want what motu is what taxon so that we can add the column for filtering.
+
+```{r top hits}
+# load-in keys
+#assigned_asvs <- read_csv(here(coi_in, paste0(datefield_out, runfield, 'assigned_asvs.csv'))) %>%
+  # so that it only joins the seed asvs rather than every asv
+#  rename(seed_asv = asv)
+
+# we reblasted but didn't rerun swarm
+assigned_asvs <- read_csv(here(coi_in, paste0('20240220_', runfield, 'assigned_asvs.csv'))) %>%
+  # so that it only joins the seed asvs rather than every asv
+  rename(seed_asv = asv)
+
+motu_taxonomy <- swarm_stat %>%
+  left_join(assigned_asvs)
+
+#write_csv(motu_taxonomy, here(coi_out, paste0(datefield_out, runfield, 'swarm_statfile-taxonomy.csv')))
+# reblasted but didn't rerun swarm
+write_csv(motu_taxonomy, here(coi_out, paste0('20240220_', runfield, 'swarm_statfile-taxonomy.csv')))
+```

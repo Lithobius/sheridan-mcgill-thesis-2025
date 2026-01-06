@@ -1,0 +1,109 @@
+---
+title: "swarm 12s"
+author: "Kate Sheridan"
+---
+
+This script runs SWARM on output from 00_run-processing. This requires
+
+Brandt et al 2021 (https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13398), used swarm on asv tables from dada2.
+
+Swarm was installed, then made available to users as explained on the github: https://github.com/torognes/swarm
+the binary from the installation copied to /usr/local/bin, which is on `$PATH`
+
+Here we will call swarm with `system2`
+
+```{r}
+library(tidyverse)
+library(here)
+# filepaths for use with here, basic files
+calvertfastq <- here('rawdata', '2018calvert', 'fastq', 
+                  '12S_Calvert2018_Re-run20210903', 'processed')
+datefield <- '20240315_'
+runfield <- 'calvert2018_12s_'
+```
+
+
+Now the formatting:
+We need the fasta with ASVs to be
+`>ASV##_readcount`
+
+Run ch1_00b_seq-table2swarm.py using the asv table and fasta from 00a_run-processing.
+
+
+```{r load-in}
+
+# filepath to fasta formatted for swarm
+swarmfasta <- file.path(here(calvertfastq, "20240315_calvert2018_12s_sequence-table_swarm-format.fasta"))
+#generate filenames for output
+swarmout <- file.path(here(calvertfastq, paste0(datefield, runfield, 'swarm_outputfile.txt')))
+swarmstats <- file.path(here(calvertfastq, paste0(datefield, runfield, 'swarm_statsfile.tsv')))
+swarmlog <- file.path(here(calvertfastq, paste0(datefield, runfield, 'swarm_log.txt')))
+swarmreps <- file.path(here(calvertfastq, paste0(datefield, runfield, 'swarm_clusterreps.fasta')))
+```
+
+
+```{r swarm call}
+system2("swarm", args = "-v")
+
+system2("swarm", args = c(swarmfasta,
+                          "-w", swarmreps,
+                          "-o", swarmout,
+                          "-s", swarmstats,
+                          "-l", swarmlog,
+                          "-f"))
+
+```
+
+# input swarm output to generate motus
+
+should probably add 'curate with lulu' step before assigning motus; temp num to start?
+
+```{r input swarm}
+
+swarm_stat <- read_delim(here(calvertfastq, 
+                             '20240315_calvert2018_12s_swarm_statsfile.tsv'),
+                         # give columns names
+                        col_names = c('n_in_cluster', 'motu_reads', 
+                                      'seed_asv', 'seed_reads', 'n_1readamplicon',
+                                      'max_iterations_to_limit', 'cumulative_steps')) 
+
+swarm_stat <- swarm_stat %>%
+  mutate(motu = paste0('motu', seq.int(from = 1, to = nrow(swarm_stat)))) %>%
+  mutate(seed_asv_reads = paste0(seed_asv, '_', seed_reads))
+
+swarm_out <- read_delim(here(calvertfastq, 
+                             '20240315_calvert2018_12s_swarm_outputfile.txt'),
+                        col_names = FALSE, delim = " ")
+
+
+# format
+swarm_out <- swarm_out %>%
+  # identify seeds for taxonomy assignment ~TEMPORARY~
+  mutate(seed_asv_reads = X1) %>%
+  # add 'motu' numbers
+  left_join(swarm_stat) %>%
+  select(!(c(motu_reads, n_in_cluster, n_1readamplicon, seed_reads,
+             max_iterations_to_limit, cumulative_steps, seed_asv_reads))) %>%
+  #mutate(cluster = paste0('cluster', seq.int(from = 1, to = nrow(swarm_out)))) %>%
+  # make long, no more NAs
+  pivot_longer(cols = !c(motu, seed_asv)) %>%
+  select(!name) %>%
+  filter(!(is.na(value))) %>%
+  # asv + reads each get their own column
+  separate_wider_delim(value, delim = "_", names = c("asv", "asv_reads"))
+  
+  
+write_csv(swarm_out, here(calvertfastq, paste0(datefield, runfield, 'motu2asv.csv')))
+
+write_csv(swarm_stat, here(calvertfastq, paste0(datefield, runfield, 'swarm_statsfile-w-motunums.csv')))
+
+
+
+# to do; replace asv names in fasta
+```
+
+Now we blast our swarm clusters.
+
+
+
+

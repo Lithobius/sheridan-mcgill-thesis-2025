@@ -1,0 +1,132 @@
+---
+title: "ch2_00f_lulu"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+
+library(lulu)
+
+fastq <- here('rawdata', 'peco', 'fastq', 'allyears')
+edna_out <- here('processeddata', 'peco', '2021-24_edna')
+
+datefield <- '20250528_'
+runfield <- 'peco-combined_12s_'
+```
+
+# load in 
+```{r loadin}
+motu2asv <- read_csv(here(fastq, '20250528_peco-combined_12s_motu2asv.csv'))%>%
+  distinct()
+
+asv_seq_table <- read_delim(here(fastq, 
+                                 "20250528_peco-combined_12s_sequence-table_asv-names.txt"))
+```
+
+
+# set up dataframes for lulu
+```{r prep}
+# join data to filter into the required dfs
+motuxsample <-  asv_seq_table %>%
+  # pivot to long so sequence can map to ASV
+  pivot_longer(cols = !row_names,
+               names_to = 'asv') %>%
+  filter(value >= 1) %>% 
+  left_join(motu2asv) %>%
+  rename(reads_raw = value,
+         sample_id = row_names) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  select(sample_id, reads_raw, motu) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = (reads_raw),
+              values_fn = sum) %>%
+    # NA to 0
+  mutate_all(~replace(., is.na(.), 0)) %>%
+  column_to_rownames('motu')
+```
+
+
+We'll want to use the already-swarmed stuff, but we need our cluster representatives to match the motu names
+
+From github:
+First produce a blastdatabase with the OTUs
+makeblastdb -in OTU_sequences.fasta -parse_seqids -dbtype nucl
+ Then blast the OTUs against the database
+blastn -db OTU_sequences.fasta -outfmt '6 qseqid sseqid pident' -out match_list.txt -qcov_hsp_perc 80 -perc_identity 84 -query OTU_sequences.fasta
+
+```{r}
+otu_sequences <- file.path(fastq,
+                           '20250528_peco-combined_12s_swarm_clusterreps-motus.fasta')
+blast_out <- file.path(fastq, paste0(datefield, runfield, 'lulu_matchlist.txt'))
+
+# check its working
+system2("blastn", args = "-h")
+system2("makeblastdb", args = "-h")
+
+# first produce a blast database with the otus
+system2("makeblastdb", args=c("-in", otu_sequences,
+                         "-parse_seqids",
+                         "-dbtype", 'nucl'
+                         ))
+
+system2("blastn", args=c("-db", otu_sequences, # directory of db to blast against
+                         "-outfmt", "'6 qseqid sseqid pident'",
+                         "-qcov_hsp_perc", 80,
+                         "-perc_identity", 84,
+                         "-query", otu_sequences,
+                         "-out", blast_out
+                         ))
+
+motu_matchlist <- read_delim(here(fastq, paste0(datefield, runfield, 'lulu_matchlist.txt')),
+                           delim = '\t', col_names = c("motu_query", "motu_hit",  "identity_percentage"))
+```
+
+Now that we have both parts we can try lulu
+
+We can look at the settings more in depth at some point!
+
+```{r}
+curated_result <- lulu(motuxsample, motu_matchlist)
+
+# make sure the motus are in a column to merge in later steps
+curated_table <- curated_result$curated_table %>%
+  rownames_to_column('motu')
+motu_map <- curated_result$otu_map %>%
+  rownames_to_column('motu')
+
+discard <- data.frame(curated_result$discarded_otus) %>%
+  rename(discarded = `curated_result.discarded_otus`)
+
+curated_result
+
+curated_result$minimum_relative_cooccurence #.95
+curated_result$minimum_match # 84
+
+motu2asv2 <- motu2asv %>%
+  left_join(motu_map) %>%
+  rename(motu_swarm = motu,
+         motu_lulu = parent_id,
+         lulu_rank = rank) %>%
+  relocate(motu_lulu, motu_swarm) %>%
+  select(!c(seed_asv, total, spread, asv_reads))
+```
+
+# Export
+```{r}
+# I don't think we need to write this out since we're going to be processing year by year
+#write_csv(curated_table, here(edna_out, paste0(datefield, runfield, 'motuxsample_lulu.csv')))
+#write_csv(motu_map, here(fastq, paste0(datefield, runfield, 'lulu_motu-map.csv')))
+
+# key for QC
+write_csv(motu2asv2, here(fastq, paste0(datefield, runfield, 'lulu_motu2asv.csv')))
+
+# TODO later make into a txt with commas
+# Used to remove from fasta
+write_csv(discard, here(fastq, paste0(datefield, runfield, 'removed-motus.csv')))
+```
+
+Now we need to remove the discarded motus from the fasta

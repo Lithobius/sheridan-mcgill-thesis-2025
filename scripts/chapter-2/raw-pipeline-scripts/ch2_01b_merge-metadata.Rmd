@@ -1,0 +1,374 @@
+---
+title: "2022edna_01e-add-2021"
+output: html_document
+date: "2023-05-31"
+---
+
+This script combines years of data into one file of each type
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(PNWColors)
+
+# here filepaths
+edna_2021 <- here('processeddata', 'peco', '2021_edna')
+edna_2022 <- here('processeddata', 'peco', '2022_edna')
+edna_2023 <- here('processeddata', 'peco', '2023_edna')
+edna_2024 <- here('processeddata', 'peco', '2024_edna')
+
+edna_out <- here('processeddata', 'peco', '2021-24_edna')
+
+datefield <- '20251107_'
+runfield <- 'peco-combined_12s_'
+
+# Palette
+## match map with 14 levels if by region
+## or match to 17 levels corresponding with partners: note that San Francisco Bay has 2 partners
+pal <-  pnw_palette("Bay", 17, type = "continuous")                               
+#make it an object to use as the colour value in the plot
+
+pal14 <- pnw_palette("Bay", 14, type = "continuous")
+
+# version with 2 for orgeon and 2 for san francisco
+pal_2or <- c("Juneau Region, Alaska" = "#00496F",
+             "Southeast Alaska" = "#03587B",
+             "Haida Gwaii, British Columbia" = "#076787",
+             "Central Coast British Columbia" = "#0B7693",
+             "North Vancouver Island, British Columbia" = "#0F85A0",
+             "Inner Coast, British Columbia" = "#469989",
+             "Pacific Rim Park, British Columbia" = "#7EAE73",
+             "Puget Sound & Padilla Bay, Washington" = "#B5C25C",
+             "Willapa Bay, Washington" = "#EDD746",
+             "Yaquina Bay, Oregon" = "#EDC334",
+             "Coos Bay, Oregon" = "#EDB123",
+             "Humboldt Bay, California" = "#ED9E11",
+             "Bodega Bay, California" = "#ED8B00",
+             "San Fransisco Bay, California" = "#E97809",
+             "Morro Bay, California" = "#E56512",
+             "Los Angeles, California" = "#E1531B",
+             "San Diego region, California" = "#DD4124")
+```
+
+# Metadata
+
+```{r metadata-combine}
+
+site_conversions <- read_csv(here('rawdata', 'peco', 
+                                  '2023_edna', 'site_conversions_2023.csv')) %>%
+  rename(site_code = old_site_code) %>%
+  distinct()
+
+meta2021 <- read_csv(here(edna_2021, '20231013_peco2021_metadata.csv')) %>%
+  mutate(year = 2021)
+
+meta2022 <- read_csv(here(edna_2022, '20231013_peco2022_metadata.csv')) %>%
+  mutate(year = 2022) %>%
+  mutate(extraction_date = as.character(extraction_date))
+
+meta2023 <- read_csv(here(edna_2023, '20240925_peco2023_metadata.csv')) %>%
+  mutate(year = 2023) %>%
+  mutate(salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c)) %>%
+  rename(decimal_latitude = lat,
+         decimal_longitude = long)
+
+
+meta2024 <- read_csv(here(edna_2024, '20250527_peco2024_metadata.csv')) %>%
+  mutate(year = 2024)  %>%
+  mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         filter_time = as.character(filter_time),
+         extraction_date = as.character(extraction_date)) %>%
+  # are these correct??? Matching previous years
+  mutate(location_name = case_when(location_name == 'Louscoone Head' ~ 'Louscoone Inlet',
+                                   TRUE ~ location_name)) %>%
+  # temporary for sties that are missing, coordinates from 2023
+  # or my best guess from google
+  mutate(decimal_latitude = case_when(site_code == 'NC_BL' ~ 38.19,
+                                      TRUE ~ decimal_latitude)) %>%
+  mutate(decimal_longitude = case_when(site_code == 'NC_BL' ~ -122.93,
+                                      TRUE ~ decimal_longitude))
+
+controls2024 <- meta2024 %>%
+  select(sample_id, extraction_blank, pcr_blank) %>%
+  pivot_longer(cols = !sample_id,
+               values_to = 'blanks',
+               names_to = 'treatment') %>%
+  select(!sample_id) %>%
+  rename(sample_id = blanks) %>%
+  distinct() %>%
+  mutate(treatment = case_when(treatment == 'extraction_blank' ~ 'Extraction blank',
+                               treatment == 'pcr_blank' ~ 'PCR blank'))
+
+
+meta_all <- meta2021 %>%
+  full_join(meta2022) %>%
+  janitor::remove_empty() %>%
+  mutate(sample_id = str_replace_all(sample_id, 'coe', 'coe-0')) %>%
+  mutate(sample_id = str_replace_all(sample_id, '-0-', '-')) %>%
+  mutate(sample_id = str_remove_all(sample_id, '-bsaredo')) %>%
+  left_join(site_conversions) %>%
+  mutate(site_code = coalesce(better_site_code, site_code)) %>%
+  select(!better_site_code) %>%
+  distinct() %>%
+  relocate(region_name) %>%
+  mutate(site_code = case_when(site_code == 'MI_PP' ~ 'PP_MI',
+                               site_code == 'MB_TD' ~ 'MB_TP',
+                               #westside park
+                               site_code == 'A_NC' ~ 'NC_WP',
+                               site_code == 'B_NC' ~ 'NC_B',
+                               site_code == 'C_NC' ~ 'NC_C',
+                               site_code == 'D_NC' ~ 'NC_D',
+                               site_code == 'E_NC' ~ 'NC_E',
+                               site_code == 'F_NC' ~ 'NC_BL',
+                               site_code == 'PP_J' ~ 'PP_JJ',
+                               site_code == 'PS_NC' ~ 'NC_PS',
+                               site_code == 'PB_PS' ~ 'PS_BV',
+                               site_code == 'MD_HG' ~ 'HG_MDD',
+                               site_code == 'SD_SD' ~ 'SD_SDL',
+                               str_detect(site_code, 'OR_') ~ str_replace_all(site_code, 'OR_', 'YB_'),
+                               site_code == 'F_YB' ~ 'YB_F',
+                               str_detect(site_code, 'CA_') & region_name == "CA_SD" ~ str_replace_all(site_code, 'CA_', 'SD_'),
+                               TRUE ~site_code)) %>%
+
+  #update blanks
+  mutate(sample_id = case_when(str_detect(sample_id, 'peco-neg-pcr') ~ 
+                                 str_replace_all(sample_id, 'peco-neg-pcr', 'negpcr-2021'),
+                               str_detect(sample_id, 'neg-pcr-peco') ~ 
+                                 str_replace_all(sample_id, 'neg-pcr-peco', 'negpcr-2021'),
+                               str_detect(sample_id, 'pecoxn') ~ 
+                                 str_replace_all(sample_id, 'pecoxn', 'exblank-2021-'),
+                               TRUE ~ sample_id)) %>%
+  mutate(treatment = case_when(control == 'no' ~ 'Sample',
+                               control == 'yes' & !is.na(site_code) ~ 'Field blank',
+                               str_detect(sample_id, 'negpcr') ~ 'PCR blank',
+                               str_detect(sample_id, 'exblank') ~ 'Extraction blank',
+                               TRUE ~ treatment)) %>%
+  filter(!is.na(sample_id)) %>%
+  full_join(meta2023) %>%
+  full_join(meta2024) %>%
+  full_join(controls2024) %>%
+    mutate(region_code = case_when(region_code == 'BC_HG' ~ 'BC_HGa',
+                                 region_code == 'CA_Nca' ~ 'CA_NCa',
+                                 site_code %in% c('YB_FP', 'YB_BV') ~ 'OR_CB',
+                                 TRUE ~ region_code)) %>%
+  mutate(site_code = case_when(site_code == 'SD_SD' ~ 'SD_SDL',
+                               site_code == 'YB_SN' ~ 'YB_SBN',
+                               site_code == 'YB_SS' ~ 'YB_SBS',
+                               site_code == 'OR_SBS' ~ 'YB_SBS',
+                               site_code == 'WB_NA' ~ 'WB_PA',
+                               site_code == 'HB_SB' ~ 'HB_SR',
+                               site_code == 'SD_Coronado' ~ 'SD_CI',
+                               site_code == "YB_FP" ~ "CB_FP",
+                               site_code == "YB_BV" ~ "CB_BV",
+                               site_code %in% c('NV_KI', 'NV_KH') ~ 'NV_KB',
+                               site_code == 'NC_PS' & region_code == 'WA_PSb' ~ 'PS_NC',
+                               TRUE ~ site_code))%>%
+  # combine similar columns
+  mutate(extraction_blank = coalesce(extraction_negatives_associated, extraction_blank)) %>%
+  mutate(dna_extraction_date = coalesce(dna_extraction_date, extraction_date)) %>%
+  mutate(swell_m = coalesce(swell_height_m, swell_m)) %>%
+  mutate(library = coalesce(mi_seq_library, plate_sequencing, library)) %>%
+  mutate(temperature_c = coalesce(temperature_C, temperature_c)) %>%
+  mutate(organization_participants = coalesce(organization_participants, personnel)) %>%
+  mutate(notes_about_sample = coalesce(notes_about_sample, amount_filtered_m_l, as.character(volume_filtered)))%>%
+  mutate(notes_about_sample = ifelse(!is.na(notes_about_sample) & !is.na(lab_notes), paste0(notes_about_sample, ', ', lab_notes), notes_about_sample)) %>%
+  # one code per site
+  group_by(site_code) %>%
+  mutate(lat_mean = mean(decimal_latitude, na.rm = TRUE),
+         long_mean = mean(decimal_longitude, na.rm = TRUE)) %>%
+  ungroup() %>%
+  # remove extras
+  select(!c(control, QC_date, QC_name, extraction_staff, plate_sequencing,
+            mi_seq_library, swell_height_m, month, day, temperature_C,
+            extraction_negatives_associated, extraction_date, sample_box,
+            filter_time, personnel, decimal_latitude, decimal_longitude,
+            amount_filtered_m_l, lab_notes, volume_filtered)) %>%
+    rename(decimal_latitude = lat_mean,
+           decimal_longitude = long_mean) %>%
+  # rename duplicate sites to standardize
+  mutate(location_name = case_when(site_code == 'JN_AN' ~ 'Auke Nu Cove',
+                                   site_code == 'JN_SB' ~ 'South Bridget Cove',
+                                   site_code == 'JN_EC' ~ 'Echo Cove',
+                                   site_code == 'JN_BC' ~ 'Bay Creek',
+                                   site_code == 'JN_FC' ~ 'Fish Creek',
+                                   site_code == 'HG_RI' ~ 'Ramsay Island',
+                                   site_code == 'HG_MDD' ~ 'Masset Downtown Dock',
+                                   site_code == 'WB_DP' ~ 'Damon Point',
+                                   site_code == 'WB_BC' ~ 'Bay Center',
+                                   site_code == 'WB_WR' ~ 'Willapa River',
+                                   site_code == 'WB_SB' ~ 'South Bay, Grays Harbour',
+                                   site_code == 'WB_PA' ~ 'Parcel A, Nahcotta', 
+                                   site_code == 'LA_LN' ~ 'Lower Newport Bay',
+                                   site_code == 'LA_UN' ~ 'Upper Newport Bay Restoration Bed',
+                                   site_code == 'LA_MS' ~ 'Marine Stadium Restoration Bed',
+                                   site_code == 'LA_JD' ~ 'Jack Dunster Reserve',
+                                   site_code == 'LA_SP' ~ 'San Pedro Region',
+                                   site_code == 'MB_CB' ~ 'Coleman Beach',
+                                   site_code == 'MB_TP' ~ 'Tidelands Park',
+                                   site_code == 'NC_DE' ~ 'Drakes Estero',
+                                   site_code == 'NC_WP' ~ 'Westside Park',
+                                   site_code == 'NC_PM' ~ 'Point Molate',
+                                   site_code == 'NC_PS' ~ 'Point San Pablo',
+                                   site_code == 'NC_RB' ~ 'Richardson Bay',
+                                   site_code == 'NV_KB' ~ 'Kaprino Bay',
+                                   site_code == 'PP_JJ' ~ 'Jaques-Jarvis Lagoon',
+                                   site_code == 'PS_NC' ~ 'North Cove, Waldron Island',
+                                   site_code == 'PS_SH' ~ 'Ship Harbour',
+                                   site_code == 'PS_FJ' ~ 'Fourth of July Beach',
+                                   site_code == 'PS_BB' ~ 'Bellingham Bay',
+                                   site_code == 'PS_BV' ~ 'Bayview',
+                                   site_code == 'SD_CI' ~ 'Coronado Island',
+                                   site_code == 'SD_KF' ~ 'Kendall-Frost Mission Bay Marsh Reserve',
+                                   site_code == 'CB_BV' ~ 'Bar View',
+                                   site_code == 'CB_FP' ~ 'Fossil Point',
+                                   site_code == 'YB_IF' ~ 'Idaho Flats',
+                                   site_code == 'YB_SBN' ~ 'Sallys Bend North',
+                                   site_code == 'YB_SBS' ~ 'Sallys Bend South',
+                                   # find out about this
+                                   site_code == 'CC_GOG1' ~ 'Duck Island',
+                                   str_detect(location_name, 'Sedgewick') ~ str_replace_all(location_name, 'Sedgewick', 'Sedgwick'),
+                                  str_detect(location_name, 'Jaune') ~ str_replace_all(location_name, 'Jaune', 'Jeune'),
+                                  str_detect(location_name, 'lagoon') ~ str_replace_all(location_name, 'lagoon', 'Lagoon'),
+                                   str_detect(location_name, ', Central Coast') ~ str_remove_all(location_name, ', Central Coast'),
+                                  str_detect(location_name, ', Centra Coast') ~ str_remove_all(location_name, ', Centra Coast'),
+                                  str_detect(location_name, ', Inner Coast') ~ str_remove_all(location_name, ', Inner Coast'),
+                                  str_detect(location_name, ', Pacific Rim Park') ~ str_remove_all(location_name, ', Pacific Rim Park'),
+                                  str_detect(location_name, ', San Juan Islands') ~ str_remove_all(location_name, ', San Juan Islands'),
+                                  str_detect(location_name, ', San Juan Island') ~ str_remove_all(location_name, ', San Juan Island'),
+                                  str_detect(location_name, ', San Juans Islands') ~ str_remove_all(location_name, ', San Juans Islands'),
+                                  str_detect(location_name, ', Orcas Island') ~ str_remove_all(location_name, ', Orcas Island'),
+                                  str_detect(location_name, ', Shaw Island') ~ str_remove_all(location_name, ', Shaw Island'),
+                                  str_detect(location_name, ', Puget Sound') ~ str_remove_all(location_name, ', Puget Sound'),
+                                  str_detect(location_name, ', Padilla Bay') ~ str_remove_all(location_name, ', Padilla Bay'),
+                                  str_detect(location_name, 'Pacific Rim National Park Reserve, BC') ~ str_remove_all(location_name, ', Pacific Rim National Park Reserve, BC'),
+                                  str_detect(location_name, ', Prince of Wales Island') ~ str_remove_all(location_name, ', Prince of Wales Island'),
+                                  str_detect(location_name, ', North Central CA') ~ str_remove_all(location_name, ', North Central CA'),
+                                  str_detect(location_name, ', North Central California') ~ str_remove_all(location_name, ', North Central California'),
+                                  str_detect(location_name, ', Bodega Bay') ~ str_remove_all(location_name, ', Bodega Bay'),
+                                  str_detect(location_name, ', San Francisco Bay') ~ str_remove_all(location_name, ', San Francisco Bay'),
+                                  str_detect(location_name, ', San Diego') ~ str_remove_all(location_name, ', San Diego'),
+                                  str_detect(location_name, ', Orange County, LA region') ~ str_remove_all(location_name, ', Orange County, LA region'),
+                                  str_detect(location_name, ', Orange County') ~ str_remove_all(location_name, ', Orange County'),
+                                  str_detect(location_name, ', Long Beach') ~ str_remove_all(location_name, ', Long Beach.*$'),
+                                  str_detect(location_name, ', Willapa') ~ str_remove_all(location_name, ', Willapa.*$'),
+                                  str_detect(location_name, ' \\(') ~ str_remove_all(location_name, ' \\(.*$'),
+                                   TRUE ~ location_name)) %>%
+  # move useful to front
+  relocate(region_code, region_name, site_code, sample_id, treatment, 
+           location_name, decimal_latitude, decimal_longitude, 
+           year, extraction_blank, library) %>%
+  #TEMPORARY; get coordinates for this site
+  mutate(decimal_latitude = case_when(site_code == 'CC_KIS1' ~ 51,
+                                      TRUE ~ decimal_latitude)) %>%
+  mutate(decimal_longitude = case_when(site_code == 'CC_KIS1' ~ -128.5,
+                                       site_code == 'PS_NC' ~ -123.04,
+                                      TRUE ~ decimal_longitude)) %>%
+      # Jenn is splitting this here due to different latitude, and inner SF bay
+  mutate(region_name = case_when(site_code %in% c("CB_FP", "CB_BV") ~ "OR_CB",
+                                 site_code %in% c("NC_PM", "NC_PS",
+                                                  "NC_RB", "NC_WP") ~ "CA_SF",
+                                 TRUE ~ region_name)) %>%
+    mutate(region_name_label = case_when(region_name == 'AK_JN' ~ "Juneau Region, Alaska",
+               region_name == 'AK_SE' ~  "Southeast Alaska",
+                region_name == 'BC_HG' ~ "Haida Gwaii, British Columbia",
+                region_name == 'BC_CC' ~ "Central Coast British Columbia",
+                region_name == 'BC_IC' ~ "Inner Coast, British Columbia",
+                region_name == 'BC_NV' ~ "North Vancouver Island, British Columbia",
+                region_name == 'BC_PP' ~ "Pacific Rim Park, British Columbia",
+                region_name == 'WA_PS' ~ "Puget Sound & Padilla Bay, Washington",
+                region_name == 'WA_WB' ~ "Willapa Bay, Washington",
+                region_name == 'OR_YB' ~ "Yaquina Bay, Oregon",
+               region_name == 'OR_CB' ~ 'Coos Bay, Oregon', 
+                region_name == 'CA_HB' ~ "Humboldt Bay, California",
+                region_name == 'CA_MB' ~ "Morro Bay, California",
+                region_name == "CA_SF" ~ "San Fransisco Bay, California",
+                region_name == "CA_NC" ~ "Bodega Bay, California",
+               region_name == 'CA_SD' ~  "San Diego region, California",
+               region_name == 'CA_LA' ~  "Los Angeles, California")) %>%
+      mutate(region_code_label = case_when(region_name == 'AK_JN' ~ "Juneau Region, Alaska",
+               region_code == 'AK_SE' ~  "Southeast Alaska",
+                region_code == 'BC_HGa' ~ "Haida Gwaii, British Columbia",
+               region_code == 'BC_HGb' ~ "Haida Nation, British Columbia",
+                region_name == 'BC_CC' ~ "Central Coast British Columbia",
+                region_name == 'BC_IC' ~ "Inner Coast, British Columbia",
+                region_name == 'BC_NV' ~ "North Vancouver Island, British Columbia",
+                region_name == 'BC_PP' ~ "Pacific Rim Park, British Columbia",
+                region_code == 'WA_PSa' ~ "Padilla Bay, Washington",
+                region_code == 'WA_PSb' ~ "San Juan Islands, Washington",
+                region_name == 'WA_WB' ~ "Willapa Bay, Washington",
+                region_name == 'OR_YB' ~ "Yaquina Bay, Oregon",
+               region_name == 'OR_CB' ~ "Coos Bay, Oregon",
+                region_name == 'CA_HB' ~ "Humboldt Bay, California",
+                region_name == 'CA_MB' ~ "Morro Bay, California",
+                region_code == 'CA_NCa' ~ "Bodega Bay, California",
+               region_code == 'CA_NCb' ~ "San Francisco Bay 1, California",
+               region_code == 'CA_NCc' ~ "San Francisco Bay 2, California",
+               region_name == 'CA_SD' ~  "San Diego region, California",
+               region_name == 'CA_LA' ~  "Los Angeles, California"))
+
+write_csv(meta_all, here(edna_out, paste0(datefield, 'peco-combined_metadata.csv')))
+```
+
+
+Combined regions for plotting
+
+
+```{r set up for plotting}
+regions <- meta_all %>%                                                           
+  #regions with site code for organisation
+  select(site_code, region_code, region_name, 
+         region_name_label, region_code_label,
+         decimal_latitude, decimal_longitude) %>%
+  filter(!is.na(site_code)) %>%
+  distinct(site_code, .keep_all = TRUE) %>%
+  mutate(region_code = as.factor(region_code)) %>%
+  mutate(region_name = as.factor(region_name)) 
+
+# sort regions by latitude to direct color vector
+region_by_lat <- regions %>%                                                   
+  select(region_name,
+          decimal_latitude)%>%
+  distinct()%>%
+   #organising the region names by latitude
+  mutate(region_name = as.factor(region_name)) %>%
+  #temp removing NA
+  filter(!(is.na(region_name))) %>%
+  filter(!(is.na(decimal_latitude))) %>%
+  #requires calculating avg latitude of each 
+  group_by(region_name) %>%                                                     
+  summarise(avg_region_lat = mean(decimal_latitude))%>%                          
+  # arranging the region names in the data 
+  arrange(desc(avg_region_lat)) %>%
+  rowid_to_column('region_lat_name') 
+
+# site + sample count
+region_counts <- meta_all %>%                                                           
+  #regions with site code for organisation
+  select(site_code, region_name, 
+         sample_id)%>%
+  distinct() %>%
+  filter(!(is.na(site_code))) %>%
+  group_by(region_name) %>%
+  add_tally(name = 'samples') %>%
+  ungroup() %>% 
+  select(!(sample_id)) %>%
+  distinct() %>%
+  group_by(region_name) %>%
+  add_tally(name = 'sites') %>%
+  select(!(site_code)) %>%
+  distinct()
+
+
+# add site/sample count to regions
+regions <- regions %>%
+  left_join(region_by_lat) %>%
+  left_join(region_counts) %>%
+  filter(!(is.na(region_name))) %>%
+  arrange(-decimal_latitude) 
+
+
+write.csv(regions, here(edna_out, paste0(datefield, 'peco_region-name-plotting.csv')))
+
+```

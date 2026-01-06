@@ -71,3 +71,4 @@ processeddata/blastdb/blastdb_202410/crabs-mifish.nsq
 processeddata/blastdb/blastdb_202410/crabs-mifish.ntf
 processeddata/blastdb/blastdb_202410/crabs-mifish.nto
 *.RDS
+rawdata/bigdata/obis_cti/20251212_obis_cti-filtered.csv

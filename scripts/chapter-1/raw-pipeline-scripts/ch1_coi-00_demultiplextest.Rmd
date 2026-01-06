@@ -1,0 +1,23 @@
+---
+title: "ch1_coi-00_demultiplextest"
+output: html_document
+date: "2024-01-19"
+---
+
+I'm getting errors that reads are improperly paired so I'm going to try demultiplexing from scratch.
+
+OH NEVER MIND I DON'T HAVE THAT DATA FML
+
+```{r}
+library(tidyverse)
+library(reshape2)
+library(data.table)
+
+library(ape)
+library(dada2)
+library(phyloseq)
+library(ShortRead)
+library(Biostrings)
+library(seqinr)
+```
+

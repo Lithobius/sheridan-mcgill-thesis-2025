@@ -1,0 +1,463 @@
+---
+title: "ch1_12s-00f_reblast-update"
+output: html_document
+date: "2024-03-19"
+---
+
+Hopefully this document is temporary
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(taxize)
+library(worrms)
+library(here)
+# this includes the run folder so change as needed
+calvertfastq <- here('rawdata', '2018calvert', 'fastq', 
+                  '12S_Calvert2018_Re-run20210903', 'processed') 
+# Destination folders
+processededna <- here('processeddata', '2018calvert', 'qcstages')
+datefield <- '20240323_'
+runfield <- 'calvert2018_12s_'
+```
+```{r worms-function}
+## requires worrms to be loaded
+# input is vector of species names
+# use wm_records_names to extract 
+# this doesn't need the + signs
+
+# right now this breaks if not-found
+search_records_worms <- function(spnames) {
+  search <- tibble()
+  for (i in spnames) {
+    print(paste0('searching for ', i))
+    record <- wm_records_names(i, marine_only = FALSE)
+    message('done')
+    search <- append(search, record)
+  }
+  names(search) <- spnames
+  search_output <- map_dfr(.x = search, ~ data.frame(.x), .id = 'query') %>%
+    janitor::clean_names() %>%
+    select(!(c(url, taxon_rank_id, citation, lsid, modified)))
+  return(search_output)
+}
+```
+
+```{r}
+motu_key <- read_csv(here(calvertfastq, '20240315_calvert2018_12s_motu2asv.csv')) %>%
+  select(!asv_reads)
+
+# load in reblasted parsed file here
+motu_reblast <- read_tsv(here(calvertfastq, '20240322_2018calvert_12s_reblast_out-parsed.tsv')) %>%
+  rename(asv = seed_asv_reads) 
+
+# Give blast results MOTU#s
+motu_reblast <- motu_reblast %>%
+  left_join(motu_key) %>%
+  relocate(asv, motu)
+
+
+common_name <- read_csv(here('processeddata', 'species_lists', 'keys',
+                             '20230929_12s_common-names.csv'))[-1] 
+```
+```{r temp taxonomy}
+motu_taxonomy <- motu_reblast %>%
+  mutate(ncbi_taxa = case_when(str_detect(description, 'Artedius harringtoni') ~ 'Artedius harringtoni',
+                               str_detect(description, 'Artedius lateralis') ~ 'Artedius lateralis',
+                               str_detect(description, 'Clevelandia ios') ~ 'Clevelandia ios',
+                               str_detect(description, 'Clinocottus acuticeps') ~ 'Clinocottus acuticeps',
+                               str_detect(description, 'Clinocottus embryum') ~ 'Clinocottus embryum',
+                               str_detect(description, 'Clinocottus globiceps') ~ 'Clinocottus globiceps',
+                               str_detect(description, 'Clinocottus recalvus') ~ 'Clinocottus recalvus',
+                               
+                               str_detect(description, 'Gibbonsia metzi') ~ 'Gibbonsia metzi',
+                               str_detect(description, 'Gibbonsia montereyensis') ~ 'Gibbonsia montereyensis',
+                               str_detect(description, 'Gobiesox rhessodon') ~ 'Gobiesox rhessodon',
+                               str_detect(description, 'Gobiesox maeandricus') ~ 'Gobiesox maeandricus',
+                               str_detect(description, 'Liparis fucensis') ~ 'Liparis fucensis',
+                               str_detect(description, 'Merluccius productus') ~ 'Merluccius productus',
+                               str_detect(description, 'Oligocottus maculosus') ~ 'Oligocottus maculosus',
+                               str_detect(description, 'Oligocottus snyderi') ~ 'Oligocottus snyderi',
+                               str_detect(description, 'Orthonopias triacis') ~ 'Orthonopias triacis',
+                               str_detect(description, 'Rhinogobiops nicholsii') ~ 'Rhinogobiops nicholsii',
+                               str_detect(description, 'Synchirus gilli') ~ 'Synchirus gilli',
+                               # peco but not ch1
+                               str_detect(description, 'Gibbonsia elegans') ~ 'Gibbonsia elegans',
+                               str_detect(description, 'Gillichthys mirabilis') ~ 'Gillichthys mirabilis',
+                               str_detect(description, 'Heterostichus rostratus') ~ 'Heterostichus rostratus',
+                               str_detect(description, 'Leiocottus hirundo') ~ 'Leiocottus hirundo',
+                               str_detect(description, 'Merluccius angustimanus') ~ 'Merluccius angustimanus',
+                               # out of region
+                               str_detect(description, 'Antennatus|Clinitrachus|Gymnogobius|Merluccius merluccius|Merluccius polli|Merluccius albidus|Merluccius australis|Merluccius bilinearis|Merluccius capensis|Merluccius gayi|Merluccius hubbsi|Merluccius senegalensis|Schultzea beta') ~ 'Out of region',
+                               # outgroups
+                               str_detect(description, 'Pisaster') ~ 'Outgroup',
+                               description == 'No Results' ~ 'No BLAST hit'
+                               )) %>%
+  relocate(ncbi_taxa) %>% 
+  select(ncbi_taxa, accession) %>%
+  distinct()
+
+
+
+```
+
+
+## Update with worms
+
+
+```{r worrms taxonomy update}
+worms_search <- motu_taxonomy %>%
+  # filter out offtarget, etc
+  filter(!(ncbi_taxa %in% c('No BLAST hit', 'Outgroup', 'Out of region'))) %>%
+  select(ncbi_taxa) %>%
+  distinct() %>%
+  ## temporary issue requires replacing whitespace with '+'
+  mutate(worms_query = gsub(" ", "+", ncbi_taxa))
+
+
+# 2: worms
+fish_worms <- get_wormsid_(sci_com = unique(worms_search$worms_query), 
+                           marine_only = FALSE, accepted = FALSE)
+# get_wormsid_ gives back null and length 0 elements
+## first remove with compact and discard then map_dfr
+fish_worms2 <- fish_worms %>% 
+  compact() %>%
+  discard( ~ nrow(.x) == 0) %>%
+  map_dfr( ~ data.frame(.x), .id = 'query')
+
+
+# this cleaning step is relatively temporary until they fix the curl issue
+fish_worms_result <- fish_worms2 %>%
+  left_join(worms_search, by = c('query' = 'worms_query')) %>%
+  relocate(ncbi_taxa) %>%
+  select(!(c(authority,query))) %>%
+  #mutate(ncbi_sp = trimws(ncbi_sp)) %>%
+  # now match species to sciname to remove extra rows
+  distinct() %>%
+  # remove higher taxonomy with species-level hits
+  # A longer term solution; count number of words in ncbi_sp and scientific name and match
+  mutate(ncbi_spaces = str_count(ncbi_taxa, " ")) %>%
+  mutate(worms_spaces = str_count(scientificname, " ")) %>%
+  filter(ncbi_spaces == worms_spaces) %>%
+  # good names
+  rename(worms_aphiaid = AphiaID,
+        worms_sciname = scientificname,
+        taxa_verbatim = ncbi_taxa) %>%
+  distinct() %>%
+  add_count(taxa_verbatim, name = 'n_dups') %>%
+  filter(!(n_dups > 1 & taxa_verbatim != worms_sciname)) %>%
+  add_count(taxa_verbatim, name = 'n_dups') %>%
+  # remove duplicate unaccepted etc
+  filter(!(n_dups > 1 & status %in% c('unaccepted', 'junior homonym', 'junior objective synonym'))) %>%
+  add_count(taxa_verbatim, name = 'n_dups') %>%
+  add_count(taxa_verbatim, status, name = 'n_stat') %>%
+  # when there are accepted AND unassessed; some are ONLY unassessed
+  filter(!(n_dups > 1 & n_stat == 1 & status %in% c('unassessed'))) %>%
+  add_count(taxa_verbatim, name = 'n_dups') %>%
+  select(!(c(ncbi_spaces, worms_spaces, n_stat)))
+
+# extract higher and info about freshwater
+fish_worms_records <- search_records_worms(unique(fish_worms_result$worms_sciname))
+
+# refine results to be useful
+fish_worms_records_df <- fish_worms_records %>%
+  # only animal hits
+  filter(kingdom == 'Animalia') %>%
+  # generate terrestrial-only and freshwater-only columns
+  mutate(freshwater_only = ifelse((is_marine %in% c(0, NA) ==TRUE) & (is_brackish %in% c(0,NA) == TRUE) & (is_freshwater == 1),  "1", "0")) %>%
+    mutate(terrestrial_only = ifelse((is_marine %in% c(0, NA) ==TRUE) & (is_brackish %in% c(0,NA) == TRUE) & (is_terrestrial == 1),  "1", "0")) %>%
+  distinct() %>%
+  # rename to format
+  rename(worms_aphiaid = valid_aphia_id,
+         original_aphiaid =aphia_id,
+         worms_match = scientificname,
+         worms_sciname = valid_name
+         ) %>%
+  # remove unneeded columns
+  select(!(c(authority, parent_name_usage_id, is_freshwater, query,
+             is_terrestrial, is_marine, is_brackish, is_extinct, match_type))) %>%
+  relocate(c(worms_sciname, worms_aphiaid), .before = original_aphiaid) %>%
+  # rank lowercase
+  mutate(rank = tolower(rank)) %>%
+  add_count(worms_match, name = 'n_dups') %>%
+  # remove duplicate unaccepted etc
+  filter(!(n_dups > 1 & status %in% c('unaccepted', 'junior homonym', 'junior objective synonym'))) %>%
+  add_count(worms_match, name = 'n_dups') %>%
+  # remove incorrect 'accepted' by aphiaid
+  # inculdes same-name invertebrates
+  filter(!(n_dups > 1 & worms_aphiaid %in% c(342486, 249584, 275332, 1018268, 1007204, 1525460))) %>%
+  add_count(worms_match, name = 'n_dups') %>%
+  select(!n_dups)
+```
+
+# update taxonomy, assign
+```{r update blast}
+blast50_update <- fish_worms_records_df %>%
+  right_join(motu_taxonomy, by = c('worms_match' = 'ncbi_taxa')) %>%
+  right_join(motu_reblast) %>%
+  filter(!(worms_match %in% c('Out of region', 'Outgroup', 'No BLAST hit'))) %>%
+  select(!c(description, terrestrial_only, original_aphiaid)) %>%
+  mutate(found_taxa = worms_sciname) %>%
+  relocate(asv, found_taxa, identity_percentage, evalue, accession)
+  
+
+# Here we're going to assign to MOTUs from scratch
+# First; assign all MOTUs with 100% one species
+blast_assign <- blast50_update %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+  # indicate keep rows with 100% same species
+  mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
+  group_by(asv, found_taxa) %>%
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
+                                (any(sp_percent <= .25) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(identity_percentage >= 99) & any(identity_percentage <= 97.5)) |
+                                identity_percentage <= 96.5 ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(one_hit == 'no' & unlikely %in% c('x') & identity_percentage <= 98.5)) %>%
+  # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  # filter for anything 100%/98% that passed the original filter
+  group_by(asv) %>%
+  mutate(unlikely = case_when((hit_remain > 1 & any(identity_percentage == 100) & any(identity_percentage <= 99.5)) ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(unlikely %in% c('x') & identity_percentage <= 99.5)) %>%
+  # assign asvs with one hit remaining after unlikely and < 100% frequency
+  # # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  filter(hit_remain == 1) %>%
+  select(!(c(hit_remain, unlikely, one_hit, sp_percent, num_blast, sp_freq)))
+```
+
+## conflicts
+```{r}
+# identify ASVs that have conflicts in their top 50
+# This removes ASVs without conflicts, leaving only the potential problems.
+blast_conflict <- blast50_update %>%
+  filter(!(asv %in% blast_assign$asv)) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  mutate(max_keep = ifelse(max_sp_id == identity_percentage, 'keep', 'toss')) %>%
+  filter(max_keep == 'keep') %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+    group_by(asv, found_taxa) %>%
+  # remove hits with less than 98.5%% when an ID in the list has 100%,
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
+                                (any(sp_percent <= .2) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(identity_percentage >= 99) & any(identity_percentage <= 97.5)) |
+                                 identity_percentage <= 96.5 ~ 'x')) %>%
+  ungroup() %>%
+  filter(!(unlikely %in% c('x') & identity_percentage <= 98 |
+             identity_percentage <= 97)) %>%
+  select(!(c(unlikely))) %>%
+    group_by(asv) %>%
+  # what is the highest identity percentage on that asv
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  # if the species max is .5% lower than the max
+  # this seems to be about as far away as makes sense for this data
+  # Note that maybe for other data it might be different.
+  # May also need more solid empirical justification than 
+  # my past experience handling NCBI data
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .5) %>%
+  select(!(c(max_id, max_sp_id, point_diff))) %>%
+      # recalculate species percent
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+    mutate(updated_taxon = case_when(length(unique(found_taxa)) == 1 ~ found_taxa,
+                                   length(unique(genus)) == 1 ~ genus,
+                                   length(unique(family)) == 1 ~ family,
+                                   length(unique(order)) == 1 ~ order)) %>%
+    select(!c(num_blast, sp_percent, sp_freq, max_keep))
+
+
+
+# low hits
+blast_lowmatch <- blast50_update %>%
+  filter(!(asv %in% blast_assign$asv | asv %in% blast_conflict$asv)) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  ## what is the highest identity percentage per species, to eliminate duplicates
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  distinct(asv, found_taxa, max_sp_id, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # what is the highest identity percentage on that asv
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  # if the species max is .5 points or about 99.5% lower than the max for the asv
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .5) %>%
+  # recalculate species percent and remove 100s
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+  mutate(low_match = ifelse(max_id < 96, 'yes', 'no')) %>%
+    # if the number of flagged records always has the same genus, update. 
+  # if the number of flagged records always has the same family, update.
+  mutate(updated_taxon = case_when(length(unique(found_taxa)) == 1 & low_match == 'no' ~ found_taxa,
+                                   length(unique(genus)) == 1 ~ genus,
+                                   length(unique(family)) == 1 ~ family,
+                                   length(unique(order)) == 1 ~ order)) %>%
+  ungroup() %>%
+  select(!(c(max_id, max_sp_id, point_diff, 
+             num_blast, sp_percent, sp_freq)))
+
+
+```
+
+# remerge
+
+```{r remerge}
+# drop uncertanties to next taxonomic level
+blast_updates <- blast_conflict %>%
+  rbind(blast_lowmatch) %>%
+  distinct() %>%
+  mutate(rank = case_when(str_detect(updated_taxon, ' ') == TRUE ~ 'species',
+                          updated_taxon == genus ~ 'genus',
+                          updated_taxon == family ~ 'family',
+                          updated_taxon == order ~ 'order',
+                          updated_taxon == class ~ 'class',
+                          updated_taxon == phylum ~ 'phylum')) %>%
+  mutate(genus = case_when(rank %in% c('family', 'order')| 
+                             str_detect(updated_taxon, 'Unknown') == TRUE ~ NA_character_,
+                           TRUE ~ genus)) %>%
+  mutate(family = case_when(rank %in% c('order')| 
+                             str_detect(updated_taxon, 'Unknown')== TRUE ~ NA_character_,
+                            TRUE ~ family)) %>%
+  mutate(order = case_when(rank %in% c('class')| 
+                             str_detect(updated_taxon, 'Unknown') == TRUE ~ NA_character_,
+                            TRUE ~ order)) %>%
+  distinct(asv, updated_taxon, .keep_all = TRUE) %>%
+  rbind(blast_assign) %>%
+  mutate(found_taxa = coalesce(updated_taxon,found_taxa)) %>%
+  select(!c(updated_taxon, bitscore,
+            accession, worms_sciname, status, unacceptreason)) %>%
+  relocate(asv, found_taxa, rank)
+
+# list of not assigned asvs, see what's left over, should be just outgroups and no results
+not_assigned <- motu_reblast %>%
+  filter(!(asv %in% blast_updates$asv)) %>%
+  left_join(motu_taxonomy) %>%
+  # re-add outgroup names
+  mutate(ncbi_taxa = case_when(str_detect(description, 'Pisaster') ~ 'Pisaster',
+                               TRUE ~ ncbi_taxa)) %>%
+  mutate(phylum = case_when(ncbi_taxa %in% c('Pisaster') ~ 'Echinodermata'),
+         kingdom = case_when(ncbi_taxa %in% c('Pisaster') ~ 'Eukaryota'),
+         genus = case_when(ncbi_taxa %in% c('Pisaster') ~ ncbi_taxa)) %>%
+  select(!c(description)) %>%
+  rename(found_taxa = ncbi_taxa)
+```
+
+# refine
+```{r}
+taxonomy_assigned_asv <- blast_updates %>%
+  left_join(common_name) %>%
+  relocate(common_name, .before = rank) %>%
+  full_join(not_assigned) %>%
+  mutate(blast = ifelse(is.na(found_taxa), 'No BLAST hit', 'BLAST')) %>%
+  mutate(found_taxa = coalesce(found_taxa, blast)) %>%
+  mutate(common_name = case_when(found_taxa %in% c('No BLAST hit') ~ found_taxa,
+                                 found_taxa == 'Pisaster' ~ 'Sea star',
+                                 ## FISH ##
+                                 found_taxa == 'Clinocottus embryum' ~ 'Calico sculpin',
+                                 found_taxa == 'Liparis fucensis' ~ 'Slipskin snailfish',
+                                 found_taxa == 'Oligocottus maculosus' ~ 'Tidepool sculpin',
+                                 # genera
+                                 found_taxa == 'Merluccius' ~ 'Hake species',
+                                 TRUE ~ common_name)) %>%
+  mutate(rank = case_when(is.na(rank) ~ 'offtarget',
+                          TRUE ~ rank)) %>%
+  select(!c(low_match, blast, accession, bitscore,
+            worms_aphiaid, valid_authority, worms_match)) %>%
+  relocate(asv, motu) %>%
+  # some group is open somewhere
+  ungroup()
+```
+# Motu level ids
+```{r}
+# motu column
+by_motu <- taxonomy_assigned_asv %>%
+  select(asv, seed_asv, found_taxa, common_name, rank) %>%
+  filter(asv == seed_asv) %>%
+  select(!asv) %>%
+  distinct() %>%
+  rename(found_taxa_motu = found_taxa,
+         common_name_motu = common_name,
+         rank_motu = rank) 
+
+# add motu columns, relocate
+taxonomy_assigned_full <- taxonomy_assigned_asv %>%
+  left_join(by_motu) %>%
+  relocate(found_taxa_motu, common_name_motu, rank_motu, 
+           .before = identity_percentage) %>%
+  rename(found_taxa_asv = found_taxa,
+         rank_asv = rank,
+         common_name_asv = common_name) %>%
+  relocate(seed_asv, .before = freshwater_only)
+```
+
+
+# Merge with already-checked data
+
+Note any that didn't get assigned that don't have seed ASV in this set will need updated for MOTU identifications.
+
+```{r}
+taxonomy_12s <- read_csv(here(processededna,
+                              '20240322_calvert2018_12s_taxonomy_initial.csv'))
+
+all_updated <- taxonomy_12s %>%
+  filter(!(asv %in% taxonomy_assigned_asv$asv)) %>%
+  rbind(taxonomy_assigned_full) %>%
+  arrange(motu) %>%
+  select(!c(identity_percentage, evalue))
+
+
+write_csv(all_updated, here(processededna, paste0(datefield, runfield,
+                                                             'taxonomy.csv')))
+```
+

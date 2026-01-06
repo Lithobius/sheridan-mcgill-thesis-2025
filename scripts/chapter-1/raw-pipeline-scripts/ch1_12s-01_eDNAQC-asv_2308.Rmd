@@ -1,0 +1,301 @@
+---
+title: "ch1eDNAQC-12s"
+author: "Kate Sheridan"
+date: "11/27/2021"
+output: html_document
+---
+
+Version of Sunday Lab eDNA QC pipeline modified from Trawl Project 2020, scripts by Anya Mueller, Jenn Sunday, Ben Millard-Martin
+
+Main difference with this version is that it is eDNA-only, with no cleaning of trawl related files, and Hakai samples. Updated August 2022 with key replacement
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+#for pcr dissimilarity
+library(vegan)
+library(usedist)
+
+library(here)
+# filepaths for use with here, basic files
+mifish <- here("rawdata", "2018calvert", "fastq", "12S_Calvert2018_Re-run20210903", "processed")
+
+# Destination folders
+processededna <- here('processeddata', '2018calvert', 'qcstages')
+
+datefield <- '20240323_'
+runfield <- 'calvert2018_12s_'
+```
+
+## 01 - Initial Cleaning
+
+Initial cleaning includes: cleaning names of columns, creating a unique site ID, cleaning eDNA data to be more usable. Modified from Anya's 2020 script
+
+Also adding in coordinates and habitat information.
+
+```{r 01-initialcleaning-loadin, message=FALSE}
+mifish_asvmatrix <- read.table(here::here(mifish, 
+                                           "20240315_12s_2018calvert_rerun20210903_sequence-table_12S-merged-w-ASV-names.txt"), 
+                               header = TRUE)
+
+taxonomy_12s <- read_csv(here(processededna,
+                              '20240323_calvert2018_12s_taxonomy.csv'))
+
+edna_metadata <- read_csv(here('processeddata', '2018calvert', "2018calvert_eDNA_metadata.csv"))[-1]
+
+```
+
+# eDNA data
+
+First cleaning the data and generating matrix
+
+```{r 01-join metadata}
+mifish_asvmatrix_meta <-  mifish_asvmatrix %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  mutate(totalread = rowSums(select(., contains("ASV")))) %>%
+  filter(!(totalread == 0)) %>%
+  # first change the columns from ASV to motu
+  pivot_longer(cols = !row_names,
+               names_to = 'asv',
+               values_to = 'raw_reads') %>% 
+  separate(row_names, 
+           c("sample_name", 
+             "pcr_rep" 
+             ), #separate row_name label into vectors of information, 
+                   #which info you need will vary based on how it was recorded and processed
+           sep="-") %>%
+  #make unique identifier for each row
+  mutate(sample_id=paste(sample_name, pcr_rep, sep="-")) %>% 
+  mutate(pcr_rep = tolower(pcr_rep),
+         sample_id = tolower(sample_id),
+         sample_name = tolower(sample_name)) %>%
+  filter(!(asv == 'totalread')) %>%
+  left_join(edna_metadata) %>%
+  # this removes samples that didn't make it through run processing
+  filter(!(is.na(asv))) %>%
+  distinct()
+
+```
+
+## 02 Controls
+
+Can't match controls with anything so currently just removing... hopefully updated eventually.
+```{r 02-12s}
+unique(mifish_asvmatrix_meta$sample_name)
+
+mifish_asvmatrix_meta %>% filter(sample_name %in% c('neg1', 'neg2', 'neg3') & raw_reads >= 1)
+
+controls <- mifish_asvmatrix_meta %>%
+  filter(sample_name %in% c('neg1', 'neg2', 'neg3') & raw_reads >= 1) %>%
+  select(sample_name, pcr_rep, asv, raw_reads, sample_id) %>%
+  mutate(pcr_asv = paste0(pcr_rep, '_', asv)) %>%
+  group_by(pcr_asv) %>%
+  mutate(ctrl_mean = round(mean(raw_reads))) %>%
+  ungroup() %>%
+  select(pcr_rep, asv, ctrl_mean) %>%
+  distinct()
+
+# read subtract version
+mifish_asvmatrix_meta_nc <- mifish_asvmatrix_meta %>%
+  filter(!raw_reads == 0) %>%
+  left_join(controls) %>%
+  # make any NAs 0
+  mutate(ctrl_mean = ifelse(is.na(ctrl_mean), 0, ctrl_mean)) %>%
+  # subtract reads by pcr rep
+  mutate(reads_adjust = raw_reads - ctrl_mean) %>%
+  # remove named controls, edit to be what is in dataframe
+  filter(!grepl("neg", sample_name)) %>%
+  # make negatives 0s
+  mutate(reads_adjust = ifelse(reads_adjust < 0, 0, reads_adjust))
+
+
+# # remove control version
+# mifish_asvmatrix_meta_nc <- mifish_asvmatrix_meta %>%
+#   # remove named controls, edit to be what is in dataframe
+#   filter(!grepl("neg", sample_name)) 
+```
+
+## 03-B Dataset singletons
+
+One method to remove putative self positives; remove all dataset-wide singletons
+
+Due to revisions of the pipeline, we'll skip this step for now.
+
+```{r 03b-singletons-12s}
+# # whole-dataset singleton removal
+# 
+# # presence-absence, removal of columns that sum to 0 or 1
+# mifish_asvmatrix_nc_pa <- mifish_asvmatrix_nc %>%
+#   # must be all numbers!
+#   column_to_rownames(var = 'sample_id') %>%
+#   # vegan's decostand to convert
+#   decostand(method = 'pa') %>%
+#   # removing control-only asvs 
+#   select(where(~ sum(.) != 0)) %>%
+#   #removing one observation asvs. 
+#   ## not sure about this, went from 1726 to 373? match to taxon table, might be ok cause mifish?
+#   select(where(~ sum(.) != 1)) %>%
+#   rownames_to_column(var = 'sample_id')
+# 
+# # create vector of retained asvs
+# mifish_retainedasv <- mifish_asvmatrix_nc_pa %>%
+#   select(!(sample_id)) %>%
+#   colnames() %>%
+#   enframe(name = NULL, value = "asv_r")
+# 
+# # reduce asv matrix + matrix/metadata
+# mifish_asvmatrix_nc2 <- mifish_asvmatrix_nc %>%
+#   select(c(sample_id, mifish_retainedasv$asv_r))
+# 
+# mifish_asvmatrix_metadata_nc2 <- mifish_asvmatrix_metadata_nc %>%
+#   select(!(starts_with("ASV"))) %>%
+#   full_join(mifish_asvmatrix_nc2, by = 'sample_id')
+# 
+# # saving again if needed
+# write_csv(mifish_asvmatrix_nc2, here::here(processededna, "12S_asvmatrix_03b.csv"))
+
+```
+
+## 02 PCR dissimilarity
+
+If applicable. Not all data will have pcr reps, if it doesn't skip. From Anya 2020 script
+
+Here we are removing samples with highly dissimilar PCR replicates
+
+used reads_adjust
+
+```{r 02-pcr-dissimilarity}
+dat <- mifish_asvmatrix_meta_nc %>%
+  select(sample_id, sample_name, asv, reads_adjust) %>%
+  pivot_wider(names_from = asv, 
+              values_from = reads_adjust) %>%
+  # NA to 0
+  mutate_all(~replace(., is.na(.), 0))
+
+#extract useful bits: t1 <- sample names; t2 <- ASV x site
+t1 <- dat %>%
+  select(sample_id, sample_name, starts_with('asv'))
+
+#calculate bray curtis dissimilarity
+t2 <- vegdist(t1[,3:ncol(t1)], method = "bray", binary = T)
+
+# calculate distance from group centroid using Multivariate homogeneity of groups dispersions (variances)
+t3 <- betadisper(t2, group = dat$sample_name, type = "centroid")
+
+#plot with 95% CI elipses
+ plot(t3, hull = F, ellipse = T, conf = 0.95, label = F, pch = 5, main = "95% CI elipse around sample replicates")
+
+#extract distances
+t4 <- cbind(dat$sample_id, dat$sample_name, as.data.frame(t3$distances))
+colnames(t4) <- c("sample_id", "sample_name", "distances")
+
+#calculate 95% CIs
+t4 <- t4 %>%
+  group_by(sample_name) %>%
+  mutate(meandis=mean(distances), # mutate when grouped applies the summary to each row
+         SDdis=sd(distances),
+         CIdis = 1.96*SDdis/sqrt(3), 
+         upperCIdis=meandis+CIdis) #calculate upper end of 95% CI
+
+#check that PCR reps are within CIs
+t4$diff <- ifelse(t4$upperCIdis<t4$distances, "problem", "ok")
+
+#list for later filtering
+problemlist <- t4 %>%
+  subset(diff == "problem") %>%
+  distinct(sample_name, sample_id)
+
+#now we want to remove the pcr reps identified as problems (pcr reps?)
+# I am just going to remove the replicate itself
+mifish_asvmatrix_nc_95ci <- mifish_asvmatrix_meta_nc %>%
+  filter(!(sample_id %in% problemlist$sample_id))
+
+#not going to keep the replicate information past here
+```
+
+## 03-A -- Occupancy model QC-type
+
+We are skipping this for now, since Erikson/Mize doesn't use it. May want to re-add for other analyses?
+
+
+## 05 -- Taxonomy
+
+```{r 05-taxonomy-12s}
+# merge taxonomy file with asv table
+mifish_asvmatrix_taxonomy <- mifish_asvmatrix_nc_95ci %>%
+  filter(reads_adjust > 0) %>%
+  # totalread is useless
+  filter(!(asv == 'totalread')) %>%
+  left_join(taxonomy_12s) %>%
+  select(!(c(volume_filtered, lab_notes, hakai_project,
+             hakai_link_data, sample_type, veg_sub, vegcom_sub,
+             ))) %>%
+  relocate(asv, raw_reads, reads_adjust, found_taxa_asv, common_name_asv, 
+           rank_asv, location, macroveg_group, macroveg_community,
+           .before = pcr_rep)
+
+# right now the full asv list isn't being added back in after blast, need to assess.
+
+# sort out unidentified asvs
+mifish_asvmatrix_unknown <- mifish_asvmatrix_taxonomy %>%
+  filter(found_taxa_asv == 'No BLAST hit')
+
+# write out problems
+write.csv(mifish_asvmatrix_unknown, here(processededna, 
+                                          paste0(datefield, runfield,
+                                                 'asvmatrix_taxonomy-problems.csv')))
+
+
+
+```
+
+
+
+## Final matrices
+
+```{r mifish-finalmatrix}
+# species list
+asv_splist <- mifish_asvmatrix_taxonomy %>%
+  filter(class %in% c('Teleostei', 'Holocephali')) %>%
+  select(found_taxa_asv, common_name_asv, rank_asv) %>%
+  distinct()
+
+#save whole list
+write_csv(asv_splist, here('processeddata', 'species_lists', 
+                           paste0(datefield, runfield,
+                                          'asv_splist.csv')))
+
+
+mifish_asvmatrix_final <- mifish_asvmatrix_taxonomy %>%
+  group_by(sample_name, asv) %>%
+  mutate(raw_reads_all = sum(raw_reads)) %>%
+  mutate(reads_adjust_all = sum(reads_adjust)) %>%
+  ungroup() %>%
+  relocate(raw_reads_all, reads_adjust_all, .before = found_taxa_asv) %>%
+  rename(raw_reads_pcr = raw_reads,
+         reads_adjust_pcr = reads_adjust) %>%
+  relocate(raw_reads_pcr, reads_adjust_pcr, .before = pcr_rep) %>%
+  distinct() %>%
+  mutate(asv_pa = 1) %>%
+  relocate(asv_pa, .before = found_taxa_asv) %>%
+  filter(!(is.na(class)))
+
+
+#save whole list
+write_csv(mifish_asvmatrix_final, here(processededna,
+                                          paste0(datefield, runfield,
+                                                 'asvmatrix_taxonomy.csv')))
+
+mifish_asvmatrix_final_fish <- mifish_asvmatrix_final %>%
+  filter(class %in% c('Teleostei', 'Holocephali'))
+
+#save whole list
+write_csv(mifish_asvmatrix_final, here(processededna,
+                                          paste0(datefield, runfield,
+                                                 'asvmatrix_taxonomy-fish.csv')))
+```
+
+
+
+
+

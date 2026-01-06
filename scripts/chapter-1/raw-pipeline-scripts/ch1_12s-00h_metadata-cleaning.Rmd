@@ -1,0 +1,193 @@
+---
+title: "ch1_12s-00d_metadata-cleaning"
+output: html_document
+date: "2023-08-31"
+---
+
+All Chapter1 QC scripts are modified from pipelines developed by Anya Mueller and Ben Millard-Martin.
+
+Originally metadata cleaning was part of 01-eDNAQC but because of the extent of cleaning required for this dataset and the fact it must be done multiple times (once for ASV and once for mOTUs) I have separated it to be its own script to produce a single 'master' 12S metadata that will simply be loaded in to 01-eDNAQC.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(here)
+
+#if different
+datameta <- here("rawdata", "2018calvert")
+
+cleanmeta <- here('processeddata', '2018calvert')
+```
+
+
+## 01 - Initial Cleaning
+
+Initial cleaning includes: cleaning names of columns, creating a unique site ID. Modified from Anya's 2020 script
+
+Also adding in coordinates and habitat information.
+
+here you want to read in metadata
+Coordinates may be separate from the rest of the metadata with site table(s)
+Filenames if directly from Hakai will be a mix of . and _ separators, be careful entering
+NOTE: watch COI vs CO1, some files my use a letter I vs a number 1.
+
+```{r 01-clean-metadata, message=FALSE}
+ edna_metadata <- read_csv(here::here('rawdata', '2018calvert', '12S',
+                                    "Calvert_12S_metadata.csv")) %>% 
+  clean_names()
+
+coords1 <- read_csv(here::here('rawdata', '2018calvert', 'site_locations.csv')) %>% 
+  clean_names()
+
+coords2 <- read_csv(here::here('rawdata', 'hakai', 'site_data', 'hakai_nearshore_sites.csv')) %>% 
+  clean_names()
+
+seine_hab <- read_csv(here::here(datameta, 'seine', 'fabs_extract', '2021Nov_FABSMaster_habitat.csv')) %>%
+  clean_names()
+
+
+## basic metadata
+edna_metadata <- edna_metadata %>%
+  # only 2018 and negatives
+  filter(!(year %in% c(2020,2019))) %>%
+  # we don't have info about extraction blanks
+  #filter(!(sample_type %in% c('extraction blank'))) %>%
+  filter(!(sample_name %in% c('Negative-PCR_2019-1stRUN', "Negative-PCR_2019-RERUN",
+                              "Blank001_1stRUN", "Blank002_1stRUN"))) %>%
+  mutate(location = location) %>%
+  mutate(site = paste(year,
+                      location,
+                      depth, sep = "_")) %>% # make unique site id
+  relocate(site) %>%
+  mutate(site=str_replace(site, " ", "-")) %>% # we had sites with spaces. not good for later.
+  mutate(sample_id = tolower(sample_id),
+         pcr_rep = tolower(pcr_rep),
+         sample_name = tolower(sample_name),
+         geo_location_name_old = tolower(geo_location_name_old))
+
+
+## this dataset required merging two coordinate tables. 
+## I merged them separately because they were very different
+
+# this coords file is site_locations.csv from the Hakai data portal; 
+# it was the ipad data collected with the samples. Not every sample is represented though.
+coords1 <- coords1 %>%
+  select(site_name, point_name, decimal_lat, decimal_long,
+         substrate, biotic_subclass, biotic_community) %>%
+  rename(geo_location_name = point_name,
+         lat = decimal_lat,
+         long = decimal_long)
+
+# add coords
+edna_metadata <- edna_metadata %>%
+  full_join(coords1)
+
+# This is from a generic hakai nearshore sites list to fill in 
+# the few sites not represented in the ipad data
+coords2 <- coords2 %>%
+  select(!(c(starts_with("x"), established, survey_frequency))) %>%
+  filter(!(is.na(site_name))) %>%
+  mutate(adjacent_habitat = str_replace(adjacent_habitat, "-", "")) %>%
+  mutate(site_name = tolower(site_name)) %>%
+  rename(location = site_name,
+         lat = decimal_lat,
+         long = decimal_long) %>%
+  mutate(hakai_project = ifelse(project_name == "Seagrass", "seagrass", 
+                                ifelse(
+    project_name == "Beach Seining", "beach_seine", 
+    ifelse(project_name %in% c('Kelp - Nereo', 'Kelp - Macro', 'Kelp - Rocky Reef') ,"kelp" ,NA_character_)
+  ))) %>%
+  select(!(c(project_name, adjacent_habitat)))
+
+edna_metadata <- edna_metadata %>%
+  left_join(coords2, by = c("location", "hakai_project"))
+
+# here the coordinates were added as a separate row as they are not the same for 
+# sites already represented in coords1. So coalesce only fills the NA's, then we delete the columns.
+edna_metadata <- edna_metadata %>%
+  mutate(lat.x = coalesce(lat.x, lat.y),
+         long.x = coalesce(long.x, long.y)) %>%
+  select(!(c(lat.y, long.y, geo_location_name_old, site_name))) %>%
+  rename(lat = lat.x,
+         long = long.x)
+
+
+#getting habitat data in to compare
+
+# note this is only for seine
+seine_hab <- seine_hab %>%
+  select(!(c(lat, long, aspect, notes))) %>%
+  rename(location = site)
+
+
+edna_metadata <- left_join(x = edna_metadata, y = seine_hab, by = "location")
+
+
+# lots of unnecessary columns from seine_hab
+cols_to_remove <- c('primary_substrate', 'intertidal_secondary_substate', 'subtidal_secondary_substrate',
+                    'intertidal_primary_substrate', 'subtidal_primary_substrate', 'biotic_subclass', 
+                    'biotic_community', 'primary_habitat_class', 'primary_vegetation', 
+                    'intertidal_primary_macroveg', 'intertidal_secondary_macroveg', 'subtidal_primary_macroveg',
+                    'subtidal_primary_macroveg_simple', 'subtidal_secondary_macroveg', 'intertidal_primary_cover',
+                    'intertidal_secondary_cover', 'subtidal_primary_cover', 'subtidal_secondary_cover', 'veg_subst',
+                    'slope_intertidal', 'slope_subtidal')
+
+# cleaning habitat info
+# make combined columns, recode variables, variable with combined groups, remove bonus columns
+edna_metadata <- edna_metadata %>%
+  mutate(substrate = coalesce(substrate, primary_substrate),
+         macroveg_group = coalesce(biotic_subclass, primary_vegetation),
+         macroveg_community = coalesce(biotic_community, primary_vegetation)) %>% 
+  mutate(across(macroveg_group, ~recode(., algae = 'macroalgae',
+                                        `seagrass meadow` = 'seagrass',
+                                        `benthic macroalgae` = 'macroalgae',
+                                        sand = 'none',
+                                        `no vegetation` = 'none'))) %>%
+  mutate(across(macroveg_community, ~recode(., unknown = 'algae',
+                                            `Zostera marina` = 'zostera',
+                                            `Macrocystis pyrifera` = 'macrocystis',
+                                            `Nereocystis luetkeana` = 'nereocystis',
+                                            sand = 'none'))) %>%
+  mutate(veg_sub = paste0(macroveg_group, "_", substrate),
+         vegcom_sub = paste0(macroveg_community, "_", substrate)) %>%
+  select(!(all_of(cols_to_remove))) %>%
+  filter(!(is.na(site)))
+
+# save cleaned and updated metadata
+write.csv(edna_metadata, here::here(cleanmeta, "2018calvert_eDNA_metadata.csv"))
+```
+
+# table to export
+
+```{r}
+library(gt)
+library(gtExtras)
+
+
+
+meta_table <- edna_metadata %>%
+  select(location, macroveg_group, bottom_depth_m, lat, long) %>%
+  distinct() %>%
+  filter(!(is.na(location) | is.na(macroveg_group))) %>%
+  group_by(location) %>%
+  mutate(max_depth_m = max(bottom_depth_m),
+         Latitude = mean(lat),
+         Longitude = mean(long)) %>%
+  ungroup() %>%
+  select(!c(bottom_depth_m, lat, long)) %>%
+  mutate(Resampled = ifelse(location %in% c('wfb', 'ssp', 'ppo',
+                                            'pba', 'hdo', 'chp'), 'x', ' ')) %>%
+  relocate(Resampled, .before = Latitude) %>%
+  distinct() %>%
+  rename(Vegetation = macroveg_group,
+         Depth_m = max_depth_m) %>%
+  arrange(Vegetation, location) %>%
+  gt(rowname_col = 'location')
+  
+meta_table
+
+options(chromote.headless = "new")
+
+gtsave(meta_table, filename = here('output', 'other', '20250320_ch1_sitetable.pdf'))
+```
+

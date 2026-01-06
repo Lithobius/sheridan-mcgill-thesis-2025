@@ -1,0 +1,117 @@
+---
+title: "ch1_coi-01b_recombine"
+output: html_document
+date: "2023-08-22"
+---
+
+Each COI run was QCd separately, here we will recombine them to be useable in the rest of the scripts for this chapter.
+
+
+```{r}
+library(tidyverse)
+library(here)
+# filepaths for use with here, basic files
+fastq_combined <- here('rawdata', '2018calvert', 'fastq', 
+                       'coi_kate', 'combined_runs')
+# Destination folders
+processededna <- here('processeddata', '2018calvert', 'qcstages')
+
+datefield_in <- '20240220_'
+datefield_out <- '20240222_'
+runfield <- 'calvert2018_coi_'
+```
+
+
+
+# load in all QCd versions of coi
+
+```{r loadin}
+gcsept <- read_csv(here(fastq_combined, 
+                        paste0(datefield_in,
+                               'calvert2018_coi_gcsept_asvmatrix_taxonomy.csv')))
+
+gcoct <- read_csv(here(fastq_combined, 
+                        paste0(datefield_in,
+                               'calvert2018_coi_gcoct_asvmatrix_taxonomy.csv')))
+
+
+quad1 <- read_csv(here(fastq_combined, 
+                        paste0(datefield_in,
+                               'calvert2018_coi_quadra1_asvmatrix_taxonomy.csv')))
+
+quad3 <- read_csv(here(fastq_combined, 
+                        paste0(datefield_in,
+                               'calvert2018_coi_quadrarerun3_asvmatrix_taxonomy.csv')))
+
+
+
+```
+
+
+# format
+
+Merge all the tables together
+
+```{r join}
+allrunsalldata <- gcsept %>%
+  bind_rows(gcoct) %>%
+  bind_rows(quad1) %>%
+  bind_rows(quad3) %>%
+  mutate(species = ifelse(rank == 'species', found_taxa, NA_character_))
+
+allruns_noruns <- allrunsalldata %>%
+  select(!c(reads_raw, run, pcr_rep, pool, 
+            sample_id, run_id, pcrvariable, meandis,
+            distances, SDdis, CIdis, upperCIdis)) %>%
+  distinct()
+
+reads_by_run <- allrunsalldata %>%
+  select(sample_name, pcr_rep, asv, reads_raw, run) %>%
+  mutate(runread_head = case_when(run == 'Genome Canada October' ~ 'reads_raw_gcoct',
+                                  run == 'Genome Canada September' ~ 'reads_raw_gcsept',
+                                  run == 'Quadra Run1' ~ 'reads_raw_quadra1',
+                                  run == 'Quadra Rerun3' ~ paste0('reads_raw_quadra3_', pcr_rep))) %>%
+  select(!c(run,pcr_rep)) %>%
+  distinct() %>%
+  pivot_wider(names_from = runread_head,
+              values_from = reads_raw) %>%
+  mutate(pa_gcsept = ifelse(!is.na(reads_raw_gcsept), 1, NA_character_),
+         pa_gcoct = ifelse(!is.na(reads_raw_gcoct), 1, NA_character_),
+         pa_quadra1 = ifelse(!is.na(reads_raw_quadra1), 1, NA_character_),
+         pa_quadra3 = ifelse(!is.na(reads_raw_quadra3_rep1) | !is.na(reads_raw_quadra3_rep2) | !is.na(reads_raw_quadra3_rep3) | !is.na(reads_raw_quadra3_NA), 1, NA_character_)) %>%
+  left_join(allruns_noruns) %>%
+  relocate(motu, found_taxa, common_name, rank,
+           pa_gcsept, pa_gcoct, pa_quadra1, pa_quadra3, .before = reads_raw_gcsept) %>%
+  filter(asv != 'totalread')
+
+
+
+write_csv(reads_by_run, here(processededna, paste0(datefield_out, runfield, 'asvmatrix_run-columns_all.csv')))
+
+
+reads_by_run_inverts <- reads_by_run %>%
+  # no blast failures
+  filter(!is.na(rank)) %>%
+  # no off target
+  filter(rank != "offtarget") %>%
+  # make sure no tunicates here
+  filter(phylum != 'Chordata')
+
+write_csv(reads_by_run_inverts, here(processededna, paste0(datefield_out, runfield, 'asvmatrix_run-columns_inverts.csv')))
+
+```
+
+
+
+
+```{r lookin}
+motuasv_compare <- reads_by_run_inverts %>%
+  select(asv, found_taxa, found_taxa_motu, common_name, common_name_motu) %>%
+  distinct() %>%
+  filter(!(common_name == common_name_motu))
+
+reads_by_run_inverts %>% filter(rank == 'genus') %>% select(asv) %>% distinct()
+
+reads_by_run_inverts %>% filter(rank == 'genus') %>% select(motu) %>% distinct()
+```
+

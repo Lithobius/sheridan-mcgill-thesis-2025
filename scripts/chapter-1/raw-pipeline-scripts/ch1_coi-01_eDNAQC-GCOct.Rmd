@@ -1,0 +1,208 @@
+---
+title: "ch1eDNAQC-coi"
+author: "Kate Sheridan"
+date: "11/27/2021"
+output: html_document
+---
+Version of Sunday Lab eDNA QC pipeline modified from Trawl Project 2020, scripts by Anya Mueller, Jenn Sunday, Ben Millard-Martin
+
+Main difference with this version is that it is eDNA-only, with no cleaning of trawl related files, and Hakai samples.
+
+August 2022 update: updated taxonomy fix to key replacement
+January 2024 update: split script to be one for each run, reflecting the needs of each run.
+
+Here I will QC on ASV and in the combining scripts filter to MOTU for the comparisons.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(vegan)
+library(here)
+library(taxize)
+
+# run output
+datacoi <- here("rawdata", "2018calvert", "fastq",
+                "coi_kate", "CO1_Run1_GenomeQuebec_Oct212019",
+                "processed")
+
+#if different
+datameta <- here('rawdata', '2018calvert', 'COI')
+
+# Destination folders
+processededna <- here("rawdata", "2018calvert", "fastq",
+                "coi_kate", "combined_runs")
+
+cleanmeta <- here('processeddata', '2018calvert')
+
+datefield <- '20240220_'
+# note i need to update this in the past scripts to match 12s: this is the goal
+runfield <- 'calvert2018_coi_gcoct_'
+
+```
+
+## 01 - Initial Cleaning
+
+Initial cleaning includes: cleaning names of columns, creating a unique site ID, cleaning eDNA data to be more usable. Modified from Anya's 2020 script
+
+Also adding in coordinates and habitat information.
+
+here you want to read in any markers and metadata
+These will be sequence + ASV merged tables, saved as a .txt file, with metadata as .csv
+
+Filenames if directly from Hakai will be a mix of . and _ separators, be careful entering
+NOTE: watch COI vs CO1, some files my use a letter I vs a number 1. 
+
+```{r 01-initialcleaning-loadin, message=FALSE}
+## read in files
+coi_asvmatrix <- read.table(here(datacoi,
+                                 "20240205_coi_2018calvert_run1_gc20191021_sequence-table_asv-names.txt"),
+                            header = TRUE)
+
+# COI metadata was separate, but we will add columns from the 12s metadata that we already cleaned for habitat etc.
+## see ch1_12s-01_eDNAQC script for details
+coi_metadata <- read.csv(here(datameta,
+                              'eDNA_Calvert2018_metadata_RevisedMay2020.csv')) %>% 
+  clean_names()
+
+edna_metadata <- read_csv(here(cleanmeta, "2018calvert_eDNA_metadata.csv"))[-1] %>%
+  select(!(c(sample_id, pcr_rep))) %>%
+  distinct()
+```
+
+# Metadata
+
+```{r 01-metadata}
+# extract needed columns to merge
+coi_metadata2 <- coi_metadata %>%
+  select(sample_id, sample_name, pcr_rep, 
+         run_id, pool) %>%
+  left_join(edna_metadata)
+
+# save cleaned and updated metadata
+# export only if needed
+#write.csv(edna_metadata, here::here(cleanmeta, "2018calvert_eDNA_metadata_coi.csv"))
+
+# split into relevant run
+meta_run1 <- coi_metadata2 %>%
+  filter(run_id == "Run_1")
+```
+
+# eDNA data
+
+Combine the matrix with the metadata. This chunk will vary depending on the run.
+
+```{r 01-COI}
+edna_asvmatrix_meta <-  coi_asvmatrix %>%
+  mutate(sample = str_remove_all(sample, '_gcoct')) %>%
+  mutate(totalread = rowSums(select(., contains("ASV")))) %>%
+  # shouldn't be true but just in case
+  filter(!(totalread == 0)) %>%
+  rename(sample_name = sample) %>%
+  pivot_longer(cols = !sample_name,
+               names_to = 'asv',
+               values_to = 'reads_raw') %>%
+  filter(reads_raw > 0) %>%
+  left_join(meta_run1) %>%
+  mutate(run = 'Genome Canada October') 
+```
+
+## Controls
+
+We don't have any controls matched with this run.
+
+## 03-B Dataset singletons
+
+One method to remove putative self positives; remove all dataset-wide singletons
+
+Due to revisions in the pipeline, we're skipping this for now.
+
+```{r 03b-singletons-coi}
+# whole-dataset singleton removal
+# pooled
+# edna_runpool <- edna_runpool_meta %>%
+#   select(sample_id, starts_with('ASV'))
+# 
+# # presence-absence, removal of columns that sum to 0 or 1
+# edna_runpool_pa <- edna_runpool %>%
+#   # must be all numbers!
+#   select(!(sample_id)) %>%
+#   # vegan's decostand to convert
+#   decostand(method = 'pa') %>%
+#   # removing control-only asvs 
+#   select(where(~ sum(.) != 0)) %>%
+#   #removing one observation asvs. 
+#   ## not sure about this, went from 10k to 5.4k
+#   select(where(~ sum(.) != 1)) %>%
+#   rownames_to_column(var = 'sample_id')
+# 
+# # create vector of retained asvs
+# edna_runpool_retainedasv <- edna_runpool_pa %>%
+#   select(!(sample_id)) %>%
+#   colnames() %>%
+#   enframe(name = NULL, value = "asv_r")
+# 
+# # reduce asv matrix + matrix/metadata
+# edna_runpool_2 <- edna_runpool %>%
+#   select(c(sample_id, edna_runpool_retainedasv$asv_r))
+# 
+# edna_runpool_meta2 <- edna_runpool_meta %>%
+#   select(!(starts_with("ASV"))) %>%
+#   full_join(edna_runpool_2, by = 'sample_id')
+
+```
+
+## 02 PCR dissimilarity
+
+If applicable. Not all data will have pcr reps, if it doesn't skip. From Anya 2020 script
+
+We do not have PCR reps for this run.
+
+## 03-A -- Occupancy model QC-type
+
+We are skipping this for now, since Erikson/Mize doesn't use it. May want to re-add for other analyses?
+
+## 04 -- remove field control reads
+
+We do not have field controls for this run. 
+
+## 05 -- Taxonomy
+
+```{r taxonomy add}
+taxonomy_coi <- read_csv(here(processededna, '20240220_calvert2018_coi_assigned_asvs.csv'))
+
+taxonomy_motus <- read_csv(here('processeddata', '2018calvert', 'qcstages',
+                                '20240220_calvert2018_coi_swarm_statfile-taxonomy.csv')) %>%
+  select(seed_asv, motu, found_taxa, common_name, n_in_cluster) %>%
+  rename(found_taxa_motu = found_taxa,
+         common_name_motu = common_name)
+
+motu2asv <- read_csv(here('processeddata', '2018calvert', 'qcstages',
+                                '20240220_calvert2018_coi_motu2asv.csv')) %>%
+  select(!c(seed_reads, asv_reads)) 
+
+
+asvmatrix_meta_taxonomy <- edna_asvmatrix_meta %>%
+  left_join(taxonomy_coi) %>%
+  relocate(found_taxa, common_name, rank, .before = sample_id) %>%
+  #add motu info
+  left_join(motu2asv) %>%
+  relocate(motu, .before=reads_raw) %>%
+  left_join(taxonomy_motus) %>%
+  relocate(found_taxa_motu, common_name_motu, .before = sample_id)
+
+
+
+```
+
+
+## Final matrices
+
+Where we fix it up after all the control stuff is taken care of but we skip this because it's going to be taken care of in the script where we merge all runs rather htan doing it 4 times
+
+```{r final}
+#save whole list
+write_csv(asvmatrix_meta_taxonomy, here(processededna,
+                                          paste0(datefield, runfield,
+                                                 'asvmatrix_taxonomy.csv')))
+```
+

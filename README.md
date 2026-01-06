@@ -56,6 +56,10 @@ scripts
 	coi-03b_inext-readnumber
 		same as 12s but coi
 	
+raw-pipeline-scripts
+	right now these are the scripts that were used in my original repository to clean the fastq files. They represent many iterations of new and rerun data across several years so they are in the process of being streamlined and reorganized.
+	Ultimately, these will be updated to work with a download of our data from NCBI
+
 
 ## Chapter 2
 
@@ -64,8 +68,7 @@ Analyses from intermediate files ready
 Note the OBIS-GBIF files and raw spatial files must be generated from scratch as the intermediate files are too large for github.
 
 to do;
-	add pipeline
-	obis-gbif test
+	add pipeline; added, update
 	test thermal affinity download scripts
 	
 scripts
@@ -127,7 +130,9 @@ scripts
 	mapping
 		rmarkdown
 		makes maps of study area and partners
-		
+
+raw-pipeline-scripts
+	right now these are the scripts that were used in my original repository to clean the fastq files. They represent many iterations of new and rerun data across several years so they are in the process of being streamlined and reorganized.		
 			
 ## other
 

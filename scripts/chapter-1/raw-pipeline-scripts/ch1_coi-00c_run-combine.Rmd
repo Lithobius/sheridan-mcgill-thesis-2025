@@ -1,0 +1,349 @@
+---
+title: "ch1_coi-00c_merge-runs"
+date: "2024-01-27"
+---
+
+
+Combining runs for taxonomy assignment. There are 4 COI runs.
+Modified from Evan's combining_runs.dada2.12s.PECO.R and combining_runs.calvert-2018.R
+
+Sequence tables
+Input: sequence tables from each run
+Output: sequence table per run, master sequence table from all runs
+
+Read retention
+Input: read retention log from each run
+Output: read retention by run, and total
+
+NOTE ON FILEPATHS:
+datefield by run is the date the run was last processed -- not today's date! That's regular `datefield`!
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dada2)
+library(seqinr)
+
+library(here)
+# here filepaths
+# combined destination
+fastq_combined <- here('rawdata', '2018calvert', 'fastq', 
+                       'coi_kate', 'combined_runs')
+datefield <- '20240205_'
+runfield <- 'calvert2018_coi_'
+
+# Genome Canada, September
+coifastq_gcsept <- here('rawdata', '2018calvert', 'fastq', 
+                  'coi_kate', 'CO1_Run1_GenomeQuebec_Sept232019') 
+datefield_gcsept <- '20240205_'
+runfield_gcsept <- 'calvert2018_coi_run1_gc20190923_'
+
+# Genome Canada, October
+coifastq_gcoct <- here('rawdata', '2018calvert', 'fastq', 
+                  'coi_kate', 'CO1_Run1_GenomeQuebec_Oct212019') 
+datefield_gcoct <- '20240205_'
+runfield_gcoct <- 'calvert2018_coi_run1_gc20191021_'
+
+# Quadra run1
+coifastq_quad1 <- here('rawdata', '2018calvert', 'fastq', 
+                  'coi_kate', 'CO1_Run1_Training_03062020-Quadra') 
+datefield_quad1 <- '20240127_'
+runfield_quad1 <- 'calvert2018_coi_run1_quadra20200603_'
+
+# Quadra rerun3
+coifastq_quad3 <- here('rawdata', '2018calvert', 'fastq', 
+                  'coi_kate', 'CO1_ReRun3_04062020-Quadra') 
+datefield_quad3 <- '20240127_'
+runfield_quad3 <- 'calvert2018_coi_rerun3_quadra20200604_'
+
+```
+
+# Merge together
+
+It gets mad if your sample names are duplicated, and since these are multiple runs of the same thing, that is the case here.
+
+
+until the quadra runs make it through the run processing we'll have this shorter version thats just genome canada
+
+```{r merge-tables}
+####read in sequence tables####
+# Genome canada september
+seqtab_gcsept <- read_delim(here(coifastq_gcsept, 'processed',
+                                 paste0(datefield_gcsept, runfield_gcsept, 
+                                        "sequence-table_coi.txt"))) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  mutate(row_names = paste0(row_names, '_gcsept')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+
+# genome canada october
+seqtab_gcoct <- read_delim(here(coifastq_gcoct, 'processed',
+                                 paste0(datefield_gcoct, runfield_gcoct, 
+                                        "sequence-table_coi.txt"))) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  mutate(row_names = paste0(row_names, '_gcoct')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+# Quadra run 1
+# genome canada october
+seqtab_quad1 <- read_delim(here(coifastq_quad1, 'processed',
+                                 paste0(datefield_quad1, runfield_quad1, 
+                                        "sequence-table_coi.txt"))) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  mutate(row_names = paste0(row_names, '_quadra1')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+# Quadra rerun3
+seqtab_quad3 <- read_delim(here(coifastq_quad3, 'processed',
+                                 paste0(datefield_quad3, runfield_quad3, 
+                                        "sequence-table_coi.txt"))) %>%
+  filter(!(row_names == 'Undetermined')) %>%
+  mutate(row_names = paste0(row_names, '_quadra3')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
+####merge sequence tables####
+#ASVs are combined on sequence alone. exact matches are simply merged
+seqtab_all <- mergeSequenceTables(seqtab_gcsept, seqtab_gcoct, 
+                                  seqtab_quad1, seqtab_quad3) 
+```
+
+
+# Combine eDNA
+
+All sequence tables should be merged into one master table. This means that every identical sequence in every year will be given the same ASV number. This master combined table should be exported and run through seqtable2swarm.py before moving on to clustering and taxonomy assignment.
+
+```{r write-out}
+
+####save sequences as fasta, give sequences human-readable names, save modified sequence table####
+
+#saving the new names and sequences as a .fasta file in your project working directory, and save a table that shows the mapping of sequences to new ASV names
+asvtab_all <- t(as.data.frame(seqtab_all)) 
+#transposed (OTUs are rows) data frame. 
+# unclassing the otu_table() output avoids type/class errors later on
+
+#re-save sequence table w updated names
+write.table(data.frame("row_names"=rownames(seqtab_all), seqtab_all),
+            here(fastq_combined,
+                 paste0(datefield, runfield, "sequence-table.txt")), row.names=FALSE, quote=F, sep="\t")
+
+ASV.seq <- as.character(unclass(row.names(asvtab_all))) #store sequences in character vector
+ASV.num <- paste0("ASV", seq(ASV.seq), sep='') #create new names
+
+asv_map <- cbind(asv = ASV.num, seq = ASV.seq) %>%
+  as.data.frame()
+
+write.table(asv_map, here(fastq_combined, 
+                          paste0(datefield, runfield,
+                                 "asv-sequences_name-mapping.txt")),
+            sep="\t", quote=F, row.names=F, col.names=F)
+
+
+
+write.fasta(sequences=as.list(ASV.seq), names=ASV.num, 
+            here(fastq_combined, 
+                 paste0(datefield, runfield, "asv-sequences.fasta"))) #save sequences with new names in fasta format
+
+
+
+
+
+
+#IMPORTANT: sanity checks
+colnames(seqtab_all) == ASV.seq #only proceed if this tests as true for all elements
+
+#rename your ASVs in the taxonomy table and sequence table objects
+colnames(seqtab_all) <- ASV.num
+
+#re-save sequence table w updated names
+write.table(data.frame("row_names"=rownames(seqtab_all),seqtab_all),
+            here(fastq_combined,
+                 paste0(datefield, runfield, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+
+```
+
+# By run
+
+## ASV tables
+
+These will be used for eDNA QC after taxonomy assignment.
+
+```{r genome canada}
+asvtab_gcsept <- seqtab_gcsept %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_gcsept,
+            here(coifastq_gcsept, "processed",
+                 paste0(datefield, runfield_gcsept, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+
+
+asvtab_gcoct <- seqtab_gcoct %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_gcoct,
+            here(coifastq_gcoct, "processed",
+                 paste0(datefield, runfield_gcoct, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+
+# quadra 1
+asvtab_quad1 <- seqtab_quad1 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_quad1,
+            here(coifastq_quad1, "processed",
+                 paste0(datefield, runfield_quad1, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+
+# quadra 1
+asvtab_quad3 <- seqtab_quad3 %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2021 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_quad3,
+            here(coifastq_quad3, "processed",
+                 paste0(datefield, runfield_quad3, "sequence-table_asv-names.txt")), row.names=FALSE, quote=F, sep="\t")
+
+```
+
+# Read retention summary statistics
+
+These files map where the reads went throughout the entire QC process
+
+I need to remake these because they were saved incorrectly; september and october have the same number and the filter and trim step wasn't updated.
+
+```{r load-in read retention}
+# GC September
+retention_gcsept <- read_csv(here(coifastq_gcsept, 'qc_plots',
+                                        paste0(datefield_gcsept, runfield_gcsept,
+                                               "read-retention_coi_bysample.csv")))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(run = 'Genome Canada September')
+
+# GC October
+retention_gcoct <- read_csv(here(coifastq_gcoct, 'qc_plots',
+                                        paste0(datefield_gcoct, runfield_gcoct,
+                                               "read-retention_coi_bysample.csv")))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(run = 'Genome Canada October') 
+
+# quadra1
+retention_quad1 <- read_csv(here(coifastq_quad1, 'qc_plots',
+                                        paste0(datefield_quad1, runfield_quad1,
+                                               "read-retention_coi_bysample.csv")))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(run = 'Quadra Run1')
+
+# quadra1
+retention_quad3 <- read_csv(here(coifastq_quad3, 'qc_plots',
+                                        paste0(datefield_quad3, runfield_quad3,
+                                               "read-retention_coi_bysample.csv")))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(run = 'Quadra Run3')
+
+```
+
+```{r merge-retention}
+
+retention_all <- retention_gcsept %>%
+  bind_rows(retention_gcoct) %>%
+  bind_rows(retention_quad1) %>%
+  bind_rows(retention_quad3)
+
+retention_summary <- retention_all %>%
+  group_by(run) %>%
+  summarize(n_samp = length(sample_id),
+            raw = sum(raw_f) + sum(raw_r),
+            after_cutadapt = sum(cutadapt_f) + sum(cutadapt_r),
+            # get the rs for this on the summary
+            after_filtertrim = sum(filtertrim_f) + sum(filtertrim_r),
+            after_denoise = sum(denoised_f) + sum (denoised_r),
+            merged = sum(merged),
+            nosingletons = sum(nosingletons),
+            nochimeras = sum(nochimeras)) %>%
+  ungroup() %>%
+  janitor::adorn_totals('row')
+
+
+write.csv(retention_summary, here(fastq_combined, 
+                                  paste0(datefield, runfield,
+                                         "read_retention.csv")))
+```
+
+```{r extract read stats from merged files}
+length(asvtab_all)
+
+allsum <- seqtab_all %>%
+  as.data.frame(.) %>%
+  mutate(totalsample = rowSums(.))
+
+sum(allsum$totalsample)
+```
+
+
+
+# Dereplicate FASTA test
+
+idk what this does at the moment
+
+Right now it looks like all these are unique?
+
+```{r dereplicate}
+library(ips)
+
+asvtab_all <- t(as.data.frame(seqtab_all))
+
+seq_list <- asvtab_all %>%
+  as.data.frame() %>%
+  rownames_to_column('asv_seq') %>%
+  select(asv_seq) %>%
+  mutate(temp_asv = paste0("tempasv_", seq(asv_seq))) %>%
+  column_to_rownames('temp_asv')
+
+write.fas(seq_list, here(fastq_combined, 
+                         paste0(datefield, 'tempasvs.fasta')))
+seq_list2 <- read.fas(here(fastq_combined, 
+                           paste0(datefield, 'tempasvs.fasta')))
+
+seq_align <- mafft(seq_list2)
+write.fas(seq_align, here(fastq_combined, 
+                          paste0(datefield, 'tempasvs_align.fasta')))
+
+seq_derep <- dada2:::derepFasta(here(fastq_combined,
+                                     paste0(datefield, 'tempasvs_align.fasta')))
+
+uniq<-seq_derep$uniques %>%
+  as.data.frame()
+
+```
+

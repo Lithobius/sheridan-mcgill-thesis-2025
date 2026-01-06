@@ -1,0 +1,207 @@
+---
+title: "ch2_01a-2021_metadata-cleaning"
+output: html_document
+date: "2023-10-13"
+---
+
+2021 metadata cleaning
+
+Standardize here, to be merged with other years
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+
+edna_2021 <- here('rawdata', 'peco', '2021_edna')
+edna_out <- here('processeddata', 'peco', '2021_edna')
+```
+
+
+## Metadata
+```{r load-in}
+## read in files
+edna_site_metadata <- read_csv(here::here(edna_2021,
+                                    "20220127_PECO_site-level_metadata.csv")) %>%
+  rename(decimal_latitude = decimal_latitide)
+
+# includes lab metadata
+edna_sample_metadata <- read_csv(here::here(edna_2021,
+                                    "202301_PECO_2021_edna_metadata-MAL.csv")) %>%
+  janitor::clean_names() %>%
+  # use hte sample id column for the redone samples
+  select(!(sample_id)) %>%
+  rename(sample_id = bsa_redo_samples)
+
+# there were a few missing data
+missing_site_metadata <- read_csv(here::here(edna_2021,
+                                    "20230222_site-level_missing.csv"))%>%
+  rename(decimal_latitude = decimal_latitide)
+missing_sample_metadata <- read_csv(here::here(edna_2021,
+                                    "20230222_sample-level_missing.csv")) %>%
+  janitor::clean_names()
+
+```
+
+### Clean and merge Metadata
+
+Note more cleaning needs to be done on the site and sample level metadata eg date column
+
+
+
+```{r metadata}
+edna_site_fix <- edna_site_metadata %>%
+  rbind(missing_site_metadata) %>%
+    #add region code to end of single letter sites
+  mutate(site_code2 = case_when(
+    region_name == 'HG_BC_PECO' ~ str_replace_all(site_code, c('MDD_HG' = "MD_HG"
+                                     )),
+    region_name == 'YB_OR_PECO' ~ str_replace_all(site_code, c('A' = "BV_YB",
+                                     '\\bB\\b' = "FP_YB",
+                                     '\\bC\\b' = "SS_YB",
+                                     '\\bD\\b' = "IF_YB",
+                                     '\\bE\\b' = "SN_YB")),
+    region_name == 'NC_CA_PECO' ~ str_replace_all(site_code, c('A' = "A_NC",
+                                     '\\bB\\b' = "B_NC",
+                                     '\\bF\\b' = "F_NC",
+                                     '\\bD\\b' = "D_NC",
+                                     '\\bE\\b' = "E_NC")),
+    region_name == 'PS_WA_PECO' ~ str_replace_all(site_code, c(
+                                     'PS_PB' = "PB_PS",
+                                     'PS_SH' = "SH_PS")))) %>%
+   mutate(site_code = str_replace(site_code, "FAN1", "FAN3")) %>%
+  mutate(site_code = coalesce(site_code2, site_code)) %>%
+  select(!(site_code2)) %>%
+  # standardize location names to look nice when plotting!
+  ### note these are currently only the seine locations. update later with ALL eDNA locations!!!
+    mutate(location_name = str_replace_all(location_name, c("Park, BC" = "Park",
+                                                          "Bayview Padilla Bay" = "Bayview, Padilla Bay",
+                                                          "Ship Harbor" = "Ship Harbor, Padilla Bay",
+                                                          "Westside Park" = "Westside Park, Bodega Bay",
+                                                          "Masons Marina" = "Mason's Marina, Bodega Bay",
+                                                          "Campbell Cove" = "Campbell Cove, Bodega Bay",
+                                                          "Millerton" = "Millerton, Bodega Bay",
+                                                          "Blakes Landing" = "Blakes Landing, Bodega Bay",
+                                                          "North Central California \\(San Francisco Bay\\)" = "San Francisco Bay",
+                                                          "San Dieguito Lagoon" = "San Dieguito Lagoon, San Diego",
+                                                          "Chula Vista" = "Chula Vista, San Diego",
+                                                          "Shelter Island" = "Shelter Island, San Diego",
+                                                          "Fiesta Island" = "Fiesta Island, San Diego"
+                                                          ))) %>%
+  mutate(region_code = str_replace_all(region_code, "PECO,", "PECO")) %>%
+  # there's some random character in some rows for tide, just removing any non-word character
+  mutate(tide = str_replace(tide, "\\W+", "")) %>%
+  distinct() %>%
+  # originally missing coordinate info for Ramsay Island
+  mutate(decimal_latitude = ifelse(site_code == "RI_HG", '52.575011', decimal_latitude)) %>%
+  mutate(decimal_longitude = ifelse(site_code == "RI_HG", '-131.39638', decimal_longitude)) %>%
+  # some Yaquina Bay duplicates with no coordinates
+  filter(!(is.na(decimal_latitude)))%>%
+    mutate(region_name = str_remove_all(region_name, '_PECO'),
+         region_code = str_remove_all(region_code, '_PECO')) %>%
+  mutate(region_name = case_when(region_name == 'JN_AK' ~ 'AK_JN',
+                   region_name == 'SE_AK' ~ 'AK_SE',
+                   region_name == 'HG_BC' ~ 'BC_HG',
+                   region_name == 'NV_BC' ~ 'BC_NV',
+                   region_name == 'CC_BC' ~ 'BC_CC',
+                   region_name == 'IC_BC' ~ 'BC_IC',
+                   region_name == 'PP_BC' ~ 'BC_PP',
+                   region_name == 'PS_WA' ~ 'WA_PS',
+                   region_name == 'WB_WA' ~ 'WA_WB',
+                   region_name == 'YB_OR' ~ 'OR_YB',
+                   region_name == 'LA_CA' ~ 'CA_LA',
+                   region_name == 'NC_CA' ~ 'CA_NC',
+                   region_name == 'SD_CA' ~ 'CA_SD',
+                   region_name == 'MB_CA' ~ 'CA_MB',
+                   TRUE ~ region_name)) %>%
+  mutate(region_code = case_when(region_code == 'JN_AK' ~ 'AK_JN',
+                   region_code == 'SE_AK' ~ 'AK_SE',
+                   region_code == 'HG_BC' ~ 'BC_HG',
+                   region_code == 'NV_BC' ~ 'BC_NV',
+                   region_code == 'CC_BC' ~ 'BC_CC',
+                   region_code == 'IC_BC' ~ 'BC_IC',
+                   region_code == 'PP_BC' ~ 'BC_PP',
+                   region_code == 'PS_WAa' ~ 'WA_PSa',
+                   region_code == 'PS_WAb' ~ 'WA_PSb',
+                   region_code == 'WB_WA' ~ 'WA_WB',
+                   region_code == 'YB_OR' ~ 'OR_YB',
+                   region_code == 'LA_CA' ~ 'CA_LA',
+                   region_code == 'NC_CAa' ~ 'CA_NCa',
+                   region_code == 'NC_CAb' ~ 'CA_NCb',
+                   region_code == 'NC_CAc' ~ 'CA_NCc',
+                   region_code == 'CA_Nca' ~ 'CA_NCa',
+                   region_code == 'SD_CA' ~ 'CA_SD',
+                   region_code == 'MB_CA' ~ 'CA_MB',
+                   TRUE ~ region_code)) %>%
+    # update FAN3 for now??
+  mutate(region_code = ifelse(site_code == 'FAN3_CC', 'BC_CC',
+                                          region_code))  %>%
+  mutate(region_name = ifelse(site_code == 'FAN3_CC', 'BC_CC',
+                                          region_name)) %>%
+  mutate(location_name = ifelse(site_code == 'FAN3_CC', 'McMullins South, Central Coast',
+                                          location_name))
+  
+#combine missing sample metadata with existing sample metadata
+missing_sample_metadata2 <- edna_sample_metadata %>%
+  filter(sample_id %in% missing_sample_metadata$sample_id) %>%
+  select(!(c(region_name, site_code, filter_time, 
+             collection_time, control, notes_about_sample))) %>%
+  left_join(missing_sample_metadata)
+
+# combine site and sample level metadata
+edna_metadata <- edna_sample_metadata %>%
+  #remove incomplete rows and rowbind newly complete rows
+  filter(!(sample_id %in% missing_sample_metadata2$sample_id)) %>%
+  rbind(missing_sample_metadata2) %>%
+  # update region names
+  mutate(site_code2 = case_when(
+    region_name == 'HG_BC_PECO' ~ str_replace_all(site_code, c('DSD_temp' = "DSD_HG",
+                                     'MDD_temp' = "MD_HG")),
+    region_name == 'PS_WA_PECO' ~ str_replace_all(site_code, c('BP_temp' = "PB_PS",
+                                     'SH_temp' = "SH_PS")),
+    )) %>%
+  mutate(site_code = str_replace(site_code, "FAN1", "FAN3")) %>%
+  #one site didn't record if it was a control
+  mutate(control = ifelse((site_code %in% "F") & (is.na(collection_time)), "yes", 
+                              ifelse((site_code %in% "F") & (!(is.na(collection_time))), 'no', control))) %>%
+  mutate(site_code = coalesce(site_code2, site_code)) %>%
+  select(!(site_code2)) %>%
+   select(site_code, sample_id, control, treatment,
+          dna_extraction_date, mi_seq_library) %>%
+  left_join(edna_site_fix) %>%
+  # sample name to lower
+  mutate(sample_id = tolower(sample_id)) %>%
+  # pecoe450 not tagged with redo
+  # this will make the original pecoe450 data isolated and 
+  ## automatically removed in future qc steps
+  mutate(sample_id = ifelse(sample_id == 'pecoe450', 'pecoe450-bsaredo', sample_id)) %>%
+  mutate(mi_seq_library = ifelse(sample_id == 'pecoe450-bsaredo', 'BSA_redo', mi_seq_library))
+
+
+## create extraction blank column
+xnblanks <- edna_metadata %>%
+  filter(treatment == 'extraction negative') %>%
+  select(sample_id, dna_extraction_date) %>%
+  filter(!(is.na(dna_extraction_date))) %>%
+  rename(extraction_blank = sample_id)
+
+
+# Final updates
+edna_metadata_all <- edna_metadata %>%
+  left_join(xnblanks)  %>%
+  mutate(year = 2021) %>%
+  mutate(control = case_when(treatment %in% c('extraction negative', 
+                                              'PCR negative', 'Calibration') ~ 'yes',
+                             sample_id == 'pecoe066' ~ 'no',
+                             TRUE ~ control))
+  
+
+```
+
+
+
+```{r write out}
+#write out to read back in later if needed
+write_csv(edna_metadata_all, here(edna_out, '20231013_peco2021_metadata.csv'))
+
+```
+

@@ -1,0 +1,715 @@
+---
+title: "asv-taxonomy merge"
+output: html_document
+date: "2024-02-01"
+---
+
+Now that the taxonomy from NCBI is standardized (more or less) we can merge it with the ASV table which will then get assigned to the runs during QC. So we'll perform the manual LCA on the entire ASV list, then the asvs can just be assigned with no modification in the QC.
+
+
+Notes on some taxonomy oddness:
+Gastropoda:
+Limpets do not have an order at the moment. The ASVs would have been assigned to order but it was NA so it went back to gastropoda. However i put "Limpet" in common name.
+
+Clione has been split into two forms; C. elegantissima is the north pacific form, Clione limacina is the North atlantic form, but it is a recent split so some NCBI records may still be 'limacina'; examples:
+LC341693, from north pacific
+
+Clytia hemisphaerica has records in the North Pacific even though its 'supposed to be' atlantic
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+
+# filepaths for use with here, basic files
+coi_data <- here("rawdata", "2018calvert", "fastq",
+               'coi_kate', 'combined_runs')
+
+
+# datefield might be different
+datefield <- '20240220_'
+runfield <- 'calvert2018_coi_'
+```
+
+
+```{r load-in}
+# not all asvs will have blasted
+asvlist <- read_delim(here(coi_data,
+                           '20240205_calvert2018_coi_asv-sequences_name-mapping.txt'),
+                      col_names = FALSE) %>%
+  select(X1) %>%
+  rename(asv = X1)
+
+top50_blast <- read_csv(here(coi_data, '20240220_calvert2018_coi_blast-top50_taxonomy.csv')) %>%
+  relocate(asv, found_taxa, identity_percentage) %>%
+  # fix this in original scripts
+  mutate(kingdom = ifelse(kingdom == 'Animalia', 'Metazoa', kingdom)) %>%
+  mutate(domain = ifelse(kingdom == 'Metazoa', 'Eukaryota', domain)) %>%
+  rename(percent_identity = identity_percentage) %>%
+  # temporary taxonomy update
+  mutate(terrestrial_only = case_when(found_taxa %in% c('Rhagada', 'Cochlostoma',
+                                                        'Euhadra peliomphala', 'Euhadra amaliae') | family %in% c('Camaenidae') ~ 1,
+                                      TRUE ~ terrestrial_only)) %>%
+  mutate(class = case_when(class == 'Hexanauplia' ~ 'Thecostraca',
+                            TRUE ~ class)) %>%
+  mutate(rank = case_when(rank %in% c('suborder') ~ 'order',
+                          TRUE ~ rank)) %>%
+  select(!clade_2)
+```
+Can skip key joining steps from before since we updated the taxonomy for this run specificially
+
+```{r 100 species}
+# Actually I think some of these can be bumped up to higher levels
+# We dont' really analyze offtarget
+taxonomy_strip <- top50_blast %>%
+  # simplify algae, etc
+  mutate(found_taxa = case_when(genus %in% c('Skeletonema', 'Alexandrium', 'Karenia', 'Pythium',
+                                             'Gonyaulax', 'Azadinium', 'Pseudonitzschia', 
+                                             'Pseudo-nitzschia', 'Chaetoceros', 'Cylindrotheca',
+                                             'Scrippsiella', 'Paramoeba', 
+                                             'Cochliopodium', 'Dinophysis',
+                                             'Pelagibacter', 'Tamlana', 
+                                             'Microspongium', 'Ostreopsis',
+                                             'Laminariocolax', 'Prorocentrum', 'Ostreopsis') ~ genus,
+                                found_taxa %in% c('Ralfsioid', 'Ralfsiacean', 
+                                                  'Nusuttodinium') ~ 'Ralfsia',
+                                TRUE ~ found_taxa)) %>%
+  # invalid, out of region, etc. for off target.
+  filter(!(found_taxa %in% c('Leathesia difformis'))) %>%
+  # invalid for on-target
+  filter(!(found_taxa %in% c( # butterflies
+    'Cupido argiades', 'Polyommatus eros', 'Iphiclides feisthamelii',
+    # rotifer, UK, probably freshwater?
+    'Synchaeta kitina',
+    # atlantic
+    'Oikopleura intermedia'))) %>%
+  # bad NCBI accessions that are messing stuff up; 'environmental samples' or low taxonomic resolution
+  filter(!(accession %in% c('HQ848880', 'HQ848838', 'HQ848878', 
+                            'MH242692', 'LC222760', 'LC222761',
+                            'HQ848867', 'LC222760', 'MH242692',
+                            'KC732391', 'KC732383', 'KC732392',
+                            'KC732394',
+                            # mislabeled echinoderm
+                            'MZ580936',
+                            # mislabeled hydrozoans
+                            'KF977357', 'KF977307',
+                            # Acartia californiensis that only blasts to longiremis
+                            'JX846960',
+                            # Dynamena disticha, always has high evalue compared to offtarget hits
+                            'OQ322796',
+                            # genus level with surrounding sp at 100/99
+                            'MF545009', 'MK037218', 'MK037190', 'MK037191',
+                            'OQ032411', 'OQ032410', 'MK037215', 'MG314764',
+                            'MG318906', 'MG315809', 'KM611691', 'MG320983',
+                            'MG316950', 'MG313992', 'MG422967', 'MN138410',
+                            'MW256484', 'MG316786', 'MG319069', 'MG316535',
+                            'MG312465', 'KM611755', 'KM611615', 'MK037187',
+                            'MK037202', 'KF715887', 'KF715883', 'KM611719',
+                            'OQ032393', 'MH242704', 'MH242857', 'MK037216',
+                            'MF544699', 'MF544788', 'MG318505', 'EF687902',
+                            'MG313626', 'MK037214', 'KU197597', 'KU197596',
+                            'MG423290', 'KM611547', 'MF742099', 'MF742100',
+                            'MF742097', 'MF742098', 'MF742101', 'MF121663',
+                            'MF121381', 'HQ932478', 'HQ932476', 'MF121560',
+                            'MF121117', 'AY894308', 'KU495778', 'HM542073',
+                            'KU495846', 'MZ580560', 'HM542077', 'HM542075',
+                            'MH242735', 'MF742130', 'MF742127', 'MF742128',
+                            'HM542074', 'HM542078', 'OQ957219',
+                            'MF742131', 'KU495788', 'HM542076', 'KU495907',
+                            # family level or above with surrounding sp at 100/99
+                            'KU204303', 'KU204300', 'KU204274', 'HQ966534',
+                            'HQ966538', 'HQ966537', 'HQ966536', 'KU204281',
+                            'KU204302', 'MW256486', 'AY319475', 'HQ932519',
+                            'MW899233', 'HQ932536', 'MW899232', 'MW899229',
+                            'MW899234', 'KJ950451', 'KJ950450', 'KJ950450',
+                            'HQ932537', 'MG421931', 'MF043878', 'MF043876',
+                            'MF043874', 'MF043870', 'MK037227'
+                            ))) %>%
+  # update found taxa if needed
+  mutate(found_taxa = case_when(found_taxa == 'Haliotis kamtschatkana kamtschatkana' ~ 'Haliotis kamtschatkana',
+                                # north pacific records
+                                accession %in% c('LC341693', 'LC341685', 'LC341692',
+                                                 'LC341687', 'LC341686', 'LC341684',
+                                                 'LC341683', 'LC341688', 'LC341689',
+                                                 'LC341690', 'LC341691') ~ 'Clione elegantissima',
+                                TRUE ~ found_taxa)) %>%
+  # update common name for certain animals
+  mutate(common_name = case_when(genus %in% c('Lottia', 'Acmaea') ~ 'Limpet',
+                                 genus == 'Haliotis' ~ 'Abalone',
+                                 genus == 'Clione' ~ 'Sea angel',
+                                 genus %in% c('Rhagada', 'Cochlostoma', 'Euhadra') | family %in% c('Camaenidae') ~ 'Terrestrial snail',
+                                 TRUE ~ common_name)) %>%
+  # out of region target taxa that tend to be 100% alongside other 100%s
+  filter(!(found_taxa %in% c(# northwest pacific
+    'Mya japonica', 'Clytia xiamenensis', 'Nuttallia japonica', 'Nuttallia ezonis',
+    # southeast asia
+    'Laspionchis boucheti',
+                             # atlantic
+                             'Metridia lucens lucens',
+                             'Anemonia viridis', 'Anemonia sulcata',
+                             # california
+                             'Hyperproson anale', 'Cottus gulosus'))) %>%
+  mutate(found_taxa = case_when(description == 'No Results' ~ 'No Results',
+                                TRUE ~ found_taxa))
+
+# in some cases we're getting out of region hits that by removing, 
+# the species is no longer assigned to anything.
+# Here we'll take this into consideration further down
+outofregion <- c(# Atlantic
+                             'Clione limacina', 'Eunapius carteri', 
+                             'Hemimycale columella', 'Gastropsetta frontalis',
+                             'Hemimycale mediterranea', 'Phorcus sauciatus',
+                             'Iberus guiraoanus', 'Iberus', 'Kurtiella bidentata',
+                             # Northwest pacific
+                             'Cerebratulus orochi', 'Abralia andamanica',
+                              'Trichiurus brevis', 'Polydora onagawaensis',
+                             # Southeast Asia
+                             'Anthopleura anjunae', 'Stratospongilla bombayensis',
+                             'Aseraggodes winterbottomi', 'Parapercis clathrata',
+                             'Halichoeres nebulosus', 'Synchiropus stellatus',
+                             'Ophidiaster granifer',
+                             # South America
+                             'Cliona chilensis',
+                             # California
+                             'Hemimycale polyboletus')
+
+
+# First; assign all MOTUs with 100% one species
+blast_assign <- taxonomy_strip %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, percent_identity, .keep_all = TRUE) %>%
+    # modify dataframe to be more useful
+  select(asv, found_taxa, 
+         percent_identity, evalue, bitscore, 
+         rank, common_name, kingdom, phylum, class, order, 
+         family, genus, freshwater_only, terrestrial_only,
+         ncbi_organism, organism_verbatim,
+         worms_sciname, status, worms_aphiaid
+         ) %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+  # indicate keep rows with 100% same species
+  mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
+  group_by(asv, found_taxa) %>%
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(percent_identity == 100) & any(percent_identity <= 99.5)) |
+                                (any(sp_percent <= .2) & any(percent_identity <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(percent_identity >= 99) & any(percent_identity <= 97.5)) |
+                                percent_identity <= 96.5 ~ 'x',
+                              evalue > (1 * 10^-49) ~ 'x',
+                              found_taxa %in% outofregion ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(one_hit == 'no' & unlikely %in% c('x') & percent_identity <= 99.5|
+             !is.na(evalue) & evalue > (1 * 10^-49)|
+             one_hit == 'yes' & found_taxa %in% outofregion)) %>%
+  # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  # filter for anything 100%/98% that passed the original filter
+  group_by(asv) %>%
+  mutate(unlikely = case_when((hit_remain > 1 & any(percent_identity == 100) & any(percent_identity <= 99.5)) ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(unlikely %in% c('x') & percent_identity <= 99.5)) %>%
+  # assign asvs with one hit remaining after unlikely and < 100% frequency
+  # # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  filter(hit_remain == 1) %>%
+  select(!(c(hit_remain, unlikely, one_hit, sp_percent, num_blast, sp_freq)))
+```
+
+Resolve ones with more than one hit
+
+```{r}
+# identify ASVs that have conflicts in their top 10
+# This removes ASVs without conflicts, leaving only the potential problems.
+blast_conflict <- taxonomy_strip %>%
+  filter(!(asv %in% blast_assign$asv)) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, percent_identity, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+    # modify dataframe to be more useful
+  select(asv, found_taxa, sp_percent,
+         percent_identity, evalue, bitscore, 
+         rank, kingdom, phylum, class, order, 
+         family, genus, freshwater_only, terrestrial_only,
+         ncbi_organism, organism_verbatim, common_name,
+         worms_sciname, status, worms_aphiaid
+         ) %>%
+    group_by(asv, found_taxa) %>%
+  # remove hits with less than 98.5%% when an ID in the list has 100%,
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(percent_identity == 100) & any(percent_identity <= 99.7)) |
+                                (any(sp_percent <= .2) & any(percent_identity <= 99.7)) | 
+                               (any(percent_identity >= 99) & any(percent_identity <= 97.5)) |
+                                 percent_identity <= 96.5 ~ 'x',
+                              evalue > (1 * 10^-49) ~ 'x',
+                                found_taxa %in% outofregion ~ 'x')) %>%
+  ungroup() %>%
+  filter(!(unlikely %in% c('x') & percent_identity <= 98 |
+             percent_identity <= 97|
+             unlikely %in% c('x') & evalue > (1 * 10^-49))) %>%
+  select(!(c(unlikely))) %>%
+    #remove anything that's more than .5 lower
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(percent_identity)) %>%
+  ungroup() %>%
+  #distinct(asv, found_taxa, max_sp_id, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # what is the highest identity percentage on that MOTU
+  mutate(max_id = max(percent_identity)) %>%
+  ungroup() %>%
+  # if the species max is .3% lower than the max
+  # this seems to be about as far away as makes sense for this data
+  # Note that maybe for other data it might be different.
+  # May also need more solid empirical justification than 
+  # my past experience handling NCBI data
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .3) %>%
+  select(!(c(max_id, max_sp_id, point_diff))) %>%
+    # recalculate species percent
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+  # to family
+  mutate(updated_taxon = case_when(sp_percent == 1 & found_taxa %in% outofregion ~ genus,
+                                   sp_percent == 1 ~ found_taxa,
+                                   length(unique(genus)) == 1 ~ genus,
+                                   length(unique(family)) == 1 ~ family,
+                                   length(unique(order)) == 1 ~ order,
+                                   length(unique(class)) == 1 ~ class,
+                                   length(unique(phylum)) == 1 ~ phylum
+                                   )) %>%
+  # some have NAs in fields
+  mutate(updated_taxon = case_when(is.na(updated_taxon) & phylum %in% c('Dinophyceae', 'Rhodophyta') ~ phylum,
+                                   is.na(updated_taxon) & class %in% c('Insecta', 'Gastropoda') ~ class,
+                                   TRUE ~ updated_taxon)) %>%
+  select(!c(num_blast, sp_freq))
+
+
+blast_lowmatch <- taxonomy_strip %>%
+  filter(!(asv %in% blast_assign$asv | asv %in% blast_conflict$asv)) %>%
+    # isolate low and high evalues to identify which asvs actually have conflicts
+  # remember high evalues are bad
+  mutate(evalue_high = ifelse(evalue > 0.01, 'yes', 'no'),
+         evalue_low = ifelse(evalue < (1 * 10^-49), 'yes', 'no')) %>%
+  group_by(asv) %>%
+  # if some asvs have high and low mixed?
+  mutate(somehigh = ifelse(length(unique(evalue_high)) > 1, 'yes', 'no'),
+         somelow = ifelse(length(unique(evalue_low)) > 1, 'yes', 'no')) %>%
+  ungroup() %>%
+  # get rid of the high values when only some are high
+  filter(somehigh == 'no' | somehigh == 'yes' & evalue_high == 'no') %>%
+  # keep the low values when only some are low
+  filter(somelow == 'no' | somelow == 'yes' & evalue_low == 'yes') %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  ## what is the highest identity percentage per species, to eliminate duplicates
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(percent_identity)) %>%
+  ungroup() %>%
+  group_by(asv) %>%
+  # what is the highest identity percentage on that asv
+  mutate(max_id = max(percent_identity)) %>%
+  ungroup() %>%
+  # keep only the highest % of a species
+  filter(percent_identity == max_sp_id) %>%
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .4) %>%
+  # reduce to one row per species
+  distinct(asv, found_taxa, max_sp_id, .keep_all = TRUE) %>%
+  # recalculate species percent and remove 100s
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+  # na handling
+  mutate(na_gen = ifelse(any(is.na(genus)), 'yes', 'no'),
+         na_fam = ifelse(any(is.na(family)), 'yes', 'no'),
+         na_ord = ifelse(any(is.na(order)), 'yes', 'no'),
+         na_class = ifelse(any(is.na(class)), 'yes', 'no')) %>%
+    # if the number of flagged records always has the same genus, update. 
+  # if the number of flaggd records always has the same family, update.
+  # if the species percent is 100% and the species was actually not local, update
+  mutate(updated_taxon = case_when(sp_percent == 1 & evalue > .01 ~ order,
+                                   sp_percent == 1 & percent_identity < 95 ~ family,
+                                   sp_percent == 1 & str_detect(found_taxa, ' ') == TRUE ~ genus,
+                                   sp_percent == 1 ~ found_taxa,
+                                   length(unique(genus)) == 1 & na_gen == 'no' ~ genus,
+                                   length(unique(family)) == 1 & na_fam == 'no' ~ family,
+                                   length(unique(order)) == 1 & na_ord == 'no' ~ order,
+                                   length(unique(class)) == 1 & na_class == 'no' ~ class,
+                                   length(unique(phylum)) == 1 ~ phylum,
+                                   length(unique(kingdom)) == 1 ~ kingdom,
+                                   length(unique(domain)) > 1 ~ 'Potential chimera',
+                                   length(unique(kingdom)) > 1 ~ 'Potential chimera')) %>%
+  # some plants + bacteria, etc get NAs from this
+  # drop outgroups to a higher taxonomy and walk back any marine inverts
+  mutate(updated_taxon = case_when(is.na(updated_taxon) & kingdom %in% c('Viridiplantae',
+                                                                         'Bacteria', 'Fungi') ~ kingdom,
+                                   is.na(updated_taxon) & phylum %in% c('Chordata') ~ order,
+                                   is.na(updated_taxon) & phylum %in% c('Dinophyceae',
+                                                                        'Apicomplexa') ~ phylum,
+                                   is.na(updated_taxon) & class %in% c('Araneae', 'Acari',
+                                                                       'Pseudoscorpiones') ~ class,
+                                   is.na(updated_taxon) & !is.na(genus) ~ genus,
+                                   is.na(updated_taxon) & !is.na(order) ~ order,
+                                   TRUE ~ updated_taxon)) %>%
+  ungroup() %>%
+  select(!(c(max_id, max_sp_id, point_diff, 
+              accession, description,
+             num_blast, sp_freq, sp_percent,
+             evalue_high, evalue_low, somehigh, somelow,
+             na_gen, na_fam, na_ord, na_class)))
+
+
+# drop uncertanties to next taxonomic level
+blast_updates <- blast_conflict %>%
+  rbind(blast_lowmatch) %>%
+  distinct() %>%
+  mutate(rank = case_when(str_detect(updated_taxon, ' ') == TRUE & str_detect(updated_taxon, 'incertae sedis') == FALSE ~ 'species',
+                          updated_taxon == genus ~ 'genus',
+                          updated_taxon == family ~ 'family',
+                          updated_taxon == order ~ 'order',
+                          updated_taxon == class ~ 'class',
+                          updated_taxon == phylum ~ 'phylum')) %>%
+  mutate(genus = case_when(rank %in% c('family', 'order', 'class', 'phylum') ~ NA_character_,
+                           TRUE ~ genus)) %>%
+  mutate(family = case_when(rank %in% c('order', 'class', 'phylum') ~ NA_character_,
+                            TRUE ~ family)) %>%
+  mutate(order = case_when(rank %in% c('class', 'phylum') ~ NA_character_,
+                            TRUE ~ order)) %>%
+  mutate(class = case_when(rank %in% c('phylum') ~ NA_character_,
+                            TRUE ~ phylum)) %>%
+  distinct(asv, updated_taxon, .keep_all = TRUE) %>%
+  rbind(blast_assign) %>%
+  mutate(found_taxa = coalesce(updated_taxon,found_taxa)) %>%
+  select(!updated_taxon) %>%
+  relocate(found_taxa, common_name) %>%
+  # less useful columns
+  select(!c(unacceptreason, status, organism_verbatim, ncbi_organism,
+            worms_aphiaid, worms_sciname)) %>%
+  # until i fix this
+  select(!c(domain, sp_percent))
+```
+
+
+Now to see what didn't get assigned and get common names in for invertebrates
+Right now the few i checked that weren't assigned were low identity misc stuff
+
+```{r assign}
+assigned_asvs <- asvlist %>%
+  left_join(blast_updates) %>%
+  # flag offtarget
+  mutate(rank = case_when(kingdom != 'Metazoa' ~ "offtarget",
+                          TRUE ~ rank)) %>%
+  # very rough common names for now
+  mutate(common_name = case_when(found_taxa == "No Results" ~ 'No Results',
+                                 found_taxa == 'Potential chimera' ~ 'Potential chimera',
+                                 # outgroups and unknown
+                                 order %in% c('Ancyromonadida') ~ 'Other protist',
+                                 found_taxa %in% c('Metazoa', 'invertebrate') ~ 'Unknown animal',
+                                 # terrestrial and freshwater
+                                 family == 'Unionidae' ~ 'Freshwater mussel',
+                                 found_taxa %in% c('Paranais litoralis', 'Chaetogaster') | 
+                                   order == 'Tubificida' ~ 'Freshwater oligochaete',
+                                 found_taxa == 'Spongilla lacustris' ~ 'Freshwater sponge',
+                                 # fish, technically offtarget
+                                 genus %in% c('Cottus', 'Ammodytes') ~ 'Fish species',
+                                 found_taxa %in% c('Embiotocidae', 'Danio', 
+                                                   'Cypriniformes', 'Clupeiformes',
+                                                   'Eupercaria incertae sedis',
+                                                   'Scombriformes', 'Callionymiformes',
+                                                   'Gobiiformes', 'Parapercis', 'Clupea pallasii',
+                                                   'Labridae', 'Engraulidae', 'Callionymidae',
+                                                   'Scopelarchus guentheri','Scopelarchus',
+                                                   'Cobitidae', 'Dussumieria', 
+                                                   'Scorpaenichthys marmoratus',
+                                                   'Pleurosicya', 'Pleuronectiformes', 'Aseraggodes',
+                                                   'Platichthys stellatus') ~ 'Fish species',
+                                 order == 'Salmoniformes' ~ 'Salmon',
+                                 #inverts
+                                 found_taxa == 'Amphipholis squamata' ~ 'Dwarf brittle star',
+                                 found_taxa == 'Aglaja ocelligera' ~ 'Spotted Aglaga',
+                                 found_taxa == 'Alia carinata' ~ 'Carinate dove shell',
+                                 found_taxa == 'Anthopleura elegantissima' ~ 'Aggregating anemone',
+                                 found_taxa == 'Aplyopsis enteromorphae' ~ 'Enteromorpha-eating sapsucker',
+                                 found_taxa == 'Apostichopus californicus' ~ 'California sea cucumber',
+                                 found_taxa == 'Arctonoe pulchra' ~ 'Red commensal scale worm',
+                                 found_taxa == 'Arabella iricolor' ~ 'Iridescent worm',
+                                 found_taxa == 'Balanus crenatus' ~ 'Wrinkled barnacle',
+                                 found_taxa == 'Balanus glandula' ~ 'Acorn barnacle',
+                                 found_taxa == 'Balanus nubilus' ~ 'Giant acorn barnacle',
+                                 found_taxa == 'Bolinopsis microptera' ~ 'Short-lobed comb jelly',
+                                 found_taxa == 'Caligus clemensi' ~ 'Sea lice',
+                                 found_taxa == 'Cerebratulus marginatus' ~ 'Milky ribbon worm',
+                                 found_taxa == 'Chthamalus dalli' ~ 'Little brown barnacle',
+                                 found_taxa == 'Clavelina lepadiformis' ~ 'Light-bulb sea squirt',
+                                 found_taxa == 'Clinocardium nuttallii' ~ 'Basket cockle',
+                                 found_taxa == 'Cliona californiana' ~ 'Yellow boring sponge',
+                                 found_taxa == 'Clionaopsis platei' ~ 'False pumpkin sponge',
+                                 found_taxa == 'Clytia gregaria' ~ 'Gregarious jellyfish',
+                                 found_taxa == 'Crepipatella lingulata' ~ 'Pacific half-slipper snail',
+                                 found_taxa == 'Cucumaria pseudocurata' ~ 'Tar spot sea cucumber',
+                                 found_taxa == 'Cucumaria miniata' ~ 'Red sea cucumber',
+                                 found_taxa == 'Dermasterias imbricata' ~ 'Leather star',
+                                 found_taxa == 'Dendraster excentricus' ~ 'Eccentric sand dollar',
+                                 found_taxa == 'Diopatra ornata' ~ 'Ornate tube worm',
+                                 found_taxa == 'Ectopleura marina' ~ 'Pink-mouth hydroid',
+                                 found_taxa == 'Emplectonema viride' ~ 'Green ribbon worm',
+                                 found_taxa == 'Enteroctopus dofleini' ~ 'Giant Pacific octopus',
+                                 found_taxa == 'Euphausia pacifica' ~ 'North Pacific krill',
+                                 found_taxa == 'Eupolymnia heterobranchia' ~ 'Brown intertidal spaghetti worm',
+                                 found_taxa == 'Eurytemora americana' ~ 'Brackish calanoid',
+                                 found_taxa == 'Eutonina indicans' ~ 'Aggregating jelly',
+                                 found_taxa == 'Evasterias troschelii' ~ 'False ochre star',
+                                 found_taxa == 'Glycymeris septentrionalis' ~ 'Western bittersweet',
+                                 found_taxa == 'Glycera americana' ~ 'American bloodworm',
+                                 found_taxa == 'Haliotis kamtschatkana' ~ 'Northern abalone',
+                                 found_taxa == 'Haliclystus sanjuanensis' ~ 'Oval-anchored stalked jelly',
+                                 found_taxa == 'Haminoea vesicula' ~ 'Blister glassy-bubble',
+                                 found_taxa == 'Hololepida magna' ~ 'Giant fleshy scaleworm',
+                                 found_taxa == 'Halosydna brevisetosa' ~ 'Shortscaled worm',
+                                 found_taxa == 'Humilaria kennerleyi' ~ 'Kennerleys venus',
+                                 found_taxa == 'Kellia suborbicularis' ~ 'Suborbicular kellyclam',
+                                 found_taxa == 'Lacuna vincta' ~ 'Northern lacuna',
+                                 found_taxa == 'Lepidozona mertensii' ~ 'Red chiton',
+                                 found_taxa == 'Leuckartiara longicalcar' ~ 'Long spur jelly',
+                                 found_taxa == 'Leukoma staminea' ~ 'Pacific littleneck clam',
+                                 found_taxa == 'Littorina scutulata' ~ 'Checkered periwinkle',
+                                 found_taxa == 'Littorina sitkana' ~ 'Sitka periwinkle',
+                                 found_taxa == 'Lottia paradigitalis' ~ 'Boreal limpet',
+                                 found_taxa == 'Lottia digitalis' ~ 'Ribbed limpet',
+                                 found_taxa == 'Lottia pelta' ~ 'Shield limpet',
+                                 found_taxa == 'Lottia scutum' ~ 'Plate limpet',
+                                 found_taxa == 'Macoma balthica' ~ 'Baltic macoma',
+                                 found_taxa == 'Macoma nasuta' ~ 'Bent-nosed clam',
+                                 found_taxa == 'Mactromeris polynyma' ~ 'Stimpsons surfclam',
+                                 found_taxa == 'Melibe leonina' ~ 'Lions mane nudibranch',
+                                 found_taxa == 'Melanochlamys diomedea' ~ 'Albatross aglaja',
+                                 found_taxa == 'Membranipora membranacea' ~ 'Coffin box bryozoan',
+                                 found_taxa == 'Mesocentrotus franciscanus' ~ 'Red sea urchin',
+                                 found_taxa == 'Metridium senile' ~ 'Plumose anemone',
+                                 found_taxa == 'Mitrocoma cellularia' ~ 'Cross jelly',
+                                 found_taxa == 'Mytilus trossulus' ~ 'Bay mussel',
+                                 found_taxa == 'Mytilus californianus' ~ 'California mussel',
+                                 found_taxa == 'Mya arenaria' ~ 'Softshell clam',
+                                 found_taxa == 'Nassarius mendicus' ~ 'Lean Western nassa',
+                                 found_taxa == 'Neosabellaria cementarium' ~ 'Cemented sandmason tubeworm',
+                                 found_taxa == 'Nereis vexillosa' ~ 'Mussel worm',
+                                 found_taxa == 'Nutricola tantilla' ~ 'Purple dwarf-venus',
+                                 found_taxa == 'Nuttallia obscurata' ~ 'Purple varnish clam',
+                                 found_taxa == 'Obelia dichotoma' ~ 'Sea thread hydroid',
+                                 found_taxa == 'Ophiopholis aculeata' ~ 'Crevice brittle star',
+                                 found_taxa == 'Ophiopholis kennerlyi' ~ 'Daisy brittle star',
+                                 found_taxa == 'Orthasterias koehleri' ~ 'Rainbow star',
+                                 found_taxa == 'Panopea generosa' ~ 'Pacific geoduck',
+                                 found_taxa == 'Paleanotus bellis' ~ 'Golden petal worm',
+                                 found_taxa == 'Patiria miniata' ~ 'Bat star',
+                                 found_taxa == 'Phascolosoma (Phascolosoma) agassizii' ~ 'Agassiz peanut worm',
+                                 found_taxa == 'Phacellophora camtschatica' ~ 'Fried egg jellyfish',
+                                 found_taxa == 'Phoronopsis harmeri' ~ 'Large green phoronid',
+                                 found_taxa == 'Pisaster brevispinus' ~ 'Pink sea star',
+                                 found_taxa == 'Placida dendritica' ~ 'Branched sapsucker',
+                                 found_taxa == 'Pleurobrachia bachei' ~ 'Pacific sea gooseberry',
+                                 found_taxa == 'Pollicipes polymerus' ~ 'Gooseneck barnacle',
+                                 found_taxa == 'Portunion conformis' ~ 'Parasitic isopod',
+                                 found_taxa == 'Pseudocnus curatus' ~ 'Aggregating sea cucumber',
+                                 found_taxa == 'Pseudocnus lubricus' ~ 'Fishers sea cucumber',
+                                 found_taxa == 'Ruditapes philippinarum' ~ 'Manila clam',
+                                 found_taxa == 'Sarsia tubulosa' ~ 'Clapper hydroid',
+                                 found_taxa == 'Saxidomus gigantea' ~ 'Butter clam',
+                                 found_taxa == 'Saxidomus nuttalli' ~ 'California butterclam',
+                                 found_taxa == 'Semibalanus balanoides' ~ 'Common rock barnacle',
+                                 found_taxa == 'Semibalanus cariosus' ~ 'Thatched barnacle',
+                                 found_taxa %in% c('Stiliger fuscovittatus', 'Bosellia') ~ 'Sap-sucking sea slug',
+                                 found_taxa == 'Stomotoca atra' ~ 'Hanging stomach jelly',
+                                 found_taxa == 'Strongylocentrotus droebachiensis' ~ 'Green sea urcin',
+                                 found_taxa == 'Strongylocentrotus purpuratus' ~ 'Purple sea urchin',
+                                 found_taxa == 'Stylasterias forreri' ~ 'Velcro star',
+                                 found_taxa == 'Tegula pulligo' ~ 'Dusky tegula',
+                                 found_taxa == 'Tellina nuculoides' ~ 'Salmon tellin',
+                                 found_taxa == 'Tubulanus sexlineatus' ~ 'Six lined ribbon worm',
+                                 found_taxa == 'Thysanoessa spinifera' ~ 'Krill',
+                                 found_taxa == 'Trinchesia albocrusta' ~ 'White-crusted aeolid',
+                                 genus == 'Halichondria'~ 'Breadcrumb sponge species',
+                                 family == 'Eunicidae' ~ 'Eunicid polychaete species',
+                                 family == 'Syllidae' ~ 'Necklace worm species',
+
+                                 
+                                 genus == 'Dynamena' ~ 'Sea fir species',
+                                 genus == 'Hiatella' ~ 'Clam species',
+                                 family %in% c('Tellinidae') ~ 'Tellin',
+                                 genus == 'Mytilus'| order %in% c('Cardiida') ~ 'Mussel species',
+                                 genus == 'Obelia' ~ 'Sea thread hydroid species',
+                                 genus == 'Onchidella' ~ 'Ochidella sea slug species',
+                                 genus == 'Saxidomus' ~ 'Washington clam species',
+                                 genus == 'Salmincola' ~ 'Salmincola copepod species',
+                                 genus == 'Thatcheria' ~ 'Wonder snail species',
+                                
+                                 # Annelids
+                                 family == 'Cirratulidae' ~ 'Cirratulid polychaete',
+                                 family == 'Capitellidae' ~ 'Capitellid polychaete',
+                                 family == 'Dorvilleidae' ~ 'Dorvilleid polychaete',
+                                 family == 'Glyceridae' ~ 'Bloodworm',
+                                 family == 'Goniadidae' ~ 'Goniadid polychaete',
+                                 family == 'Hesionidae' ~ 'Hesionid polychaete',
+                                 family == 'Nereididae' ~ 'Ragworm',
+                                 family == 'Maldanidae' ~ 'Bamboo worm',
+                                 family == 'Opheliidae' ~ 'Opheliid polychaete',
+                                 family == 'Orbiniidae' ~ 'Orbiniid polychaete',
+                                 family == 'Pectinariidae' ~ 'Trumpet worm',
+                                 family == 'Phyllodocidae' ~ 'Paddle worm',
+                                 family == 'Spionidae' ~ 'Spionid polychaete',
+                                 family == 'Terebellidae' ~ 'Sphagetti worm',
+                                 family %in% c('Sigalionidae', 'Polynoidae') ~ 'Scale worm',
+                                 order == 'Sabellida' | 
+                                   family == 'Sabellariidae' ~ 'Feather duster worm',
+                                 order == 'Sipuncula' ~ 'Sipunculan',
+                                 class == 'Polychaeta' | order %in% c('Phyllodocida') ~ 'Polychaete',
+                                
+                                ## Molluscs
+                                 # Gastropods
+                                 family == 'Neritidae' ~ 'Nerite snail species',
+                                 order == 'Cephalaspidea' ~ 'Headshield slug species',
+                                 order == 'Nudibranchia' ~ 'Nudibranch species',
+                                 class == 'Gastropoda' |
+                                   order %in% c('Littorinimorpha', 'Trochida') |
+                                   family %in% c('Olividae', 'Helicidae') ~ 'Sea snail species',
+                                 # bivalves
+                                 family == 'Hiatellidae' ~ 'Saltwater clam species',
+                                 class == 'Bivalvia'|order %in% c('Venerida', 'Galeommatida') ~ 'Bivalve',
+                                 # other molluscs
+                                 order == 'Oegopsida' ~ 'Squid species',
+                                 class == 'Polyplacophora' ~ 'Chiton',
+                                 
+                                 ## Arthropods
+                                 genus == 'Balanus' | order %in% c('Balanomorpha', 'Pollicipedomorpha') ~ 'Barnacle species',
+                                 order == 'Amphipoda' ~ 'Amphipod',
+                                 order == 'Calanoida' ~ 'Calanoid copepod',
+                                 order == 'Cyclopoida' ~ 'Cyclopoid copepod',
+                                 order == 'Decapoda' ~ 'Decapod crustacean species',
+                                 order == 'Harpacticoida' ~ 'Harpacticoid copepod',
+                                 order == 'Isopoda' ~ 'Isopod species',
+                                 order == 'Leptostraca' ~ 'Leptostracan crustacean species',
+                                 order == 'Onychopoda' ~ 'Predatory water flea species',
+                                 class == 'Branchiopoda' ~ 'Branchiopod',
+                                 class == 'Copepoda' | order %in% c('Calanoida') ~ 'Copepod',
+                                 class == 'Malacostraca' ~ 'True crab',
+                                 found_taxa == 'Thecostraca' ~ 'Thecostracan crustacean species',
+                                 found_taxa == 'Arthropoda' ~ 'Unknown arthropod',
+                                 
+                                 ## Cnidarians
+                                 genus == 'Aequorea' ~ 'Crystal jelly species',
+                                 genus == 'Aurelia' ~ 'Moon jelly species',
+                                 genus == 'Cyanea' ~ 'Lions mane jellyfish species',
+                                 order == 'Anthoathecata' ~ 'Athecate hydroid',
+                                 order == 'Leptothecata' ~ 'Thecate Hydroid',
+                                 order == 'Semaeostomeae' ~ 'Jellyfish',
+                                 order == 'Stauromedusae' ~ 'Stalked jellyfish',
+                                 order == 'Siphonophorae' ~ 'Siphonophore',
+                                 class == 'Anthozoa' ~ 'Anemone',
+                                 class == 'Hydrozoa' | 
+                                   order %in% c('Anthoathecata') | 
+                                   family %in% c('Campanulariidae')|
+                                   found_taxa == 'Hydrozoa' ~ 'Hydrozoan',
+                                 class == 'Scyphozoa' ~ 'Scyphozoan',
+                                 # tunicates
+                                 order %in% c('Aplousobranchia') ~ 'Tunicate species',
+                                 order == 'Echiuroidea' ~ 'Spoon worm',
+                                 # Echinoderms
+                                  family == 'Ophiopholidae' | class == 'Ophiuroidea'|
+                                   order %in% c('Amphilepidida', 'Euryalida') ~ 'Brittle star species',
+                                 class == 'Asteroidea' | order %in% c('Forcipulatida', 'Valvatida') ~ 'Sea star',
+                                 class == 'Echinoidea' | order == 'Camarodonta' ~ 'Sea urchin species',
+                                 class == 'Holothuroidea' ~ 'Sea cucumber',
+
+                                 # other other
+                                 phylum == 'Acanthocephala' ~ 'Thorny headed worm',
+                                 phylum == 'Bryozoa' ~ 'Bryozoan',
+                                 phylum == 'Chaetognatha' ~ 'Arrow worm',
+                                 phylum == 'Ctenophora' ~ 'Ctenophore',
+                                 phylum == 'Kinorhyncha' ~ 'Mud dragon',
+                                 phylum == 'Nemertea' ~ 'Ribbon worm',
+                                 phylum == 'Platyhelminthes' ~ 'Flatworm',
+                                 phylum == 'Phoronida' ~ 'Horseshoe worm',
+                                 phylum == 'Porifera' ~ 'Sponge',
+                                 phylum == 'Rotifera' ~ 'Rotifer',
+                                 TRUE ~ common_name)) %>%
+  mutate(found_taxa == case_when(found_taxa %in% c('Ergasilida') ~ order,
+                                 TRUE ~ found_taxa)) %>%
+  # hopefully temporary
+  mutate(found_taxa = ifelse(is.na(found_taxa), 'BLAST failed', found_taxa)) %>%
+  mutate(common_name = ifelse(found_taxa == 'BLAST failed', 'BLAST failed', common_name)) %>%
+  # strip any remaining taxonomy for unknowns
+  mutate(phylum = ifelse(found_taxa %in% c('Metazoa', 'Invertebrate'), NA_character_, phylum)) %>%
+  mutate(class = ifelse(found_taxa %in% c('Metazoa', 'Invertebrate'), NA_character_, class)) %>%
+  mutate(order = ifelse(found_taxa %in% c('Metazoa', 'Invertebrate'), NA_character_, order)) %>%
+  mutate(family = ifelse(found_taxa %in% c('Metazoa', 'Invertebrate'), NA_character_, family)) %>%
+  mutate(genus = ifelse(found_taxa %in% c('Metazoa', 'Invertebrate'), NA_character_, genus))
+
+
+
+
+# just to check that all blasted, was assigned
+blasted_list <- top50_blast %>%
+  select(asv) %>%
+  distinct() %>%
+  mutate(blast = 'yes')
+
+# these need to go through BLAST, didn't even get 'no results'
+not_assigned <- assigned_asvs %>%
+  filter(found_taxa == 'BLAST failed') %>%
+  select(asv) %>%
+  left_join(blasted_list)
+
+```
+
+
+```{r save}
+
+
+write_csv(assigned_asvs, here(coi_data, paste0(datefield, runfield, 'assigned_asvs.csv')))
+
+write_csv(not_assigned, here(coi_data, paste0(datefield, runfield, 'asvs_not_assigned.csv')))
+```
+
+
+
+```{r checking}
+assigned_asvs %>%
+  filter(found_taxa != 'No Results') %>%
+  filter(is.na(common_name))
+```
+

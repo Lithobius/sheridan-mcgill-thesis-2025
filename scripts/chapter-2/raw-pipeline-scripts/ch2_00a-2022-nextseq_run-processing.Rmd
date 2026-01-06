@@ -1,0 +1,553 @@
+---
+title: "ch2_00a-2022-nextseq_run-processing"
+output: html_document
+date: "2024-06-14"
+---
+
+This script processes a run from fastq to an ASV table
+
+Modified by Kate Sheridan from:
+#notes for processing PECO2022_Run2_Run20230629
+#author: Evan Morien
+#created: 2023/07/04
+#last modified: 2023/07/04
+
+also:
+https://benjjneb.github.io/dada2/tutorial.html
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(reshape2)
+library(data.table)
+library(ape)
+library(dada2)
+library(phyloseq)
+library(ShortRead)
+library(Biostrings)
+library(seqinr)
+
+# for plots
+theme_set(theme_bw())
+
+# file path setup
+library(here)
+
+datefield <- '20240614_'
+
+pecofastq <- here('rawdata', 'peco', 'fastq', 
+                  'peco2022_nextseq')
+
+
+runfield <- 'peco2022_12s_nextseq_'
+
+
+```
+First, make list objects with which files are forward, reverse, and the sample names so that dada2 can iterate through the whole folder.
+You will need to make sure that the patterns here match your output files!!
+```{r prep-fastqs}
+# create folder if it doesn't exist
+path.qc <- file.path(here(pecofastq, "qc_plots"))
+if(!dir.exists(path.qc)) dir.create(path.qc)
+
+# look at the files if you need to to update the pattern for F/R
+#list.files(here(pecofastq, '12S_PECO_2021_Lib2_Run20221108'))
+
+# make a list of files with forward reads
+fnFs <- sort(list.files((here(pecofastq)), 
+                        pattern="_R1_001.fastq.gz", full.names = TRUE)) #change the pattern to match all your R1 files
+# make a list of files with reverse reads
+fnRs <- sort(list.files((here(pecofastq)), 
+                        pattern="_R2_001.fastq.gz", full.names = TRUE))
+
+# extract sample names
+sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1) #change the delimiter in quotes and the number at the end of this command to decide how to split up the file name, and which element to extract for a unique sample name
+
+
+####fastq Quality Plots####
+# Evan picks a random set of the samples to show in the quality plot
+# alternatively the tutorial suggests; plotQualityProfile(fnFs[1:2])
+numplot <- 20 #CHANGE ME to the number of samples you want to include in the quality plot, if you have a lot of samples, it's best to look at just a few of them, the plots take a minute or two to generate even only showing 10-20 samples.
+a <- sample(fnFs, numplot)
+b <- which(fnFs %in% a)
+plotfnFs <- fnFs[b]
+plotfnRs <- fnRs[b]
+
+# this plots the quality profiles for each sample, save as pdf
+plotQualityProfile(plotfnFs)
+ggsave(here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, 'quality_plots-dada2-R1s.pdf')), 
+            device = 'pdf',
+            width = 16, height = 9)
+
+
+plotQualityProfile(plotfnRs)
+ggsave(here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, 'quality_plots-dada2-R2s.pdf')), 
+            device = 'pdf',
+            width = 16, height = 9)
+
+```
+
+```{r if-troubleshooting}
+#temporary small version for testing
+#fnFs <- fnFs[1:10]
+#fnRs <- fnRs[1:10]
+
+```
+
+
+
+Evan writes: "quality plots must be inspected at this point. if they look okay, we can proceed with the rest of the processing. if not, consult Rute & Matt, explain what looks off to them"
+
+*Kate workflow adjustment* these quality plots are just to make sure that the data is good before spending computing time. Now we have to remove primers before beginning the dada2 workflow.
+
+Next its on to primer checking; this sanity check makes sure the reads actually contain the primers before spending processing time on dada2. To run the sanity check, specify primers, it will give you all orientations of those primers, then run them against the files you remove N's from. It should spit out a table with how many reads contain the primers. Then after running cutadapt, a similar table should say 0.
+
+also evan writes: 'OPTIONAL!!!! change primer orientation####
+#REV <- REV.orients[["Reverse"]] #IMPORTANT!!! change orientation ONLY IF NECESSARY. see the dada2 ITS_workflow guide section "Identify Primers" for details'
+Note this is due to a problem before, we'll see major issues with pretty much everything disappearing if it happens again.
+
+Right now, since I have specified `-max-n 0` in cutadapt, if some primers show up as reverse, etc. its ok, they'll get removed by cutadapt. Previously, a call to `filterAndTrim` was used, saving the initially filtered reads to a separate folder, but this is redundant given the same feature is available in cutadapt so it has been streamlined to only require cutadapt.
+
+So we will use cutadapt directly through `system2` instead of leaving R to run a bash script or whatever. With `system2` we can either provide a path to the desired copy of cutadapt or just use "cutadapt" in quotes and it will use the first one on the `$PATH`. I have my `$PATH` set up so that I can just use "cutadapt".
+
+*Note* that cutadapt will throw the error "One or more of your adapter sequences may be incomplete."
+For our data, this is not important because our data is amplicon sequencing; it would only matter if the dna was truly supposed to be random/shotgun. (source: https://cutadapt.readthedocs.io/en/stable/guide.html#filtering-reads)
+
+*Cutadapt settings*
+FW/R primers and reverse complements, remove from reads, maximum Ns in output = 0, quiet to reduce messaging, json logs to extract info from later, new output files in folder 'cutadapt'.
+
+
+```{r primer removal}
+#these are the MiFish-U primers
+FWD <- "GTCGGTAAAACTCGTGCCAGC"
+REV <- "CATAGTGGGGTATCTAATCCCAGTTTG"
+
+allOrients <- function(primer) {
+  # Create all orientations of the input sequence
+  require(Biostrings)
+  dna <- DNAString(primer)  # The Biostrings works w/ DNAString objects rather than character vectors
+  orients <- c(Forward = dna, Complement = complement(dna), Reverse = reverse(dna), 
+               RevComp = reverseComplement(dna))
+  return(sapply(orients, toString))  # Convert back to character vector
+}
+FWD.orients <- allOrients(FWD)
+REV.orients <- allOrients(REV)
+FWD.orients
+
+primerHits <- function(primer, fn) {
+  # Counts number of reads in which the primer is found
+  nhits <- vcountPattern(primer, sread(readFastq(fn)), fixed = FALSE)
+  return(sum(nhits > 0))
+}
+index <- 10 #CHANGE ME (if necessary) this is the index of the file we want to check for primers, within the lists "fn*s.filtN", it can be any number from 1 to N, where N is the number of samples you are processing. don't use extraction, pcr, or field blanks for this sanity check
+rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs[[index]]), #the index of the sample you'd like to use for this test is used here (your first sample may be a blank/control and not have many sequences in it, be mindful of this) 
+      # kate note: i changed this from fnRs.filtered to regular fnR because we are not filtering first now
+      FWD.ReverseReads = sapply(FWD.orients, primerHits, fn = fnRs[[index]]), 
+      REV.ForwardReads = sapply(REV.orients, primerHits, fn = fnFs[[index]]), 
+      REV.ReverseReads = sapply(REV.orients, primerHits, fn = fnRs[[index]]))
+
+# Extract sample names, assuming filenames have format:
+# This is to name the .json files
+get.sample.name <- function(fname) strsplit(basename(fname), "_")[[1]][1]
+sample.names <- unname(sapply(fnFs, get.sample.name))
+head(sample.names)
+
+# specify where to put 
+path.cut <- file.path(here(pecofastq, "cutadapt"))
+if(!dir.exists(path.cut)) dir.create(path.cut)
+fnFs.cut <- file.path(path.cut, basename(fnFs))
+fnRs.cut <- file.path(path.cut, basename(fnRs))
+log.cut <- file.path(path.cut, paste0(sample.names, '.cutadapt.json'))
+
+
+## Cutadapt
+# check to make sure cutadapt is recognized and the version
+system2('cutadapt', args = "--version")
+
+FWD.RC <- dada2:::rc(FWD)
+REV.RC <- dada2:::rc(REV)
+# Trim FWD and the reverse-complement of REV off of R1 (forward reads)
+R1.flags <- paste("-g", FWD, "-a", REV.RC) 
+# Trim REV and the reverse-complement of FWD off of R2 (reverse reads)
+R2.flags <- paste("-G", REV, "-A", FWD.RC) 
+
+#Run Cutadapt
+for(i in seq_along(fnFs)) {
+  system2('cutadapt', args = c(R1.flags, R2.flags, 
+                               "-n", 2, # -n 2 required to remove FWD and REV from reads
+                               "--max-n", 0,
+                               "-j", 38, 
+                               "-m", 50, # specify minimum length
+                               "-o", fnFs.cut[i], "-p", fnRs.cut[i], # output files
+                               fnFs[i], fnRs[i], # input files
+                               # silence messages
+                               "--quiet",
+                               # output logs
+                               "--json", log.cut[i])) 
+}
+#sanity check, should report zero for all orientations and read sets
+index <- 20 #this is the index of the file we want to check for primers, within the lists "fn*s.cut", it can be any number from 1 to N, where N is the number of samples you are processing
+rbind(FWD.ForwardReads = sapply(FWD.orients, primerHits, fn = fnFs.cut[[index]]), 
+      FWD.ReverseReads = sapply(FWD.orients, primerHits, fn = fnRs.cut[[index]]), 
+      REV.ForwardReads = sapply(REV.orients, primerHits, fn = fnFs.cut[[index]]), 
+      REV.ReverseReads = sapply(REV.orients, primerHits, fn = fnRs.cut[[index]]))
+
+# Forward and reverse fastq filenames have the format:
+# #remember to change this so it matches ALL your file names!
+cutFs <- sort(list.files(path.cut, pattern = "_R1_001.fastq.gz", full.names = TRUE)) 
+cutRs <- sort(list.files(path.cut, pattern = "_R2_001.fastq.gz", full.names = TRUE))
+```
+
+
+*DADA2 workflow begins*
+
+Now that we have trimmed off primers we can use dada2.
+
+From here we determine how many bp to trim based on quality scores.
+Apparently lower quality reverse reads with very low quality near the end is common with Illumina but they recommend not trimming too much as the dada2 algorithm is robust to this. Here we are not using truncLen since we're following the ITS tutorial, just setting a minimum number of bp for the reads so that we don't keep very low length reads.
+
+*Note* also that Kate-version % retained in this step will always be lower than Evan's because we're retaining more reads in earlier steps due to only running filterAndTrim one time (here), but it should be decently high in samples (>80%)! We could still be more conservative with cutadapt.
+
+```{r filter-and-trim}
+####filter and trim reads####
+
+# generate filenames for subdirectory so that filterAndTrim can iterate
+path.filter <- file.path(here(pecofastq, "filtered"))
+if(!dir.exists(path.filter)) dir.create(path.filter)
+filtFs <- file.path(path.filter, basename(cutFs))
+filtRs <- file.path(path.filter, basename(cutRs))
+
+
+#filter and trim command. dada2 can canonically handle lots of errors, I am typically permissive in the maxEE parameter set here, in order to retain the maximum number of reads possible. error correction steps built into the dada2 pipeline have no trouble handling data with this many expected errors.
+#IMPORTANT: DO NOT CHANGE THESE PARAMETERS FOR PECO EXPERIMENTS, THEY ARE SET AND MUST BE RETAINED FOR DATA COMPARABILITY
+out <- filterAndTrim(cutFs, filtFs, cutRs, filtRs,
+                     minLen = c(110,110), # discard reads below 110bp
+                     maxEE=c(4,6), # permissive values
+                     truncQ=c(2,2), # default
+                     rm.phix=TRUE, # no PhiX after this step
+                     matchIDs=TRUE, # paired read matching
+                     compress=TRUE, 
+                     multithread=TRUE) # FALSE on windows OR specify cores
+
+# add this info to report later
+retained <- as.data.frame(out)
+retained$percentage_retained <- retained$reads.out/retained$reads.in*100
+write.table(retained, here(pecofastq, 'filtered',
+                           paste0(datefield, runfield, "retained_reads_filterAndTrim_step_length_var.txt")), 
+            sep="\t", row.names=TRUE, col.names=TRUE, quote=FALSE)
+
+```
+
+
+*Run up to here*
+
+
+Next we learn error rates via machine learning.
+These errors are base pair transitions at each quality score. It estimates this model and the plots should show the black lines (estimate) and dots (data) lining up. Howver, it's worth checking the plot in the tutorial before getting worried, the black lines should only match the red lines for same to same errors. 
+
+Similar to phylogenetic transition matrices, it seems that the error rates between base pairs are fairly standard.
+
+```{r error rates}
+####learn error rates####
+#the next three sections (learn error rates, dereplication, sample inference) are the core of dada2's sequence processing pipeline. read the dada2 paper and their online documentation (linked at top of this guide) for more information on how these steps work
+errF <- learnErrors(filtFs, 
+                    multithread=TRUE) # again either false on windows or number of cores if desired
+errR <- learnErrors(filtRs, 
+                    multithread=TRUE)
+
+
+plotErrors(errF, nominalQ=TRUE) #assess this graph after processing. it shows the error rates observed in your dataset. strange or unexpected shapes in the plot should be considered carefully before moving on.
+
+ggsave(here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, 'error-rates_dada2-R1s_length-var.pdf')), 
+            device = 'pdf',
+            width = 10, height = 10)
+
+plotErrors(errR, nominalQ=TRUE) #assess this graph after processing. it shows the error rates observed in your dataset. strange or unexpected shapes in the plot should be considered carefully before moving on.
+
+ggsave(here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, 'error-rates_dada2-R2s_length-var.pdf')), 
+            device = 'pdf',
+            width = 10, height = 10)
+
+
+
+#sometimes, samples with low sequence count don't produce any filtered output, so we have to do something extra here to get rid of their entries in filtFs and filtRs
+filtFs <- sort(list.files(path.filter, pattern = "_R1_001.fastq.gz", full.names = TRUE)) #remember to change this so it matches ALL your file names!
+filtRs <- sort(list.files(path.filter, pattern = "_R2_001.fastq.gz", full.names = TRUE)) #remember to change this so it matches ALL your file names!
+
+```
+Now the big moment, we're going to run dada2!
+
+First we dereplicate the fastqs, then run dada2 on our forward and reverse using the error models learned previously.
+
+```{r dada2}
+####dereplication####
+derepFs <- derepFastq(filtFs, verbose=TRUE)
+derepRs <- derepFastq(filtRs, verbose=TRUE)
+
+
+# Name the derep-class objects by the sample names #this is just to ensure that all your R objects have the same sample names in them
+names(derepFs) <- sample.names
+names(derepRs) <- sample.names
+
+####sample inference####
+dadaFs <- dada(derepFs, err=errF, multithread=38)
+dadaRs <- dada(derepRs, err=errR, multithread=38)
+
+# check output
+dadaFs[[2]]
+dadaRs[[2]]
+
+```
+low-sequence sample removal
+
+There's an error ahead that we want to avoid by removing samples with low levels of unique sequences, which does seem to correlate with overall read number on those samples.
+
+
+Evan writes:
+#a "subscript out of bounds" error at the next step (merging) may indicate that you aren't merging any reads in one or more samples.
+#NB, NOT getting this error doesn't necessarily mean that all of your samples end up with more than 0 merged reads, as i found out while processing a large 18s dataset. your guess is as good as mine as to why this error does or does not appear, but filtering out the samples that cause it is necessary for completion of the pipeline.
+#samples_to_keep <- as.numeric(out[,"reads.out"]) > 100 #example of simple method used above after the filter and trim step. if you already did this but still got an error when merging, try the steps below
+
+```{r low-sequence sample removal}
+####OPTIONAL: remove low-sequence samples before merging####
+# getN <- function(x) sum(getUniques(x)) #keeping track of read retention, number of unique sequences after ASV inference
+# 
+# # lets see what how the lower end looks like
+# track <- as.data.frame(cbind(sapply(derepFs, getN), 
+#                sapply(derepRs, getN), 
+#                sapply(dadaFs, getN), 
+#                sapply(dadaRs, getN))) %>%
+#   # set threshold using reverse reads value
+#   mutate(keep = ifelse(V4 > 10, TRUE, FALSE)) %>%
+#   rownames_to_column('sample_id')
+# 
+# # look at threshold possibilities
+# # histogram of lower reads
+# # this may throw an error if no samples meet the criteria. in which case, great.
+# track_hist <- track %>%
+#   filter(V4 < 175)
+# 
+# hist(track_hist$V4,
+#      breaks = 15)
+# 
+# #your threshold. try different ones to get the lowest one that will work. 
+# ## this method accounts for dereplication/ASVs left after inference
+# ## note script previously used '50'
+# ## I don't know how to pick a good number here.
+# samples_to_keep <- track %>%
+#   filter(keep == TRUE) %>%
+#   select(sample_id) 
+# 
+# #record names of samples you have the option of removing
+# samples_to_remove <- track %>%
+#   filter(keep == FALSE) %>%
+#   select(sample_id)
+# 
+# # write out which are removed
+# write.table(samples_to_keep, 
+#             here(pecofastq, 'qc_plots',
+#             paste0(datefield, runfield, 'samples_retained.txt')),
+#             row.names=FALSE, quote=F, sep="\n")
+# write.table(samples_to_remove, 
+#             here(pecofastq, 'qc_plots',
+#             paste0(datefield, runfield, 'samples_removed.txt')),
+#             row.names=FALSE, quote=F, sep="\n")
+
+```
+
+
+Merge paired reads
+
+We've been processing everything as fw OR r, now we will merge the two into a single object and make a sequence table of sample = row and unique sequence = column, value = reads.
+
+```{r merge reads}
+####merge paired reads####
+mergers <- mergePairs(dadaFs, derepFs, 
+                      dadaRs, derepRs, 
+                      verbose=TRUE)
+# Inspect the merger data.frame from the first sample
+head(mergers[[1]])
+
+####construct sequence table####
+seqtab <- makeSequenceTable(mergers)
+dim(seqtab)
+
+####View Sequence Length Distribution Post-Merging####
+#most useful with merged data. this plot will not show you much for forward reads only, which should have a uniform length distribution.
+length.histogram <- as.data.frame(table(nchar(getSequences(seqtab)))) #tabulate sequence length distribution
+pdf(here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "length-histogram_merged-reads.pdf")), width = 10, height = 8) # define plot width and height. completely up to user.
+plot(x=length.histogram[,1], y=length.histogram[,2]) #view length distribution plot
+dev.off()
+#review after processing as sanity check. most ASVs should be w/in a few bp of the amplicon length
+```
+
+Low count singleton removal
+
+(Try a version without this)
+
+~OTU table from phyloseq `otu_table()` 
+	Basically just rotated sequence table; row = asv, col = sample
+~Relative abundance of OTU table via Phyloseq’s `transform_sample_counts`
+	Uses function = x/sum(x)
+~ rowsums of relative abundance
+~ rowsums of presence/absence otu table; 1 == asv present in only one sample
+~ remove asv if: p/a rowsum == 1 & relative abundance rowsum < threshold
+	Threshold == .001
+	If singleton and rare
+	
+This can be a significant portion of the dataset, but typically a low number of reads.
+
+
+```{r evans singleton removal}
+####remove low-count singleton ASVs####
+#create phyloseq otu_table
+otus <- otu_table(t(seqtab), taxa_are_rows = TRUE)
+
+#generate counts of sample per ASV
+otu_pres_abs <- otus
+otu_pres_abs[otu_pres_abs >= 1] <- 1 #creating a presence/absence table
+otu_pres_abs_rowsums <- rowSums(otu_pres_abs) #counts of sample per ASV
+
+#IF you want to filter out rare variants (low-read-count singleton ASVs) you can use phyloseq's "transform_sample_counts" to create a relative abundance table, and then filter your ASVs by choosing a threshold of relative abundance: otus_rel_ab = transform_sample_counts(otus, function(x) x/sum(x))
+dim(seqtab) # sanity check
+dim(otus) # (this should be the same as last command, but the dimensions reversed)
+
+otus_rel_ab <- transform_sample_counts(otus, function(x) x/sum(x)) #create relative abundance table
+df <- as.data.frame(unclass(otus_rel_ab)) #convert to plain data frame
+df[is.na(df)] <- 0 #if there are samples with no merged reads in them, and they passed the merge step (a possiblity, converting to a relative abundance table produes all NaNs for that sample. these need to be set to zero so we can do the calculations in the next steps.)
+otus_rel_ab.rowsums <- rowSums(df) #compute row sums (sum of relative abundances per ASV. for those only present in one sample, this is a value we can use to filter them for relative abundance on a per-sample basis)
+a <- which(as.data.frame(otu_pres_abs_rowsums) == 1) #which ASVs are only present in one sample
+b <- which(otus_rel_ab.rowsums <= 0.001) #here is where you set your relative abundance threshold #which ASVs pass our filter for relative abundance
+removed <- length(intersect(a,b)) #how many of our singleton ASVs fail on this filter
+rows_to_remove <- intersect(a,b) #A also in B (we remove singleton ASVs that have a lower relative abundance value than our threshold)
+otus_filt <- otus[-rows_to_remove,] #filter OTU table we created earlier
+dim(otus_filt) #how many ASVs did you retain?
+seqtab.nosingletons <- t(as.matrix(unclass(otus_filt))) #convert filtered OTU table back to a sequence table matrix to continue with dada2 pipeline
+
+#Start ASV report
+cat("dim(otus):", dim(otus),
+    file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")),
+    sep="\t",append=TRUE)
+cat("", file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")),
+    sep="\n", append=TRUE)
+cat("# ASVs Removed:", length(intersect(a,b)),
+    file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")),sep="\t",append=TRUE)
+cat(" ", file="ASV_report.txt", sep="\n", append=TRUE)
+cat("dim(otus_filt):", dim(otus_filt),
+    file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")),
+    sep="\t",append=TRUE)
+cat("", file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")), sep="\n", append=TRUE)
+
+
+```
+
+Chimera removal
+
+```{r chimeras}
+####remove chimeras####
+#here we remove "bimeras" or chimeras with two sources. look at "method" to decide which type of pooling you'd like to use when judging each sequence as chimeric or non-chimeric
+seqtab.nosingletons.nochim <- removeBimeraDenovo(seqtab.nosingletons, method="pooled", multithread=38, verbose=TRUE) #this step can take a few minutes to a few hours, depending on the size of your dataset
+cat("dim(seqtab.nosingletons.nochim):", dim(seqtab.nosingletons.nochim),
+    file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")),
+    sep="\t",append=TRUE)
+cat("", file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")), 
+    sep="\n", append=TRUE)
+sum(seqtab.nosingletons.nochim)/sum(seqtab.nosingletons) #proportion of nonchimeras #it should be relatively high after filtering out your singletons/low-count ASVs, even if you lose a lot of ASVs, the number of reads lost should be quite low
+cat("proprtion of chimeras:", sum(seqtab.nosingletons.nochim)/sum(seqtab.nosingletons),
+    file=here(pecofastq, 'qc_plots',
+            paste0(datefield, runfield, "ASV_report.txt")),
+    sep="\t",append=TRUE)
+
+dim(seqtab.nosingletons.nochim)
+dim(seqtab.nosingletons)
+```
+
+
+Evan's report
+Add info from cutadapt
+
+update to reflect current naming of stuff...
+
+
+```{r report}
+path.processed <- file.path(here(pecofastq, "processed"))
+if(!dir.exists(path.processed)) dir.create(path.processed)
+
+# ####track read retention through steps####
+getN <- function(x) sum(getUniques(x))
+
+#rm(track)
+
+track <- cbind(# raw fastqs
+               sapply(fnFs, getN),
+               sapply(fnRs, getN),
+               # after cutadapt
+               sapply(cutFs, getN),
+               sapply(cutRs, getN),
+               # after filterAndTrim
+               sapply(filtFs, getN),
+               sapply(filtRs, getN),
+               # after dereplication
+               sapply(derepFs, getN),
+               sapply(derepRs, getN),
+               # after dada2
+               sapply(dadaFs, getN),
+               sapply(dadaRs, getN),
+               #after merge
+               sapply(mergers, getN),
+               # after low abundance singletons
+               rowSums(seqtab.nosingletons),
+               # after chimera removal
+               rowSums(seqtab.nosingletons.nochim))
+
+colnames(track) <- c("raw_f", "raw_r", 
+                     "cutadapt_f", "cutadapt_r",
+                     "filtertrim_f", "filtertrim_r",
+                     "dereplicated_f", "dereplicated_r",
+                     "denoised_f", "denoised_r", 
+                     "merged", "nosingletons", "nochimeras")
+
+
+track2 <- track %>%
+  as.data.frame() %>%
+  mutate(percentraw_retainedby_cutadapt = cutadapt_f / raw_f * 100,
+         percent_retained_aftermerge = merged / denoised_f * 100,
+         percent_notsingleton = nosingletons / merged * 100,
+         percent_notchimera = nochimeras / nosingletons * 100,
+         percent_retained_of_raw = nochimeras/raw_f * 100) %>%
+  rownames_to_column('sample_id') %>%
+  mutate(sample_id = str_remove_all(sample_id, pecofastq)) %>%
+  mutate(sample_id = str_remove_all(sample_id, "/")) %>%
+  mutate(sample_id = str_remove_all(sample_id, "\\.fastq\\.gz"))
+
+ 
+  
+  
+
+# 
+# ####save output from sequence table construction steps####
+write.csv(track2, here(pecofastq, 'qc_plots',
+             paste0(datefield, runfield, "read-retention_12s_bysample.csv")))
+
+#             
+# sequence table
+write.table(data.frame("row_names"=rownames(seqtab.nosingletons.nochim),
+                       seqtab.nosingletons.nochim),
+            file=here(path.processed,
+            paste0(datefield, runfield, "sequence-table_12S-merged.txt")),
+            row.names=FALSE, quote=F, sep="\t")
+
+```
+

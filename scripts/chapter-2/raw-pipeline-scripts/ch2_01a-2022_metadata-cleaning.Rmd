@@ -1,0 +1,198 @@
+---
+title: "edna_01a_2022metadata-cleaning"
+output: html_document
+date: "2023-05-07"
+---
+
+This version is for the 2022 eDNA data;
+Adapted from cleaning section of TO_20220407_meta.R written by Thomas O'Callaghan-Brown
+
+
+```{r}
+library(here)
+library(tidyverse)
+```
+
+
+
+```{r loadin}
+edna_metadata<- read_csv(here('rawdata',
+                              'peco',
+                              '2022_edna', 
+                              'combined',
+                              "20230507_PECO2022_site-level_metadata.csv"),
+                         na = c('')) %>% # this introduces NAs
+  janitor::clean_names()
+
+edna_sample_meta <- read_csv(here('rawdata', 
+                              'peco',
+                              '2022_edna', 
+                              'combined',
+                              "20230507_PECO2022_sample-level_data.csv"),
+                         na = c('', 'NA', 'N/A')) %>% # this introduces NAs
+  janitor::clean_names() %>%
+  select(!(c(x10, qc_name, qc_date)))
+
+edna_lab_meta <- read_csv(here('rawdata', 
+                              'peco',
+                              '2022_edna', 
+                              "PECO2022_metadata_MODIFIED.csv"),
+                         na = c('', 'NA', 'N/A')) %>% # this introduces NAs
+  janitor::clean_names() %>%
+  janitor::remove_empty() %>%
+  select(!(c(collection_time_24h, filter_time,
+             site_code, region_name, control))) %>%
+  rename(lab_notes = notes_about_sample)
+  
+```
+
+
+```{r clean-metadata}
+# to do: standardize sample collection date
+metadata<- edna_metadata %>%
+  #add region code to end of single letter sites
+  mutate(site_code2 = case_when(
+    region_name == 'OR_YB_PECO' ~ str_replace_all(site_code, c(
+                                     '\\bC\\b' = "SS_YB",
+                                     '\\bD\\b' = "IF_YB",
+                                     '\\bE\\b' = "SN_YB",
+                                     '\\bF\\b' = "F_YB")),
+    region_name == 'WA_PS_PECO' ~ str_replace_all(site_code, c('FJ_SJI' = 'FJ_PS',
+                                                                'FB_SJI' = 'FB_PS',
+                                                                'NC_WI' = 'NC_PS',
+                                                                'IC_SI' = 'IC_PS',
+                                                                'BH_OI' = 'BH_PS')))) %>%
+  mutate(site_code = coalesce(site_code2, site_code)) %>%
+  select(!(site_code2)) %>%
+    #temporary until metadata script is fixed
+  mutate(region_code = case_when(site_code %in% c('MB_PP', 'HI_PP',
+                                                  'E_PP', 'J_PP', 
+                                                  'C_PP') ~ "BC_PP",
+                                 TRUE ~ region_code)) %>%
+  mutate(region_name = case_when(site_code %in% c('MB_PP', 'HI_PP',
+                                                  'E_PP', 'J_PP', 
+                                                  'C_PP') ~ "BC_PP",
+                                 TRUE ~ region_name)) %>%
+  # woops we need to change this on the master spreadsheet haha
+  rename('decimal_latitude' = 'decimal_latitide') %>%
+    # standardize location names to look nice when plotting!
+  ### note these are currently only the seine locations. update later with ALL eDNA locations!!!
+  ### also note these are only 2021 sites, update later with 2022 sites
+  mutate(location_name = str_replace_all(location_name, c("Park, BC" = "Park",
+                                                          "Bayview Padilla Bay" = "Bayview, Padilla Bay",
+                                                          "Ship Harbor" = "Ship Harbor, Padilla Bay",
+                                                          "Westside Park" = "Westside Park, Bodega Bay",
+                                                          "Masons Marina" = "Mason's Marina, Bodega Bay",
+                                                          "Campbell Cove" = "Campbell Cove, Bodega Bay",
+                                                          "Millerton" = "Millerton, Bodega Bay",
+                                                          "Blakes Landing" = "Blakes Landing, Bodega Bay",
+                                                          "North Central California \\(San Francisco Bay\\)" = "San Francisco Bay",
+                                                          "San Dieguito Lagoon" = "San Dieguito Lagoon, San Diego",
+                                                          "Chula Vista" = "Chula Vista, San Diego",
+                                                          "Shelter Island" = "Shelter Island, San Diego",
+                                                          "Fiesta Island" = "Fiesta Island, San Diego"
+                                                          ))) %>%
+  mutate(decimal_latitude = str_remove_all(decimal_latitude, " N")) %>%
+  mutate(decimal_longitude = str_remove_all(decimal_longitude, " W")) %>%
+  # YB sites, 2021 locations
+  mutate(decimal_latitude = case_when(site_code == "SN_YB" ~ '44.622867',
+                                      site_code == "SS_YB" ~ '44.61245',
+                                      site_code == "IF_YB" ~ '44.617633',
+                                      site_code == "F_YB" ~ '44.6238', # confirm this one
+                                      site_code == "KC_NV" ~ '50.521548',
+                                      #switched lat and long, converted to decimal
+                                      site_code == 'SH_PS' ~ '48.505383',
+                                      site_code == 'BP_PS' ~ '48.728233',
+                                      # convert to decimal
+                                      site_code == 'E_PP' ~ '48.877117',
+                                      site_code == 'C_PP' ~ '48.8883',
+                                      site_code == 'J_PP' ~ '48.92145',
+                                      site_code == 'HI_PP' ~ '48.951517',
+                                      TRUE ~ decimal_latitude)) %>%
+  mutate(decimal_longitude = case_when(site_code == "SN_YB" ~ '-124.023817',
+                                       site_code == "SS_YB" ~ '-124.013317',
+                                       site_code == "IF_YB" ~ '-124.029183',
+                                       site_code == "F_YB" ~ '-124.0589', # confirm
+                                       site_code == "KC_NV" ~ '-127.576556',
+                                       site_code == 'SH_PS' ~ '-122.674583',
+                                       site_code == 'BP_PS' ~ '-122.506733',
+                                       # decimal
+                                       site_code == 'E_PP' ~ '-125.3054',
+                                       site_code == 'C_PP' ~ '-125.379833',
+                                       site_code == 'J_PP' ~ '-125.275733',
+                                       site_code == 'HI_PP' ~ '-125.30975',
+                                       TRUE ~ decimal_longitude)) %>%
+  mutate(decimal_longitude = as.numeric(decimal_longitude),
+         decimal_latitude = as.numeric(decimal_latitude)) %>%
+  mutate(region_name = str_remove_all(region_name, '_PECO'))
+
+
+
+edna_sample_meta2 <- edna_sample_meta %>%
+  #NAs in is.control for NC_CA_PECO; can remove by ifelse is.na(sample_time) then yes else no
+  mutate(site_code2 = case_when(
+    region_name == 'OR_YB_PECO' ~ str_replace_all(site_code, c(
+                                     '\\bC\\b' = "SS_YB",
+                                     '\\bD\\b' = "IF_YB",
+                                     '\\bE\\b' = "SN_YB",
+                                     '\\bF\\b' = "F_YB")),
+    region_name == 'WA_PS_PECO' ~ str_replace_all(site_code, c('FJ_SJI' = 'FJ_PS',
+                                                                'FB_SJI' = 'FB_PS',
+                                                                'NC_WI' = 'NC_PS',
+                                                                'IC_SI' = 'IC_PS',
+                                                                'BH_OI' = 'BH_PS')))) %>%
+  mutate(site_code = coalesce(site_code2, site_code)) %>%
+  select(!(site_code2)) %>%
+  #one site didn't record if it was a control
+  mutate(control = ifelse((site_code %in% c("BH_PS")) & (is.na(collection_time_24h)), "yes", 
+                              ifelse((site_code %in% "BH_PS") & (!(is.na(collection_time_24h))), 'no', control))) %>%
+ # the time column is a bit messed up also, most issues can be fixed with replacing ###.0 with 0#:##:00
+ # write a regex later to do this, too much to do today and isn't necessary.
+   #mutate(collection_time = str_replace_all(collection_time, ))
+ # I also need to fix the sample_id column to be standardized
+  mutate(sample_id = str_remove_all(sample_id, "\\.0")) %>%
+  mutate(sample_id = ifelse(grepl('^[0-9]', sample_id), paste0('PECOe',sample_id), sample_id))%>%
+  mutate(region_name = str_remove_all(region_name, '_PECO'))
+ 
+```
+
+
+# add lab metadata
+
+```{r lab meta}
+edna_sample_lab <- edna_sample_meta2 %>%
+  full_join(edna_lab_meta) %>%
+  mutate(notes_about_sample = case_when(notes_about_sample == '1000mL' ~ '1000 mL',
+                                        notes_about_sample == '900mL' ~ '900 mL',
+                                        notes_about_sample == '800mL' ~ '800 mL',
+                                        notes_about_sample == '500mL' ~ '500 mL',
+                                        TRUE ~ notes_about_sample)) %>%
+  mutate(lab_notes = case_when(lab_notes == '1000mL' ~ '1000 mL',
+                               lab_notes == '900mL' ~ '900 mL',
+                               lab_notes == '800mL' ~ '800 mL',
+                                        TRUE ~ lab_notes)) %>%
+  mutate(lab_notes = ifelse(lab_notes == notes_about_sample, NA_character_, lab_notes))
+
+
+
+```
+
+
+```{r}
+# combine site and sample level metadata
+all_metadata <- metadata %>%
+  full_join(edna_sample_lab) %>%
+  # sample name to lower
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(extraction_blank = tolower(extraction_blank)) %>%
+  relocate(sample_id) %>%
+  mutate(sample_id = str_replace_all(sample_id, 'pecoe', 'pecoe-0'))
+
+#write out to read back in later if needed
+write.csv(all_metadata, here('processeddata', 'peco', '2022_edna', 
+                         '20231013_peco2022_metadata.csv'),
+          row.names = FALSE)
+
+
+```
+

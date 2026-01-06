@@ -1,0 +1,667 @@
+---
+title: "merge-years"
+output: html_document
+date: "2023-05-31"
+---
+
+This script combines years of data into one file of each type
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+library(PNWColors)
+
+# here filepaths
+edna_2021 <- here('processeddata', 'peco', '2021_edna')
+edna_2022 <- here('processeddata', 'peco', '2022_edna')
+edna_2023 <- here('processeddata', 'peco', '2023_edna')
+edna_2024 <- here('processeddata', 'peco', '2024_edna')
+
+edna_out <- here('processeddata', 'peco', '2021-24_edna')
+
+datefield <- '20251107_'
+runfield <- 'peco-combined_12s_'
+
+# Palette
+## match map with 14 levels if by region
+## or match to 17 levels corresponding with partners: note that San Francisco Bay has 2 partners
+pal <-  pnw_palette("Bay", 17, type = "continuous")                               
+#make it an object to use as the colour value in the plot
+
+pal14 <- pnw_palette("Bay", 14, type = "continuous")
+
+pal2023 <- pnw_palette("Bay", 15, type = "continuous")
+```
+
+
+asv matrix combine
+Blend 2021 and 2022, standardize to the same blast run
+
+```{r combine matrices}
+meta_all <- read_csv(here(edna_out, '20251107_peco-combined_metadata.csv')) 
+
+asvs2021 <- read_csv(here(edna_2021, '20250528_peco-2021_12s_asvmatrix_complete.csv')) %>%
+  mutate(year = 2021) %>%
+  select(!c(dna_extraction_date))
+
+asvs2022 <- read_csv(here(edna_2022, '20250528_peco-2022_12s_motumatrix_complete.csv')) %>%
+  mutate(year = 2022)%>%
+  select(!c(dna_extraction_date))
+
+# note; update this?
+asvs2023 <- read_csv(here(edna_2023, '20250528_peco2023_12s-asvmatrix-temp.csv')) %>%
+  mutate(year = 2023) %>%
+  mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c))
+
+
+asvs2024 <- read_csv(here(edna_2024, '20250528_peco2024_12s-asvmatrix-temp.csv')) %>%
+    mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c),
+         notes_about_sample = as.character(notes_about_sample))
+
+asv_all <- asvs2021 %>%
+  full_join(asvs2022) %>%
+  full_join(asvs2023) %>%
+  full_join(asvs2024) %>%
+  janitor::remove_empty() %>%
+  relocate(sample_id, motu, found_taxa, common_name, rank, year) %>%
+  # don't know where this error is
+  mutate(region_code = ifelse(region_code == 'CA_Nca', 'CA_NCa',region_code)) %>%
+  # duplicate to remove soon
+  mutate(site_code = case_when(site_code == 'SD_SD' ~ 'SD_SDL',
+                               site_code == 'YB_SN' ~ 'YB_SBN',
+                               site_code == 'YB_SS' ~ 'YB_SBS',
+                               site_code == 'OR_SBS' ~ 'YB_SBS',
+                               site_code == 'WB_NA' ~ 'WB_PA',
+                               site_code == 'HB_SB' ~ 'HB_SR',
+                               site_code == 'SD_Coronado' ~ 'SD_CI',
+                               site_code == "YB_FP" ~ "CB_FP",
+                               site_code == "YB_BV" ~ "CB_BV",
+                               site_code %in% c('NV_KI', 'NV_KH') ~ 'NV_KB',
+                               site_code == 'NC_PS' & region_code == 'WA_PSb' ~ 'PS_NC',
+                               TRUE ~ site_code))%>%
+  mutate(site_code = ifelse(site_code == 'HB_SB', 'HB_SR', site_code)) %>%
+    mutate(region_name = case_when(site_code %in% c("CB_FP", "CB_BV") ~ "OR_CB",
+                                 site_code %in% c("NC_PM", "NC_PS",
+                                                  "NC_RB", "NC_WP") ~ "CA_SF",
+                                 TRUE ~ region_name)) %>%
+  mutate(region_code = ifelse(region_name == 'OR_CB', 'OR_CB',region_code))
+
+new_range <- asv_all %>%
+  group_by(found_taxa) %>%
+  summarise(taxa_max = max(decimal_latitude, na.rm = TRUE), taxa_mean = mean(decimal_latitude, na.rm = TRUE),
+            taxa_median = median(decimal_latitude, na.rm = TRUE), taxa_min = min(decimal_latitude, na.rm = TRUE))
+
+fishonly_range <- asv_all %>%
+  left_join(new_range) %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii'))
+
+write_csv(fishonly_range, here(edna_out, paste0(datefield, runfield, 'asvmatrix_fish_all.csv')))
+```
+
+
+# controls
+```{r combine controls}
+ctrl2021 <- read_csv(here(edna_2021, '20250528_peco-2021_12s_controls.csv')) %>%
+  mutate(year = 2021) 
+
+ctrl2022 <- read_csv(here(edna_2022, '20250505_peco2022_12s_controls.csv')) %>%
+  mutate(year = 2022) 
+
+ctrl2023 <- read_csv(here(edna_2023, '20250528_peco2023_12s_controls.csv')) %>%
+  mutate(year = 2023) %>%
+  mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c))
+
+ctrl2024 <- read_csv(here(edna_2024, '20250528_peco2024_12s_controls.csv')) %>%
+  mutate(sample_collection_date = as.character(sample_collection_date),
+         salinity_psu = as.character(salinity_psu),
+         temperature_c = as.character(temperature_c))
+
+
+
+ctrl_all <- ctrl2021 %>%
+  full_join(ctrl2022) %>%
+  full_join(ctrl2023) %>%
+  full_join(ctrl2024)
+
+write_csv(ctrl_all, here(edna_out, paste0(datefield, 'peco-combined_12s_controls.csv')))
+```
+# uniques and splist
+```{r}
+#uniques for quick mapping
+#all
+mifish_coords <- fishonly_range %>%
+  distinct(found_taxa, common_name, rank, 
+           decimal_latitude, decimal_longitude,
+           taxa_min, taxa_max, taxa_median, taxa_mean) %>%
+# there are NAs at the moment, delete later
+  filter(!(is.na(decimal_latitude))) %>%
+  filter(!(is.na(found_taxa))) %>%
+  arrange(found_taxa)
+#save if needed
+write.csv(mifish_coords, here(edna_out, paste0(datefield, runfield, 'fish-coords.csv')))
+
+# uniques for pcoa etc
+mifish_coords2 <- fishonly_range %>%
+  select(found_taxa, common_name, rank, 
+         decimal_latitude, decimal_longitude,
+         region_code, site_code, location_name) %>%
+  distinct() %>%
+# there are NAs at the moment, delete later
+  filter(!(is.na(decimal_latitude))) %>%
+  filter(!(is.na(found_taxa))) # %>%
+  #left_join(region_label)
+#save if needed
+write.csv(mifish_coords2, here(edna_out, paste0(datefield, runfield, 'fish-coords-uniques_regions.csv')))
+
+
+
+
+species_list <- fishonly_range%>%
+  select(found_taxa, common_name, rank) %>%
+  filter(rank == 'species') %>%
+  distinct()
+
+
+# species list
+write.csv(species_list, here(edna_out, paste0(datefield, runfield, 'species-list.csv')))
+```
+
+
+# phyloseq test
+
+Phyloseq objects contain otu table, sample_data, and taxonomy table among other things.
+
+What is the best level to normalize our data at? ; species, motu, asv, genus?
+
+metadata needed for blind = false
+next vs miseq
+year
+library
+field blank vs sample
+
+vst or rlog, probably vst for the time factor
+assay to extract values
+
+
+
+```{r phyloseq motus}
+library(phyloseq)
+library(DESeq2)
+library(pheatmap)
+library(vsn)
+library(ape)
+
+# import otu table
+# requires numeric matrix
+fishonly_otus <- asv_all %>%
+ filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  filter(treatment %in% c('Sample')) %>%
+  select(sample_id, motu, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('motu') %>%
+  as.matrix()
+
+# there weren't any 0 columns?
+#fishonly_otus[,-(which(colSums(x)==0))] 
+
+fishonly_sample <- asv_all %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(sample_id, year, region_code) %>% 
+  # a few have no treatment, look into later
+  #  mutate(treatment_deseq = case_when(is.na(treatment) ~ 'Sample',
+   #                            treatment == 'Field blank' ~ 'field_blank',
+    #                           TRUE ~ treatment)) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_otus)) %>%
+  mutate(seq_method = ifelse(year == 2023, 'nextseq', 'miseq')) %>%
+  mutate(year = as.factor(year))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_otus = fishonly_otus + 1
+
+fishotu_dsdata = DESeqDataSetFromMatrix(countData = fishonly_otus, 
+                             colData=fishonly_sample, 
+                             #design = ~ treatment_deseq + seq_method
+                             design = ~ year
+                             )
+
+vsd_otu <- varianceStabilizingTransformation(fishotu_dsdata)
+
+## Taxa level
+
+# import otu table
+# requires numeric matrix
+fishonly_taxa_otus <- asv_all %>%
+ filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  filter(treatment == 'Sample') %>%
+  select(sample_id, found_taxa, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('found_taxa') %>%
+  as.matrix()
+
+fishonly_taxa_sample <- asv_all %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(sample_id, year, region_code) %>%
+  #mutate(treatment_deseq = case_when(is.na(treatment) ~ 'Sample',
+   #                            treatment == 'Field blank' ~ 'field_blank',
+    #                           TRUE ~ treatment)) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_taxa_otus)) %>%
+  mutate(seq_method = ifelse(year == 2023, 'nextseq', 'miseq')) %>%
+  mutate(year = as.factor(year))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_taxa_otus = fishonly_taxa_otus + 1
+
+fishtaxa_dsdata = DESeqDataSetFromMatrix(countData = fishonly_taxa_otus, 
+                             colData=fishonly_taxa_sample, 
+                             design = ~ year)
+
+vsd_taxa <- varianceStabilizingTransformation(fishtaxa_dsdata)
+
+# plots
+meanSdPlot(fishonly_otus)
+meanSdPlot(assay(vsd_otu))
+
+pheatmap(fishonly_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized MOTUs')
+pheatmap(assay(vsd_otu), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'MOTUs with VST, DESeq2')
+
+
+meanSdPlot(fishonly_taxa_otus)
+meanSdPlot(assay(vsd_taxa))
+
+pheatmap(fishonly_taxa_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized taxa')
+pheatmap(assay(vsd_taxa), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Taxa with VST, DESeq2')
+
+```
+
+## attach to data
+```{r}
+wis_taxa <- vegan::wisconsin(fishonly_taxa_otus)
+wis_otu <- vegan::wisconsin(fishonly_otus)
+
+wis_taxa_tomerge <- as.data.frame(wis_taxa) %>%
+    rownames_to_column('found_taxa') %>%
+  pivot_longer(cols = !found_taxa,
+               names_to = 'sample_id',
+               values_to = 'relabund_wis_taxa')
+
+wis_otu_tomerge <- as.data.frame(wis_otu) %>%
+    rownames_to_column('motu') %>%
+  pivot_longer(cols = !motu,
+               names_to = 'sample_id',
+               values_to = 'relabund_wis_motu')
+  
+
+
+vst_taxa_tomerge <- as.data.frame(assay(vsd_taxa)) %>%
+  rownames_to_column('found_taxa') %>%
+  pivot_longer(cols = !found_taxa,
+               names_to = 'sample_id',
+               values_to = 'relabund_vst_taxa') %>%
+  mutate(relabund_vst_taxa = ifelse(relabund_vst_taxa < 0, 0, relabund_vst_taxa))
+
+vst_otu_tomerge <- as.data.frame(assay(vsd_otu)) %>%
+  rownames_to_column('motu') %>%
+  pivot_longer(cols = !motu,
+               names_to = 'sample_id',
+               values_to = 'relabund_vst_motu') %>%
+  mutate(relabund_vst_motu = ifelse(relabund_vst_motu < 0, 0, relabund_vst_motu))
+
+
+fishonly_relabund <- fishonly_range %>%
+  filter(treatment == 'Sample') %>%
+  left_join(vst_taxa_tomerge) %>%
+  left_join(vst_otu_tomerge)%>%
+  left_join(wis_taxa_tomerge) %>%
+  left_join(wis_otu_tomerge) %>%
+  relocate(relabund_vst_taxa, relabund_vst_motu, relabund_wis_taxa, relabund_wis_motu,
+           motu_pa, .before = reads_raw) %>%
+  select(!c(n_dups, fish_base_url, group))
+
+write.csv(fishonly_relabund, here(edna_out, paste0(datefield, runfield, 'asvmatrix_fish.csv')))
+```
+
+
+
+## Compare to other methods
+
+
+```{r}
+#this function calculates the eDNA index on a taxonomy by sample matrix from raw read numbers
+#Author: Anya Mueller
+#adapted from (Jacobs-Palmer et al, 2020)
+
+edna_index <- function(df, row_var) {
+  #df = a dataframe with taxonomy/ASV in columns, samples in rows
+  #row_var = variable from the dataframe of desired row-wise identifier
+  
+  ##prep data
+  #make dataframe
+  x <- as.data.frame(df)
+  #put row_var into rownames
+  rownames(x) <- x[[row_var]]
+  #remove row_var column
+  x[[row_var]] <- NULL
+  #remove rows who sum to zero
+  x <- subset(x, rowSums(x)>0) 
+  
+  ##Take proportions from table of raw read counts 
+  #apply operation to a matrix
+  x <- sweep(x, 
+             #do it by row
+             MARGIN = 1,
+             #value used for operation (sum by sample)
+             STATS = rowSums(x), 
+             #divide raw read number by row sum
+             FUN = "/")
+  
+  #remove columns who sum to zero
+  x[,-(which(colSums(x)==0))] 
+  
+  ##Take indices using a table with proportions of reads 
+  #apply operation to a matrix
+  x <- sweep(x, 
+             #do it by column
+             MARGIN = 2, 
+             #value used for operation (row max)
+             STATS =
+               apply(x, 
+                     #do it by column
+                     MARGIN = 2, 
+                     #take max of column (max proportion for taxonomy/ASV)
+                     max), 
+             #divide proportion by column max
+             FUN = "/")
+  
+  ##add back row variable
+  x[[row_var]] <- rownames(x)
+  rownames(x) <- NULL
+  
+  return(x)
+}
+
+mifish_asvmat_pfs <- list()
+for(i in c(0, 0.05, 0.1)){
+  mifish_asvmat_pfs[[paste(paste("prev",i, sep = "-"), "mifish", sep = "-")]] <- mifish_asvmatrix_taxonomy %>%
+    filter(!(found_taxa %in% c("No BLAST hit")),
+           asv_prevalence > i) %>%
+    select(asv,
+           sample_id,
+           asv_read_raw) %>%
+    pivot_wider(names_from = "asv",
+                values_from = "asv_read_raw")
+}
+
+```
+
+
+```{r}
+#wis_otu <- vegan::wisconsin(fishonly_otus)
+wis_taxa <- vegan::wisconsin(fishonly_taxa_otus)
+
+#revwis_taxa <- fishonly_otus
+
+
+meanSdPlot(fishonly_taxa_otus)
+meanSdPlot(assay(vsd_taxa))
+meanSdPlot(wis_taxa)
+
+pheatmap(fishonly_taxa_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized taxa')
+pheatmap(assay(vsd_taxa), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Taxa with VST, DESeq2')
+pheatmap(wis_taxa, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'wisconsin with vegan')
+```
+
+
+```{r save heatmaps}
+pdf(file = here(edna_out, 'untransformed_large.pdf'),
+    width = 50, height = 8.5)
+pheatmap(fishonly_taxa_otus, 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Untransformed',
+         na_col = 'white')
+dev.off()
+
+pdf(file = here(edna_out, 'vst_large.pdf'),
+    width = 50, height = 8.5)
+pheatmap(assay(vsd), 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'VST with DESeq2',
+         na_col = 'white')
+dev.off()
+
+pdf(file = here(edna_out, 'wisconsin_large.pdf'),
+    width = 50, height = 8.5)
+pheatmap(wis, 
+         fontsize = 5,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Wisconsin with Vegan',
+         na_col = 'black')
+dev.off()
+```
+
+
+
+
+```{r pcoas}
+sample_data <- fishonly_sample %>%
+  rownames_to_column('sample_id')
+
+fishonly_taxa_dist <- dist(t(fishonly_taxa_otus))
+vsd_taxa_dist <- dist(t(assay(vsd_taxa)))
+wis_taxa_dist <- dist(t(wis_taxa))
+
+fishonly_taxa_dist2 <- as.matrix(fishonly_taxa_dist)
+vsd_taxa_dist2 <- as.matrix(vsd_taxa_dist)
+wis_taxa_dist2 <- as.matrix(wis_taxa_dist)
+
+
+colors <- colorRampPalette( rev(RColorBrewer::brewer.pal(9, "Blues")) )(255)
+pheatmap(fishonly_taxa_dist2,
+         col = colors)
+pheatmap(vsd_taxa_dist2,
+         col = colors)
+pheatmap(wis_taxa_dist2,
+         col = colors)
+
+fishonly_pcoa <- pcoa(fishonly_taxa_dist2)
+fishonly_pcoa_plot <- as.data.frame(fishonly_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('sample_id') %>%
+  left_join(sample_data)
+
+vsd_taxa_pcoa <- pcoa(vsd_taxa_dist2)
+vsd_taxa_pcoa_plot <- as.data.frame(vsd_taxa_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('sample_id') %>%
+  left_join(sample_data)
+
+wis_taxa_pcoa <- pcoa(wis_taxa_dist2)
+wis_taxa_pcoa_plot <- as.data.frame(wis_taxa_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('sample_id') %>%
+  left_join(sample_data)
+  
+
+ggplot(fishonly_pcoa_plot, aes(x = axis_1, y = axis_2)) +
+  geom_point(aes(x = axis_1, y = axis_2,
+                 color = as.factor(year))) +
+  labs(title = 'Unadjusted, by taxa') +
+  theme_bw()
+
+ggsave(here(edna_out, 'qc', 'unadjusted_pcoa.png'))
+
+ggplot(vsd_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
+  geom_point(aes(x = axis_1, y = axis_2,
+                 color = as.factor(year))) +
+  labs(title = 'VST with DESeq2, by taxa') +
+  theme_bw()
+
+ggsave(here(edna_out, 'qc', 'vst_pcoa.png'))
+
+ggplot(wis_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
+  geom_point(aes(x = axis_1, y = axis_2,
+                 color = as.factor(year))) +
+  labs(title = 'Wisconsin with vegan, by taxa') +
+  theme_bw()
+
+ggsave(here(edna_out, 'qc', 'wisconsin_pcoa.png'))
+
+plotPCA(fishonly_taxa_dist)
+plotPCA(vsd_taxa, intgroup = c('year'))
+```
+
+
+# scratch
+
+```{r deseq function}
+deseq_varstab = function(physeq, sampleConditions=rep("A", nsamples(physeq)), ...){
+	require("DESeq2")
+	# Enforce orientation.
+	if( !taxa_are_rows(physeq) ){
+		physeq <- t(physeq)
+	}
+	x = as(otu_table(physeq), "matrix")
+	# The same tweak as for edgeR to avoid NaN problems
+	# that cause the workflow to stall/crash.
+	x = x + 1
+	# Create annotated data.frame with the taxonomy table, in case it is useful later
+	taxADF = as(data.frame(as(tax_table(physeq), "matrix"), stringsAsFactors=FALSE), "AnnotatedDataFrame")
+	cds = DESeqDataSetFromMatrix(x, sampleConditions, featureData=taxADF)
+	#cds = newCountDataSet(x, sampleConditions, featureData=taxADF)
+	# First estimate library size factors
+	cds = estimateSizeFactors(cds)
+	# Variance estimation, passing along additional options
+	cds = estimateDispersions(cds, ...)
+	# Determine which column(s) have the dispersion estimates
+	dispcol = grep("disp\\_", colnames(fData(cds)))
+	# Enforce that there are no infinite values in the dispersion estimates
+	if( any(!is.finite(fData(cds)[, dispcol])) ){
+		fData(cds)[which(!is.finite(fData(cds)[, dispcol])), dispcol] <- 0.0
+	}
+  vsmat = exprs(varianceStabilizingTransformation(cds))
+  otu_table(physeq) <- otu_table(vsmat, taxa_are_rows=TRUE)
+  return(physeq)
+}
+```
+
+ˆ
+```{r}
+# import otu table
+# requires numeric matrix
+fishonly_taxa_otus <- asv_all %>%
+ filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(sample_id, found_taxa, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('found_taxa') %>%
+  as.matrix()
+
+fishonly_taxa_taxonomy <- asv_all %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(found_taxa, found_taxa, genus, family, order, class) %>%
+  distinct() %>% 
+  column_to_rownames('found_taxa') %>%
+  # make sure the same 'species' are in each
+  filter(rownames(.) %in% rownames(fishonly_taxa_otus)) %>%
+  as.matrix()
+
+fishonly_taxa_sample <- asv_all %>%
+  filter(class %in% c('Teleostei', 'Chondrostei', 'Holocephali', 'Elasmobranchii')) %>%
+  select(sample_id, year, region_code, treatment) %>%
+  mutate(treatment_deseq = case_when(is.na(treatment) ~ 'Sample',
+                               treatment == 'Field blank' ~ 'field_blank',
+                               TRUE ~ treatment)) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_taxa_otus))
+
+
+
+fishtaxa_phylo <- merge_phyloseq(fishtaxa_otutable, fishtaxa_samples,
+                                 fishtaxa_taxonomy)
+
+
+fishmotu_otutable <- otu_table(fishonly_otus, taxa_are_rows = TRUE)
+fishmotu_samples <- sample_data(fishonly_sample)
+fishmotu_taxonomy <- tax_table(fishonly_taxonomy)
+
+fishmotu_phylo <- merge_phyloseq(fishmotu_otutable, fishmotu_samples,
+                                 fishmotu_taxonomy)
+
+
+fishmotu_deseq <- deseq_varstab(fishmotu_phylo)
+
+
+
+fishotu_deseq <- DESeq(fishotu_dsdata)
+
+```
+
+
+
+
+```{r}
+exblanks_2021 <-asvs2021 %>%
+  select(sample_id, library, extraction_blank, region_name) %>%
+  distinct()
+```
+

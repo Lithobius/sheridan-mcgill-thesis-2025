@@ -1,0 +1,133 @@
+---
+title: "ch2_01a-2024_metadata-cleaning"
+output: html_document
+date: "2024-06-04"
+---
+
+Currently samples and coordinates are not properly assigned
+
+```{r setup, include=FALSE}
+library(here)
+library(tidyverse)
+```
+
+```{r}
+edna_metadata_site <- read_csv(here('rawdata',
+                               'peco',
+                               '2024_edna',
+                               'PECO_data-entry_2024 - site_level.csv')) %>%
+  janitor::clean_names() %>%
+  rename(decimal_latitude = decimal_latitide) %>%
+  mutate(region_code = str_remove_all(region_code, '_PECO')) %>%
+  mutate(region_code = case_when(region_code == 'IC_BC' ~ 'BC_IC',
+                                 region_code == 'CC_BC' ~ 'BC_CC',
+                                 region_code == 'PR_BC' ~ 'BC_PP',
+                                 region_code == 'SD_CA' ~ 'CA_SD',
+                                 region_code == 'HB_BC' ~ 'CA_HB',
+                                 region_code == 'NV_BC' ~ 'BC_NV',
+                                 TRUE ~ region_code)) %>%
+  # remove white space?
+  mutate(region_name = trimws(region_name, which = 'both'),
+         site_code = trimws(site_code, which = 'both')) %>%
+  select(!data_entry_name)
+
+edna_metadata_sample <- read_csv(here('rawdata',
+                               'peco',
+                               '2024_edna',
+                               'PECO_data-entry_2024 - sample-level.csv')) %>%
+  janitor::clean_names() %>%
+  mutate(sample_id = tolower(sample_id))  %>%
+  mutate(region_name = case_when(region_name == 'BC_HN' ~ 'BC_HG',
+                                 TRUE ~ region_name)) %>%
+    # remove white space?
+  mutate(region_name = trimws(region_name, which = 'both'),
+         site_code = trimws(site_code, which = 'both')) %>%
+  select(!data_entry_name)
+
+edna_metadata_extraction <- read_csv(here('rawdata',
+                               'peco',
+                               '2024_edna',
+                               'eDNAExtraction_Metadata_PECO2024 - Samples.csv')) %>%
+    janitor::clean_names() %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(extraction_blank = tolower(extraction_blank))
+
+
+edna_metadata_pcr <- read_csv(here('rawdata',
+                               'peco',
+                               '2024_edna',
+                               'Indexes_NextSeq-Table 1.csv')) %>%
+    janitor::clean_names() %>%
+  janitor::remove_empty() %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(pcr_blank = case_when(str_detect(well_position, "D-") ~ 'negpcr-2024-4',
+                               str_detect(well_position, "C-") ~ 'negpcr-2024-3',
+                               str_detect(well_position, "B-") ~ 'negpcr-2024-2',
+                               str_detect(well_position, "A-") ~ 'negpcr-2024-1')) %>%
+  select(!c(project, well_position))
+
+
+
+```
+
+# clean
+
+
+```{r}
+metadata2024 <- edna_metadata_sample %>%
+  left_join(edna_metadata_site) %>%
+  mutate(notes = case_when(is.na(notes) & !is.na(notes_about_sample) ~ notes_about_sample,
+                           !is.na(notes) & is.na(notes_about_sample) ~ notes,
+                           !is.na(notes) & !is.na(notes_about_sample) ~ paste0(notes, ', ', notes_about_sample))) %>%
+  select(!c(sample_id_like_prev,
+            #collection_time, filter_time,
+             notes_about_sample)) %>%
+  # give all sites the same coordinates
+  group_by(site_code) %>%
+  mutate(site_lat = mean(decimal_latitude, na.rm = TRUE),
+         site_long = mean(decimal_longitude, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(decimal_latitude = coalesce(site_lat, decimal_latitude),
+         decimal_longitude = coalesce(site_long, decimal_longitude)) %>%
+  select(!c(site_lat, site_long)) %>%
+  mutate(treatment = case_when(control == 'Y' ~ 'Field blank',
+                               control == 'N' ~ 'Sample',
+                               #sample_id %in% c('pecoe-1289') ~ 'Field blank',
+                               #site_code == 'NV_KI' ~ 'Sample'
+                               )) %>%
+  filter(!(site_code == 'Not used')) %>%
+  relocate(region_code, decimal_latitude, decimal_longitude, .before = collection_time) %>%
+  mutate(site_code = case_when(site_code == 'BB_PS' ~ 'PS_BB',
+                               site_code == 'SH_PS' ~ 'PS_SH',
+                               site_code == 'PB_PS' ~ 'PS_BV', # is this right???
+                               site_code == 'OR_BV' ~ 'YB_BV',
+                               site_code == 'OR_FP' ~ 'YB_BV',
+                               site_code == 'OR_SBN' ~ 'YB_SBN',
+                               site_code == 'OR_SBS' ~ 'YB_SBS',
+                               site_code == 'OR_IF' ~ 'YB_IF',
+                               site_code == 'C_PR' ~ 'PP_C',
+                               site_code == 'E_PR' ~ 'PP_E',
+                               site_code == 'HI_PR' ~ 'PP_HI',
+                               site_code == 'JJ_PR' ~ 'PP_JJ',
+                               site_code == 'MB_PR' ~ 'PP_MB',
+                               site_code == 'CA_KF' ~ 'SD_KF',
+                               TRUE ~ site_code
+                               )) %>%
+  mutate(region_code = case_when(site_code %in% c('NC_DE') ~ 'CA_NCc',
+                                 site_code %in% c('NC_RB', 'NC_PM', 'NC_PS') ~ 'CA_NCb',
+                                 site_code %in% c('NC_WP', 'NC_BL') ~ 'CA_NCa',
+                                 site_code %in% c('PS_SH', 'PS_BV', 'PS_BB') ~ 'WA_PSa',
+                                 site_code %in% c('PS_NC', 'PS_IC',
+                                                  'PS_FB', 'PS_FJ', 'PS_BH') ~ 'WA_PSb',
+                                 TRUE ~ region_code)) %>%
+  left_join(edna_metadata_extraction) %>%
+  left_join(edna_metadata_pcr)
+
+
+write_csv(metadata2024, here('processeddata', 'peco',
+                                    '2024_edna',
+                                    '20250527_peco2024_metadata.csv')) 
+
+
+```
+

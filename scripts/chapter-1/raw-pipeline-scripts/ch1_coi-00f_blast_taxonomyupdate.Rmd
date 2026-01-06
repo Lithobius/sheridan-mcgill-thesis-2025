@@ -1,0 +1,666 @@
+---
+title: "coi-blast-get-useful-info"
+output: html_document
+date: "2024-01-29"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(taxize)
+library(worrms)
+library(here)
+
+# filepaths for use with here, basic files
+coi_data <- here("rawdata", "2018calvert", "fastq",
+               'coi_kate', 'combined_runs')
+
+
+# datefield might be different
+datefield <- '20240220_'
+runfield <- 'calvert2018_coi_'
+```
+```{r worms-function}
+## requires worrms to be loaded
+# input is vector of species names
+# use wm_records_names to extract 
+# this doesn't need the + signs
+
+# right now this breaks if not-found
+search_records_worms <- function(spnames) {
+  search <- tibble()
+  for (i in spnames) {
+    print(paste0('searching for ', i))
+    record <- wm_records_names(i, marine_only = FALSE)
+    message('done')
+    search <- append(search, record)
+  }
+  names(search) <- spnames
+  search_output <- map_dfr(.x = search, ~ data.frame(.x), .id = 'query') %>%
+    janitor::clean_names() %>%
+    select(!(c(url, taxon_rank_id, citation, lsid, modified)))
+  return(search_output)
+}
+```
+
+
+
+All we got here is the description and the accession basically so we have to query NCBI for the taxonomy.
+
+```{r extract and rename}
+edna_blast <- read_delim(here(coi_data,
+                                '20240206_coi-reblast_out-parsed.tsv'),
+                           delim = '\t') %>%
+  rename(asv = seed_asv_reads)
+```
+In starting and stopping BLAST there may have been some missed
+```{r any missed}
+noresults <- edna_blast %>%
+  filter(description %in% c('No Results')) %>%
+  select(asv) %>%
+  distinct()
+
+write_delim(noresults, file = here(coi_data, paste0(datefield, runfield, 'blast_noresults.txt')),
+          col_names = FALSE)
+```
+
+
+
+# Accessions
+First extract all unique accessions to query vs ncbi in the coi_ncbi-efetch-taxonomy.py script.
+
+```{r extract accessions}
+accessionlist <- edna_blast %>%
+  select(accession) %>%
+  filter(!is.na(accession)) %>%
+  distinct()
+
+
+write_delim(accessionlist, file = here(coi_data, paste0(datefield, runfield, 'accessions.txt')),
+          col_names = FALSE)
+```
+
+NOW run  ncbis-efetch-taxonomy.py!
+
+Once the script is run, load in the results to parse. Eventually I'll get the script to parse but for now its faster to do it in R because I can do it while NCBI is still querying with a duplicated file of some hits.
+
+The hard part is going to be that the taxonomy is different lengths. I can probably break it up by larger groups.
+
+This part sets up the higher taxonomy for most things, once it get pasts order or so its very rough. 
+
+```{r fix-taxonomy}
+tax_by_acc <- read_csv(here(coi_data, '20240213_calvert2018_coi_taxonomy.csv'))
+
+taxonomy_only <- tax_by_acc %>%
+  filter(!(accession %in% c('accession'))) %>%
+  # unique taxonomy for smaller amount to handle
+  #select(!accession) %>%
+  # reduce even more during troubleshooting
+  #select(!organism) %>%
+  distinct() %>%
+  # remove unnecessary bits
+  mutate(taxonomy = str_remove_all(taxonomy, "\\'")) %>%
+  mutate(taxonomy = str_remove_all(taxonomy, "\\[")) %>%
+  mutate(taxonomy = str_remove_all(taxonomy, "\\]")) %>%
+  separate_wider_delim(cols = taxonomy, 
+                       delim = ", ",
+                       names_sep = '_',
+                       too_few = 'align_start') %>%
+  # first two are good enough as is
+  rename(domain = taxonomy_1,
+         kingdom = taxonomy_2) %>%
+  # clade1 can be superphylum/etc and whatever fits here for diatoms
+  # check more metazoans; could just be if metazoa then taxonomy_3
+  mutate(clade_1 = case_when(kingdom %in% c('Sar', 'Fungi') ~ taxonomy_3,
+                             kingdom == "Metazoa" & taxonomy_3 %in% c("Ecdysozoa", "Spiralia",
+                                                                      "Lophotrochozoa") ~ taxonomy_3)) %>%
+  mutate(clade_2 = case_when(kingdom == "Metazoa" & taxonomy_4 %in% c("Lophotrochozoa", 'Gnathifera') ~ taxonomy_4)) %>%
+  relocate(clade_1, clade_2, .before = taxonomy_3) %>%
+  # phylum should be whatever's left in taxonomy 3, and taxonomy 4 for anyone with a clade_1
+  mutate(phylum = case_when(kingdom %in% c('Bacteroidota', 'Apusozoa', 'Pseudomonadota',
+                                           'Rhodophyta') ~ kingdom,
+                            taxonomy_5 %in% c('Kinorhyncha') ~ taxonomy_5,
+                            taxonomy_3 %in% c('environmental samples') ~ NA_character_,
+                            taxonomy_4 %in% c('environmental samples') ~ NA_character_,
+                            is.na(clade_1) & is.na(clade_2) ~ taxonomy_3,
+                            !is.na(clade_2) ~ taxonomy_5,
+                            TRUE ~ taxonomy_4)) %>%
+  relocate(phylum, .before = taxonomy_4) %>%
+  mutate(clade_3 = case_when(phylum %in% c('Chordata', 'Echinodermata') ~ taxonomy_4,
+                             phylum %in% c('Ascomycota', 'Ochrophyta', 'Arthropoda') ~ taxonomy_5)) %>%
+    mutate(clade_4 = case_when(clade_3 %in% c('Bacillariophyta') ~ taxonomy_8,
+                               phylum %in% c('Arthropoda') ~ taxonomy_6,
+                             phylum %in% c('Echinodermata') ~ taxonomy_5,
+                             phylum %in% c('Rhodophyta')~ taxonomy_4)) %>%
+  mutate(class = case_when(kingdom %in% c('Cryptophyceae') ~ kingdom,
+                           clade_3 %in% c('Bacillariophyta') ~ taxonomy_9,
+                           taxonomy_5 %in% c('Bivalvia') ~ taxonomy_5,
+                           taxonomy_6 %in% c('Branchiopoda') ~ taxonomy_6,
+                           phylum %in% c('Echinodermata', 'Annelida', 'Bryozoa',
+                                         'Ascomycota', 'Mollusca', 'Chordata', 'Rotifera',
+                                         'Platyhelminthes', 'Nemertea', 'Acanthocephala',
+                                         'Kinorhyncha', 'Nematomorpha') ~ taxonomy_6,
+                           phylum %in% c('Arthropoda', 'Brachiopoda') ~ taxonomy_7,
+                           phylum %in% c('Ochrophyta') ~ taxonomy_8,
+                           phylum %in% c('Chlorophyta', 'Haptophyta', 'Cnidaria', 
+                                         'Porifera', 'Ctenophora',
+                                         'Phoronida') ~ taxonomy_4,
+                           phylum %in% c('Apusozoa', 'Pseudomonadota', 'Rhodophyta') ~ taxonomy_3
+                           )) %>%
+  # order
+  mutate(clade_5 = case_when(kingdom == 'Amoebozoa' ~ taxonomy_5,
+                             taxonomy_6 == 'Pteriomorphia' ~ taxonomy_6,
+                             taxonomy_8 == 'Eumalacostraca' ~ taxonomy_8,
+                             clade_3 %in% c('Hexapoda') ~ taxonomy_9,
+                             phylum %in% c('Cnidaria', 'Porifera') ~ taxonomy_5,
+                             phylum %in% c('Annelida', 'Echinodermata', 
+                                           'Nemertea', 'Platyhelminthes',
+                                           'Rotifera') ~ taxonomy_7,
+                             phylum %in% c('Mollusca') ~ taxonomy_8,
+                             class %in% c('Ulvophyceae') ~ taxonomy_5)) %>%
+  mutate(order = case_when(phylum %in% c('Bacteroidota', 'Discosea', 'Evosea',
+                                         'Pseudomonadota', 'Oomycetes') ~ taxonomy_4,
+                           class %in% c('Ulvophyceae') ~ taxonomy_4,
+                           class %in% c('Scyphozoa') ~ taxonomy_5,
+                           class %in% c('Cirripedia') ~ taxonomy_10,
+                           clade_3 %in% c('Bacillariophyta') |
+                             clade_5 %in% c('Errantia', 'Sedentaria') |
+                             class %in% c('Asteroidea') ~ taxonomy_8,
+                           taxonomy_13 %in% c('Aves') ~ taxonomy_13,
+                           taxonomy_9 %in% c('Eucarida') ~ taxonomy_9,
+                           taxonomy_8 %in% c('Monostilifera', 'Lottioidea') ~ taxonomy_8,
+                           taxonomy_8 == 'Eumalacostraca' ~ taxonomy_10,
+                           taxonomy_7 %in% c('Anostraca') ~ taxonomy_7,
+                           clade_3 %in% c('Hexapoda') ~ taxonomy_10,
+                           clade_3 %in% c('Bacillariophyta') ~ taxonomy_11,
+                           phylum %in% c('Rhodophyta', 'Haptophyta', 'Oomycota',
+                                         'Dinophyceae', 'Chlorophyta', 'Ctenophora',
+                                         'Phoronida') ~ taxonomy_5,
+                           phylum %in% c('Cnidaria', 'Porifera') ~ taxonomy_6,
+                           phylum %in% c('Ascomycota', 'Chordata', 'Bryozoa',
+                                         'Acanthocephala', 'Nematomorpha',
+                                         'Ochrophyta') ~ taxonomy_7,
+                           phylum %in% c('Brachiopoda') ~ taxonomy_8,
+                           phylum %in% c('Arthropoda', 'Echinodermata',
+                                         'Annelida', 'Platyhelminthes',
+                                         'Ochrophyta') ~ taxonomy_9,
+                           phylum %in% c('Mollusca', 'Rotifera') ~ taxonomy_9,
+                           kingdom %in% c('Ancyromonadida') ~ kingdom)) %>%
+  mutate(clade_6 = case_when(order %in% c('Mammalia') ~ taxonomy_10)) %>%
+
+  mutate(family = case_when(phylum %in% c('Ancyromonadidae') ~ phylum,
+                            class %in% c('Ulvophyceae') ~ taxonomy_6,
+                            class %in% c('Scyphozoa') ~ taxonomy_7,
+                            class %in% c('Cirripedia') ~ taxonomy_12,
+                            class %in% c('Clitellata', 'Branchiopoda', 
+                                         'Hexanauplia', 'Echinoidea') | 
+                              order %in% c('Pisciforma') ~ taxonomy_10,
+                            order %in% c('Lottioidea', 'Scolecida') ~ taxonomy_9,
+                            clade_3 %in% c('Hexapoda') ~ taxonomy_13,
+                            clade_3 %in% c('Bacillariophyta') ~ taxonomy_9,
+                            taxonomy_12 %in% c('Salmonidae') ~ taxonomy_12,
+                            taxonomy_13 %in% c('Phocidae', 'Clupeidae', 
+                                               'Embiotocidae') ~ taxonomy_13,
+                            taxonomy_13 %in% c('Aves') & taxonomy_17 %in% c('Fringillidae') ~ taxonomy_17,
+                            taxonomy_13 %in% c('Aves') ~ taxonomy_16,
+                            taxonomy_14 %in% c('Ammodytidae') ~ taxonomy_14,
+                            taxonomy_15 %in% c('Pleuronectidae') ~ taxonomy_15,
+                            taxonomy_8 == 'Eumalacostraca' ~ taxonomy_11,
+                            taxonomy_8 %in% c('Obeliidae', 'Clytiidae', 'Streptocephalidae')  ~ taxonomy_8,
+                            taxonomy_8 %in% c('Monostilifera', 'Malacostegina') ~ taxonomy_10,
+                            order %in% c('Mammalia') ~ taxonomy_11,
+                            phylum %in% c('Mollusca', 'Rotifera', 'Brachiopoda') ~ taxonomy_10,
+                            phylum %in% c('Annelida', 'Platyhelminthes',
+                                          'Echinodermata') ~ taxonomy_9,
+                            phylum %in% c('Ascomycota', 'Nemertea', 'Bryozoa',
+                                          'Acanthocephala', 'Nematomorpha',
+                                          'Ochorophyta') ~ taxonomy_8,
+                            phylum %in% c('Cnidaria', 'Porifera', 'Kinorhyncha') ~ taxonomy_7,
+                            phylum %in% c('Pyrenomonadales', 'Apusozoa', 'Florideophyceae') ~ taxonomy_4,
+                            phylum %in% c('Bacteroidota', 'Pseudomonadota') ~ taxonomy_5,
+                            phylum %in% c('Rhodophyta', 'Discosea', 'Haptophyta',
+                                          'Chlorophyta', 'Oomycota', 'Ochrophyta',
+                                          'Dinophyceae', 'Phoronida') ~ taxonomy_6)) %>%
+  mutate(clade_7 = case_when(class %in% c('Ulvophyceae') ~ taxonomy_7,
+                             phylum %in% c('Ascomycota') ~ taxonomy_9,)) %>%
+  mutate(genus = case_when(taxonomy_4 %in% c('Ancyromonas') ~ taxonomy_4,
+                           taxonomy_5 %in% c('Thecamonas', 'Teleaulax') ~ taxonomy_5,
+                           !is.na(taxonomy_19) & order %in% c('Hymenoptera', 'Aves') ~ taxonomy_19,
+                           !is.na(taxonomy_18) & order %in% c('Hymenoptera', 'Lepidoptera') ~ taxonomy_18,
+                           !is.na(taxonomy_17) ~ taxonomy_17,
+                           !is.na(taxonomy_16) ~ taxonomy_16,
+                           !is.na(taxonomy_15) ~ taxonomy_15,
+                           !is.na(taxonomy_14) ~ taxonomy_14,
+                           !is.na(taxonomy_13) ~ taxonomy_13,
+                           clade_3 %in% c('Tunicata') ~ taxonomy_8,
+                           clade_3 %in% c('Bacillariophyta') ~ taxonomy_10,
+                           class %in% c('Scyphozoa') ~ taxonomy_7,
+                           class %in% c('Ulvophyceae', 'Demospongiae') ~ taxonomy_8,
+                           domain == 'Bacteria' ~ taxonomy_6,
+                           order %in% c('Peronosporales') ~ taxonomy_6,
+                           order %in% c('Lottioidea') ~ taxonomy_10,
+                           phylum %in% c('Rotifera') ~ taxonomy_11,
+                           phylum %in% c('Ascomycota', 'Platyhelminthes') ~ taxonomy_10,
+                           !is.na(taxonomy_12) & phylum %in% c('Annelida', 'Arthropoda',
+                                                               'Echinodermata', 'Mollusca') ~ taxonomy_12,
+                           !is.na(taxonomy_11) & phylum %in% c('Annelida', 'Arthropoda',
+                                                               'Echinodermata', 'Mollusca',
+                                                               'Nemertea', 'Bryozoa', 'Brachiopoda') ~ taxonomy_11,
+                           !is.na(taxonomy_10) & phylum %in% c('Annelida', 'Echinodermata') ~ taxonomy_10,
+                           !is.na(taxonomy_9) & phylum %in% c('Cnidaria', 'Nemertea',
+                                                              'Bryozoa', 'Arthropoda',
+                                                              'Acanthocephala', 'Nematomorpha',
+                                                              'Chordata', 'Ochrophyta') ~ taxonomy_9,
+                           !is.na(taxonomy_8) & phylum %in% c('Ochrophyta', 'Cnidaria', 'Kinorhyncha')|
+                             !is.na(taxonomy_8) & kingdom %in% c('Amoebozoa') ~ taxonomy_8,
+                           phylum %in% c('Rhodophyta', 'Discosea', 'Chlorophyta',
+                                         'Oomycota', 'Ochrophyta', 'Dinophyceae',
+                                         'Haptophyta', 'Ctenophora', 'Phoronida') |
+                             !is.na(taxonomy_7) & kingdom %in% c('Amoebozoa')~ taxonomy_7,
+                           kingdom %in% c('Amoebozoa') ~ taxonomy_6)) %>%
+  mutate(leftover = case_when(class %in% c('Ulvophyceae') ~ taxonomy_9,
+                              phylum %in% c('Rhodophyta', 'Chlorophyta')~ taxonomy_8,
+                              domain == 'Bacteria' ~ taxonomy_7,
+                              clade_3 %in% c('PX clade') ~ taxonomy_9)) %>%
+  relocate(clade_3, clade_4, class, clade_5, order, clade_6, family, clade_7,
+           genus, leftover, .before = taxonomy_6) %>%
+  # we can remove taxonomy_3 now, probably?
+  select(!c(taxonomy_3, taxonomy_4, taxonomy_5,
+            taxonomy_6, taxonomy_7, taxonomy_8,
+            taxonomy_9, taxonomy_10, taxonomy_11,
+            taxonomy_12, taxonomy_13, taxonomy_14,
+            taxonomy_15, taxonomy_16, taxonomy_17,
+            taxonomy_18, taxonomy_19)) %>%
+  # 
+  # 
+  # fix any outstanding issues
+  mutate(domain = case_when(organism %in% c('bacterium Bacteria.') ~ 'Bacteria',
+                            TRUE ~ domain)) %>%
+  mutate(kingdom = case_when(kingdom %in% c('environmental samples', 
+                                            'Eukaryota incertae sedis',
+                                           'Bacteroidota', 'Cryptophyceae', 'Bacillota',
+                                           'Ancyromonadida', 'Thermodesulfobacteriota',
+                                           'Apusozoa', 'Pseudomonadota', 'Rhodophyta') ~ domain,
+                             organism %in% c('bacterium Bacteria.') ~ 'Bacteria',
+                            TRUE ~ kingdom)) %>%
+  mutate(phylum = case_when(phylum %in% c('Ancyromonadidae') ~ NA_character_,
+                            TRUE ~ phylum)) %>%
+  mutate(order = case_when(order %in% c('environmental samples') ~ NA_character_,
+                           TRUE ~ order)) %>%
+  mutate(genus = case_when(genus %in% c('environmental samples') ~ NA_character_,
+                           TRUE ~ genus))
+
+unique(taxonomy_only$phylum)
+```
+
+Now we will clean the organism list to minimize the entries.
+Afterwards we will run relevant taxa through taxize/worrms
+
+```{r clean-organism}
+taxonomy_unique_organism <- taxonomy_only %>%
+  #select(organism) %>%
+  mutate(organism_verbatim = organism) %>%
+  rename(species = organism) %>%
+  distinct() %>%
+  # remove brackets and special characters
+  mutate(species = str_remove_all(species, "\\[|\\]|\\(|\\)|\\'|#|/|>|&|-|:|,|_|=")) %>%
+   # remove 'sp'
+  mutate(species = trimws(species)) %>%
+    # species
+  mutate(species = str_remove_all(species, "(sp\\. )|(sp\\.)$|( sp)$|(_sp_)|( sp[0-9])")) %>%
+    # genus
+  mutate(species = str_remove_all(species, "( Gen)|( gen n)|( gen)$|( gen\\. )|( gen )|( fam\\.)")) %>%
+  # species complexes
+  mutate(species = str_remove_all(species, "(cf\\. )|( cf)|( aff\\.)|^(aff\\. )|( species complex)|( Group )|( group )|( group)$|( gr\\.)|( complex)$|( complex )|( complex type)|( complexnew)|( complexc)|( var\\.)|( Var)$|( clade [A-Z]{1} )|( clade[0-9]{1})|( clade )|( clade)$|( nr\\.)|( unid\\.)|( und)$|( undet)$|( und_[0-9]{1})$|( unk)$|( unk_[0-9]{1})$| unnamed| sensu lato|  sesu lato|  sensu stricto|( intermediate )|( n\\.)|(f\\.)|(nom\\. nud\\.)")) %>%
+  mutate(species = str_remove_all(species, "[0-9]*")) %>%
+  mutate(species = str_remove_all(species, "\\.")) %>%
+  mutate(species = trimws(species)) %>%
+  # remove some of the random lowercase letters and upper lower combos
+  mutate(species = str_remove_all(species, "( [a-z{1}])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z][A-Za-z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z][A-Za-zA-Za-z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z][A-Za-za-z])$")) %>%
+  #remove the last character if its a capital letter many times
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  # in case multiple 'words'
+  mutate(species = trimws(species)) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  # words relating to science
+  mutate(species = str_remove_all(species, "uncultured|( bacterium)$|( marine )|(environmental sample)| continuum| in red algae|Candidatus | strain| like$| isolate ")) %>%
+  mutate(species = str_remove_all(species, "endosymbiont of [A-z]*$|prey of [A-z]*$")) %>%
+  mutate(species = str_remove_all(species, "(spade head)|(Pilbara Banded)")) %>%
+  mutate(species = trimws(species)) %>%
+  # words relating to locations
+  mutate(species = str_remove_all(species, "Marbis$|Jiaozhou Bay|Cal$| California| Palaeo|( Anem)$| Vostok| Norway| Biologic|Thao$| Fanad$| Mol$| Marseille$|AHarris| Ballona$")) %>%
+  
+  # random single lowercase letters
+  mutate(species = str_remove_all(species, "( [a-z]{1})$")) %>%
+  mutate(species = trimws(species)) %>%
+  # another round
+  #remove the last character if its a capital letter many times
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = trimws(species)) %>%
+  # fragments and nonsense
+  mutate(species = str_remove_all(species, "Pl$|Plg$|CCass|FAipt|odSpoLacu|BCnid|NuCnid|SCSaan|FuerteventuraLanzarote| Hel$|LPdiv|DERaa|NemBar|UBSiik|BaUclulet|LRoa|LRob|AHarris")) %>%
+  # in case multiple 'words'
+  mutate(species = trimws(species)) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  mutate(species = trimws(species)) %>%
+  mutate(species = str_remove_all(species, "([A-Z])$")) %>%
+  distinct() %>%
+  # now standardize the stuff that should draw from higher taxonomy
+  relocate(organism_verbatim, .before = domain) %>%
+  rename(ncbi_organism = species) %>%
+  # update ncbi organism to reflect higher taxonomy
+  mutate(ncbi_organism = case_when(ncbi_organism %in% c('dinoflagellate', 'diatom') ~ phylum,
+                                   ncbi_organism %in% c('zooplankton', 'bacterium', 'bacterium Bacteria') ~ domain,
+                                   ncbi_organism %in% c('Alaria esculenta  angustifolia', 'Alaria esculenta  latifolia') ~ 'Alaria esculenta',
+                                   ncbi_organism == 'SparassidaeOlioslike StVincent' ~ 'Sparassidae',
+                                   ncbi_organism == 'Odonthalia floccosa  comosa' ~ 'Odonthalia floccosa',
+                                   ncbi_organism == 'Aegla uruguayana Dom Pedrito Santa Maria Chico' ~ 'Aegla uruguayana',
+                                   ncbi_organism == 'Euphausiacea caab' ~ 'Euphausiacea',
+                                   ncbi_organism == 'Mitrella burchardi' ~ 'Mitrella burchardti',
+                                   ncbi_organism == 'Synchaeta tremulaoblonga' ~ 'Synchaeta',
+                                   ncbi_organism == 'Omphalius rusticus rusticus' ~ 'Omphalius rusticus',
+                                   ncbi_organism == 'Tegula turbinatum' ~ 'Tegula turbinata',
+                                   ncbi_organism == 'Tedania pillarriosae' ~ 'Tedania pilarriosae',
+                                   ncbi_organism == 'Limecola balthica balthica' ~ 'Limecola balthica',
+                                   # not in worms for some reason, not in our region anyway
+                                   ncbi_organism == 'Dussumieria modakandai' ~ 'Dussumieria',
+                                   TRUE ~ ncbi_organism)) %>%
+  #temporary for troubleshooting
+  #select(!c(accession, organism_verbatim)) %>%
+  distinct()
+```
+
+Now we'll separate metazoa;
+for metazoa we'll run through taxize/worrms
+for non-metazoa we'll just make sure the taxonomy generated is sufficient, and trim it to king phillip
+
+phylum_labs <- c('Bacillariophyta' = 'Diatoms/Heterokont Algae',
+                 'Haptista' = 'Haptista (Algae)',
+                 #'Dictyochophyceae' = 'Dictyochophyceae (Heterokont Algae)',
+                 #'Pelagophyceae' = 'Pelagophyceae (Heterokont Algae)',
+                 #'Cryptophyceae' = 'Cryptophyceae (Algae)',
+                 #'Raphidophyceae' = 'Raphidophyceae (Algae)',
+                 #'Phaeophyceae' = 'Brown Algae',
+                 #'Telonemida' = 'Telonemida (Eukaryote)',
+                 )
+
+
+
+```{r}
+notmetazoa <- taxonomy_unique_organism %>%
+  filter(!(kingdom == 'Metazoa')) %>%
+  # some 'clades' were just metazoa
+  remove_empty() %>%
+  # changes to make
+  # some of these are not strictly accurate but will help me sort
+  mutate(order = case_when(order == 'environmental samples' ~ NA_character_,
+                           family %in% c('Phaeophyceae') ~ family,
+                           TRUE ~ order)) %>%
+  mutate(genus = case_when(genus == 'environmental samples' ~ NA_character_,
+                           family %in% c('Cochliopodium', 'Leohumicola', 
+                                         'Levanderina', 'Philozoon',
+                                         'Neoporphyra', 'Wildemania', 
+                                         'Smithora') ~ family,
+                           order %in% c('Pycnococcus') ~ order,
+                           clade_5 %in% c('Parvamoeba') ~ clade_5,
+                           ncbi_organism == 'Pyramimonas parkeae' ~ 'Pyramimonas',
+                           is.na(genus) & !is.na(clade_7) & phylum %in% c('Ascomycota') ~ clade_7,
+                           is.na(genus) & ncbi_organism %in% c('Polaribacter') ~ ncbi_organism,
+                           TRUE ~ genus)) %>%
+  mutate(family = case_when(family %in% c('environmental samples', 'Leohumicola', 
+                                          'Levanderina', 'Philozoon', 
+                                          'Neoporphyra', 'Wildemania', 
+                                         'Smithora') | genus %in% c('Agarum') ~ NA_character_,
+                            family %in% c('Phaeophyceae', 'Bryopsidales') ~ genus,
+                            clade_5 %in% c('Cochliopodiidae') ~ clade_5,
+                           TRUE ~ family)) %>%
+  mutate(class = case_when(phylum == 'Ochrophyta' ~ clade_3,
+                           TRUE ~ class)) %>%
+  mutate(order = case_when(order %in% c('environmental samples', 'Pycnococcus') ~ NA_character_,
+                           TRUE ~ order)) %>%
+  # go back to overwrite some that needed to populate
+  mutate(genus = case_when(!is.na(leftover) ~ leftover,
+                           TRUE ~ genus)) %>%
+  # checked, can remove
+  select(!c(clade_1, clade_3, clade_4,
+            clade_5, clade_7, leftover)) %>%
+  # give it a common name for plotting
+  mutate(common_name = case_when(class %in% c('Bacillariophyta') ~ 'Diatom',
+                                 class %in% c('Pelagophyceae', 'Dictyochophyceae', 
+                                              'Raphidophyceae', 'Bolidophyceae') |
+                                   phylum %in% c('Pyrenomonadales') ~ 'Other algae',
+                                 class == 'Prymnesiophyceae' ~ 'Coccolithophore',
+                                 class == 'PX clade' ~ 'Brown algae',
+                                 class == 'Chrysophyceae' ~ 'Golden algae',
+                                 phylum == 'Chlorophyta' ~ 'Green algae',
+                                 phylum == 'Dinophyceae' ~ 'Dinoflagellate',
+                                 phylum == 'Rhodophyta' ~ 'Red algae',
+                                 phylum %in% c('Oomycota', 'Oomycetes') ~ 'Water mold',
+                                 phylum %in% c('Picozoa', 'Telonemida', 'Apusozoa',
+                                               'Apicomplexa', 'Apusozoa', 'Cercozoa') ~ 'Other protist',
+                                 kingdom == 'Amoebozoa' ~ 'Amoeba',
+                                 kingdom == 'Fungi' ~ 'Fungi',
+                                 kingdom == 'Viridiplantae' ~ 'Other plant',
+                                 domain == 'Bacteria' ~ 'Bacteria',
+                                 is.na(phylum) ~ paste0('Unknown ', kingdom))) %>%
+  relocate(common_name, .before = ncbi_organism)
+
+
+# extract non-marine metazoa, fix up as-is
+metazoa_nonmarine <- taxonomy_unique_organism %>%
+  filter(kingdom == 'Metazoa') %>%
+  # only non-marine metazoa or NAs
+  filter(order %in% c('Mammalia', 'Amphibia', 'Aves', 
+                      'Lepidosauria')|
+           clade_3 %in% c('Hexapoda', 'Myriapoda',
+                                                 'environmental samples')|
+           is.na(phylum)|
+           clade_4 %in% c('Arachnida')|
+           genus %in% c('Rhagada', 'Orobdella', 'Streptocephalus')|
+           ncbi_organism %in% c('Plationus patulus macracanthus', 
+                                'Synchaeta kitina')) %>%
+  mutate(class = case_when(class %in% c('Pterygota') ~ clade_4,
+                           TRUE ~ class)) %>%
+  mutate(genus = case_when(genus %in% c('Chironomidae') ~ NA_character_,
+                           TRUE ~ genus)) %>%
+  # clean up subspecies, hybrids
+  mutate(ncbi_organism = case_when(ncbi_organism %in% c('Sorex cinereus cinereus') ~ 'Sorex cinereus',
+                                   TRUE ~ ncbi_organism)) %>%
+  remove_empty() %>%
+  mutate(common_name = case_when(genus == 'Sorex' ~ 'Shrew',
+                                 genus == 'Lepus' ~ 'Hare',
+                                 genus == 'Canis' ~ 'Dog',
+                                 genus == 'Sus' ~ 'Pig',
+                                 genus == 'Bos' ~ 'Cow',
+                                 genus == 'Gallus' ~ 'Chicken',
+                                 genus %in% c('Rhagada') ~ 'Terrestrial snail',
+                                 genus %in% c('Orobdella') ~ 'Freshwater leech',
+                                 genus %in% c('Streptocephalus') ~ 'Freshwater shrimp',
+                                 genus %in% c('Plationus', 'Synchaeta') ~ 'Freshwater rotifer',
+                                 family == 'Rodentia' ~ 'Rodent',
+                                 family == 'Phocidae' ~ 'Seal',
+                                 family == 'Columbidae' ~ 'Pidgeon',
+                                 order == 'Amphibia' ~ 'Amphibian',
+                                 order == 'Aves' ~ 'Other Bird',
+                                 order == 'Lepidosauria' ~ 'Snake/Lizard',
+                                 class %in% c('Insecta','Entomobryomorpha') ~ 'Hexapod',
+                                 class == 'Acari' ~ 'Mite',
+                                 class == 'Araneae' ~ 'Spider',
+                                 class %in% c('Pseudoscorpiones', 'Amblypygi',
+                                              'Opiliones') ~ 'Other arachnid',
+                                 clade_3 %in% c('Myriapoda') ~ 'Myriapod',
+                                 is.na(phylum) ~ 'Unknown metazoa',
+                                 ncbi_organism %in% c('Arthropoda') ~ 'Unknown arthropod',
+                                 ncbi_organism %in% c('Cryptoprocta ferox') ~ 'Other mammal')) %>%
+  select(!c(clade_1, clade_3, clade_4, clade_5, clade_6)) %>%
+  relocate(common_name, .before = ncbi_organism)
+  
+  
+# extract search terms  
+metazoa_marine <- taxonomy_unique_organism %>%
+  filter(kingdom == 'Metazoa') %>%
+  filter(!(organism_verbatim %in% metazoa_nonmarine$organism_verbatim)) %>%
+  # fix hybrids
+  mutate(ncbi_organism = case_when(ncbi_organism %in% c('Haliotis discus hannai x Haliotis iris') ~ 'Haliotis',
+                                   ncbi_organism %in% c('Mytilus trossulus x Mytilus edulis') ~ 'Mytilus',
+                                   ncbi_organism %in% c('Kareius bicoloratus x Platichthys stellatus', 
+                                                        'Platichthys stellatus x Kareius bicoloratus x Platichthys stellatus') ~ 'Platichthys',
+                                   ncbi_organism %in% c('Platichthys stellatus x Verasper variegatus') ~ 'Pleuronectidae',
+                                   ncbi_organism == 'Callyspongia siphonella' ~ 'Callyspongia (Callyspongia) siphonella',
+                                   ncbi_organism == 'Phyllophorus cebuensis' ~ 'Phyllophorus (Phyllothuria) cebuensis',
+                                   ncbi_organism == 'Oikopleura intermedia' ~ 'Oikopleura (Coecaria) intermedia',
+                                   TRUE ~ ncbi_organism)) %>%
+  select(accession, ncbi_organism, organism_verbatim)
+
+# check that the taxonomy in metazoa marine is marine
+metazoa_testing <- taxonomy_unique_organism %>%
+  filter(kingdom == 'Metazoa') %>%
+  filter(!(organism_verbatim %in% metazoa_nonmarine$organism_verbatim)) %>%
+  select(!c(accession, organism_verbatim)) %>%
+  distinct()
+```
+
+
+```{r marine search}
+marine_search <- metazoa_marine %>%
+  select(ncbi_organism) %>%
+  distinct() %>% 
+  ## temporary issue requires replacing whitespace with '+'
+  mutate(worms_query = gsub(" ", "+", ncbi_organism))
+
+# 2: worms
+marine_worms <- get_wormsid_(sci_com = unique(marine_search$worms_query), 
+                           marine_only = FALSE, accepted = FALSE)
+# get_wormsid_ gives back null and length 0 elements
+## first remove with compact and discard then map_dfr
+marine_worms2 <- marine_worms %>% 
+  compact() %>%
+  discard( ~ nrow(.x) == 0) %>%
+  map_dfr( ~ data.frame(.x), .id = 'query')
+
+
+# this cleaning step is relatively temporary until they fix the curl issue
+marine_worms_result <- marine_worms2 %>%
+  left_join(marine_search, by = c('query' = 'worms_query')) %>%
+  relocate(ncbi_organism) %>%
+  select(!(c(authority,query))) %>%
+  # now match species to sciname to remove extra rows
+  distinct() %>%
+  # remove higher taxonomy with species-level hits
+  # A longer term solution; count number of words in ncbi_sp and scientific name and match
+  mutate(ncbi_spaces = str_count(ncbi_organism, " ")) %>%
+  mutate(worms_spaces = str_count(scientificname, " ")) %>%
+  filter(ncbi_spaces == worms_spaces) %>%
+  mutate(notmatch = case_when(worms_spaces == 0 & ncbi_organism !=scientificname ~ 'remove')) %>%
+  filter(is.na(notmatch)) %>%
+  # good names
+  rename(worms_aphiaid = AphiaID,
+        worms_sciname = scientificname,
+        taxa_verbatim = ncbi_organism) %>%
+  distinct() %>%
+  select(!(c(ncbi_spaces, worms_spaces, notmatch))) %>%
+    add_count(taxa_verbatim, name = 'duplicate') %>%
+  filter(!(duplicate > 1 & status %in% c('unaccepted', 'nomen nudum', 
+                                         'misspelling', 'unassessed',
+                                         'junior homonym'))) %>%
+  add_count(taxa_verbatim, name = 'duplicate') %>%
+  # check this if a new run
+  filter(!(duplicate > 1 & taxa_verbatim != worms_sciname)) 
+# there might still be duplicates here, they're probably plants etc.
+
+# if needed, save and load
+saveRDS(marine_worms_result, here(coi_data, paste0(datefield,"_worms_result.RDS")))
+
+## extract higher and info about freshwater
+inverts_worms_records <- search_records_worms(unique(marine_worms_result$worms_sciname))
+
+# refine results to be useful
+inverts_worms_records_df <- inverts_worms_records %>%
+  # only animal hits
+  filter(kingdom == 'Animalia') %>%
+  # generate terrestrial-only and freshwater-only columns
+  mutate(freshwater_only = ifelse((is_marine %in% c(0, NA) ==TRUE) & (is_brackish %in% c(0,NA) == TRUE) & (is_freshwater == 1),  "1", "0")) %>%
+    mutate(terrestrial_only = ifelse((is_marine %in% c(0, NA) ==TRUE) & (is_brackish %in% c(0,NA) == TRUE) & (is_terrestrial == 1),  "1", "0")) %>%
+  distinct() %>%
+  # rename to format
+  rename(worms_aphiaid = valid_aphia_id,
+         original_aphiaid =aphia_id,
+         worms_match = scientificname,
+         worms_sciname = valid_name
+         ) %>%
+  # remove unneeded columns
+  select(!(c(authority, parent_name_usage_id, is_freshwater, query,
+             is_terrestrial, is_marine, is_brackish, is_extinct, match_type,
+             valid_authority, original_aphiaid))) %>%
+  relocate(c(worms_sciname), .before = worms_match) %>%
+  # rank lowercase
+  mutate(rank = tolower(rank)) %>%
+  rename(ncbi_organism = worms_match) %>%
+  add_count(ncbi_organism, name = 'duplicate') %>%
+  filter(!(duplicate > 1 & status %in% c('unaccepted', 'nomen nudum', 
+                                         'misspelling', 'unassessed',
+                                         'junior homonym'))) %>%
+  filter(!(duplicate > 1 & is.na(worms_sciname))) %>%
+  select(!duplicate) 
+
+
+```
+
+
+
+
+
+
+```{r remerge}
+metazoa_marine_worms <- metazoa_marine %>%
+  select(accession, ncbi_organism, organism_verbatim) %>%
+  left_join(inverts_worms_records_df)
+
+
+taxonomy_all <- metazoa_nonmarine %>%
+  bind_rows(notmetazoa) %>%
+  bind_rows(metazoa_marine_worms) %>%
+  mutate(found_taxa = coalesce(worms_sciname, ncbi_organism)) %>%
+  relocate(found_taxa, rank, .before = common_name) %>%
+  mutate(accession = str_remove_all(accession, '\\.1|\\.2|\\.3|\\.4'))
+
+taxonomy_topblast <- edna_blast %>%
+  left_join(taxonomy_all)
+
+write_csv(taxonomy_topblast, here(coi_data, paste0(datefield, runfield, 'blast-top50_taxonomy.csv')))
+```
+
+
+check what wasn't in either nonmarine or worms, re-add up top
+```{r}
+taxonomy_topblast %>%
+  filter(description != 'No Results') %>%
+  filter(is.na(kingdom)) %>%
+  select(asv, found_taxa)
+```
+
