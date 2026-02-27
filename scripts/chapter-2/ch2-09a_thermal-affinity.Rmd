@@ -18,7 +18,7 @@ library(matrixStats)
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 plotout <- here('output', 'chapter2', 'thermalaffinity')
-datefield <- '20251212_'
+datefield <- '20260223_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -59,12 +59,24 @@ site_order2 <- regions %>%
   arrange(decimal_latitude)
 
 # region/site environmental data
-region_environment <- read_csv(here(dataedna,
-                                    '20251212_environment_region.csv')) %>%
-  select(!avg_region_lat) 
+region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
+                                   '20251113_mean-summer-sst_by-region.csv')) %>%
+  select(!avg_region_lat) %>%
+   mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+                                          TRUE ~ region_label))
 
-site_environment <- read_csv(here(dataedna,
-                                    '20251212_environment_site.csv')) 
+site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
+                                   '20251113_summer-sst-summary-stats_by-site.csv')) 
+
+# 
+#region_environment <- read_csv(here('rawdata', 'temp', 'erddap',
+#                                    '20251212_sitesst_peco_summarystats.csv'))
+
+#site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
+#                                    '20251212_summer-sst-summary-stats_by-site.csv')) 
+
+site_temps <- site_environment %>%
+  select(!c(decimal_latitude, decimal_longitude, avg_region_lat, region_lat_name))
 
 # species list
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
@@ -73,17 +85,31 @@ edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
   # remove below threshold
   filter(relabund_vst_taxa > 1) %>%
   # problematic sample
-  filter(!(sample_id %in% c('pecoe-0207')))
-  
+  filter(!(sample_id %in% c('pecoe-0207'))) %>%
+  # remove sites that were only one year
+  filter(!(site_code %in% c('PP_EB', 'PP_S', 'PP_O', 'PP_M', 'PP_K', 'PP_SI'))) %>%
+  mutate(region_name_label = ifelse(region_name == 'BC_HG', 'Haida Gwaii, British Columbia', region_name_label))
+
+edna_peco_sp <- edna_peco %>%
+  select(found_taxa, common_name, relabund_vst_taxa, sample_id, site_code, location_name,
+         year, region_name, region_name_label) %>%
+  distinct()
+
+
 sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
-                          '20251212_sti_errdap_pathfinder.csv')) %>%
-  # match edna
+                          '20250803_sti_errdap_pathfinder.csv')) %>%
   rename(found_taxa = scientific_name) 
+
+  
+#sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
+#                          '20251212_sti_errdap_pathfinder.csv')) %>%
+  # match edna#
+#  rename(found_taxa = scientific_name) 
 ```
 
 
 ```{r cti and descriptive plots}
-cti_peco <- edna_peco %>%
+cti_peco <- edna_peco_sp %>%
   left_join(sti_obis) %>%
   filter(!is.na(max_temp)) %>%
   # temporary until I merge [1]
@@ -116,7 +142,7 @@ ggsave(here(plotout, paste0(datefield, 'cti_year-region.png')))
 ## cti vs summer temps
 
 cti_environment <- cti_peco %>%
-  left_join(region_temps) %>%
+  left_join(region_environment) %>%
   mutate(sitegroup = fct_reorder(as_factor(site_code), year, .fun = first))
 
 cti_environment_site <- cti_peco %>%
@@ -137,14 +163,14 @@ cti_environment_site <- cti_peco %>%
          site_last5_temp75 = mean(site_temp75, na.rm = TRUE))%>%
   ungroup()
 
-ggplot(cti_environment) +
+ggplot(cti_environment_site) +
   geom_point(aes(x = sst_mean, 
                 y = cti,
                 color = region_label,
                 alpha = year)) +
     scale_color_manual(values = pal_2or) +
   geom_path(aes(x = sst_mean, y = cti,
-                group = sitegroup
+                group = site_code
                 ),
             alpha = .2)+
     labs(color = NULL,x = 'Mean summer SST', y = 'Thermal affinity of the community') +
@@ -158,7 +184,7 @@ ggsave(here(plotout, paste0(datefield, 'ctivssst_bysite.png')),
        unit = 'px')
 
 
-ggplot(cti_environment) +
+ggplot(cti_environment_site) +
   geom_point(aes(x = sst_mean, 
                 y = cti,
                 group = year,
@@ -243,7 +269,8 @@ sti_peco <- edna_peco %>%
   select(!c(decimal_latitude, decimal_longitude, samples, avg_region_lat,
             sites, region_code_label, region_code, region_lat_name)) %>%
   distinct() %>%
-  relocate(sti_value, region_label)
+  relocate(sti_value, region_label) %>%
+    mutate(region_label = ifelse(region_name == 'BC_HG', 'Haida Gwaii, British Columbia', region_label))
   
 sti_environment <- sti_peco %>%
   left_join(site_temps) %>%
@@ -264,20 +291,6 @@ sti_environment <- sti_peco %>%
          site_temp05 = coalesce(site_temp05, region_05)) %>%
   select(!c(region_95, region_75, region_05, region_mean,
             site_temp90, site_temp25, site_temp10))
-
-
-# sti_peco <- edna_peco %>%
-#   select(!c(region_code, decimal_latitude, decimal_longitude,
-#             region_code_label)) %>%
-#   left_join(sti_obis) %>%
-#   filter(!is.na(max_temp)) %>%
-#   # temporary until I merge [1]
-#   janitor::remove_empty() %>%
-#   left_join(regions) %>%
-#   select(!c(decimal_latitude, decimal_longitude, samples,
-#             avg_region_lat, sites)) %>%
-#   distinct() %>%
-#   relocate(sti_value, region_label, seq_method)
 
 ggplot()+
   geom_point(data = sti_peco,
@@ -356,7 +369,41 @@ ggsave(here(plotout, paste0(datefield, 's05tbiasmin_bysite_facet-year_scatter-al
        unit = 'px')
 
 
+
 ```
+
+```{r presentation-version}
+ggplot()+
+  geom_point(data = sti_peco,
+               aes(x=sti_value,
+                   y= factor(site_code, levels = site_order$site_code),
+                  color = region_label,
+                  alpha = relabund_vst_taxa),
+             size = 2) +
+    geom_point(data = cti_environment_site,
+             aes(y = factor(site_code, levels = site_order$site_code),
+                x = cti),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  scale_color_manual(values = pal_2or) +
+  facet_wrap('year', nrow = 1) +
+  labs(color = NULL,x = NULL, y = NULL) +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        # to add my own numbers after trimming
+        strip.background = element_blank(),
+        legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+
+ggsave(here(plotout, paste0(datefield, 'sticti_bysite_facet-year_presentation-vers.pdf')),
+        height = 14,
+       width = 14,
+       unit = 'in')
+```
+
 
 # Compare thermal affinity and environment
 

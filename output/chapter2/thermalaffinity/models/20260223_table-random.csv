@@ -1,0 +1,349 @@
+region_label,grp,condval,condsd,model
+"Juneau Region, Alaska",JN_AN,0.14,0.164,95th percentile SST
+"Juneau Region, Alaska",JN_BC,-0.136,0.164,95th percentile SST
+"Juneau Region, Alaska",JN_EC,0.095,0.164,95th percentile SST
+"Juneau Region, Alaska",JN_FC,-0.063,0.164,95th percentile SST
+"Juneau Region, Alaska",JN_SB,-0.035,0.164,95th percentile SST
+"Juneau Region, Alaska",JN_AN,0.134,0.159,75th
+"Juneau Region, Alaska",JN_BC,-0.126,0.159,75th
+"Juneau Region, Alaska",JN_EC,0.084,0.159,75th
+"Juneau Region, Alaska",JN_FC,-0.055,0.159,75th
+"Juneau Region, Alaska",JN_SB,-0.037,0.159,75th
+"Juneau Region, Alaska",JN_AN,0.135,0.161,Mean SST
+"Juneau Region, Alaska",JN_BC,-0.129,0.161,Mean SST
+"Juneau Region, Alaska",JN_EC,0.088,0.161,Mean SST
+"Juneau Region, Alaska",JN_FC,-0.058,0.161,Mean SST
+"Juneau Region, Alaska",JN_SB,-0.036,0.161,Mean SST
+Southeast Alaska,SE_GK,0.216,0.226,95th percentile SST
+Southeast Alaska,SE_NF,-0.003,0.26,95th percentile SST
+Southeast Alaska,SE_NS,-0.141,0.226,95th percentile SST
+Southeast Alaska,SE_NZ,-0.013,0.226,95th percentile SST
+Southeast Alaska,SE_RF,-0.018,0.226,95th percentile SST
+Southeast Alaska,SE_SH,-0.041,0.226,95th percentile SST
+Southeast Alaska,SE_GK,0.415,0.273,75th
+Southeast Alaska,SE_NF,0.049,0.335,75th
+Southeast Alaska,SE_NS,-0.087,0.273,75th
+Southeast Alaska,SE_NZ,-0.028,0.273,75th
+Southeast Alaska,SE_RF,-0.036,0.273,75th
+Southeast Alaska,SE_SH,-0.314,0.273,75th
+Southeast Alaska,SE_GK,0.202,0.239,Mean SST
+Southeast Alaska,SE_NF,0.02,0.278,Mean SST
+Southeast Alaska,SE_NS,-0.185,0.239,Mean SST
+Southeast Alaska,SE_NZ,-0.018,0.239,Mean SST
+Southeast Alaska,SE_RF,-0.024,0.239,Mean SST
+Southeast Alaska,SE_SH,0.005,0.239,Mean SST
+"Haida Gwaii, British Columbia",HG_BH,-0.179,0.238,95th percentile SST
+"Haida Gwaii, British Columbia",HG_DN,0.081,0.256,95th percentile SST
+"Haida Gwaii, British Columbia",HG_DSD,0.084,0.238,95th percentile SST
+"Haida Gwaii, British Columbia",HG_LIE,0.009,0.238,95th percentile SST
+"Haida Gwaii, British Columbia",HG_MDD,-0.209,0.238,95th percentile SST
+"Haida Gwaii, British Columbia",HG_RI,0.045,0.223,95th percentile SST
+"Haida Gwaii, British Columbia",HG_ROI,-0.07,0.238,95th percentile SST
+"Haida Gwaii, British Columbia",HG_SB,0.005,0.223,95th percentile SST
+"Haida Gwaii, British Columbia",HG_TK,0.236,0.256,95th percentile SST
+"Haida Gwaii, British Columbia",HG_BH,-0.251,0.238,75th
+"Haida Gwaii, British Columbia",HG_DN,0.073,0.26,75th
+"Haida Gwaii, British Columbia",HG_DSD,0.194,0.238,75th
+"Haida Gwaii, British Columbia",HG_LIE,0.005,0.238,75th
+"Haida Gwaii, British Columbia",HG_MDD,-0.142,0.238,75th
+"Haida Gwaii, British Columbia",HG_RI,0.083,0.221,75th
+"Haida Gwaii, British Columbia",HG_ROI,-0.207,0.238,75th
+"Haida Gwaii, British Columbia",HG_SB,0.046,0.221,75th
+"Haida Gwaii, British Columbia",HG_TK,0.198,0.26,75th
+"Haida Gwaii, British Columbia",HG_BH,-0.169,0.26,Mean SST
+"Haida Gwaii, British Columbia",HG_DN,0.103,0.281,Mean SST
+"Haida Gwaii, British Columbia",HG_DSD,0.026,0.26,Mean SST
+"Haida Gwaii, British Columbia",HG_LIE,0.005,0.26,Mean SST
+"Haida Gwaii, British Columbia",HG_MDD,-0.285,0.26,Mean SST
+"Haida Gwaii, British Columbia",HG_RI,0.069,0.243,Mean SST
+"Haida Gwaii, British Columbia",HG_ROI,-0.081,0.26,Mean SST
+"Haida Gwaii, British Columbia",HG_SB,0.066,0.243,Mean SST
+"Haida Gwaii, British Columbia",HG_TK,0.266,0.281,Mean SST
+Central Coast British Columbia,CC_CHP,-1.042,0.444,95th percentile SST
+Central Coast British Columbia,CC_FAN3,0.515,0.402,95th percentile SST
+Central Coast British Columbia,CC_GOG1,-0.347,0.402,95th percentile SST
+Central Coast British Columbia,CC_KIS1,0.405,0.594,95th percentile SST
+Central Coast British Columbia,CC_KIS2,0.15,0.444,95th percentile SST
+Central Coast British Columbia,CC_PBA,0.319,0.402,95th percentile SST
+Central Coast British Columbia,CC_CHP,-0.937,0.433,75th
+Central Coast British Columbia,CC_FAN3,0.48,0.393,75th
+Central Coast British Columbia,CC_GOG1,-0.346,0.393,75th
+Central Coast British Columbia,CC_KIS1,0.356,0.566,75th
+Central Coast British Columbia,CC_KIS2,0.088,0.433,75th
+Central Coast British Columbia,CC_PBA,0.359,0.393,75th
+Central Coast British Columbia,CC_CHP,-0.959,0.443,Mean SST
+Central Coast British Columbia,CC_FAN3,0.441,0.402,Mean SST
+Central Coast British Columbia,CC_GOG1,-0.371,0.402,Mean SST
+Central Coast British Columbia,CC_KIS1,0.49,0.583,Mean SST
+Central Coast British Columbia,CC_KIS2,0.07,0.443,Mean SST
+Central Coast British Columbia,CC_PBA,0.328,0.402,Mean SST
+"North Vancouver Island, British Columbia",NV_BI,0.036,0.207,95th percentile SST
+"North Vancouver Island, British Columbia",NV_JL,-0.186,0.227,95th percentile SST
+"North Vancouver Island, British Columbia",NV_KB,0.239,0.207,95th percentile SST
+"North Vancouver Island, British Columbia",NV_KC,-0.394,0.207,95th percentile SST
+"North Vancouver Island, British Columbia",NV_PC,0.305,0.227,95th percentile SST
+"North Vancouver Island, British Columbia",NV_BI,0.018,0.213,75th
+"North Vancouver Island, British Columbia",NV_JL,-0.16,0.23,75th
+"North Vancouver Island, British Columbia",NV_KB,0.181,0.213,75th
+"North Vancouver Island, British Columbia",NV_KC,-0.289,0.213,75th
+"North Vancouver Island, British Columbia",NV_PC,0.25,0.23,75th
+"North Vancouver Island, British Columbia",NV_BI,0.016,0.217,Mean SST
+"North Vancouver Island, British Columbia",NV_JL,-0.16,0.232,Mean SST
+"North Vancouver Island, British Columbia",NV_KB,0.179,0.217,Mean SST
+"North Vancouver Island, British Columbia",NV_KC,-0.28,0.217,Mean SST
+"North Vancouver Island, British Columbia",NV_PC,0.245,0.232,Mean SST
+"Inner Coast, British Columbia",IC_GOW,-0.148,0.18,95th percentile SST
+"Inner Coast, British Columbia",IC_MAB,0.38,0.18,95th percentile SST
+"Inner Coast, British Columbia",IC_OPB,-0.125,0.18,95th percentile SST
+"Inner Coast, British Columbia",IC_SHS,-0.04,0.18,95th percentile SST
+"Inner Coast, British Columbia",IC_SMB,-0.067,0.18,95th percentile SST
+"Inner Coast, British Columbia",IC_GOW,-0.151,0.181,75th
+"Inner Coast, British Columbia",IC_MAB,0.383,0.181,75th
+"Inner Coast, British Columbia",IC_OPB,-0.128,0.181,75th
+"Inner Coast, British Columbia",IC_SHS,-0.039,0.181,75th
+"Inner Coast, British Columbia",IC_SMB,-0.066,0.181,75th
+"Inner Coast, British Columbia",IC_GOW,-0.157,0.177,Mean SST
+"Inner Coast, British Columbia",IC_MAB,0.344,0.177,Mean SST
+"Inner Coast, British Columbia",IC_OPB,-0.137,0.177,Mean SST
+"Inner Coast, British Columbia",IC_SHS,-0.019,0.177,Mean SST
+"Inner Coast, British Columbia",IC_SMB,-0.031,0.177,Mean SST
+"Pacific Rim Park, British Columbia",PP_C,-0.467,0.202,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_E,-0.27,0.221,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_EB,0.299,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_G,0.234,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_HI,0.162,0.202,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_JJ,0.086,0.202,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_K,-0.166,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_M,0.161,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_MB,0.245,0.221,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_MI,-0.183,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_O,0.038,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_S,-0.091,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_SI,-0.05,0.284,95th percentile SST
+"Pacific Rim Park, British Columbia",PP_C,-0.454,0.202,75th
+"Pacific Rim Park, British Columbia",PP_E,-0.186,0.221,75th
+"Pacific Rim Park, British Columbia",PP_EB,0.262,0.289,75th
+"Pacific Rim Park, British Columbia",PP_G,0.282,0.289,75th
+"Pacific Rim Park, British Columbia",PP_HI,0.22,0.202,75th
+"Pacific Rim Park, British Columbia",PP_JJ,0.166,0.202,75th
+"Pacific Rim Park, British Columbia",PP_K,-0.208,0.289,75th
+"Pacific Rim Park, British Columbia",PP_M,0.108,0.289,75th
+"Pacific Rim Park, British Columbia",PP_MB,0.309,0.221,75th
+"Pacific Rim Park, British Columbia",PP_MI,-0.241,0.289,75th
+"Pacific Rim Park, British Columbia",PP_O,-0.018,0.289,75th
+"Pacific Rim Park, British Columbia",PP_S,-0.166,0.289,75th
+"Pacific Rim Park, British Columbia",PP_SI,-0.075,0.289,75th
+"Pacific Rim Park, British Columbia",PP_C,-0.531,0.203,Mean SST
+"Pacific Rim Park, British Columbia",PP_E,-0.248,0.225,Mean SST
+"Pacific Rim Park, British Columbia",PP_EB,0.302,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_G,0.376,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_HI,0.255,0.203,Mean SST
+"Pacific Rim Park, British Columbia",PP_JJ,0.177,0.203,Mean SST
+"Pacific Rim Park, British Columbia",PP_K,-0.259,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_M,0.13,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_MB,0.342,0.225,Mean SST
+"Pacific Rim Park, British Columbia",PP_MI,-0.295,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_O,-0.031,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_S,-0.189,0.304,Mean SST
+"Pacific Rim Park, British Columbia",PP_SI,-0.03,0.304,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_BB,0.035,0.167,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_BH,0.255,0.154,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_BP,-0.092,0.184,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_BV,-0.145,0.143,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_FB,-0.11,0.143,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_FJ,0.162,0.143,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_IC,0.126,0.143,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_NC,-0.087,0.143,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_SH,0,0.143,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_SP,-0.135,0.184,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_YB,-0.01,0.184,95th percentile SST
+"Puget Sound & Padilla Bay, Washington",PS_BB,0.036,0.166,75th
+"Puget Sound & Padilla Bay, Washington",PS_BH,0.253,0.153,75th
+"Puget Sound & Padilla Bay, Washington",PS_BP,-0.083,0.182,75th
+"Puget Sound & Padilla Bay, Washington",PS_BV,-0.144,0.142,75th
+"Puget Sound & Padilla Bay, Washington",PS_FB,-0.114,0.142,75th
+"Puget Sound & Padilla Bay, Washington",PS_FJ,0.153,0.142,75th
+"Puget Sound & Padilla Bay, Washington",PS_IC,0.12,0.142,75th
+"Puget Sound & Padilla Bay, Washington",PS_NC,-0.083,0.142,75th
+"Puget Sound & Padilla Bay, Washington",PS_SH,-0.003,0.142,75th
+"Puget Sound & Padilla Bay, Washington",PS_SP,-0.128,0.182,75th
+"Puget Sound & Padilla Bay, Washington",PS_YB,-0.007,0.182,75th
+"Puget Sound & Padilla Bay, Washington",PS_BB,0.035,0.168,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_BH,0.26,0.154,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_BP,-0.086,0.185,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_BV,-0.147,0.144,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_FB,-0.116,0.144,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_FJ,0.158,0.144,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_IC,0.123,0.144,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_NC,-0.086,0.144,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_SH,-0.003,0.144,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_SP,-0.133,0.185,Mean SST
+"Puget Sound & Padilla Bay, Washington",PS_YB,-0.006,0.185,Mean SST
+"Willapa Bay, Washington",WB_BC,0.261,0.246,95th percentile SST
+"Willapa Bay, Washington",WB_CO,-0.087,0.33,95th percentile SST
+"Willapa Bay, Washington",WB_DP,-0.143,0.223,95th percentile SST
+"Willapa Bay, Washington",WB_PA,-0.467,0.223,95th percentile SST
+"Willapa Bay, Washington",WB_SB,0.049,0.279,95th percentile SST
+"Willapa Bay, Washington",WB_SP,0.333,0.33,95th percentile SST
+"Willapa Bay, Washington",WB_ST,0.171,0.33,95th percentile SST
+"Willapa Bay, Washington",WB_WP,0.316,0.33,95th percentile SST
+"Willapa Bay, Washington",WB_WR,-0.433,0.246,95th percentile SST
+"Willapa Bay, Washington",WB_BC,0.272,0.246,75th
+"Willapa Bay, Washington",WB_CO,-0.079,0.324,75th
+"Willapa Bay, Washington",WB_DP,-0.141,0.223,75th
+"Willapa Bay, Washington",WB_PA,-0.443,0.223,75th
+"Willapa Bay, Washington",WB_SB,0.056,0.277,75th
+"Willapa Bay, Washington",WB_SP,0.298,0.324,75th
+"Willapa Bay, Washington",WB_ST,0.15,0.324,75th
+"Willapa Bay, Washington",WB_WP,0.283,0.324,75th
+"Willapa Bay, Washington",WB_WR,-0.398,0.246,75th
+"Willapa Bay, Washington",WB_BC,0.296,0.242,Mean SST
+"Willapa Bay, Washington",WB_CO,-0.038,0.312,Mean SST
+"Willapa Bay, Washington",WB_DP,-0.193,0.221,Mean SST
+"Willapa Bay, Washington",WB_PA,-0.371,0.221,Mean SST
+"Willapa Bay, Washington",WB_SB,0.033,0.271,Mean SST
+"Willapa Bay, Washington",WB_SP,0.258,0.312,Mean SST
+"Willapa Bay, Washington",WB_ST,0.13,0.312,Mean SST
+"Willapa Bay, Washington",WB_WP,0.225,0.312,Mean SST
+"Willapa Bay, Washington",WB_WR,-0.342,0.242,Mean SST
+"Willapa Bay, Washington",WB_BC,0.305,0.226,Upwelling
+"Willapa Bay, Washington",WB_CO,-0.002,0.279,Upwelling
+"Willapa Bay, Washington",WB_DP,-0.137,0.209,Upwelling
+"Willapa Bay, Washington",WB_PA,-0.323,0.209,Upwelling
+"Willapa Bay, Washington",WB_SB,0.073,0.248,Upwelling
+"Willapa Bay, Washington",WB_SP,0.152,0.279,Upwelling
+"Willapa Bay, Washington",WB_ST,0.048,0.279,Upwelling
+"Willapa Bay, Washington",WB_WP,0.13,0.279,Upwelling
+"Willapa Bay, Washington",WB_WR,-0.246,0.226,Upwelling
+"Yaquina Bay, Oregon",YB_F,0.013,0.171,95th percentile SST
+"Yaquina Bay, Oregon",YB_IF,-0.078,0.127,95th percentile SST
+"Yaquina Bay, Oregon",YB_SBN,0.191,0.127,95th percentile SST
+"Yaquina Bay, Oregon",YB_SBS,-0.126,0.127,95th percentile SST
+"Yaquina Bay, Oregon",YB_F,0.026,0.173,75th
+"Yaquina Bay, Oregon",YB_IF,-0.088,0.124,75th
+"Yaquina Bay, Oregon",YB_SBN,0.206,0.124,75th
+"Yaquina Bay, Oregon",YB_SBS,-0.144,0.124,75th
+"Yaquina Bay, Oregon",YB_F,0.003,0.17,Mean SST
+"Yaquina Bay, Oregon",YB_IF,-0.072,0.129,Mean SST
+"Yaquina Bay, Oregon",YB_SBN,0.187,0.129,Mean SST
+"Yaquina Bay, Oregon",YB_SBS,-0.118,0.129,Mean SST
+"Yaquina Bay, Oregon",YB_F,-0.027,0.168,Upwelling
+"Yaquina Bay, Oregon",YB_IF,-0.06,0.129,Upwelling
+"Yaquina Bay, Oregon",YB_SBN,0.189,0.129,Upwelling
+"Yaquina Bay, Oregon",YB_SBS,-0.103,0.129,Upwelling
+"Coos Bay, Oregon",CB_BV,0.47,0.279,95th percentile SST
+"Coos Bay, Oregon",CB_FP,-0.47,0.331,95th percentile SST
+"Coos Bay, Oregon",CB_BV,0.515,0.4,75th
+"Coos Bay, Oregon",CB_FP,-0.515,0.465,75th
+"Coos Bay, Oregon",CB_BV,0.547,0.362,Mean SST
+"Coos Bay, Oregon",CB_FP,-0.547,0.425,Mean SST
+"Coos Bay, Oregon",CB_BV,0.448,0.274,Upwelling
+"Coos Bay, Oregon",CB_FP,-0.448,0.324,Upwelling
+"Humboldt Bay, California",HB_EB,-0.295,0.254,95th percentile SST
+"Humboldt Bay, California",HB_KS,0.269,0.254,95th percentile SST
+"Humboldt Bay, California",HB_SR,0.026,0.203,95th percentile SST
+"Humboldt Bay, California",HB_EB,-0.322,0.002,75th
+"Humboldt Bay, California",HB_KS,0.262,0.002,75th
+"Humboldt Bay, California",HB_SR,0.059,0.002,75th
+"Humboldt Bay, California",HB_EB,-0.525,0.004,Mean SST
+"Humboldt Bay, California",HB_KS,0.394,0.004,Mean SST
+"Humboldt Bay, California",HB_SR,0.131,0.003,Mean SST
+"Humboldt Bay, California",HB_EB,-0.201,0.192,Upwelling
+"Humboldt Bay, California",HB_KS,0.19,0.192,Upwelling
+"Humboldt Bay, California",HB_SR,0.011,0.156,Upwelling
+"Bodega Bay, California",NC_B,-1.025,0.83,95th percentile SST
+"Bodega Bay, California",NC_BL,0.027,0.684,95th percentile SST
+"Bodega Bay, California",NC_D,-0.418,0.83,95th percentile SST
+"Bodega Bay, California",NC_DE,0.101,0.594,95th percentile SST
+"Bodega Bay, California",NC_E,0.502,0.83,95th percentile SST
+"Bodega Bay, California",NC_NC,1.08,0.684,95th percentile SST
+"Bodega Bay, California",NC_WP,-0.267,0.533,95th percentile SST
+"Bodega Bay, California",NC_B,-0.627,0.792,75th
+"Bodega Bay, California",NC_BL,0.203,0.691,75th
+"Bodega Bay, California",NC_D,-0.23,0.792,75th
+"Bodega Bay, California",NC_DE,0.089,0.621,75th
+"Bodega Bay, California",NC_E,0.431,0.792,75th
+"Bodega Bay, California",NC_NC,0.398,0.691,75th
+"Bodega Bay, California",NC_WP,-0.264,0.569,75th
+"Bodega Bay, California",NC_B,-0.609,0.755,Mean SST
+"Bodega Bay, California",NC_BL,0.188,0.654,Mean SST
+"Bodega Bay, California",NC_D,-0.195,0.755,Mean SST
+"Bodega Bay, California",NC_DE,0.127,0.586,Mean SST
+"Bodega Bay, California",NC_E,0.524,0.755,Mean SST
+"Bodega Bay, California",NC_NC,0.329,0.654,Mean SST
+"Bodega Bay, California",NC_WP,-0.364,0.535,Mean SST
+"Bodega Bay, California",NC_B,-0.935,0.764,Upwelling
+"Bodega Bay, California",NC_BL,-0.329,0.613,Upwelling
+"Bodega Bay, California",NC_D,-0.264,0.764,Upwelling
+"Bodega Bay, California",NC_DE,-0.232,0.526,Upwelling
+"Bodega Bay, California",NC_E,0.651,0.764,Upwelling
+"Bodega Bay, California",NC_NC,1.279,0.613,Upwelling
+"Bodega Bay, California",NC_WP,-0.17,0.469,Upwelling
+"San Francisco Bay, California",NC_PM,0.645,0.653,95th percentile SST
+"San Francisco Bay, California",NC_PS,0.036,0.653,95th percentile SST
+"San Francisco Bay, California",NC_RB,-0.681,0.741,95th percentile SST
+"San Francisco Bay, California",NC_PM,0.098,0.241,75th
+"San Francisco Bay, California",NC_PS,-0.011,0.241,75th
+"San Francisco Bay, California",NC_RB,-0.087,0.245,75th
+"San Francisco Bay, California",NC_PM,0.642,0.545,Mean SST
+"San Francisco Bay, California",NC_PS,-0.029,0.545,Mean SST
+"San Francisco Bay, California",NC_RB,-0.613,0.619,Mean SST
+"San Francisco Bay, California",NC_PM,0.474,0.665,Upwelling
+"San Francisco Bay, California",NC_PS,-0.184,0.665,Upwelling
+"San Francisco Bay, California",NC_RB,-0.29,0.748,Upwelling
+"Morro Bay, California",MB_CB,-0.169,0.088,95th percentile SST
+"Morro Bay, California",MB_TP,0.169,0.099,95th percentile SST
+"Morro Bay, California",MB_CB,-0.172,0.086,75th
+"Morro Bay, California",MB_TP,0.172,0.097,75th
+"Morro Bay, California",MB_CB,-0.172,0.084,Mean SST
+"Morro Bay, California",MB_TP,0.172,0.096,Mean SST
+"Morro Bay, California",MB_CB,-0.171,0.088,Upwelling
+"Morro Bay, California",MB_TP,0.171,0.099,Upwelling
+"Los Angeles, California",LA_AB,-0.627,0.395,95th percentile SST
+"Los Angeles, California",LA_JD,0.341,0.361,95th percentile SST
+"Los Angeles, California",LA_LN,-0.199,0.361,95th percentile SST
+"Los Angeles, California",LA_MS,0.732,0.395,95th percentile SST
+"Los Angeles, California",LA_SP,-0.267,0.441,95th percentile SST
+"Los Angeles, California",LA_UN,0.02,0.361,95th percentile SST
+"Los Angeles, California",LA_AB,-0.616,0.412,75th
+"Los Angeles, California",LA_JD,0.401,0.374,75th
+"Los Angeles, California",LA_LN,-0.257,0.374,75th
+"Los Angeles, California",LA_MS,0.847,0.412,75th
+"Los Angeles, California",LA_SP,-0.389,0.464,75th
+"Los Angeles, California",LA_UN,0.013,0.374,75th
+"Los Angeles, California",LA_AB,-0.328,0.337,Mean SST
+"Los Angeles, California",LA_JD,0.139,0.321,Mean SST
+"Los Angeles, California",LA_LN,-0.023,0.321,Mean SST
+"Los Angeles, California",LA_MS,0.308,0.337,Mean SST
+"Los Angeles, California",LA_SP,-0.185,0.356,Mean SST
+"Los Angeles, California",LA_UN,0.089,0.321,Mean SST
+"Los Angeles, California",LA_AB,-0.362,0.348,Upwelling
+"Los Angeles, California",LA_JD,0.153,0.33,Upwelling
+"Los Angeles, California",LA_LN,-0.029,0.33,Upwelling
+"Los Angeles, California",LA_MS,0.345,0.348,Upwelling
+"Los Angeles, California",LA_SP,-0.2,0.369,Upwelling
+"Los Angeles, California",LA_UN,0.093,0.33,Upwelling
+"San Diego region, California",SD_CI,-0.18,0.588,95th percentile SST
+"San Diego region, California",SD_CV,0.045,0.529,95th percentile SST
+"San Diego region, California",SD_FI,0.1,0.556,95th percentile SST
+"San Diego region, California",SD_KF,0.269,0.588,95th percentile SST
+"San Diego region, California",SD_SDL,0.387,0.588,95th percentile SST
+"San Diego region, California",SD_SI,-0.621,0.529,95th percentile SST
+"San Diego region, California",SD_CI,-0.242,0.627,75th
+"San Diego region, California",SD_CV,0.047,0.557,75th
+"San Diego region, California",SD_FI,0.126,0.589,75th
+"San Diego region, California",SD_KF,0.301,0.627,75th
+"San Diego region, California",SD_SDL,0.464,0.627,75th
+"San Diego region, California",SD_SI,-0.697,0.557,75th
+"San Diego region, California",SD_CI,-0.264,0.634,Mean SST
+"San Diego region, California",SD_CV,0.049,0.562,Mean SST
+"San Diego region, California",SD_FI,0.141,0.595,Mean SST
+"San Diego region, California",SD_KF,0.284,0.634,Mean SST
+"San Diego region, California",SD_SDL,0.49,0.634,Mean SST
+"San Diego region, California",SD_SI,-0.7,0.562,Mean SST
+"San Diego region, California",SD_CI,-0.124,0.496,Upwelling
+"San Diego region, California",SD_CV,0.043,0.463,Upwelling
+"San Diego region, California",SD_FI,0.103,0.479,Upwelling
+"San Diego region, California",SD_KF,0.126,0.496,Upwelling
+"San Diego region, California",SD_SDL,0.259,0.496,Upwelling
+"San Diego region, California",SD_SI,-0.407,0.463,Upwelling

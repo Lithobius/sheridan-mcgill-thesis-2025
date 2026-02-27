@@ -23,11 +23,11 @@ bigdata <- here('processeddata', 'bigdata')
 # save in
 pcoa_out <- here::here("output", "chapter2", "pcoa")
 
-datefield <- '20251212_'
+datefield <- '20260223_'
 
 # from PNW colors, Bay
 # or with 2 oregon regions
-pal_2or <- c("Juneau Region, Alaska" = "#00496F",
+pal_peco <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
              "Haida Gwaii, British Columbia" = "#076787",
              "Central Coast British Columbia" = "#0B7693",
@@ -48,7 +48,7 @@ pal_2or <- c("Juneau Region, Alaska" = "#00496F",
 
 ```{r load-in}
 obisgbif <- read_csv(here(bigdata,
-               '20251113_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
+               '20251212_obis-gbif_region-peco-bysite_unfiltered.csv')) %>%
     rename(region_label = region_name_label) 
 
 mifish_edna <- read_csv(here(dataedna,
@@ -163,11 +163,11 @@ obisgbif_mifish_plot <- obisgbif_mifish_clusters %>%
 ggplot(obisgbif_mifish_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   theme_bw()+
   labs(title = 'OBIS-GBIF Mifish PECO partners') +
   theme(legend.position = 'none',
@@ -197,11 +197,11 @@ ggplot(obisgbif_mifish_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(cluster)),
                   alpha=0.3) +
   # giving it the wrong value forces it to be grey
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   ggrepel::geom_text_repel(data = obisgbif_centroid,
             aes(x = centroid_x,
                 y = centroid_y,
@@ -242,7 +242,7 @@ ggtree(obisgbif_cons_y,
              shape = 22,
              position = position_nudge(x = -.015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_text(aes(label=cluster), hjust=1, vjust=1.4, size=3)+
   theme(legend.position = 'none') 
 
@@ -325,11 +325,11 @@ obisgbif_mifish_plot <- obisgbif_mifish_clusters %>%
 ggplot(obisgbif_mifish_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   theme_bw()+
   labs(title = 'OBIS-GBIF Mifish PECO partners') +
   theme(legend.position = 'none',
@@ -359,11 +359,11 @@ ggplot(obisgbif_mifish_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(cluster)),
                   alpha=0.3) +
   # giving it the wrong value forces it to be grey
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   ggrepel::geom_text_repel(data = obisgbif_centroid,
             aes(x = centroid_x,
                 y = centroid_y,
@@ -405,7 +405,7 @@ ggtree(obisgbif_cons,
              shape = 22,
              position = position_nudge(x = -.015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_text(aes(label=cluster), hjust=1, vjust=1.4, size=3)+
   theme(legend.position = 'none') 
 
@@ -492,11 +492,11 @@ obisgbif_unfilter_plot <- obisgbif_unfilter_clusters %>%
 ggplot(obisgbif_unfilter_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   theme_bw()+
   #labs(title = 'obis-gbif all fish') +
   theme(legend.position = 'none',
@@ -532,7 +532,7 @@ ggtree(unfilter_cons,
              shape = 22,
              position = position_nudge(x = -.015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_text(aes(label=cluster), hjust=1, vjust=1.4, size=3)+
   theme(legend.position = 'none') 
 
@@ -621,7 +621,7 @@ mb_line2021 <- mifish_2021_plot %>%
 ggplot(mifish_2021_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
           # line between morro bay dots
@@ -633,7 +633,7 @@ ggplot(mifish_2021_plot, aes(x = axis_1, y = axis_2)) +
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -666,7 +666,7 @@ ggtree(mifish_2021_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label)+
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
@@ -753,7 +753,7 @@ mb_line2022 <- mifish_2022_plot %>%
 ggplot(mifish_2022_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
           # line between morro bay dots
@@ -765,7 +765,7 @@ ggplot(mifish_2022_plot, aes(x = axis_1, y = axis_2)) +
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -798,7 +798,7 @@ ggtree(mifish_2022_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label)+
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
@@ -887,7 +887,7 @@ mb_line2023 <- mifish_2023_plot %>%
 ggplot(mifish_2023_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
           # line between morro bay dots
@@ -899,7 +899,7 @@ ggplot(mifish_2023_plot, aes(x = axis_1, y = axis_2)) +
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -932,7 +932,7 @@ ggtree(mifish_2023_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label)+
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
@@ -1023,7 +1023,7 @@ mb_line2024 <- mifish_2024_plot %>%
 ggplot(mifish_2024_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
         # line between morro bay dots
@@ -1035,7 +1035,7 @@ ggplot(mifish_2024_plot, aes(x = axis_1, y = axis_2)) +
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -1069,7 +1069,7 @@ ggtree(mifish_2024_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label)+
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
@@ -1190,11 +1190,11 @@ ggplot(mifish_all_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(cluster)),
                   alpha=0.3) +
   # giving it the wrong value forces it to be grey
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   ggrepel::geom_text_repel(data = mifish_centroid,
             aes(x = centroid_x,
                 y = centroid_y,
@@ -1234,7 +1234,7 @@ ggtree(mifish_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
   theme(legend.position = 'none') 
@@ -1329,13 +1329,13 @@ ggplot(mifish_site_plot, aes(x = axis_1, y = axis_2)) +
             color = "#E56512",
             alpha = 0.4,
             size =3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -1359,11 +1359,11 @@ ggplot(mifish_site_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(cluster)),
                   alpha=0.3) +
   # giving it the wrong value forces it to be grey
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or)+
+  scale_color_manual(values = pal_peco)+
   ggrepel::geom_text_repel(data = mifish_centroid,
             aes(x = centroid_x,
                 y = centroid_y,
@@ -1412,7 +1412,7 @@ ggtree(mifish_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   #scale_shape_manual(values = shape_pal) +
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
@@ -1512,13 +1512,13 @@ ggplot(mifish_site_plot, aes(x = axis_1, y = axis_2)) +
             color = "#E56512",
             alpha = 0.4,
             size =3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -1565,7 +1565,7 @@ ggtree(mifish_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or)+
+  scale_fill_manual(values = pal_peco)+
   #scale_shape_manual(values = shape_pal) +
   geom_text(aes(label=cluster), 
             hjust=0, vjust=0, size=3)+
@@ -1601,10 +1601,10 @@ ggplot(obisgbif_mifish_plot) +
                colour = 'black',
                alpha = .6,
                horizontal = TRUE) +
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label) +
   # horizontal!
@@ -1619,37 +1619,37 @@ ggsave(filename = here(pcoa_out, paste0(datefield,
                                     'obisgbif-mifish_pc1xlat_boxplot-site.pdf')),
        device = 'pdf', height = 6, width= 10,  units = "in")
 
-# ggplot(obisgbif_unfilter_plot) +
-#   geom_point(aes(y = axis_1, 
-#                  x = factor(regionyear, levels = region_order3$regionyear),
-#                  fill = region_label),
-#              shape = 21,
-#              colour = 'black',
-#              alpha = .6,
-#              size = 1) +
-#   geom_boxplot(aes(y = axis_1, 
-#                  x = factor(regionyear, levels = region_order3$regionyear),
-#                  fill = region_label),
-#                colour = 'black',
-#                alpha = .6,
-#                horizontal = TRUE) +
-#   scale_color_manual(values = pal_2or,
-#                     limits = region_order$region_label,
-#                     labels = region_order$region_label) +
-#   scale_fill_manual(values = pal_2or,
-#                     limits = region_order$region_label,
-#                     labels = region_order$region_label) +
-#   # horizontal!
-#   coord_flip() +
-#   labs(x = NULL, y = 'PC1') +
-#   theme_bw()+
-#     theme(legend.position = 'none',
-#         panel.grid = element_blank()
-#         )
-# 
-# ggsave(filename = here(pcoa_out, paste0(datefield, 
-#                                     'obisgbif-unfiltered_pc1xlat_boxplot-site.pdf')),
-#        device = 'pdf', height = 6, width= 10,  units = "in")
+ggplot(obisgbif_unfilter_plot) +
+  geom_point(aes(y = axis_1,
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+             shape = 21,
+             colour = 'black',
+             alpha = .6,
+             size = 1) +
+  geom_boxplot(aes(y = axis_1,
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+               colour = 'black',
+               alpha = .6,
+               horizontal = TRUE) +
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  # horizontal!
+  coord_flip() +
+  labs(x = NULL, y = 'PC1') +
+  theme_bw()+
+    theme(legend.position = 'none',
+        panel.grid = element_blank()
+        )
+
+ggsave(filename = here(pcoa_out, paste0(datefield,
+                                    'obisgbif-unfiltered_pc1xlat_boxplot-site.pdf')),
+       device = 'pdf', height = 6, width= 10,  units = "in")
 
 ```
 
@@ -1669,10 +1669,10 @@ ggplot(mifish_all_plot) +
                  fill = region_label),
                colour = 'black',
                alpha = .6) +
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label) +
   # horizontal!
@@ -1688,6 +1688,110 @@ ggsave(filename = here(pcoa_out, paste0(datefield,
        device = 'pdf', height = 10, width= 10,  units = "in")
 
 ```
+
+## presentation versions
+
+```{r}
+mifish_site_plot %>%
+  select(!year) %>%
+  distinct() %>%
+  ggplot() +
+  geom_point(aes(y = -axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+             shape = 21,
+             colour = 'black',
+             alpha = .8,
+             size = 1) +
+  geom_boxplot(aes(y = -axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+               colour = 'black',
+               alpha = .6) +
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  # horizontal!
+  coord_flip() +
+  labs(x = NULL, y = 'PC1') +
+  theme_bw()+
+    theme(legend.position = 'none',
+        panel.grid = element_blank()
+        )
+
+ggsave(filename = here(pcoa_out, paste0(datefield, 
+                                    'peco_pc1xlat-site-motu_pa_boxplot-site_presentation.pdf')),
+       device = 'pdf', height = 10, width= 10,  units = "in")
+
+ggplot(obisgbif_mifish_plot) +
+  geom_point(aes(y = axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+             shape = 21,
+             colour = 'black',
+             alpha = .6,
+             size = 1) +
+  geom_boxplot(aes(y = axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+               colour = 'black',
+               alpha = .6,
+               horizontal = TRUE) +
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  # horizontal!
+  coord_flip() +
+  labs(x = NULL, y = 'PC1') +
+  theme_bw()+
+    theme(legend.position = 'none',
+        panel.grid = element_blank()
+        )
+
+ggsave(filename = here(pcoa_out, paste0(datefield, 
+                                    'obisgbif-mifish_pc1xlat_boxplot-site_presentation.pdf')),
+       device = 'pdf', height = 10, width= 10,  units = "in")
+
+ggplot(obisgbif_unfilter_plot) +
+  geom_point(aes(y = axis_1,
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+             shape = 21,
+             colour = 'black',
+             alpha = .6,
+             size = 1) +
+  geom_boxplot(aes(y = axis_1,
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+               colour = 'black',
+               alpha = .6,
+               horizontal = TRUE) +
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  # horizontal!
+  coord_flip() +
+  labs(x = NULL, y = 'PC1') +
+  theme_bw()+
+    theme(legend.position = 'none',
+        panel.grid = element_blank()
+        )
+
+ggsave(filename = here(pcoa_out, paste0(datefield,
+                                    'obisgbif-unfiltered_pc1xlat_boxplot-site_presentation.pdf')),
+       device = 'pdf', height = 10, width= 10,  units = "in")
+```
+
+
 
 # summary stats
 
@@ -1811,13 +1915,13 @@ mifish_all_sq_plot <- mifish_all_sq_clusters %>%
 ggplot(mifish_all_sq_plot, aes(x = axis_1, y = axis_2)) +
   geom_convexhull(aes(fill = as.factor(region_label)),
                   alpha=0.4) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   geom_point(aes(x = axis_1, y = axis_2, 
                  col = as.factor(region_label)
                  ))+
-  scale_color_manual(values = pal_2or,
+  scale_color_manual(values = pal_peco,
                     limits = region_order$region_label,
                     labels = region_order$region_label)+
   theme_bw()+
@@ -1862,7 +1966,7 @@ ggtree(mifish_cons,
              shape = 22,
              position = position_nudge(x = .015, y = 0),
              size = 3) +
-  scale_fill_manual(values = pal_2or,
+  scale_fill_manual(values = pal_peco,
                     limits = region_order$region_label)+
   #scale_shape_manual(values = shape_pal) +
   geom_text(aes(label=cluster), hjust=-.25, vjust=1.5, size=5)+

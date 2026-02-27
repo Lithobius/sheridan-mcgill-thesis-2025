@@ -1,0 +1,121 @@
+region_label,model,type,aic,random_variance,residual_variance,term,intercept,std_error,df,t_value,pr_t
+"Juneau Region, Alaska",95th percentile SST,LME,37.366,0.04,0.327,Intercept,11.423,3.53,14.754,3.236,0.006
+"Juneau Region, Alaska",95th percentile SST,LME,37.366,0.04,0.327,95th percentile SST,-0.044,0.229,14.702,-0.19,0.852
+"Juneau Region, Alaska",75th percentile SST,LME,37.141,0.037,0.328,Intercept,9.642,3.486,14.82,2.766,0.015
+"Juneau Region, Alaska",75th percentile SST,LME,37.141,0.037,0.328,75th percentile SST,0.079,0.249,14.768,0.319,0.754
+"Juneau Region, Alaska",Mean SST,LME,37.384,0.038,0.329,Intercept,10.52,2.939,14.616,3.579,0.003
+"Juneau Region, Alaska",Mean SST,LME,37.384,0.038,0.329,Mean SST,0.018,0.231,14.541,0.079,0.938
+Southeast Alaska,95th percentile SST,BLME,16.558,0.099,0.212,Intercept,21.324,8.546,NA,2.495,NA
+Southeast Alaska,95th percentile SST,BLME,16.558,0.099,0.212,95th percentile SST,-0.691,0.579,NA,-1.193,NA
+Southeast Alaska,75th percentile SST,BLME,16.267,0.226,0.222,Intercept,-6.972,34.47,NA,-0.202,NA
+Southeast Alaska,75th percentile SST,BLME,16.267,0.226,0.222,75th percentile SST,1.302,2.479,NA,0.525,NA
+Southeast Alaska,Mean SST,BLME,15.237,0.119,0.222,Intercept,30.643,21.348,NA,1.435,NA
+Southeast Alaska,Mean SST,BLME,15.237,0.119,0.222,Mean SST,-1.51,1.652,NA,-0.914,NA
+"Haida Gwaii, British Columbia",95th percentile SST,BLME,58.267,0.097,0.411,Intercept,1.182,3.702,NA,0.319,NA
+"Haida Gwaii, British Columbia",95th percentile SST,BLME,58.267,0.097,0.411,95th percentile SST,0.645,0.233,NA,2.772,NA
+"Haida Gwaii, British Columbia",75th percentile SST,BLME,54.854,0.109,0.356,Intercept,-4.455,4.738,NA,-0.94,NA
+"Haida Gwaii, British Columbia",75th percentile SST,BLME,54.854,0.109,0.356,75th percentile SST,1.06,0.316,NA,3.356,NA
+"Haida Gwaii, British Columbia",Mean SST,BLME,60.86,0.12,0.464,Intercept,2.151,4.941,NA,0.435,NA
+"Haida Gwaii, British Columbia",Mean SST,BLME,60.86,0.12,0.464,Mean SST,0.685,0.364,NA,1.88,NA
+Central Coast British Columbia,95th percentile SST,LME,53.195,0.582,0.894,Intercept,26.261,32.257,16.949,0.814,0.427
+Central Coast British Columbia,95th percentile SST,LME,53.195,0.582,0.894,95th percentile SST,-0.931,1.957,16.941,-0.476,0.64
+Central Coast British Columbia,75th percentile SST,LME,54.684,0.499,0.898,Intercept,20.314,11.737,14.144,1.731,0.105
+Central Coast British Columbia,75th percentile SST,LME,54.684,0.499,0.898,75th percentile SST,-0.602,0.751,14.203,-0.801,0.436
+Central Coast British Columbia,Mean SST,LME,53.479,0.538,0.924,Intercept,10.275,27.327,16.105,0.376,0.712
+Central Coast British Columbia,Mean SST,LME,53.479,0.538,0.924,Mean SST,0.045,1.91,16.135,0.023,0.982
+"North Vancouver Island, British Columbia",95th percentile SST,LME,31.782,0.133,0.253,Intercept,22.029,4.064,13.06,5.42,0
+"North Vancouver Island, British Columbia",95th percentile SST,LME,31.782,0.133,0.253,95th percentile SST,-0.721,0.266,13.016,-2.71,0.018
+"North Vancouver Island, British Columbia",75th percentile SST,LME,35.81,0.101,0.333,Intercept,15.643,2.722,13.573,5.747,0
+"North Vancouver Island, British Columbia",75th percentile SST,LME,35.81,0.101,0.333,75th percentile SST,-0.329,0.193,13.497,-1.7,0.112
+"North Vancouver Island, British Columbia",Mean SST,LME,35.579,0.1,0.353,Intercept,17.064,4.328,14.062,3.942,0.001
+"North Vancouver Island, British Columbia",Mean SST,LME,35.579,0.1,0.353,Mean SST,-0.467,0.334,14.048,-1.396,0.184
+"Inner Coast, British Columbia",95th percentile SST,LME,31.125,0.084,0.213,Intercept,12.095,5.052,16.487,2.394,0.029
+"Inner Coast, British Columbia",95th percentile SST,LME,31.125,0.084,0.213,95th percentile SST,-0.013,0.264,16.503,-0.047,0.963
+"Inner Coast, British Columbia",75th percentile SST,LME,31.445,0.086,0.212,Intercept,12.105,4.018,14.415,3.013,0.009
+"Inner Coast, British Columbia",75th percentile SST,LME,31.445,0.086,0.212,75th percentile SST,-0.014,0.225,14.444,-0.062,0.951
+"Inner Coast, British Columbia",Mean SST,LME,31.301,0.075,0.213,Intercept,13.53,3.492,17.271,3.875,0.001
+"Inner Coast, British Columbia",Mean SST,LME,31.301,0.075,0.213,Mean SST,-0.103,0.214,17.296,-0.48,0.637
+"Pacific Rim Park, British Columbia",95th percentile SST,LME,46.024,0.12,0.247,Intercept,18.058,5.579,18.385,3.237,0.004
+"Pacific Rim Park, British Columbia",95th percentile SST,LME,46.024,0.12,0.247,95th percentile SST,-0.413,0.336,18.245,-1.227,0.235
+"Pacific Rim Park, British Columbia",75th percentile SST,LME,46.521,0.128,0.238,Intercept,15.883,3.318,17.602,4.786,0
+"Pacific Rim Park, British Columbia",75th percentile SST,LME,46.521,0.128,0.238,75th percentile SST,-0.306,0.217,17.768,-1.408,0.176
+"Pacific Rim Park, British Columbia",Mean SST,LME,44.984,0.159,0.222,Intercept,21.339,6.491,17.874,3.288,0.004
+"Pacific Rim Park, British Columbia",Mean SST,LME,44.984,0.159,0.222,Mean SST,-0.708,0.454,17.921,-1.56,0.136
+"Puget Sound & Padilla Bay, Washington",95th percentile SST,LME,42.083,0.044,0.155,Intercept,11.419,0.997,29.624,11.456,0
+"Puget Sound & Padilla Bay, Washington",95th percentile SST,LME,42.083,0.044,0.155,95th percentile SST,0.017,0.061,29.946,0.273,0.787
+"Puget Sound & Padilla Bay, Washington",75th percentile SST,LME,42.405,0.042,0.156,Intercept,11.604,0.813,29.612,14.281,0
+"Puget Sound & Padilla Bay, Washington",75th percentile SST,LME,42.405,0.042,0.156,75th percentile SST,0.006,0.054,29.977,0.106,0.916
+"Puget Sound & Padilla Bay, Washington",Mean SST,LME,41.481,0.044,0.155,Intercept,11.569,1.18,25.831,9.801,0
+"Puget Sound & Padilla Bay, Washington",Mean SST,LME,41.481,0.044,0.155,Mean SST,0.009,0.086,26.805,0.102,0.919
+"Willapa Bay, Washington",95th percentile SST,LME,40.289,0.18,0.275,Intercept,10.986,2.27,17.874,4.84,0
+"Willapa Bay, Washington",95th percentile SST,LME,40.289,0.18,0.275,95th percentile SST,0.07,0.127,17.9,0.554,0.587
+"Willapa Bay, Washington",75th percentile SST,LME,40.291,0.167,0.284,Intercept,11.379,2.257,17.758,5.04,0
+"Willapa Bay, Washington",75th percentile SST,LME,40.291,0.167,0.284,75th percentile SST,0.052,0.136,17.757,0.38,0.708
+"Willapa Bay, Washington",Mean SST,LME,40.122,0.145,0.296,Intercept,12.613,2.427,17.649,5.196,0
+"Willapa Bay, Washington",Mean SST,LME,40.122,0.145,0.296,Mean SST,-0.025,0.155,17.671,-0.16,0.875
+"Willapa Bay, Washington",Upwelling,LME,35.106,0.106,0.296,Intercept,9.609,2.424,17.939,3.964,0.001
+"Willapa Bay, Washington",Upwelling,LME,35.106,0.106,0.296,BEUTI index,1.185,1.101,17.843,1.076,0.296
+"Yaquina Bay, Oregon",95th percentile SST,LME,11.726,0.04,0.109,Intercept,16.523,4.727,9.926,3.496,0.006
+"Yaquina Bay, Oregon",95th percentile SST,LME,11.726,0.04,0.109,95th percentile SST,-0.329,0.31,9.861,-1.059,0.315
+"Yaquina Bay, Oregon",75th percentile SST,LME,10.219,0.044,0.095,Intercept,18.973,4.626,9.625,4.102,0.002
+"Yaquina Bay, Oregon",75th percentile SST,LME,10.219,0.044,0.095,75th percentile SST,-0.542,0.336,9.564,-1.612,0.139
+"Yaquina Bay, Oregon",Mean SST,LME,12.355,0.039,0.116,Intercept,14.423,3.839,10.055,3.757,0.004
+"Yaquina Bay, Oregon",Mean SST,LME,12.355,0.039,0.116,Mean SST,-0.226,0.299,9.97,-0.757,0.467
+"Yaquina Bay, Oregon",Upwelling,LME,14.83,0.037,0.12,Intercept,11.841,0.634,9.348,18.679,0
+"Yaquina Bay, Oregon",Upwelling,LME,14.83,0.037,0.12,BEUTI index,-0.053,0.102,8.762,-0.518,0.617
+"Coos Bay, Oregon",95th percentile SST,LME,8.21,0.542,0.274,Intercept,-0.484,7.065,2.079,-0.069,0.951
+"Coos Bay, Oregon",95th percentile SST,LME,8.21,0.542,0.274,95th percentile SST,0.817,0.467,2.055,1.749,0.219
+"Coos Bay, Oregon",75th percentile SST,LME,10.932,0.727,0.614,Intercept,10.98,6.847,2.108,1.604,0.244
+"Coos Bay, Oregon",75th percentile SST,LME,10.932,0.727,0.614,75th percentile SST,0.063,0.494,2.06,0.127,0.91
+"Coos Bay, Oregon",Mean SST,LME,8.512,0.755,0.474,Intercept,0.589,13.919,2.01,0.042,0.97
+"Coos Bay, Oregon",Mean SST,LME,8.512,0.755,0.474,Mean SST,0.895,1.106,2,0.809,0.503
+"Coos Bay, Oregon",Upwelling,LME,10.199,0.499,0.266,Intercept,15.062,1.86,2.452,8.1,0.008
+"Coos Bay, Oregon",Upwelling,LME,10.199,0.499,0.266,BEUTI index,-0.29,0.159,2.078,-1.819,0.206
+"Humboldt Bay, California",95th percentile SST,LME,2.017,0.148,0.114,Intercept,49.068,18.336,0.026,2.676,0.913
+"Humboldt Bay, California",95th percentile SST,LME,2.017,0.148,0.114,95th percentile SST,-2.482,1.247,0.026,-1.991,0.92
+"Humboldt Bay, California",75th percentile SST,LME,0.153,0.088,0,Intercept,44.504,0.198,2,224.956,0
+"Humboldt Bay, California",75th percentile SST,LME,0.153,0.088,0,75th percentile SST,-2.36,0.007,2,-321.58,0
+"Humboldt Bay, California",Mean SST,LME,-0.024,0.224,0,Intercept,96.576,0.534,2,180.94,0
+"Humboldt Bay, California",Mean SST,LME,-0.024,0.224,0,Mean SST,-6.569,0.036,2,-183.148,0
+"Humboldt Bay, California",Upwelling,LME,4.294,0.075,0.072,Intercept,1.087,4.11,2.057,0.264,0.816
+"Humboldt Bay, California",Upwelling,LME,4.294,0.075,0.072,BEUTI index,0.492,0.176,2.058,2.796,0.104
+"Bodega Bay, California",95th percentile SST,BLME,48.019,1.315,1.45,Intercept,36.569,11.229,NA,3.257,NA
+"Bodega Bay, California",95th percentile SST,BLME,48.019,1.315,1.45,95th percentile SST,-1.45,0.689,NA,-2.103,NA
+"Bodega Bay, California",75th percentile SST,BLME,49.809,0.914,2,Intercept,21.715,11.476,NA,1.892,NA
+"Bodega Bay, California",75th percentile SST,BLME,49.809,0.914,2,75th percentile SST,-0.595,0.783,NA,-0.76,NA
+"Bodega Bay, California",Mean SST,BLME,48.473,0.849,1.729,Intercept,27.13,8.997,NA,3.015,NA
+"Bodega Bay, California",Mean SST,BLME,48.473,0.849,1.729,Mean SST,-1.026,0.652,NA,-1.573,NA
+"Bodega Bay, California",Upwelling,BLME,48.477,1.301,1.057,Intercept,8.94,1.381,NA,6.474,NA
+"Bodega Bay, California",Upwelling,BLME,48.477,1.301,1.057,BEUTI index,0.397,0.126,NA,3.157,NA
+"San Francisco Bay, California",95th percentile SST,BLME,39.205,4.062,1.905,Intercept,28.951,14.884,NA,1.945,NA
+"San Francisco Bay, California",95th percentile SST,BLME,39.205,4.062,1.905,95th percentile SST,-0.776,0.782,NA,-0.992,NA
+"San Francisco Bay, California",75th percentile SST,LME,34.894,0.068,1.605,Intercept,27.107,6.671,8.076,4.064,0.004
+"San Francisco Bay, California",75th percentile SST,LME,34.894,0.068,1.605,75th percentile SST,-0.731,0.379,8.083,-1.929,0.09
+"San Francisco Bay, California",Mean SST,BLME,37.718,2.931,1.322,Intercept,24.711,4.633,NA,5.334,NA
+"San Francisco Bay, California",Mean SST,BLME,37.718,2.931,1.322,Mean SST,-0.636,0.274,NA,-2.32,NA
+"San Francisco Bay, California",Upwelling,BLME,41.777,2.658,2.126,Intercept,14.133,2.476,NA,5.707,NA
+"San Francisco Bay, California",Upwelling,BLME,41.777,2.658,2.126,BEUTI index,0.012,0.237,NA,0.049,NA
+"Morro Bay, California",95th percentile SST,LME,2.339,0.066,0.035,Intercept,14.866,1.86,4.141,7.994,0.001
+"Morro Bay, California",95th percentile SST,LME,2.339,0.066,0.035,95th percentile SST,-0.025,0.115,4.056,-0.214,0.841
+"Morro Bay, California",75th percentile SST,LME,2.38,0.068,0.033,Intercept,15.258,1.51,4.137,10.102,0
+"Morro Bay, California",75th percentile SST,LME,2.38,0.068,0.033,75th percentile SST,-0.052,0.098,4.004,-0.527,0.626
+"Morro Bay, California",Mean SST,LME,1.663,0.067,0.032,Intercept,15.702,1.893,4.089,8.296,0.001
+"Morro Bay, California",Mean SST,LME,1.663,0.067,0.032,Mean SST,-0.084,0.129,4.004,-0.655,0.548
+"Morro Bay, California",Upwelling,LME,4.843,0.067,0.035,Intercept,14.416,0.307,3.897,46.899,0
+"Morro Bay, California",Upwelling,LME,4.843,0.067,0.035,BEUTI index,0.007,0.033,4.016,0.226,0.832
+"Los Angeles, California",95th percentile SST,LME,56.232,0.385,0.786,Intercept,2.505,8.18,15.073,0.306,0.764
+"Los Angeles, California",95th percentile SST,LME,56.232,0.385,0.786,95th percentile SST,0.751,0.374,15.072,2.006,0.063
+"Los Angeles, California",75th percentile SST,LME,56.417,0.466,0.802,Intercept,-1.177,11.3,16.255,-0.104,0.918
+"Los Angeles, California",75th percentile SST,LME,56.417,0.466,0.802,75th percentile SST,0.964,0.543,16.252,1.777,0.094
+"Los Angeles, California",Mean SST,LME,58.769,0.165,1.09,Intercept,20.028,11.84,16.367,1.691,0.11
+"Los Angeles, California",Mean SST,LME,58.769,0.165,1.09,Mean SST,-0.056,0.595,16.4,-0.093,0.927
+"Los Angeles, California",Upwelling,LME,58.201,0.183,1.075,Intercept,18.694,0.941,15.767,19.864,0
+"Los Angeles, California",Upwelling,LME,58.201,0.183,1.075,BEUTI index,0.193,0.767,12.759,0.252,0.805
+"San Diego region, California",95th percentile SST,LME,64.949,0.451,2.943,Intercept,38.727,17.626,12.167,2.197,0.048
+"San Diego region, California",95th percentile SST,LME,64.949,0.451,2.943,95th percentile SST,-0.859,0.772,12.114,-1.113,0.287
+"San Diego region, California",75th percentile SST,LME,64.744,0.537,2.939,Intercept,40.778,21.328,12.352,1.912,0.079
+"San Diego region, California",75th percentile SST,LME,64.744,0.537,2.939,75th percentile SST,-0.983,0.968,12.309,-1.016,0.329
+"San Diego region, California",Mean SST,LME,65.693,0.552,2.966,Intercept,31.836,13.721,12.475,2.32,0.038
+"San Diego region, California",Mean SST,LME,65.693,0.552,2.966,Mean SST,-0.61,0.658,12.403,-0.927,0.372
+"San Diego region, California",Upwelling,LME,61.995,0.29,3.279,Intercept,17.73,3.683,12.883,4.814,0
+"San Diego region, California",Upwelling,LME,61.995,0.29,3.279,BEUTI index,2.157,5.75,12.663,0.375,0.714

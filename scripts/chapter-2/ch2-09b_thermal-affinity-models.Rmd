@@ -26,8 +26,8 @@ library(ggeffects)
 # here filepaths
 obisdata = here('rawdata', 'bigdata', 'obis_cti')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
-plotout <- here('output', 'thermalaffinity', 'models')
-datefield <- '20251212_'
+plotout <- here('output', 'chapter2', 'thermalaffinity', 'models')
+datefield <- '20260223_'
 
 pal_2or <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -72,6 +72,12 @@ edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
   # problematic sample
   filter(!(sample_id %in% c('pecoe-0207')))
 
+edna_peco_sp <- edna_peco %>%
+  select(found_taxa, common_name, relabund_vst_taxa, sample_id, site_code, location_name,
+         year, region_name, region_label) %>%
+  distinct()
+
+
 # STIs
 
 sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
@@ -79,18 +85,24 @@ sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
   rename(found_taxa = scientific_name) 
 
 # environment
+# region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
+#                                    '20251113_mean-summer-sst_by-region.csv')) %>%
+#   select(!avg_region_lat) %>%
+#   mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+#                                        TRUE ~ region_label))
+
 region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
-                                   '20251113_mean-summer-sst_by-region.csv')) %>%
-  select(!avg_region_lat) %>%
-  mutate(region_label = case_when(region_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_label))
+                                   '20251212_mean-summer-sst_by-region.csv')) %>%
+  select(!avg_region_lat)
 
 region_temps <- region_environment %>%
   filter(year %in% c(2021, 2022, 2023, 2024)) %>%
   distinct() 
 
+#site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
+#                                   '20251113_summer-sst-summary-stats_by-site.csv')) 
 site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
-                                   '20251113_summer-sst-summary-stats_by-site.csv')) 
+                                   '20251212_summer-sst-summary-stats_by-site.csv')) 
 
 
 site_temps <- site_environment %>%
@@ -104,8 +116,8 @@ get the values needed for the model; same as in 09a thermal-affinity
 
 ```{r calculate cti and sti}
 # CTI
-cti_peco <- edna_peco %>%
-  select(!asv) %>%
+cti_peco <- edna_peco_sp %>%
+  #select(!asv) %>%
   distinct() %>%
   left_join(sti_obis) %>%
   filter(!is.na(max_temp)) %>%
