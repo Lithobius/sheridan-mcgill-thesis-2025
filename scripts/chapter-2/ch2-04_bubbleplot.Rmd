@@ -1119,3 +1119,12 @@ length(unique(edna_peco$found_taxa))
 length(unique(edna_peco$sample_id))
 ```
 
+
+
+# tss
+
+```{r lol}
+tss <- mifish_edna %>%
+  filter(species == 'Gasterosteus aculeatus')
+```
+

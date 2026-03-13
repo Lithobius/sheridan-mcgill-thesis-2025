@@ -221,23 +221,23 @@ ggsave(here(plotout, paste0(datefield, 'ctivssst_by-site-year_facet-region.png')
 
 ggplot(cti_environment) +
   geom_point(aes(x = year, 
-                y = cti,
-                color = region_label,
-                alpha = year)) +
-    scale_color_manual(values = pal_2or) +
+                 y = cti,
+                 color = region_label,
+                 alpha = year)) +
+  scale_color_manual(values = pal_2or) +
   geom_path(aes(x = year, y = cti,
                 group = sitegroup
-                ),
-            alpha = .2)+
+  ),
+  alpha = .2)+
   facet_wrap('region_name')+
   #geom_segment(aes(xend = ))
-    labs(color = NULL,x = 'Year', y = 'Thermal affinity of the community') +
+  labs(color = NULL,x = 'Year', y = 'Thermal affinity of the community') +
   theme_bw() +
   theme(legend.position = 'none',
         panel.grid.minor = element_blank())
 
 ggsave(here(plotout, paste0(datefield, 'ctiyear_bysite_facetregion.png')),
-        height = 2000,
+       height = 2000,
        width = 3000,
        unit = 'px')
 
@@ -270,8 +270,8 @@ sti_peco <- edna_peco %>%
             sites, region_code_label, region_code, region_lat_name)) %>%
   distinct() %>%
   relocate(sti_value, region_label) %>%
-    mutate(region_label = ifelse(region_name == 'BC_HG', 'Haida Gwaii, British Columbia', region_label))
-  
+  mutate(region_label = ifelse(region_name == 'BC_HG', 'Haida Gwaii, British Columbia', region_label))
+
 sti_environment <- sti_peco %>%
   left_join(site_temps) %>%
     # fill in with means if NA
@@ -294,13 +294,13 @@ sti_environment <- sti_peco %>%
 
 ggplot()+
   geom_point(data = sti_peco,
-               aes(y=sti_value,
-                   x= factor(site_code, levels = site_order$site_code),
-                  color = region_label),
-               alpha = .3) +
-    geom_point(data = cti_environment_site,
+             aes(y=sti_value,
+                 x= factor(site_code, levels = site_order$site_code),
+                 color = region_label),
+             alpha = .3) +
+  geom_point(data = cti_environment_site,
              aes(x = factor(site_code, levels = site_order$site_code),
-                y = cti),
+                 y = cti),
              shape = 23,
              fill = 'red') +
   scale_color_manual(values = pal_2or) +
@@ -319,13 +319,13 @@ ggsave(here(plotout, paste0(datefield, 'sticti_bysite_facet-year_scatter.png')),
 
 ggplot()+
   geom_point(data = sti_peco,
-               aes(x=sti_value,
-                   y= factor(site_code, levels = site_order$site_code),
-                  color = region_label,
-                  alpha = relabund_vst_taxa)) +
-    geom_point(data = cti_environment_site,
+             aes(x=sti_value,
+                 y= factor(site_code, levels = site_order$site_code),
+                 color = region_label,
+                 alpha = relabund_vst_taxa)) +
+  geom_point(data = cti_environment_site,
              aes(y = factor(site_code, levels = site_order$site_code),
-                x = cti),
+                 x = cti),
              shape = 23,
              fill = 'red') +
   scale_color_manual(values = pal_2or) +
@@ -589,6 +589,59 @@ interactive2
 htmlwidgets::saveWidget(widget = interactive2,
                         file = '20251111_ctsm_interactive.html')
 ```
+
+thermal affinity with environment
+```{r}
+cti_environment_site_year <- cti_peco %>%
+  left_join(site_temps) %>%
+  # region sst for the year
+  group_by(region_name,year) %>%
+  mutate(region_meansst = mean(sst_mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+  # fill in NAs with last 5 mean
+  group_by(region_name) %>%
+  mutate(region_last5_meansst = mean(sst_mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(region_meansst = case_when(region_meansst == 'NaN' ~ region_last5_meansst,
+                                    TRUE ~ region_meansst))
+
+
+ggplot()+
+  geom_point(data = sti_peco,
+             aes(x=sti_value,
+                 y= factor(site_code, levels = site_order2$site_code),
+                 color = region_label,
+                 alpha = relabund_vst_taxa),
+             size = 2) +
+  geom_point(data = cti_environment_site,
+             aes(y = factor(site_code, levels = site_order2$site_code),
+                 x = cti),
+             shape = 23,
+             size = 3,
+             fill = 'red') +
+  geom_line(data = cti_environment_site_year,
+             aes(y = factor(site_code, levels = site_order2$site_code),
+                 x = region_meansst,
+                 group = 1),
+            orientation = 'y') +
+  scale_color_manual(values = pal_2or) +
+  facet_wrap('year', nrow = 1) +
+  labs(color = NULL,x = NULL, y = NULL) +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        # to add my own numbers after trimming
+        strip.background = element_blank(),
+        legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+
+ggsave(here(plotout, paste0(datefield, 'sticti_bysite_facet-year-meansst_presentation-vers.pdf')),
+       height = 14,
+       width = 14,
+       unit = 'in')
+```
+
 
 # Thermal stats by species
 
@@ -1074,4 +1127,56 @@ ggsave(here(plotout, paste0(datefield, 'vst-sst_coolaffinity-ca-bb.pdf')),
 
 
 
+
+# individual species
+
+```{r}
+splist <- c('Three-spined stickleback')
+
+
+
+
+tss <- sti_peco %>%
+  filter(found_taxa == 'Gasterosteus aculeatus') 
+
+tss_env <- cti_environment_site_year %>%
+  filter(site_code %in% tss$site_code)
+
+ggplot(tss)+
+  geom_point(
+             aes(x=sti_value,
+                 y= factor(site_code, levels = site_order2$site_code),
+                 color = region_label,
+                 alpha = relabund_vst_taxa),
+             size = 2) +
+    geom_point(
+             aes(x=temp_95,
+                 y= factor(site_code, levels = site_order2$site_code),
+                 color = region_label,
+                 alpha = relabund_vst_taxa),
+             size = 2) +
+          geom_point(data = tss_env,
+                 aes(y = factor(site_code, levels = site_order2$site_code),
+                x = sst_mean),
+             shape = 13,
+             size = 3,
+             fill = 'white',
+             alpha = .5) +
+  scale_color_manual(values = pal_2or) +
+  facet_wrap('year', nrow = 1) +
+  labs(color = NULL,x = NULL, y = NULL) +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        # to add my own numbers after trimming
+        strip.background = element_blank(),
+        legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+
+ggsave(here(plotout, paste0(datefield, 'tss.pdf')),
+       height = 10,
+       width = 10,
+       unit = 'in')
+```
 
