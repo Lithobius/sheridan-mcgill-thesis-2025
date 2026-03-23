@@ -17,7 +17,7 @@ fastq <- here('rawdata', 'peco', 'fastq')
 # Out
 edna_combined <- here('processeddata', 'peco', '2021-24_edna')
 # fields
-datefield <- '20251113_'
+datefield <- '20260320_'
 
 # Palette
 ## match map with 14 levels if by region
@@ -31,12 +31,12 @@ pal2023 <- pnw_palette("Bay", 15, type = "continuous")
 ```
 In: taxonomy from BLAST, asv table, metadata
 ```{r loadin}
-metadata <- read_csv(here(edna_combined, '20251107_peco-combined_metadata.csv')) %>%
-  mutate(region_name = case_when(site_code == 'NC_WP' ~ 'CA_NC',
-                                 TRUE ~ region_name)) %>%
-  mutate(region_name_label = case_when(region_name == 'CA_NC' ~ 'Bodega Bay, California',
-                                       region_name_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
-                                       TRUE ~ region_name_label))
+metadata <- read_csv(here(edna_combined, '20260319_peco-combined_metadata.csv')) #%>%
+#  mutate(region_name = case_when(site_code == 'NC_WP' ~ 'CA_NC',
+#                                 TRUE ~ region_name)) %>%
+#  mutate(region_name_label = case_when(region_name == 'CA_NC' ~ 'Bodega Bay, California',
+#                                       region_name_label == 'San Fransisco Bay, California' ~ 'San Francisco Bay, California',
+#                                       TRUE ~ region_name_label))
 
 
 taxonomy <- read_csv(here(edna_combined, '20251113_peco-combined_12s_taxonomy.csv'))
@@ -108,20 +108,24 @@ Can't do this until I have info about which blanks are for which samples.
 ```{r control-subtract}
 pcr_ctrl_2021 <- motumatrix_metadata_2021 %>%
   filter(treatment %in% c('PCR blank')) %>%
-  select(asv, reads_raw, treatment, library, found_taxa) %>%
+  select(asv, reads_raw, treatment, seq_method, found_taxa, rank) %>%
+  mutate(is_fish_lab = ifelse(!(rank == 'outgroup'), 'yes', NA_character_)) %>%
   # make single code that combines site and asv
-  mutate(pcrasv = paste0(library, '_', asv)) %>%
-  select(pcrasv, reads_raw, found_taxa) %>%
+  mutate(pcrasv = paste0(seq_method, '_', asv)) %>%
+  select(pcrasv, reads_raw, found_taxa, is_fish_lab) %>%
+  mutate(is_fish_lab = as.character(is_fish_lab)) %>%
   rename(reads_control = reads_raw)
 
 
 extract_ctrl_2021 <- motumatrix_metadata_2021 %>%
   filter(treatment %in% c('Extraction blank')) %>%
-  select(asv, reads_raw, treatment, extraction_blank, found_taxa) %>%
+  select(asv, reads_raw, treatment, extraction_blank, found_taxa, rank) %>%
   filter(!(is.na(extraction_blank))) %>%
+  mutate(is_fish_lab = ifelse(!(rank == 'outgroup'), 'yes', NA_character_)) %>%
   # make single code that combines site and motu
   mutate(extractasv = paste0(extraction_blank, '_', asv)) %>%
-  select(extractasv, reads_raw, found_taxa) %>%
+  select(extractasv, reads_raw, found_taxa, is_fish_lab) %>%
+  mutate(is_fish_lab = as.character(is_fish_lab)) %>%
   rename(reads_control = reads_raw)
 
 motumatrix_metadata_nolab_2021 <- motumatrix_metadata_2021 %>%
@@ -141,7 +145,7 @@ motumatrix_metadata_nolab_2021 <- motumatrix_metadata_2021 %>%
   select(!(c(reads_control, extractasv))) %>%
   # subtract pcr controls by library
   # single code to combine library and motu
-  mutate(pcrasv = paste0(library, '_', asv)) %>%
+  mutate(pcrasv = paste0(seq_method, '_', asv)) %>%
   # merge to have field control values for each site-motu combo
   left_join(pcr_ctrl_2021) %>%
   mutate(in_ctrl_pcr = ifelse(reads_control > 0, 'yes', NA_character_)) %>%
@@ -156,8 +160,14 @@ motumatrix_metadata_nolab_2021 <- motumatrix_metadata_2021 %>%
   # n site code = lab control
   filter(!(is.na(site_code))) %>%
   mutate(ctrl_lab0 = ifelse(reads_adjust_lab == 0, 'yes', 'no')) %>%
-  relocate(in_ctrl_pcr, in_ctrl_extract, reads_adjust_lab, ctrl_lab0, .before = kingdom) %>%
-  distinct()
+  group_by(sample_id) %>%
+  mutate(ctrl_lab_fish = ifelse(any(is_fish_lab == 'yes'), 'yes', NA_character_)) %>%
+  ungroup() %>%
+  mutate(in_ctrl_lab = ifelse(in_ctrl_extract == 'yes' | in_ctrl_pcr == 'yes', 'yes', NA_character_)) %>%
+  relocate(
+           ctrl_lab_fish, .before = reads_adjust_lab) %>%
+  relocate(sample_id, motu, found_taxa, common_name, rank, year) %>%
+  select(!c(is_fish_lab))
 ```
 
 ## Field controls
@@ -169,10 +179,11 @@ Adjusted to annotate ASVs in field controls and whether they'd be removed in QC 
 ```{r field-control}
 field_ctrl_2021 <- motumatrix_metadata_nolab_2021 %>%
   filter(treatment == 'Field blank') %>%
-  select(site_code, asv, reads_raw, found_taxa) %>%
+  select(site_code, asv, reads_raw, found_taxa, rank) %>%
+  mutate(is_fish_field = ifelse(!(rank == 'outgroup'), 'yes', NA_character_)) %>%
   # make single code that combines site and motu
   mutate(siteasv = paste0(site_code, '_', asv)) %>%
-  select(siteasv, reads_raw, found_taxa) %>%
+  select(siteasv, reads_raw, found_taxa, is_fish_field) %>%
   rename(reads_control = reads_raw)
 
 motumatrix_metadata_nofield_2021 <- motumatrix_metadata_nolab_2021 %>%
@@ -195,7 +206,81 @@ motumatrix_metadata_nofield_2021 <- motumatrix_metadata_nolab_2021 %>%
   select(!(c(reads_control, siteasv))) %>%
   #relocate(reads_adjust, .before = reads_raw) %>%
   mutate(ctrl_field0 = ifelse(reads_adjust_field == 0, 'yes', 'no')) %>%
-  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) 
+  group_by(sample_id) %>%
+  mutate(ctrl_field_fish = ifelse(any(is_fish_field == 'yes'), 'yes', NA_character_)) %>%
+  ungroup() %>%
+  select(!is_fish_field) %>%
+  relocate(in_ctrl_field, reads_adjust_field, ctrl_field0, ctrl_fieldlab0, .before = reads_adjust_lab) %>%
+  mutate(any_ctrl = coalesce(in_ctrl_field, in_ctrl_lab)) %>%
+  # from jenn's filtering
+  group_by(site_code, year) %>%
+  mutate(field_blank_richness_site= sum(in_ctrl_field == 'yes', na.rm = TRUE)) %>%
+  mutate(lab_richness_site = sum(in_ctrl_lab =='yes', na.rm = TRUE)) %>%
+  mutate(richness_site_avs_anyctrl=sum(any_ctrl == 'yes', na.rm = TRUE)) %>%
+  ungroup() %>%
+  group_by(sample_id, year) %>%
+  mutate(sample_richness = n_distinct(asv)) %>%
+  mutate(richness_sample_avs_in_labblank = sum(in_ctrl_lab =='yes', na.rm = TRUE)) %>%
+  mutate(richness_sample_avs_anyctrl=sum(any_ctrl == 'yes', na.rm = TRUE)) %>%
+  mutate(richness_sample_avs_in_fieldblank=sum(in_ctrl_field == 'yes', na.rm = TRUE)) %>%
+  mutate(richness_proportion_in_fieldblank=richness_sample_avs_in_fieldblank/sample_richness) %>%
+  mutate(richness_proportion_in_labblank=richness_sample_avs_in_labblank/sample_richness) %>%
+  mutate(richness_proportion_in_anyblank=richness_sample_avs_anyctrl/sample_richness) %>%
+  ungroup() %>%
+  group_by(region_name, year) %>%
+  mutate(field_blank_regional_max= max(field_blank_richness_site)) %>%
+  ungroup() %>%
+    ## this carries with it an assumption of how many ASVs is reasonable to expect in a sample
+  ## made histogram, assigned in first "real" gap at a binwidth = 5; above 50
+  ## adjusted for miseq
+  ## this may need to change in future, or be reassessed
+  ## also included lab here with high proportion of lab blanks
+  ## and re-added high proportion of sample richness in field blanks to catch ones with < 5 asvs
+  mutate(flag = case_when(sample_richness > 55 ~ "richness suspiciously high",
+                          # here the bacterial diversity in field blanks can be whatever it wants if it doesn't have a fish in it
+                          richness_sample_avs_in_fieldblank >= 5 & ctrl_field_fish == 'yes' ~ "high sample richness in field blanks",
+                          richness_proportion_in_fieldblank >= 0.5 ~ "high proportion sample richness in field blanks",
+                          richness_proportion_in_labblank >= 0.5 ~ "high proportion sample richness in lab blanks",
+                          richness_proportion_in_anyblank >= 0.5 ~ "high proportion sample richness across all blanks"
+                          )) %>%
+  relocate(in_ctrl_field)
+
+#summarize the richness in every sample
+sample_summaries<- motumatrix_metadata_nofield_2021 %>%
+  select(year, 
+         region_name, 
+         site_code, 
+         sample_id, 
+         sample_richness, 
+         richness_sample_avs_in_fieldblank,
+         richness_sample_avs_in_labblank,
+         richness_sample_avs_anyctrl,
+         field_blank_richness_site, 
+         lab_richness_site,
+         richness_site_avs_anyctrl,
+         field_blank_regional_max,
+         richness_proportion_in_labblank,
+         richness_proportion_in_fieldblank, 
+         richness_proportion_in_anyblank,
+         flag) %>%
+  distinct()
+
+ggplot(sample_summaries) +
+  geom_histogram(aes(x = sample_richness),
+                 binwidth = 5)
+
+ggplot(sample_summaries) +
+  geom_histogram(aes(x = richness_sample_avs_in_fieldblank),
+                 binwidth = 5)
+
+# don't let these affect the semiquantitative
+motumatrix_metadata_2021_qcd <- motumatrix_metadata_nofield_2021 %>%
+  filter(is.na(flag))
+
+#but add in at the end
+motumatrix2021_fish_flagged <- motumatrix_metadata_nofield_2021 %>%
+  filter(!is.na(flag))
+
 ```
 
 
@@ -248,7 +333,8 @@ motumatrix_metadata_2022 <- asvtable_2022 %>%
   # check before removing
   select(!c(sample)) %>%
   mutate(extraction_blank = case_when(str_detect(extraction_blank, 'pecoxn') ~ str_replace_all(extraction_blank, 'pecoxn', 'exblank-2022-'),
-                                      TRUE ~ extraction_blank))
+                                      TRUE ~ extraction_blank)) %>%
+  mutate(seq_method = 'nextseq-2022')
 ```
 
 
@@ -269,9 +355,9 @@ Field blank -- group = site
 # this will need to be expanded with more data + lab metadata
 pcr_ctrl_2022 <- motumatrix_metadata_2022 %>%
   filter(treatment == 'PCR blank') %>%
-  select(sample_id, library, asv, reads_raw, found_taxa) %>%
-  mutate(pcrasv = paste0(library, '_', asv)) %>%
-  select(pcrasv, library, reads_raw, found_taxa) %>%
+  select(sample_id, seq_method, asv, reads_raw, found_taxa) %>%
+  mutate(pcrasv = paste0(seq_method, '_', asv)) %>%
+  select(pcrasv, seq_method, reads_raw, found_taxa) %>%
   rename(reads_control = reads_raw)
 
 # needs done when extraction info is given
@@ -301,7 +387,7 @@ motumatrix_metadata_nolab_2022 <- motumatrix_metadata_2022 %>%
   select(!(c(reads_control, extractasv))) %>%
   # subtract pcr controls by library
   # single code to combine library and motu
-  mutate(pcrasv = paste0(library, '_', asv)) %>%
+  mutate(pcrasv = paste0(seq_method, '_', asv)) %>%
   #merge to have field control values for each site-motu combo
   left_join(pcr_ctrl_2022) %>%
   mutate(in_ctrl_pcr = ifelse(reads_control > 0, 'yes', NA_character_)) %>%
@@ -401,7 +487,8 @@ motumatrix_metadata_2022_miseq <- asvtable_2022_miseq %>%
   # remove columns that don't matter this year
   janitor::remove_empty() %>%
   # check before removing
-  select(!c(sample))
+  select(!c(sample)) %>%
+  mutate(seq_method = 'miseq-2022')
 ```
 
 
@@ -438,7 +525,8 @@ motumatrix_metadata_2023 <- asvtable_2023 %>%
   rename(reads_raw = value) %>%
   left_join(metadata) %>%
     # remove columns that don't matter this year
-  janitor::remove_empty() 
+  janitor::remove_empty() %>%
+  mutate(seq_method = 'nextseq-2023')
 
 ```
 
@@ -456,8 +544,8 @@ Field blank -- group = site
 # this will need to be expanded with more data + lab metadata
 pcr_ctrl_2023 <- motumatrix_metadata_2023 %>%
   filter(treatment == 'PCR blank') %>%
-  select(sample_id, library, asv, reads_raw, found_taxa) %>%
-  mutate(pcrasv = paste0(library, '_', asv)) %>%
+  select(sample_id, seq_method, asv, reads_raw, found_taxa) %>%
+  mutate(pcrasv = paste0(seq_method, '_', asv)) %>%
   select(pcrasv, reads_raw, found_taxa) %>%
   rename(reads_pcr = reads_raw)
 
@@ -491,7 +579,7 @@ motumatrix_metadata_nolab_2023 <- motumatrix_metadata_2023 %>%
   # subtract pcr controls by library
   # ### I think it's by plate
   # single code to combine library and motu
-  mutate(pcrasv = paste0(library, '_', asv)) %>%
+  mutate(pcrasv = paste0(seq_method, '_', asv)) %>%
   # merge to have field control values for each site-motu combo
   left_join(pcr_ctrl_2023) %>%
   mutate(in_ctrl_pcr = ifelse(reads_pcr > 0, 'yes', NA_character_)) %>%
@@ -571,8 +659,8 @@ motumatrix_metadata_nofield_2023 <- motumatrix_metadata_nolab_2023 %>%
 all_ctrl_2023 <- motumatrix_metadata_2023 %>%
   filter(treatment %in% c('PCR blank', 'Extraction blank', 'Field blank')) %>%
     # excess columns for this version
-  select(!c(biological_observations,
-             tide, wind, rain,organization_participants))
+  select(!c(
+             tide, wind, rain))
 ```
 
 # 2024
@@ -747,7 +835,7 @@ all_ctrl_2024 <- motumatrix_metadata_2024 %>%
   filter(treatment %in% c('PCR blank', 'Extraction blank', 'Field blank')) %>%
     # excess columns for this version
   select(!c(#biological_observations,
-             tide, wind, rain,organization_participants))
+             tide, wind, rain))
 ```
 
 # merge years
@@ -771,7 +859,7 @@ asv_all <- motumatrix_metadata_nofield_2022 %>%
   mutate(seq_method = paste0('nextseq-', year)) %>%
   janitor::remove_empty() %>%
   filter(!(sample_id %in% missing_samples$sample_id)) %>%
-  bind_rows(miseq_2022_filtered, motumatrix_metadata_nofield_2021) %>%
+  bind_rows(miseq_2022_filtered, motumatrix_metadata_2021_qcd) %>%
   relocate(sample_id, motu, found_taxa, common_name, rank, year) %>%
   # temporary until updated in data
   mutate(site_code = case_when(site_code %in% c('NV_KI', 'NV_KH') ~ 'NV_KB',

@@ -2692,7 +2692,7 @@ obis_records %>%
   theme_bw() +
   theme(axis.title = element_blank())
 
-
+# IT WAS PINK SALMON
 obis_records %>%
   filter(scientific_name == 'Oncorhynchus gorbuscha') %>%
   ggplot() +

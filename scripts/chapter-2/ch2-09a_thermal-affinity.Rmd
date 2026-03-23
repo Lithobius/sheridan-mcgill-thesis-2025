@@ -708,7 +708,85 @@ for(i in 1:length(splist)){
        device = 'pdf', height = 2, width = 5, units = 'in')
 }
 ```
+### pdf pages
+```{r byspecies loop}
+splist <- unique(edna_peco$found_taxa)
 
+####first do species-level rank
+#rank species according to number of 
+#set number of pages to plot over
+npages <- round(length(splist)/6, 0)
+# order of plotting is by number of detections
+# then plot_group splits them into pages
+rank_species <- edna_peco %>%
+  select(found_taxa, common_name) %>%
+  distinct() %>%
+  arrange(found_taxa) %>%
+  mutate(position = 1:n()) %>%
+  mutate(plot_group=as.numeric(cut(position, npages)))#separate into 12 groups
+
+
+list_plots <- vector('list', npages) #set up a vector of lists for saving each plot
+
+i = 1
+
+for(i in 1:npages){
+#  target_sp <- splist[i]
+  
+  sti_unprocessed <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
+                          '20250803_sti_errdap_pathfinder-unprocessed.csv')) %>%
+    rename(found_taxa = scientific_name) %>%
+    #filter(found_taxa == target_sp) %>%
+    left_join(rank_species) %>%
+    filter(plot_group == i)
+  
+  sti_target <- sti_unprocessed %>%
+        filter(!is.na(sst) | !is.na(sst_n)) %>%
+    pivot_longer(cols = c('sst', 'sst_n'),
+               names_to = 'type_sst',
+               values_to = 'sst') %>%
+    filter(!is.na(sst)) %>%
+    group_by(found_taxa) %>%
+      summarise(max_temp = max(sst),
+            min_temp = min(sst),
+            temp_95 = quantile(sst, probs = .95),
+            temp_90 = quantile(sst, probs = .9),
+            temp_10 = quantile(sst, probs = .1),
+            temp_05 = quantile(sst, probs = .05),
+            # sti is median of averages
+            sti_value = median(sst)) %>%
+    ungroup()
+  
+  sti_unprocessed %>%
+            filter(!is.na(sst) | !is.na(sst_n)) %>%
+    pivot_longer(cols = c('sst', 'sst_n'),
+               names_to = 'type_sst',
+               values_to = 'sst') %>%
+    filter(!is.na(sst)) %>%
+    left_join(sti_target) %>%
+    mutate(taxa_label = paste0(found_taxa, ',\n', common_name)) %>%
+  ggplot() +
+  geom_histogram(aes(x = sst)) +
+    geom_vline(aes(xintercept = sti_value), 
+               color = '#4D94BAFF') +
+    geom_vline(aes(xintercept = temp_95),
+                   color = '#C9785CFF') +
+    geom_vline(aes(xintercept = temp_05), 
+                 color = '#8EE5EE') +
+  scale_x_continuous(limits = c(-5,40)) +
+  facet_grid(taxa_label ~ ., 
+             scales = 'free') +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = 'none',
+        strip.text.y = element_text(angle = 0))
+  
+  ggsave(filename = here(plotout, 'splevel', 'grouped', 
+                         paste0(datefield, 'thermalstats_page_', i, '.pdf')),
+       device = 'pdf', height = 11, width = 8.5, units = 'in')
+}
+```
 
 ## species and region stats
 ```{r stats for paper}
