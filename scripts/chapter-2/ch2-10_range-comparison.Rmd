@@ -1338,3 +1338,24 @@ for(i in 1:length(splist)){
 }
 ```
 
+
+
+
+
+# heatmap version
+think about this more
+suggestion was heatmap with values for concordance
+could be like bubble plot but with color for status?
+```{r heatmap}
+edna_lit_heat <- mifish_edna %>%
+  dplyr::select(found_taxa, common_name, site_code, region_label) %>%
+  distinct() %>%
+  mutate(species = found_taxa) %>%
+  left_join(fish_order_lit)
+
+fish_order_lit %>%
+  ggplot() +
+  geom_tile(aes(x = species, y = species, fill = overlap2))
+
+```
+
