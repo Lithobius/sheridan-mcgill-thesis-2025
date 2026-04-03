@@ -1,0 +1,778 @@
+---
+title: "ch2_00d_BLAST"
+output: html_document
+date: "2023-10-10"
+---
+
+Changes Sept 2024:
+We're greatly reducing our usage of ASVs moving forward so I've eliminated some of the unnecessary steps to add in asv conversions.
+
+Blast modified from Evan's script to use system2
+
+```{r}
+library(tidyverse)
+library(taxize)
+library(here)
+
+# here filepaths
+pecofastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi') 
+datefield <- '20260331_'
+datefield_new <- '20260331_'
+# if different
+datefield_swarm <- '20260331_'
+runfield <- 'peco_next-mi-combined_'
+
+# Destination folders
+processededna <- here('processeddata', 'peco', 'nextseq_miseq')
+```
+
+# blast
+
+Evan's call:
+
+mkdir blast_96_sim_LCA_besthit
+blastn 
+-task megablast 
+-num_threads 38 
+-evalue 1e-5 
+-max_target_seqs 10 
+-perc_identity 96 
+-qcov_hsp_perc 50 
+-db /data/taxonomyDBs/NCBI_NT/2023-06-08/nt 
+-outfmt '6 qseqid stitle sacc staxid pident qcovs evalue bitscore' 
+-query 12S.PECO_combined.ASV_sequences.fasta  
+-out blast_96_sim_LCA_besthit/12S_ASV_sequences.length_var.blast.out
+
+
+Note that you need to have a blast database set up locally; this is not an api call
+
+```{r run-blast}
+#path.blast <- file.path(here(calvertfastq, "blast_96sim"))
+#if(!dir.exists(path.blast)) dir.create(path.blast)
+
+mifishdb <- file.path("/Users/katesheridan/Documents/GitHub/peco/database12s/crabs/blastdb_make/crabs-mifish")
+
+
+edna_to_blast <- file.path(pecofastq,
+                           '20260331_peco_next-mi-combined_asv-sequences.fasta')
+blast_out <- file.path(pecofastq, paste0(datefield_new, runfield, 'swarm_blastresults_asv.txt'))
+
+# check its working
+system2("blastn", args = "-h")
+
+system2("blastn", args=c("-task", "'megablast'", # which kind of blast
+                         #"-num_threads", 38, # for parallelizing
+                         "-evalue", 1e-5,
+                         "-max_target_seqs", 50,
+                         "-perc_identity", 85,
+                         "-qcov_hsp_perc", 50,
+                         "-db", mifishdb, # directory of db to blast against
+                         "-outfmt", "'6 qseqid pident evalue sacc stitle bitscore qcovs mismatch'",
+                         "-query", edna_to_blast,
+                         "-out", blast_out
+                         ))
+
+
+
+```
+
+
+
+# cleanup
+
+```{r cleanup-motus}
+# top 10 list
+asv_50blast <- read_delim(here(pecofastq, paste0(datefield_new, runfield, 'swarm_blastresults_asv.txt')),
+                           delim = '\t', col_names = c("asv", 
+                                                       "identity_percentage", "evalue", "accession", "hit_name",
+                                                       "bitscore", "coverage", "n_mismatches")) %>%
+  mutate(hit_name = trimws(hit_name)) %>%
+  mutate(hit_name = str_remove_all(hit_name, "(root;)")) %>%
+  separate_wider_delim(hit_name, delim = ";", names = c('kingdom', 'phylum', 'class', 'order',
+                                                        'family', 'genus', 'species')) %>%
+  mutate(species = str_replace_all(species, "_", " ")) %>%
+  # fill in NAs
+  mutate(across(kingdom:genus, ~ na_if(., "")))
+
+# motu numbers to join with the blast results
+motu_key <- read_csv(here(pecofastq, '20260331_peco_next-mi-combined_lulu_motu2asv.csv')) %>%
+  rename(motu = motu_lulu)
+
+# load-in keys
+taxa_key <- read_csv(here('processeddata', 'splists',
+                     '20260130_12s_crabs_taxonomy-key.csv'))[-1]
+```
+
+
+ previous notes
+
+ 5 assign_tax
+ taxonomy assignment by accession number
+ --missing for custom names, same format as lineage input
+ note content from db_import may need to be updated first
+open a github issue later
+crabs assign_tax --input pgaout.fasta --output taxassigned.tsv --acc2tax nucl_gb.accession2taxid --taxid nodes.dmp --name names.dmp
+
+
+## top 50 taxonomy
+```{r top hits}
+# strip and replace higher taxonomy
+# remove out of region and hybrids
+blast50_updatetaxa <- asv_50blast %>%
+    # remove columns that will be duplicated
+  select(!c(kingdom, phylum, class, order, family, genus, species)) %>%
+  left_join(motu_key) %>%
+  left_join(taxa_key) %>%
+  # remove known incorrect hits when good hits exist (from manual check)
+  # species out of region
+  filter(!(c(found_taxa %in% c('Amphisticus argenteus', 'Aspiolucius esocinus',
+                            'Alcichthys elongatus', 'Alburnus alburnus',
+                            'Albula pacifica',
+                            'Acipenser mikadoi', 'Acipenser schrenckii',
+                            'Acipenser dabryanus', 'Acantholabrus palloni',
+                            'Acanthogobius stigmothonus', "Anisotremus virginicus",
+                            'Anisotremus scapularis', 'Anisotremus surinamensis', 
+                            'Acanthogobius hasta', 'Alosa alosa', 'Alosa agone', 'Alosa fallax',
+                            'Ammodytes japonicus', 'Ammodytes marinus', 'Ammodytes tobianus',
+                            'Ammodytes dubius', 'Ammodytes americanus', 
+                            'Argyrosomus amoyensis', 'Argyrosomus japonicus',
+                            'Anchoa mitchilli', 'Atheresthes evermanni', 
+                            'Aplodinotus grunniens', 'Askoldia variegata',
+                            #'Barbatula barbatula', 'Barbatula hispanica', 
+                            'Brachygenys chrysargyreum', 'Ballerus sapa',
+                            'Bairdiella chrysoura', 'Bero elegans', 'Bryx dunckeri',
+                            'Bahaba taipingensis', 'Boesemania microlepis',
+                            'Batrachocottus talievi', 'Batrachocottus nikolskii', 
+                            'Batrachocottus multiradiatus', 'Brachyopsis segaliensis',
+                            'Chondrostoma nasus', "Clariger papillosus",
+                            'Chirolophis saitone', 'Chirolophis ascanii', 
+                            'Chirolophis wui', 'Chirolophis japonicus',
+                            'Cleisthenes pinetorum', 'Cleisthenes herzensteini',
+                            'Collichthys lucidus',
+                            'Cottus gobio', 'Comephorus dybowskii', 'Cottus bairdii',
+                            'Cottus pollux', 'Cottus szanaga', 'Cottus poecilopus', 
+                            'Cottus czerskii', 'Cottus perifretum', 'Cottus hangiongensis',
+                            'Clupea harengus', 'Conodon nobilis', 
+                            'Cottocomephorus grewingki', 'Cottocomephorus grewingkii',
+                            'Cottocomephorus inermis', 'Comephorus baikalensis',
+                            'Cosmocampus elucens', 'Cryptacanthodes bergi',
+                            'Ctenogobius boleosoma', 'Ctenogobius saepepallens',
+                            'Ctenogobius shufeldti', 'Ctenolabrus rupestris',
+                            "Cryptacanthodes maculatus", 'Cynoscion nothus',
+                            'Cynoscion arenarius', 'Cynoscion nebulosus',
+                            'Cynoscion regalis',
+                            'Ditrema jordani', 'Dicentrarchus labrax',
+                            'Dicentrarchus punctatus',
+                            'Ernogrammus hexagrammus', 'Eques lanceolatus',
+                            'Enchelyopus cimbrius',
+                            'Equetus punctatus', 'Evorthodus lyricus',
+                            'Gadus morhua','Gadus finnmarchicus',
+                            'Gasterosteus nipponicus', 'Gasterosteus wheatlandi',
+                            'Glyptocephalus stelleri', 'Gymnogobius macrognathos',
+                            'Glyptocephalus cynoglossus', 'Gasterosteus nipponicus',
+                            'Hyperoplus immaculatus', 'Hippoglossus hippoglossus',
+                            'Hexagrammos agrammus', 'Hexagrammos otakii', 
+                            'Haemulon carbonarium', 'Haemulon flavolineatum',
+                            'Haemulon macrostomum', 'Haemulon plumierii',
+                            'Hypomesus japonicus', 'Haemulon sciurus',
+                            'Huso dauricus',
+                            'Hyperoplus lanceolatus', 'Hozukius emblemarius', 
+                            'Haemulon aurolineatum', 'Hypsoblennius ionthas',
+                            'Hypleurochilus geminatus', 'Hypleurochilus springeri',
+                            'Kasatkia memorabilis', 'Leuciscus baicalensis',
+                            'Leuciscus merzbacheri', 'Leiostomus xanthurus',
+                            'Liparis fabricii',
+                            'Liparis miostomus', 'Liparis tessellatus', 
+                            'Liparis tanakae', 'Liparis inquilinus',
+                            'Leuciscus leuciscus', 'Limanda limanda', 'Limanda sakhalinensis',
+                            'Lepidopsetta mochigarei', 'Liopsetta pinnifasciata', 
+                            'Leuciscus idus', 'Leuciscus oxyrrhis', 'Lutjanus griseus',
+                            'Leuciscus burdigalensis', 'Lutjanus argentimaculatus',
+                            'Myzopsetta ferruginea', 'Microstomus achne', 
+                            # introduced on the west coast
+                            #'Morone saxatilis',
+                            'Myoxocephalus scorpius', 'Myoxocephalus aenaeus',
+                            'Myoxocephalus brandtii', 
+                            'Malacocottus gibber',
+                            'Melanogrammus aeglefinus', 'Menticirrhus littoralis',
+                            'Miichthys miiuy', 'Netuma thalassina',
+                            # there is a gbif record in alaskan panhandle
+                            #'Myoxocephalus jaok',
+                            # good point nearby?
+                            #'Occella dodecaedron'
+                            'Oncorhynchus kawamurae', 'Opisthocentrus tenuis',
+                            'Oncorhynchus gilae', 'Opisthocentrus ocellatus',
+                            'Opisthocentrus zonope',
+                            'Oreochromis niloticus', 'Occella iburia',
+                            'Orthopristis chrysoptera', 'Oxyurichthys cornutus',
+                            'Parahucho perryi', 'Procottus major', 
+                            'Pareques umbrosus', 'Parablennius thysanius',
+                            'Parablennius yatabei', 'Pholidapus dybowskii',
+                            'Paralichthys olivaceus', 'Paralichthys adspersus',
+                            'Platichthys flesus', 'Pholis gunnellus', 
+                            'Pholis nebulosa', 'Pholis crassispina', 
+                            'Pholis picta', 'Peprilus medius', 
+                            'Pogonias cromis', 'Pungitius laevis',
+                            'Pomadasys stridens', 'Pomadasys argenteus',
+                            'Pomadasys kaakan', 'Peprilus triacanthus',
+                            'Peprilus burti', 'Peprilus paru',
+                            'Psenopsis anomala', 'Platichthys bicoloratus',
+                            'Rutilus rutilus', 'Scardinius erythrophthalmus',
+                            'Salvelinus elgyticus', 'Salvethymus svetovidovi',
+                            'Salvelinus boganidae', 'Salvelinus kuznetzovi',
+                            'Salvelinus taranetzi', 'Salvlinus albus',
+                            'Salvelinus schmidti', 'Salvelinus levanidovi',
+                            'Salvelinus kronocius', 'Salvelinus drjagini',
+                            'Salvelinus drjagini', 'Salvelinus albus',
+                            'Salvelinus leucomaenis', 'Salvelinus curilus',
+                            'Scomber scombrus',
+                            'Scartella emarginata', 'Scartella cristata',
+                            'Serranus scriba', 'Serranus cabrilla',
+                            'Sebastes mentella', 'Sebastes hubbsi',
+                            'Sebastes inermis', 'Sebastes wakiyai',
+                            'Sebastes cheni', 'Sebastes pachycephalus',
+                            'Sebastes joyneri', 'Sebastes baramenuke',
+                            'Sebastes viviparus', 'Sebastes norvegicus',
+                            'Sebastes mentella', 'Sebastes koreanus',
+                            'Sprattus sprattus', #'Squalius cephalus', ?maybe?
+                            'Squalus acanthias', 'Squalus japonicus',
+                            'Squalus mitsukurii', 'Sciaenops ocellatus',
+                            'Spirinchus lanceolatus',
+                            'Squalius carolitertii', 'Squalius pyrenaicus',
+                            'Squalius alburnoides', 'Strongylura marina',
+                            'Syngnathus fuscus', 'Stellifer lanceolatus',
+                            'Syngnathus louisianae', 'Syngnathus floridae',
+                            'Stichaeopsis nana', 'Sebastiscus marmoratus',
+                            'Scomber colias', 'Stichaeopsis nevelskoi',
+                            'Strongylura timucu', 'Stromateus brasiliensis',
+                            'Taurocottus bergii', 'Thunnus thynnus', 
+                            'Thunnus maccoyii', 'Thunnus tonggol',
+                            'Thunnus atlanticus', 'Trachurus murphyi',
+                            'Trachurus mediterraneus', 'Trachurus japonicus',
+                            'Trachurus trachurus', 'Trachurus lathami',
+                            'Trachurus picturatus', 'Tilesina gibbosa',
+                            # biological control with atlatic salmon?
+                            # could this be in runoff?
+                            #'Tautogolabrus adspersus', 
+                            'Tautoga onitis',
+                            # invasive established in California
+                            #'Tridentiger trigonocephalus',
+                            'Ulvaria subbifurcata', 'Xenolumpenus longipterus',
+                            # extinct
+                            'Salmo pallayri',
+                            # deep sea
+                            'Embassichthys bathybius', # synonimized to microstomus
+                            # arctic canada, gulf of alaska
+                            'Arctogadus glacialis', 'Boreogadus saida',
+                            'Myzopsetta proboscidea', 'Bryozoichthys lysimus',
+                            'Salvelinus alpinus',
+                            # aleutian islands
+                            'Hemilepidotus zapus',
+                            # Gulf of California/Baja peninsula; may be seen sampling if expanded south
+                            'Gillichthys seta', 'Scomber australasicus',
+                            'Liparis tunicatus', 'Merluccius angustimanus',
+                            'Totoaba macdonaldi', 'Paralabrax auroguttatus',
+                            'Haemulon flaviguttatum',
+                            # freshwater?
+                            'Morone chrysops', 'Morone americana'
+                            #'Prosopium williamsoni', 'Rhinichthys cataractae'
+                            )))) %>%
+  # drop level on outgroups that dont matter
+  mutate(found_taxa = case_when(genus %in% c('Bos', 'Anas', 'Pseudo-nitzschia') ~ genus,
+                                TRUE ~ found_taxa)) %>%
+    # filter out odd sequences
+  filter(!(accession %in% c( # hybrids
+                            'NC_082285', 'OQ656297', 'OQ656298', 
+                            'OQ656299','LC145951', 'NC_027522',
+                            'NC_034784', 'KP218514', 'KR059905',
+                            'KY132098', 'MF958972', 'JX119017',
+                            'KM401549', 'KC346973', 'KC351186',
+                            # genus level IDs
+                            'MT025508', 'MW181768', 'LC578888',
+                            'MW181767', 'MW181766', 'MZ597980',
+                            'PQ423886', 'PQ423885', 'OP931726',
+                            'OP931727', 'OP931728', 'OP931732',
+                            'OP931733', 'OP931734', 'OP931735',
+                            'OP931736',
+                            #'LC277738', # incorrectly on the list?
+                            'LC741215', 'LC772864',
+                            'KF668288',
+                            # family level IDs
+                            'NC_026537', 'OQ846303',
+                            'OQ789493', 'LC036776', 'LC036775'))) %>%
+   # set it up exactly as needed
+  select(asv, motu, identity_percentage, evalue, found_taxa, common_name, rank, 
+         genus, family, order, class, phylum, kingdom,
+         freshwater_only, accession, coverage, bitscore, 
+         status)
+
+
+
+# the original pipeline assumed we were working from a matrix with taxonomy already assigned.
+# Here we're going to assign to MOTUs from scratch
+# First; assign all MOTUs with 100% one species
+blast_assign <- blast50_updatetaxa %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+    # remove unknowns when sp % is < 100
+  filter(!(sp_percent < 1 & found_taxa %in% c('Unknown bacteria', 'Unknown organism',
+                                              'Unknown eukaryote', 'Unknown algae',
+                                              'Unknown protist'))) %>%
+  # how many blast hits
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+  # indicate keep rows with 100% same species
+  mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
+  group_by(asv, found_taxa) %>%
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
+                                (any(sp_percent <= .25) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(identity_percentage >= 99) & any(identity_percentage <= 97.5)) |
+                                identity_percentage <= 96.5 ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(one_hit == 'no' & unlikely %in% c('x') & identity_percentage <= 98.5|
+             identity_percentage <= 97)) %>%
+  # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  # filter for anything 100%/98% that passed the original filter
+  group_by(asv) %>%
+  mutate(unlikely = case_when((hit_remain > 1 & any(identity_percentage == 100) & any(identity_percentage <= 99.5)) ~ 'x')) %>%
+  ungroup() %>%
+  # remove unlikely hits
+  filter(!(unlikely %in% c('x') & identity_percentage <= 99.5)) %>%
+  # assign asvs with one hit remaining after unlikely and < 100% frequency
+  # # how many hits are left?
+  add_count(asv, name = 'hit_remain') %>%
+  filter(hit_remain == 1) %>%
+  select(!(c(hit_remain, unlikely, one_hit, sp_percent, num_blast, sp_freq)))
+  
+```
+
+## Conflicts
+
+If there isn't a single identification, use stricter criteria or drop to higher taxonomy
+```{r conflicts}
+# identify asvs that have conflicts in their top 10
+# This removes asvs without conflicts, leaving only the potential problems.
+blast_conflict <- blast50_updatetaxa %>%
+  filter(!(asv %in% blast_assign$asv)) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, identity_percentage, .keep_all = TRUE) %>%
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  mutate(max_keep = ifelse(max_sp_id == identity_percentage, 'keep', 'toss')) %>%
+  filter(max_keep == 'keep') %>%
+  group_by(asv) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+      # remove unknowns when sp % is < 100
+  filter(!(sp_percent < 1 & found_taxa %in% c('Unknown bacteria', 'Unknown organism',
+                                              'Unknown eukaryote', 'Unknown algae',
+                                              'Unknown protist'))) %>%
+  # how many blast hits
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(asv,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  # remove duplicate rows by percent
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  distinct(asv, found_taxa, sp_percent, .keep_all = TRUE) %>%
+    group_by(asv, found_taxa) %>%
+  # remove hits with less than 98.5%% when an ID in the list has 100%,
+  ## hits with relatively rare frequency and low identity percentage
+  mutate(unlikely = case_when((any(identity_percentage == 100) & any(identity_percentage <= 99.5)) |
+                                (any(sp_percent <= .2) & any(identity_percentage <= 99.5)) | # check the 20% cutoff in top 10
+                               (any(identity_percentage >= 99) & any(identity_percentage <= 97.5)) |
+                                 identity_percentage <= 96.5 ~ 'x')) %>%
+  ungroup() %>%
+  filter(!(unlikely %in% c('x') & identity_percentage <= 98 |
+             identity_percentage <= 97)) %>%
+  select(!(c(unlikely))) %>%
+    #remove anything that's more than .5 lower
+  group_by(asv) %>%
+  # what is the highest identity percentage on that asv
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  # if the species max is .5% lower than the max
+  # this seems to be about as far away as makes sense for this data
+  # Note that maybe for other data it might be different.
+  # May also need more solid empirical justification than 
+  # my past experience handling NCBI data
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .5) %>%
+  select(!(c(max_id, max_sp_id, point_diff))) %>%
+    # recalculate species percent
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+    # na handling
+  mutate(na_gen = ifelse(any(is.na(genus)), 'yes', 'no'),
+         na_fam = ifelse(any(is.na(family)), 'yes', 'no'),
+         na_ord = ifelse(any(is.na(order)), 'yes', 'no'),
+         na_class = ifelse(any(is.na(class)), 'yes', 'no'),
+         na_phy = ifelse(any(is.na(phylum)), 'yes', 'no'),
+         na_king = ifelse(any(is.na(kingdom)), 'yes', 'no')) %>%
+  mutate(updated_taxon = case_when(length(unique(found_taxa)) == 1 ~ found_taxa,
+                                   length(unique(genus)) == 1 & na_gen == 'no' ~ genus,
+                                   length(unique(family)) == 1 & na_fam == 'no' ~ family,
+                                   length(unique(order)) == 1 & na_ord == 'no' ~ order,
+                                   length(unique(class)) == 1 & na_class == 'no' ~ class,
+                                   length(unique(phylum)) == 1 & na_phy == 'no' ~ phylum,
+                                   length(unique(kingdom)) == 1  & na_king == 'no'~ kingdom,
+                                   na_king == 'yes' | length(unique(kingdom)) > 1 ~ 'Unknown organism')) %>%
+  select(!c(na_gen, na_fam, na_ord, na_class, na_phy, na_king, 
+            num_blast, sp_percent, sp_freq)) 
+
+blast_lowmatch <- blast50_updatetaxa %>%
+  filter(!(asv %in% blast_assign$asv | asv %in% blast_conflict$asv)) %>%
+  # remove duplicate rows by freqency
+  ## this will make the merge faster as it will be done on fewer unique rows with no info loss
+  ## what is the highest identity percentage per species, to eliminate duplicates
+  group_by(asv, found_taxa) %>%
+  mutate(max_sp_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  distinct(asv, found_taxa, max_sp_id, .keep_all = TRUE) %>%
+  group_by(asv) %>%
+  # what is the highest identity percentage on that asv
+  mutate(max_id = max(identity_percentage)) %>%
+  ungroup() %>%
+  # if the species max is .5 points or about 99.5% lower than the max for the asv
+  # eliminate that hit
+  # Filter to the max
+  mutate(point_diff = max_id - max_sp_id) %>%
+  filter(point_diff < .5) %>%
+  # recalculate species percent and remove 100s
+  group_by(asv) %>%
+  add_count(name = 'num_blast') %>%
+  group_by(asv, found_taxa) %>%
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  group_by(asv) %>%
+  mutate(low_match = ifelse(max_id < 96, 'yes', 'no')) %>%
+  mutate(very_low_match = ifelse(max_id < 93, 'yes', 'no')) %>%
+  mutate(extremely_low_match = ifelse(max_id < 90.99, 'yes', 'no')) %>%
+    # if the number of flagged records always has the same genus, update. 
+  # if the number of flaggd records always has the same family, update.
+  # if the species percent is 100% and the species was actually not local, update
+    # na handling
+  mutate(na_gen = ifelse(any(is.na(genus)), 'yes', 'no'),
+         na_fam = ifelse(any(is.na(family)), 'yes', 'no'),
+         na_ord = ifelse(any(is.na(order)), 'yes', 'no'),
+         na_class = ifelse(any(is.na(class)), 'yes', 'no'),
+         na_phy = ifelse(any(is.na(phylum)), 'yes', 'no'),
+         na_king = ifelse(any(is.na(kingdom)), 'yes', 'no')) %>%
+  mutate(updated_taxon = case_when(length(unique(found_taxa)) == 1 & low_match == 'no' ~ found_taxa,
+                                   length(unique(genus)) == 1 & na_gen == 'no' & 
+                                     very_low_match == 'no' ~ genus,
+                                   length(unique(family)) == 1 & na_fam == 'no' & 
+                                     extremely_low_match == 'no' ~ family,
+                                   length(unique(order)) == 1 & na_ord == 'no' ~ order,
+                                   length(unique(class)) == 1 & na_class == 'no' ~ class,
+                                   length(unique(phylum)) == 1 & na_phy == 'no' ~ phylum,
+                                   length(unique(kingdom)) == 1  & na_king == 'no'~ kingdom,
+                                   na_king == 'yes' | length(unique(kingdom)) > 1 ~ 'Unknown organism')) %>%
+  ungroup() %>%
+  select(!(c(max_id, max_sp_id, point_diff, 
+             accession, na_gen, na_fam, na_ord, na_class, na_phy, na_king, 
+             num_blast, sp_percent, sp_freq)))
+
+```
+
+## all nonnative hits
+this shouldbe 0
+
+```{r}
+hit_nohit <- asv_50blast %>%
+  filter(!(asv %in% blast_conflict$asv | asv %in% blast_lowmatch$asv | asv %in% blast_assign$asv)) %>%
+  group_by(asv) %>%
+    mutate(updated_taxon = case_when(length(unique(genus)) == 1 ~ genus,
+                                   length(unique(family)) == 1 ~ family)) %>%
+  ungroup() %>%
+  mutate(genus = case_when(family == updated_taxon ~ NA_character_,
+                           TRUE ~ genus)) %>% 
+  select(!c(accession, identity_percentage, evalue, 
+            species, bitscore, coverage, n_mismatches)) %>%
+  distinct()
+```
+
+
+## Update
+
+Now we'll use updated taxa from the conflicts, and add a column for MOTU level ids based on seed asv
+```{r update}
+# drop uncertanties to next taxonomic level
+blast_updates <- blast_conflict %>%
+      # modify dataframe to be more useful
+  select(asv, motu, found_taxa, updated_taxon, common_name,
+         identity_percentage, coverage, evalue, 
+         bitscore, rank, kingdom, phylum, class, order, 
+         family, genus, freshwater_only
+         ) %>%
+  rbind(blast_lowmatch) %>%
+  rbind(hit_nohit) %>%
+  distinct() %>%
+  mutate(rank = case_when(rank == 'offtarget' ~ rank,
+                          str_detect(updated_taxon, ' ') == TRUE ~ 'species',
+                          updated_taxon == genus ~ 'genus',
+                          updated_taxon == family ~ 'family',
+                          updated_taxon == order ~ 'order',
+                          updated_taxon == class ~ 'class',
+                          updated_taxon == phylum ~ 'phylum')) %>%
+  mutate(genus = case_when(rank %in% c('family', 'order')| 
+                             str_detect(updated_taxon, 'Unknown') == TRUE ~ NA_character_,
+                           TRUE ~ genus)) %>%
+  mutate(family = case_when(rank %in% c('order')| 
+                             str_detect(updated_taxon, 'Unknown')== TRUE ~ NA_character_,
+                            TRUE ~ family)) %>%
+  mutate(order = case_when(rank %in% c('class')| 
+                             str_detect(updated_taxon, 'Unknown') == TRUE ~ NA_character_,
+                            TRUE ~ order)) %>%
+  mutate(class = case_when(rank %in% c('phylum')| 
+                             str_detect(updated_taxon, 'Unknown') == TRUE ~ NA_character_,
+                            TRUE ~ class)) %>%
+  mutate(phylum = case_when(rank %in% c('kingdom')| 
+                             str_detect(updated_taxon, 'Unknown') == TRUE ~ NA_character_,
+                            TRUE ~ phylum)) %>%
+  mutate(kingdom = case_when(str_detect(updated_taxon, 'Unknown organism') == TRUE ~ NA_character_,
+                            TRUE ~ kingdom)) %>%
+  distinct(asv, updated_taxon, .keep_all = TRUE) %>%
+  rbind(blast_assign) %>%
+  mutate(found_taxa = coalesce(updated_taxon,found_taxa)) %>%
+  select(!c(updated_taxon, coverage, bitscore,
+            accession, status)) %>%
+  relocate(asv, motu, found_taxa, common_name, rank) %>%
+  arrange(motu, asv) %>%
+  # open group somewhere?
+  ungroup()
+```
+
+Now we'll use updated taxa from the conflicts, and add a column for MOTU level ids based on seed asv
+```{r update}
+taxonomy_assigned_asv <- motu_key %>%
+  full_join(blast_updates) %>%
+  # update based on research
+  #mutate(found_taxa = case_when(found_taxa == 'Merluccius angustimanus' ~ 'Merluccius',
+  #                              TRUE ~ found_taxa)) %>%
+  mutate(rank = case_when(found_taxa %in% c('Merluccius') ~ 'genus',
+                          TRUE ~ rank)) %>%
+ # left_join(common_name) %>%
+  #mutate(common_name = coalesce(common_name_key, common_name)) %>%
+  #relocate(common_name, .before = rank) %>%
+  mutate(blast = ifelse(is.na(found_taxa), 'No BLAST hit', 'BLAST')) %>%
+  mutate(found_taxa = coalesce(found_taxa, blast)) %>%
+  mutate(common_name = case_when(found_taxa == 'Unknown organism' ~ 'Unknown organism',
+                                 ## FISH ##
+                                 found_taxa == 'Teleostei' ~ 'Unknown fish',
+                                 # order level
+                                 found_taxa == 'Acanthuriformes' ~ 'Acanthuriform order',
+                                 found_taxa == 'Gobiiformes' ~ 'Goby order',
+                                 found_taxa == 'Perciformes' ~ 'Perciformes order',
+                                 # family level
+                                 found_taxa == 'Agonidae' ~ 'Poacher family',
+                                 found_taxa == 'Cottidae' ~ 'Cottid sculpin',
+                                 found_taxa == 'Embiotocidae' ~ 'Surfperch family',
+                                 found_taxa == 'Gadidae' ~ 'Cod family',
+                                 found_taxa == 'Liparidae' ~ 'Snailfish family',
+                                 found_taxa == 'Pleuronectidae' ~ 'Flatfish family',
+                                 found_taxa == 'Serranidae' ~ 'Sea bass family',
+                                 found_taxa == 'Stichaeidae' ~ 'Prickleback family',
+                                 # genus level
+                                 found_taxa == 'Albula' ~ 'Bonefish species',
+                                 found_taxa == 'Ammodytes' ~ 'Sandlance species',
+                                 found_taxa == 'Clinocottus' ~ 'Clinocottus sculpin species',
+                                 found_taxa == 'Cottus' ~ 'Cottus sculpin species',
+                                 found_taxa == 'Enophrys' ~ 'Enophrys sculpin species',
+                                 found_taxa == 'Gadus' ~ 'Gadus cod species',
+                                 found_taxa == 'Gibbonsia' ~ 'Kelpfish species',
+                                 found_taxa == 'Halichoeres' ~ 'Halichoeres wrasse',
+                                 found_taxa == 'Hemilepidotus' ~ 'Hemilepidotus Irish lord species',
+                                 found_taxa == 'Hexagrammos' ~ 'Hexagrammos kelp species',
+                                 found_taxa == 'Lepidopsetta' ~ 'Lepidopsetta sole species',
+                                 found_taxa == 'Leuroglossus' ~ 'Leuroglossus smoothtongue species',
+                                 found_taxa == 'Liparis' ~ 'Snailfish species',
+                                 found_taxa == 'Malacocottus' ~ 'Malacocottus sculpin species',
+                                 found_taxa == 'Merluccius' ~ 'Hake species',
+                                 found_taxa == 'Myoxocephalus' ~ 'Myoxocephalus sculpin species',
+                                 found_taxa == 'Oligocottus' ~ 'Oligocottus sculpin species',
+                                 found_taxa == 'Oncorhynchus' ~ 'Salmon species',
+                                 found_taxa == 'Paralabrax' ~ 'Paralabrax sea bass species',
+                                 found_taxa == 'Phanerodon' ~ 'Phanerodon seaperch species',
+                                 found_taxa == 'Pholis' ~ 'Gunnel species',
+                                 found_taxa == 'Rimicola' ~ 'Rimicola kelp clingfish species',
+                                 found_taxa == 'Ruscarius' ~ 'Roughcheek sculpin species',
+                                 found_taxa == 'Salvelinus' ~ 'Char species',
+                                 found_taxa == 'Sebastes' ~ 'Rockfish species',
+                                 found_taxa == 'Syngnathus' ~ 'Pipefish species',
+                                 found_taxa == 'Thunnus' ~ 'Tuna species',
+                                 found_taxa == 'Xiphister' ~ 'Prickleback species',
+                                 # species level
+                                 # invasive?
+                                 found_taxa == 'Barbatula barbatula' ~ 'Stone loach invasive',
+                                 found_taxa == 'Alosa pseudoharengus' ~ 'Alewife invasive',
+                                 found_taxa == 'Esox lucius' ~ 'Northern pike invasive',
+                                 found_taxa == 'Ctenopharyngodon idella' ~ 'Grass carp invasive',
+                                 found_taxa == 'Gambusia affinis' ~ 'Mosquitofish invasive',
+                                 found_taxa == 'Morone saxatilis' ~ 'Striped bass invasive',
+                                 found_taxa == 'Squalius cephalus' ~ 'European chub no records',
+                                 found_taxa == 'Tautogolabrus adspersus' ~ 'Cunner no records',
+                                 found_taxa == 'Tridentiger trigonocephalus' ~ 'Chameleon goby invasive',
+                                 TRUE ~ common_name)) %>%
+  # some silliness
+  mutate(found_taxa = case_when(found_taxa == 'Homo' ~ 'Homo sapiens',
+                                TRUE ~ found_taxa)) %>%
+  mutate(rank = case_when(class %in% c('Mammalia', 'Aves') ~ 'outgroup',
+                          common_name %in% c('Bacteria', 'Diatom', 'Foraminifera',
+                                             'Unknown organism') ~ 'outgroup',
+                          TRUE ~ rank)) %>%
+  #filter(is.na(common_name)) %>%
+  #arrange(common_name)
+  arrange(found_taxa) %>%
+  distinct()
+```
+
+# consensus for MOTUs
+
+add a column for motu level ids, this way we can select columns based on the analysis we want to do
+
+```{r motus}
+taxonomy_assigned_motu <- taxonomy_assigned_asv %>%
+  filter(blast == 'BLAST') %>%
+  group_by(motu) %>%
+  # how many blast hits
+  add_count(name = 'num_blast') %>%
+  ungroup() %>%
+  group_by(motu,found_taxa) %>%
+  # how often does that species come up
+  add_count(name = 'sp_freq') %>%
+  ungroup() %>%
+  group_by(motu, common_name) %>%
+  # how often does that species come up
+  add_count(name = 'com_freq') %>%
+  ungroup() %>%
+  mutate(sp_percent = sp_freq/num_blast) %>%
+  mutate(com_percent = com_freq/num_blast) %>%
+    # indicate keep rows with 100% same species
+  mutate(one_hit = ifelse(sp_percent == 1, 'yes', 'no')) %>%
+  mutate(one_com = ifelse(com_percent == 1 & rank == 'offtarget', 'yes', 'no')) %>%
+  mutate(hit_100_higher = ifelse(identity_percentage == 100 & !(rank %in% c('species', 'offtarget')), 1, NA_character_)) %>%
+  group_by(motu) %>%
+  # if any species has 100% and the rest are other ranks without 100%
+  # go with highest ranking species
+  mutate(sp_100 = ifelse((sum(hit_100_higher < 1, na.rm = TRUE) | is.na(sum(hit_100_higher < 1))) & any(one_hit == 'no' & rank != 'species' & rank != 'offtarget'),
+         found_taxa[which.max(identity_percentage) & rank == 'species'], NA_character_)) %>%
+  # all hits genus or higher, just collapse to highest match
+  mutate(higher_taxa = ifelse(all(rank != 'species'), found_taxa[which.max(sp_percent)], NA_character_)) %>%
+  # if family level has 100%
+ # mutate(fam_100 = case_when(any(one_hit == 'no' & rank == 'family' & hit_100_higher == 1) ~ found_taxa[which.max(identity_percentage) & rank == 'family'],
+#                             any(blast == 'No BLAST hit') ~ found_taxa[which.max(identity_percentage) & rank == 'family'])) %>%
+  mutate(fam_100 = ifelse(any(one_hit == 'no' & rank == 'family' & hit_100_higher == 1),
+         found_taxa[which.max(identity_percentage) & rank == 'family'], NA_character_)) %>%
+  # genus level has 100%
+  mutate(gen_100 = ifelse(any(one_hit == 'no' & rank == 'genus' & hit_100_higher == 1),
+         found_taxa[which.max(identity_percentage) & rank == 'genus'], NA_character_)) %>%
+  # species level conflict, expand later to be one family etc.
+  mutate(sp_conflict = case_when(length(unique(genus)) == 1 & one_hit == 'no' ~ 'one genus',
+                                 length(unique(family))== 1 & one_hit == 'no' ~ 'one family')) %>%
+  #mutate(sp_conflict = ifelse(length(unique(genus)) == 1 & one_hit == 'no', 'one genus', NA_character_)) %>%
+  ungroup() %>%
+  mutate(found_taxa_motu = case_when(one_hit == 'yes' ~ found_taxa,
+                                     one_com == 'yes' ~ common_name,
+                                     one_com == 'no' & rank == 'offtarget' ~ 'Unknown organism',
+                                     !is.na(fam_100) ~ fam_100,
+                                     !is.na(gen_100) ~ gen_100,
+                                     !is.na(sp_100) ~ sp_100,
+                                     !is.na(higher_taxa) ~ higher_taxa,
+                                     sp_conflict == 'one genus' ~ genus,
+                                     sp_conflict == 'one family' ~ family)) %>%
+    select(!c(one_hit, one_com, sp_100, higher_taxa, fam_100, gen_100, sp_conflict,
+            low_match, very_low_match, extremely_low_match, blast,
+            sp_percent, num_blast, sp_freq, com_freq, hit_100_higher, com_percent)) %>%
+  relocate(found_taxa_motu) %>%
+  rename(common_name_asv = common_name,
+         found_taxa_asv = found_taxa,
+         rank_asv = rank) %>%
+  group_by(motu) %>%
+  mutate(common_name = ifelse(any(found_taxa_asv == found_taxa_motu), common_name_asv[which(found_taxa_asv == found_taxa_motu)], NA_character_)) %>%
+    mutate(common_name = ifelse(any(common_name_asv == found_taxa_motu), common_name_asv[which(common_name_asv == found_taxa_motu)], common_name)) %>%
+  ungroup() %>%
+  mutate(common_name = case_when(!is.na(common_name) ~ common_name,
+                                 found_taxa_motu == 'Unknown organism' ~ 'Unknown organism',
+                                 # ugh just manual for now
+                                 found_taxa_motu == 'Oncorhynchus' ~ 'Oncorhynchus salmon species')) %>%
+  # rank now
+  group_by(motu) %>%
+    mutate(rank = ifelse(any(found_taxa_asv == found_taxa_motu), rank_asv[which(found_taxa_asv == found_taxa_motu)], NA_character_)) %>%
+      mutate(rank = ifelse(any(common_name_asv == found_taxa_motu), rank_asv[which(common_name_asv == found_taxa_motu)], rank)) %>%
+  ungroup() %>%
+  mutate(rank = case_when(!is.na(rank) ~ rank,
+                          found_taxa_motu == 'Unknown organism' ~ 'offtarget',
+                          # for expansion later
+                          found_taxa_motu == genus ~ 'genus')) %>%
+  relocate(common_name, rank, .before = motu) %>%
+  rename(found_taxa = found_taxa_motu)
+
+
+motu_test <- taxonomy_assigned_motu %>%
+  select(motu, found_taxa, common_name) %>%
+  distinct()
+
+
+write_csv(taxonomy_assigned_motu, here(processededna, 
+                                       paste0(datefield_new, runfield,'taxonomy.csv')))
+```
+
+
+
+```{r not-in}
+motu_reblast <- taxonomy_assigned_asv %>%
+  mutate(to_reblast = case_when(found_taxa %in% c('No BLAST hit') ~ 'x',
+                                extremely_low_match == 'yes' & rank != 'offtarget' ~ 'x',
+                                very_low_match == 'yes' & rank != 'offtarget' ~ 'x',
+                                rank %in% c('order', 'family') ~ 'x',
+                                rank == 'genus' & is.na(common_name) ~ 'x')) %>%
+  filter(!is.na(to_reblast)) %>%
+  select(motu) %>%
+  distinct()
+
+write_delim(motu_reblast, here(processededna, paste0(datefield_new, runfield, 'to-reblast2.txt')),
+          col_names = FALSE)
+```
+

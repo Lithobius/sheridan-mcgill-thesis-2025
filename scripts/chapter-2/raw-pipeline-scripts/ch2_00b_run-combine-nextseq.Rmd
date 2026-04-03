@@ -33,43 +33,35 @@ library(seqinr)
 library(here)
 # here filepaths
 # combined
-fastq_combined <- here('rawdata', 'peco', 'fastq', 'allyears')
-datefield <- '20250528_'
-runfield <- 'peco-combined_12s_'
+fastq_combined <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi')
+datefield <- '20260331_'
+runfield <- 'peco_next-mi-combined_'
 
 
-# 2021
-pecofastq2021 <- here('rawdata', 'peco', 'fastq', 
-                  '12S_PECO_2021_Redos_Run20250416',
-                  'Analysis', '1', 'Data', 'fastq', 
+# miseq
+pecofastq2022_mi <- here('rawdata', 'peco', 'fastq', 
+                  'miseq_nextseq', 'miseq_2022_run2',
                   'fixed', 'processed') 
-datefield2021 <- '20250527_'
-runfield2021 <- 'peco2021_12s_'
+runfield2022_mi <- 'peco2022_miseq-library2_'
 
-# 2022
-pecofastq2022 <- here('rawdata', 'peco', 'fastq', 
-                  '12S_PECO_2022_Redos_Run20250301',
-                  'Analysis','1', 'Data', 'fastq', 
+# nextseq
+pecofastq2022_next <- here('rawdata', 'peco', 'fastq', 
+                  'miseq_nextseq', 'nextseq_2022_run2',
                   'fixed', 'processed') 
-datefield2022 <- '20250428_'
-runfield2022 <- 'peco2022_12s_'
+runfield2022 <- 'peco2022_nextseq-library2_'
 
 
-# 2023
+# 2023 next-first
 pecofastq2023 <- here('rawdata', 'peco', 'fastq', 
-                  '12S_PECO2023_Run20240907', 'Analysis',
-                  '1', 'Data', 'fastq', 'fixed', 'processed') 
-datefield2023 <- '20250428_'
-runfield2023 <- 'peco2023_12s_20240907_'
+                  'miseq_nextseq', '2023', 'processed') 
+datefield2023 <- '20240603_'
+runfield2023 <- 'peco2023_nextseq-firstrun_'
 
-
-# 2024
-pecofastq2024 <- here('rawdata', 'peco', 'fastq', 
-                  '12S_PECO2024_20250525', 'Analysis',
-                  '1', 'Data', 'fastq', 'fixed', 'processed') 
-datefield2024 <- '20250527_'
-runfield2024 <- 'peco2024_12s_'
-
+# 2023 next-redo
+pecofastq2023_re <- here('rawdata', 'peco', 'fastq', 
+                  'miseq_nextseq', '2023', 'processed') 
+datefield2023_re <- '20250208_'
+runfield2023_re <- 'peco2023_nextseq-rerun_'
 ```
 
 # eDNA data
@@ -79,31 +71,35 @@ runfield2024 <- 'peco2024_12s_'
 
 ```{r each year}
 ####read in sequence tables####
-#peco run 1
-seqtab_2021 <- read_delim(here(pecofastq2021,
-                                 "20250527_peco2021_12s_nextseq_sequence-table_12S-merged.txt")) %>%
+# miseq 2022
+seqtab_2022_mi <- read_delim(here(pecofastq2022_mi,
+                                 "20260331_peco2022_miseq-library2_sequence-table_12S-merged.txt")) %>%
+  mutate(row_names = paste0(row_names, '-miseq')) %>%
   column_to_rownames('row_names') %>%
   as.matrix()
 
 
 
-#peco run 2
-seqtab_2022 <- read_delim(here(pecofastq2022, 
-                                 '20250425_peco2022_12s_nextseq_sequence-table_12S-merged.txt')) %>%
+# nextseq 2022
+seqtab_2022_next <- read_delim(here(pecofastq2022_next, 
+                                 '20260331_peco2022_nextseq-library2_sequence-table_12S-merged.txt')) %>%
+  mutate(row_names = paste0(row_names, '-nextseq')) %>%
   column_to_rownames('row_names') %>%
   as.matrix()
 
 
 
-#peco 2023
+# nextseq-first 2023
 seqtab_2023 <- read_delim(here(pecofastq2023,
-                               "20250428_peco2023_12s_20240907_sequence-table_12S-merged.txt")) %>%
+                               "20240603_peco2023_12s_20240328_sequence-table_12S-merged.txt")) %>%
+  mutate(row_names = paste0(row_names, '-first')) %>%
  column_to_rownames('row_names') %>%
  as.matrix()
 
 #peco 2024
-seqtab_2024 <- read_delim(here(pecofastq2024,
-                               "20250527_peco2024_12s_sequence-table_12S-merged.txt")) %>%
+seqtab_2023_re <- read_delim(here(pecofastq2023_re,
+                               "20250428_peco2023_12s_20240907_sequence-table_12S-merged.txt")) %>%
+  mutate(row_names = paste0(row_names, '-redone')) %>%
  column_to_rownames('row_names') %>%
  as.matrix()
 ```
@@ -115,7 +111,7 @@ All sequence tables should be merged into one master table. This means that ever
 ```{r merge-all-tables}
 ####merge sequence tables####
 #ASVs are combined on sequence alone. exact matches are simply merged
-seqtab_all <- mergeSequenceTables(seqtab_2021, seqtab_2022, seqtab_2023, seqtab_2024) 
+seqtab_all <- mergeSequenceTables(seqtab_2022_mi, seqtab_2022_next, seqtab_2023, seqtab_2023_re) 
 
 
 ####save sequences as fasta, give sequences human-readable names, save modified sequence table####
@@ -168,7 +164,7 @@ write.table(data.frame("row_names"=rownames(seqtab_all),seqtab_all),
 These will be used for eDNA QC after taxonomy assignment.
 
 ```{r yearly sequence tables}
-asvtab_2021 <- seqtab_2021 %>%
+asvtab_2022_mi <- seqtab_2022_mi %>%
   as.data.frame() %>%
   rownames_to_column(var = 'sample') %>%
   pivot_longer(cols = !sample,
@@ -179,13 +175,13 @@ asvtab_2021 <- seqtab_2021 %>%
 
 # take seqtab 2021 and update to have the right names
 #re-save sequence table w updated names
-write.table(asvtab_2021,
-            here(pecofastq2021,
-                 paste0(datefield, runfield, "sequence-table_asv-names_2021.txt")), 
+write.table(asvtab_2022_mi,
+            here(pecofastq2022_mi,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2022-miseq.txt")), 
             row.names=FALSE, quote=F, sep="\t")
 
 # 2022
-asvtab_2022 <- seqtab_2022 %>%
+asvtab_2022_next <- seqtab_2022_next %>%
   as.data.frame() %>%
   rownames_to_column(var = 'sample') %>%
   pivot_longer(cols = !sample,
@@ -196,9 +192,9 @@ asvtab_2022 <- seqtab_2022 %>%
 
 # take seqtab 2022 and update to have the right names
 #re-save sequence table w updated names
-write.table(asvtab_2022,
-            here(pecofastq2022,
-                 paste0(datefield, runfield, "sequence-table_asv-names_2022.txt")), 
+write.table(asvtab_2022_next,
+            here(pecofastq2022_next,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2022-nextseq.txt")), 
             row.names=FALSE, quote=F, sep="\t")
 
 
@@ -216,12 +212,12 @@ asvtab_2023 <- seqtab_2023 %>%
 #re-save sequence table w updated names
 write.table(asvtab_2023,
             here(pecofastq2023,
-                 paste0(datefield, runfield, "sequence-table_asv-names_2023.txt")), 
+                 paste0(datefield, runfield, "sequence-table_asv-names_2023-first.txt")), 
             row.names=FALSE, quote=F, sep="\t")
 
 
 # 2024
-asvtab_2024 <- seqtab_2024 %>%
+asvtab_2023_re <- seqtab_2023_re %>%
   as.data.frame() %>%
   rownames_to_column(var = 'sample') %>%
   pivot_longer(cols = !sample,
@@ -232,9 +228,9 @@ asvtab_2024 <- seqtab_2024 %>%
 
 # take seqtab 2024 and update to have the right names
 #re-save sequence table w updated names
-write.table(asvtab_2024,
-            here(pecofastq2024,
-                 paste0(datefield, runfield, "sequence-table_asv-names_2024.txt")), 
+write.table(asvtab_2023_re,
+            here(pecofastq2023_re,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2023-redone.txt")), 
             row.names=FALSE, quote=F, sep="\t")
 
 ```
@@ -244,7 +240,7 @@ write.table(asvtab_2024,
 Update this with stuff from the tracking script later. 
 
 Maybe figure out why certain columns aren't happy?
-REDO 2023 FOR THESE FILES AND MERGE LATER
+
 
 
 These files map where the reads went throughout the entire QC process
@@ -292,33 +288,4 @@ write.csv(retention_summary, here(fastq_combined,
 
 
 
-
-# Dereplicate FASTA test
-
-Right now it looks like all these are unique?
-
-```{r dereplicate}
-library(ips)
-
-asvtab_all <- t(as.data.frame(seqtab_all))
-
-seq_list <- asvtab_all %>%
-  as.data.frame() %>%
-  rownames_to_column('asv_seq') %>%
-  select(asv_seq) %>%
-  mutate(temp_asv = paste0("tempasv_", seq(asv_seq))) %>%
-  column_to_rownames('temp_asv')
-
-write.fas(seq_list, here(fastq_combined, '20231023_tempasvs.fasta'))
-seq_list2 <- read.fas(here(fastq_combined, '20231023_tempasvs.fasta'))
-
-seq_align <- mafft(seq_list2)
-write.fas(seq_align, here(fastq_combined, '20231023_tempasvs_align.fasta'))
-
-seq_derep <- dada2:::derepFasta(here(fastq_combined, '20231023_tempasvs_align.fasta'))
-
-uniq<-seq_derep$uniques %>%
-  as.data.frame()
-
-```
 

@@ -1,0 +1,97 @@
+---
+title: "ch2_00c_swarm"
+output: html_document
+date: "2023-08-18"
+---
+PECO swarm!
+
+Here we're going to be running swarm, according to brandt et al 2021 (https://onlinelibrary.wiley.com/doi/10.1111/1755-0998.13398), they used swarm on asv tables from dada2.
+
+Swarm was installed then made available to users as explained on the github: https://github.com/torognes/swarm
+the binary from the installation copied to /usr/local/bin, which is on `$PATH`
+
+Here we will use a similar strategy to Evan's dada2 scripts and use system2 to call swarm.
+
+```{r}
+library(tidyverse)
+library(here)
+
+# here filepaths
+pecofastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi')
+datefield <- '20260331_'
+runfield <- 'peco_next-mi-combined_'
+```
+
+
+FASTA has been updated in python
+
+```{r load-in}
+
+# filepath to fasta formatted for swarm
+swarmfasta <- file.path(here(pecofastq,
+                             "20260331_peco_next-mi-combined_sequence-table_swarm-format.fasta"))
+#generate filenames for output
+swarmout <- file.path(here(pecofastq, paste0(datefield, runfield, 'swarm_outputfile.txt')))
+swarmstats <- file.path(here(pecofastq, paste0(datefield, runfield, 'swarm_statsfile.tsv')))
+swarmlog <- file.path(here(pecofastq, paste0(datefield, runfield, 'swarm_log.txt')))
+swarmreps <- file.path(here(pecofastq, paste0(datefield, runfield, 'swarm_clusterreps.fasta')))
+```
+
+
+```{r}
+system2("swarm", args = "-v")
+
+system2("swarm", args = c(swarmfasta,
+                          "-w", swarmreps,
+                          "-o", swarmout,
+                          "-s", swarmstats,
+                          "-l", swarmlog,
+                          "-f"))
+
+```
+
+# input swarm output to generate motus
+
+
+```{r input swarm}
+
+swarm_stat <- read_delim(here(pecofastq, 
+                             '20260331_peco_next-mi-combined_swarm_statsfile.tsv'),
+                         # give columns names
+                        col_names = c('n_in_cluster', 'motu_reads', 
+                                      'seed_asv', 'seed_reads', 'n_1readamplicon',
+                                      'max_iterations_to_limit', 'cumulative_steps')) 
+
+swarm_stat <- swarm_stat %>%
+  mutate(motu = paste0('motu', seq.int(from = 1, to = nrow(swarm_stat)))) %>%
+  mutate(seed_asv_reads = paste0(seed_asv, '_', seed_reads)) %>%
+  # for lulu
+  mutate(swarm_reads = paste0(seed_asv, '_', motu_reads))
+
+swarm_out <- read_delim(here(pecofastq, 
+                             '20260331_peco_next-mi-combined_swarm_outputfile.txt'),
+                        col_names = FALSE, delim = " ")
+
+
+# format
+swarm_out <- swarm_out %>%
+  # identify seeds for taxonomy assignment ~TEMPORARY~
+  mutate(seed_asv_reads = X1) %>%
+  # add 'motu' numbers
+  left_join(swarm_stat) %>%
+  select(!(c(motu_reads, n_in_cluster, n_1readamplicon, seed_reads,
+             max_iterations_to_limit, cumulative_steps, seed_asv_reads))) %>%
+  #mutate(cluster = paste0('cluster', seq.int(from = 1, to = nrow(swarm_out)))) %>%
+  # make long, no more NAs
+  pivot_longer(cols = !c(motu, seed_asv)) %>%
+  select(!name) %>%
+  filter(!(is.na(value))) %>%
+  distinct() %>%
+  # asv + reads each get their own column
+  separate_wider_delim(value, delim = "_", names = c("asv", "asv_reads"), too_many = 'drop')
+  
+write_csv(swarm_out, here(pecofastq, paste0(datefield, runfield, 'motu2asv.csv')))
+
+write_csv(swarm_stat, here(pecofastq, paste0(datefield, 
+                                             runfield, 'swarm_statsfile-w-motunums.csv')))
+```

@@ -1,0 +1,80 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Some of the FASTQ files are empty.
+This moves them to their own folder and writes down which ones.
+Note the directory "fixed/empty" has to already exist.
+
+Author: Kate Sheridan
+2024 version 0.1.0
+"""
+
+# load-in
+import os
+import re
+import shutil
+from pyprojroot import here # for 'here' like R
+
+# log-setup
+# check logging package for more settings
+# I'm mostly using the debug options for development
+import logging
+
+LOG_FILENAME = 'remove2022-log.txt'
+
+logging.basicConfig(filename=LOG_FILENAME,
+                    level=logging.DEBUG,
+                    format=' %(asctime)s - %(levelname)s - %(message)s')
+logging.info('Debut!')
+
+
+# functions
+
+def remove_empties(files_in, files_empty, empties):
+    with open(empties, 'w') as f:
+        for filename in os.listdir(files_in):
+            #extract samplename
+            samplename = re.split(r'(_)', filename)[0]
+            # make text path for file to extract stats from
+            filepath = str(files_in) + "/" + filename
+            # get filesize; any fastq.gz less than ~ 50 bytes is empty
+            statinfo = os.stat(filepath).st_size
+            #logging.info(statinfo)
+            if statinfo > 50:
+                logging.info(filename + " is ok.")
+                pass
+            else:
+                f.write(samplename + "\n")
+                newpath = str(files_empty) + "/" + filename
+                shutil.move(filepath, newpath)
+                logging.info("Moved empty fastq: " + filename)
+
+
+
+
+# script
+
+if __name__ == "__main__":
+
+    ## directory containing "bad" filenames
+    direct = here('./rawdata/peco/fastq/miseq_nextseq/miseq_2022_run2/fixed')
+    # destination directory for 'good' files
+    dest_direct = here('./rawdata/peco/fastq/miseq_nextseq/miseq_2022_run2/Analysis/1/Data/fastq/fixed/empty')
+    # list for empties
+    empties_list = here('./rawdata/peco/fastq/miseq_nextseq/miseq_2022_Run2/fastq_w_no_sequences.txt')
+    # run function to forat to swarm format.
+    remove_empties(direct, dest_direct, empties_list)
+
+    ## directory containing "bad" filenames
+    direct2 = here('./rawdata/peco/fastq/miseq_nextseq/nextseq_2022_run2/fixed')
+    # destination directory for 'good' files
+    dest_direct2 = here('./rawdata/peco/fastq/miseq_nextseq/nextseq_2022_run2/fixed/empty')
+    # list for empties
+    empties_list2 = here('./rawdata/peco/fastq/miseq_nextseq/nextseq_2022_run2/fastq_w_no_sequences.txt')
+    # run function to forat to swarm format.
+    remove_empties(direct2, dest_direct2, empties_list2)
+
+
+# end
+logging.info('Fin!')

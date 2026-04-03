@@ -1,0 +1,56 @@
+Swarm 3.1.3
+Copyright (C) 2012-2023 Torbjorn Rognes and Frederic Mahe
+https://github.com/torognes/swarm
+
+Mahe F, Rognes T, Quince C, de Vargas C, Dunthorn M (2014)
+Swarm: robust and fast clustering method for amplicon-based studies
+PeerJ 2:e593 https://doi.org/10.7717/peerj.593
+
+Mahe F, Rognes T, Quince C, de Vargas C, Dunthorn M (2015)
+Swarm v2: highly-scalable and high-resolution amplicon clustering
+PeerJ 3:e1420 https://doi.org/10.7717/peerj.1420
+
+Mahe F, Czech L, Stamatakis A, Quince C, de Vargas C, Dunthorn M, Rognes T (2022)
+Swarm v3: towards tera-scale amplicon clustering
+Bioinformatics 38:1, 267-269 https://doi.org/10.1093/bioinformatics/btab493
+
+Database file:     /Users/katesheridan/Documents/GitHub/sheridan-mcgill-thesis-2025/rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_sequence-table_swarm-format.fasta
+Output file:       /Users/katesheridan/Documents/GitHub/sheridan-mcgill-thesis-2025/rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_swarm_outputfile.txt
+Statistics file:   /Users/katesheridan/Documents/GitHub/sheridan-mcgill-thesis-2025/rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_swarm_statsfile.tsv
+Resolution (d):    1
+Threads:           1
+Break clusters:        Yes
+Fastidious:        Yes, with boundary 3
+
+Reading sequences: 100%
+Indexing database: 100%
+Abundance sorting: 100%
+Database info:     478019 nt in 2102 sequences, longest 365 nt
+Hashing sequences: 100%
+Building network:  100%
+Clustering:        100%
+
+Results before fastidious processing:
+Number of swarms:  1455
+Largest swarm:     55
+
+Counting amplicons in heavy and light swarms 100%
+Heavy swarms: 1444, with 2091 amplicons
+Light swarms: 11, with 11 amplicons
+Total length of amplicons in light swarms: 2230
+Bloom filter: bits=16, m=249760, k=6, size=0.0MB
+Adding light swarm amplicons to Bloom filter 100%
+Generated 15009 variants from light swarms
+Checking heavy swarm amplicons against Bloom filter 100%
+Heavy variants: 3206111
+Got 2 graft candidates
+Grafting light swarms on heavy swarms 100%
+Made 1 grafts
+
+Writing swarms:    100%
+Writing seeds:     100%
+Writing stats:     100%
+
+Number of swarms:  1454
+Largest swarm:     55
+Max generations:   5

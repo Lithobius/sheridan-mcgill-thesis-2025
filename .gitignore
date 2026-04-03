@@ -72,3 +72,7 @@ processeddata/blastdb/blastdb_202410/crabs-mifish.ntf
 processeddata/blastdb/blastdb_202410/crabs-mifish.nto
 *.RDS
 rawdata/bigdata/obis_cti/20251212_obis_cti-filtered.csv
+lulu.log_20260403_144133
+/rawdata/peco/fastq/miseq_nextseq/miseq_2022_run2
+/rawdata/peco/fastq/miseq_nextseq/nextseq_2022_run2/fastq_report
+/rawdata/peco/fastq/miseq_nextseq/nextseq_2022_run2/fixed
