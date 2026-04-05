@@ -1,0 +1,71 @@
+"","site_code","region_code","region_name","decimal_latitude","decimal_longitude","region_lat_name","avg_region_lat","region_label","samples","sites"
+"1","CHP_CC","BC_CC","BC_CC",51.40613,-128.07383,4,51.77339,"Central Coast British Columbia",50,5
+"2","PBA_CC","BC_CC","BC_CC",51.6464,-128.11896,4,51.77339,"Central Coast British Columbia",50,5
+"3","KIS2_CC","BC_CC","BC_CC",51.8368,-128.2395,4,51.77339,"Central Coast British Columbia",50,5
+"4","GOG1_CC","BC_CC","BC_CC",51.92397,-128.4673,4,51.77339,"Central Coast British Columbia",50,5
+"5","FAN3_CC","BC_CC","BC_CC",52.05365,-128.40331,4,51.77339,"Central Coast British Columbia",50,5
+"6","E_PP","BC_PP","BC_PP",48.877117,-125.3054,7,48.9224848,"Pacific Rim Park, British Columbia",25,5
+"7","MB_PP","BC_PP","BC_PP",48.97404,-125.31132,7,48.9224848,"Pacific Rim Park, British Columbia",25,5
+"8","HI_PP","BC_PP","BC_PP",48.951517,-125.30975,7,48.9224848,"Pacific Rim Park, British Columbia",25,5
+"9","J_PP","BC_PP","BC_PP",48.92145,-125.275733,7,48.9224848,"Pacific Rim Park, British Columbia",25,5
+"10","C_PP","BC_PP","BC_PP",48.8883,-125.379833,7,48.9224848,"Pacific Rim Park, British Columbia",25,5
+"11","BI_NV","BC_NV","BC_NV",50.487651,-128.04074893,5,50.50581675,"North Vancouver Island, British Columbia",40,4
+"12","PC_NV","BC_NV","BC_NV",50.5176714,-127.6544689,5,50.50581675,"North Vancouver Island, British Columbia",40,4
+"13","KC_NV","BC_NV","BC_NV",50.521548,-127.576556,5,50.50581675,"North Vancouver Island, British Columbia",40,4
+"14","KI_NV","BC_NV","BC_NV",50.4963966,-127.8562984,5,50.50581675,"North Vancouver Island, British Columbia",40,4
+"15","FJ_PS","WA_PSb","WA_PS",48.4687187,-123.0033189,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"16","FB_PS","WA_PSb","WA_PS",48.4829,-123.07476,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"17","NC_PS","WA_PSb","WA_PS",48.7042064,-123.0551349,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"18","IC_PS","WA_PSb","WA_PS",48.5634903,-122.9348941,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"19","BH_PS","WA_PSb","WA_PS",48.6917494,-122.9527529,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"20","LIE_HG","BC_HG","BC_HG",52.23234,-131.28337,3,52.397794,"Haida Gwaii, British Columbia",50,5
+"21","ROI_HG","BC_HG","BC_HG",52.20462,-131.14229,3,52.397794,"Haida Gwaii, British Columbia",50,5
+"22","BH_HG","BC_HG","BC_HG",52.34843,-131.36375,3,52.397794,"Haida Gwaii, British Columbia",50,5
+"23","SB_HG","BC_HG","BC_HG",52.63074,-131.60835,3,52.397794,"Haida Gwaii, British Columbia",50,5
+"24","RI_HG","BC_HG","BC_HG",52.57284,-131.39551,3,52.397794,"Haida Gwaii, British Columbia",50,5
+"25","F_YB","OR_YB","OR_YB",44.6238,-124.0589,10,44.6191875,"Yaquina Bay, Oregon",40,4
+"26","SN_YB","OR_YB","OR_YB",44.622867,-124.023817,10,44.6191875,"Yaquina Bay, Oregon",40,4
+"27","SS_YB","OR_YB","OR_YB",44.61245,-124.013317,10,44.6191875,"Yaquina Bay, Oregon",40,4
+"28","IF_YB","OR_YB","OR_YB",44.617633,-124.029183,10,44.6191875,"Yaquina Bay, Oregon",40,4
+"29","RB_NC","CA_NCb","CA_NC",37.87402,-122.49204,11,38.063694,"Bodega Bay & San Francisco Bay, California",54,5
+"30","PM_NC","CA_NCb","CA_NC",37.94615,-122.41951,11,38.063694,"Bodega Bay & San Francisco Bay, California",54,5
+"31","PS_NC","CA_NCb","CA_NC",37.9733,-122.42098,11,38.063694,"Bodega Bay & San Francisco Bay, California",54,5
+"32","RF_SE","AK_SE","AK_SE",55.282137,-133.33403,2,55.5152836,"Southeast Alaska",25,5
+"33","NZ_SE","AK_SE","AK_SE",55.247155,-132.87914,2,55.5152836,"Southeast Alaska",25,5
+"34","SH_SE","AK_SE","AK_SE",55.59929,-133.16,2,55.5152836,"Southeast Alaska",25,5
+"35","NS_SE","AK_SE","AK_SE",55.70802,-133.34102,2,55.5152836,"Southeast Alaska",25,5
+"36","GK_SE","AK_SE","AK_SE",55.739816,-133.31202,2,55.5152836,"Southeast Alaska",25,5
+"37","BC_JN","AK_JN","AK_JN",58.3856,-134.649383,1,58.4778488,"Juneau Region, Alaska",31,5
+"38","AN_JN","AK_JN","AK_JN",58.381283,-134.692633,1,58.4778488,"Juneau Region, Alaska",31,5
+"39","FC_JN","AK_JN","AK_JN",58.3321,-134.607683,1,58.4778488,"Juneau Region, Alaska",31,5
+"40","SB_JN","AK_JN","AK_JN",58.6274,-134.943433,1,58.4778488,"Juneau Region, Alaska",31,5
+"41","EC_JN","AK_JN","AK_JN",58.662861,-134.915917,1,58.4778488,"Juneau Region, Alaska",31,5
+"42","NC_NC","CA_Nca","CA_NC",38.206,-122.926,11,38.063694,"Bodega Bay & San Francisco Bay, California",54,5
+"43","WP_NC","CA_Nca","CA_NC",38.319,-123.054,11,38.063694,"Bodega Bay & San Francisco Bay, California",54,5
+"44","GOW_IC","BC_IC","BC_IC",50.0802,-125.216483,6,50.0923832,"Inner Coast, British Columbia",48,5
+"45","SHS_IC","BC_IC","BC_IC",50.09095,-125.045067,6,50.0923832,"Inner Coast, British Columbia",48,5
+"46","SMB_IC","BC_IC","BC_IC",50.035883,-124.995,6,50.0923832,"Inner Coast, British Columbia",48,5
+"47","MAB_IC","BC_IC","BC_IC",50.11775,-125.226367,6,50.0923832,"Inner Coast, British Columbia",48,5
+"48","OPB_IC","BC_IC","BC_IC",50.137133,-125.2143,6,50.0923832,"Inner Coast, British Columbia",48,5
+"49","JD_LA","CA_LA","CA_LA",33.7617344,-118.1203273,13,33.70189716,"Los Angeles, California",45,5
+"50","MS_LA","CA_LA","CA_LA",33.7680452,-118.1285217,13,33.70189716,"Los Angeles, California",45,5
+"51","AB_LA","CA_LA","CA_LA",33.756244,-118.1311329,13,33.70189716,"Los Angeles, California",45,5
+"52","UN_LA","CA_LA","CA_LA",33.6213162,-117.8994115,13,33.70189716,"Los Angeles, California",45,5
+"53","LN_LA","CA_LA","CA_LA",33.602146,-117.8826433,13,33.70189716,"Los Angeles, California",45,5
+"54","CB_MB","CA_MB","CA_MB",35.37232,-120.85978,12,35.3664355,"Morro Bay, California",10,2
+"55","TP_MB","CA_MB","CA_MB",35.360551,-120.85194,12,35.3664355,"Morro Bay, California",10,2
+"56","WR_WB","WA_WB","WA_WB",46.69633,-123.89737,9,46.739614,"Willapa Bay, Washington",26,4
+"57","BC_WB","WA_WB","WA_WB",46.64016,-123.94413,9,46.739614,"Willapa Bay, Washington",26,4
+"58","NA_WB","WA_WB","WA_WB",46.49544,-124.02619,9,46.739614,"Willapa Bay, Washington",26,4
+"59","SB_WB","WA_WB","WA_WB",46.86754,-124.07155,9,46.739614,"Willapa Bay, Washington",26,4
+"60","DP_WB","WA_WB","WA_WB",46.9986,-124.12846,9,46.739614,"Willapa Bay, Washington",26,4
+"61","CV_CA","CA_SD","CA_SD",32.6258793,-117.1064053,14,32.77567726,"San Diego region, California",27,5
+"62","KF_CA","CA_SD","CA_SD",32.795375,-117.229336,14,32.77567726,"San Diego region, California",27,5
+"63","SD_CA","CA_SD","CA_SD",32.970861,-117.251741,14,32.77567726,"San Diego region, California",27,5
+"64","FI_CA","CA_SD","CA_SD",32.772414,-117.220498,14,32.77567726,"San Diego region, California",27,5
+"65","SI_CA","CA_SD","CA_SD",32.713857,-117.225517,14,32.77567726,"San Diego region, California",27,5
+"66","BV_PS","WA_PSa","WA_PS",48.485,-122.4830166667,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"67","SP_PS","WA_PSa","WA_PS",48.5092333333,-122.6861,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"68","YB_PS","WA_PSa","WA_PS",48.5239166667,-122.6215166667,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"69","BP_PS","WA_PSa","WA_PS",48.728233,-122.506733,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10
+"70","SH_PS","WA_PSa","WA_PS",48.505383,-122.674583,8,48.56628308,"Puget Sound & Padilla Bay, Washington",46,10

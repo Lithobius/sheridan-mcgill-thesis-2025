@@ -4,6 +4,9 @@ output: html_document
 date: "2024-06-04"
 ---
 
+note: this script was accidentally edited in place for the nextseq-miseq comparison
+version with 2021-24 should be in the git history to be restored.
+
 Updated May 2025 to add 2024 data.
 
 Note: this script adds the new sequences to the previously combined sequence_table

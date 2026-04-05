@@ -5,6 +5,11 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
+This is the original nextseq comparison script before reprocessing and reannotating the data.
+
+----------
+
+
 Additionally, my original nextseq vs miseq comparisons were from a file that had both combined into one, this condensed script is from where I wanted to compare what happened if you only looked at nextseq and removed ASVs with low read counts in samples that shared an index.
 
 This assumes you're working from a raw sequence table, so if you have data in a different format feel free to rewrite most of it, you just need the following columns to make the plot:

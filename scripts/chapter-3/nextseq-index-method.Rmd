@@ -1,0 +1,700 @@
+---
+title: "nextseq-2023-compare"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Here are plots comparing outputs of two indexing methods on nextseq, the same samples from 2023.
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(here)
+library(DESeq2)
+library(vegan)
+library(recluster)
+library(ggConvexHull)
+library(ggpubr)
+seqs_in <- here('processeddata', 'peco', 'nextseq_miseq')
+dataedna <- here('processeddata', 'peco', '2021-24_edna')
+obisdata = here('rawdata', 'bigdata', 'obis_cti')
+plot_out <- here('output', 'chapter3')
+
+datefield <- '20260404_'
+
+pal_peco <- c("Juneau Region, Alaska" = "#00496F",
+             "Southeast Alaska" = "#03587B",
+             "Haida Gwaii, British Columbia" = "#076787",
+             "Central Coast British Columbia" = "#0B7693",
+             "North Vancouver Island, British Columbia" = "#0F85A0",
+             "Inner Coast, British Columbia" = "#469989",
+             "Pacific Rim Park, British Columbia" = "#7EAE73",
+             "Puget Sound & Padilla Bay, Washington" = "#B5C25C",
+             "Willapa Bay, Washington" = "#EDD746",
+             "Yaquina Bay, Oregon" = "#EDC334",
+             "Coos Bay, Oregon" = "#EDB123",
+             "Humboldt Bay, California" = "#ED9E11",
+             "Bodega Bay, California" = "#ED8B00",
+             "San Francisco Bay, California" = "#E97809",
+             "Morro Bay, California" = "#E56512",
+             "Los Angeles, California" = "#E1531B",
+             "San Diego region, California" = "#DD4124")
+```
+
+```{r load-in}
+# set up regions
+regions <- read_csv(here(dataedna, '20260320_peco_region-name-plotting.csv'))[-1] %>%
+  rename(region_label = region_name_label) 
+
+# why is this separate?
+region_2023 <- regions %>%
+  select(region_name, region_label) %>%
+  distinct()
+
+edna_compare <- read.csv(here(seqs_in,
+                             '20260331_peco_next-mi-combined_asvmatrix_fish-novst.csv'))[-1] %>%
+  filter(!(class %in% c('Insecta'))) %>%
+  left_join(region_2023) %>%
+    select(!c(region_code_label, region_code, reads_adjust_fieldlab, curated, motu_swarm,
+            reads_adjust_field,rain, extraction_blank, sample_richness, lab_richness_site,
+            flag, bottom_depth_m, volume_filtered, collection_time, lulu_rank, filter_time,
+            seagrass_presence, seagrass_notes, describe_transect, wind, temperature_c,
+            notes, sample_box, sample_notes, personnel, swell_m, tide, salinity_psu,
+            collection_method, treatment, any_ctrl, field_blank_richness_site, field_blank_regional_max,
+            reads_adjust_lab, richness_site_avs_anyctrl, richness_sample_avs_in_labblank,
+            richness_sample_avs_anyctrl, richness_sample_avs_in_fieldblank, richness_proportion_in_fieldblank,
+            richness_proportion_in_labblank, richness_proportion_in_anyblank)) %>%
+  distinct()
+  #rename(found_taxa = found_taxa_asv,
+  #       rank = rank_asv,
+  #       common_name = common_name_asv)
+
+only_2023 <- edna_compare %>%
+  filter(year == 2023) %>%
+  filter(rank == "species") %>%
+  mutate(index_type = case_when(library == '2023first' ~ 'Dual',
+                                library == '2023redone' ~ 'Unique dual'))
+
+region_order <- regions %>%
+  filter(region_name %in% only_2023$region_name) %>%
+  select(region_lat_name, region_name, region_label, avg_region_lat) %>% 
+  distinct() %>%
+  arrange(-avg_region_lat)
+
+region_order2 <- regions %>%
+  filter(region_name %in% only_2023$region_name) %>%
+  select(region_lat_name, region_name, region_label, avg_region_lat) %>% 
+  distinct() %>%
+  arrange(avg_region_lat)
+
+site_order <- regions %>%
+  filter(site_code %in% only_2023$site_code) %>%
+  select(site_code, decimal_latitude) %>%
+  arrange(decimal_latitude)
+
+
+# set an order for plotting; here mean of range found
+# this is from the 'correct' data
+fish_order_all <- edna_compare %>%
+  filter(rank == 'species') %>%
+  select(found_taxa, common_name, taxa_mean) %>%
+  distinct() %>%
+  arrange(taxa_mean) %>%
+  mutate(order_num = as.numeric(row.names(.)))
+
+
+fish_order_2023 <- edna_compare %>%
+  filter(rank == 'species') %>%
+  filter(year == 2023) %>%
+  select(found_taxa, common_name, taxa_mean) %>%
+  distinct() %>%
+  arrange(taxa_mean) %>%
+  mutate(order_num = as.numeric(row.names(.)))
+
+
+
+
+```
+
+# 2023 compare
+
+```{r 2023 bubbles}
+firstonly <- edna_compare %>%
+  filter(rank == "species") %>%
+  filter(library == '2023first')
+
+redoonly <- edna_compare %>%
+  filter(rank == "species") %>%
+  filter(library == '2023redone')
+
+
+
+bubble_plot_data <- only_2023 %>%
+  select(found_taxa, common_name, region_name, site_code, index_type) %>%
+  distinct() %>%
+  add_count(region_name, found_taxa, index_type, name = 'n_sites') %>%
+  left_join(region_2023) 
+
+bubble2023 <- bubble_plot_data %>%
+  ggplot() +
+  geom_point(aes(x = factor(common_name, levels = fish_order_2023$common_name), 
+             y = factor(region_label, levels = region_order$region_label),
+             size = 10 + n_sites,
+             color = region_label)) +
+  facet_wrap(~index_type, ncol=1)+
+  scale_color_manual(values = pal_peco)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  theme_bw() +
+  scale_x_discrete(drop=FALSE) +
+  scale_size(guide = 'none') +
+  scale_alpha(guide = 'none') +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position = 'none',
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 8, angle = 60, hjust=1),
+        plot.margin = unit(c(1,1,1,2), 'lines'),
+        panel.grid.minor = element_blank(),
+        axis.ticks.y = element_blank())
+
+
+
+ggsave(filename = here(plot_out, paste0(datefield, 'nextseq2023_comparision.pdf')),
+       device = 'pdf', height = 8, width = 14, units = 'in')
+
+bubble2023 +
+  theme(axis.text.x = element_text(size = 12, angle = 60, hjust=1),
+        plot.margin = margin(1,1,1,2.25, "cm"))
+
+ggsave(filename = here(plot_out, paste0(datefield, 'nextseq2023_comparision.png')),
+       device = 'png', height = 2500, width = 5000, units = 'px', dpi = 300)
+```
+
+# thermal affinity lol
+
+## add vst to 2023
+```{r phyloseq motus}
+# import otu table
+# requires numeric matrix
+fishonly_otus <- only_2023 %>%
+  mutate(sample_lib = paste0(sample_id, '_', library)) %>%
+  select(sample_lib, motu, reads_raw) %>%
+  pivot_wider(names_from = sample_lib,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('motu') %>%
+  as.matrix()
+
+fishonly_sample <- only_2023 %>%
+  mutate(sample_lib = paste0(sample_id, '_', library)) %>%
+  select(sample_lib, year, region_name, library) %>% 
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_lib') %>%
+  filter(rownames(.) %in% colnames(fishonly_otus)) %>%
+  # NOTE factor CANNOT include special characters
+  mutate(library = as.factor(str_remove_all(library, '-')))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_otus = fishonly_otus + 1
+
+fishotu_dsdata = DESeqDataSetFromMatrix(countData = fishonly_otus, 
+                             colData=fishonly_sample, 
+                             design = ~ library
+                             )
+
+# note it mentions it uses local for fittype; look into this
+vsd_otu <- varianceStabilizingTransformation(fishotu_dsdata)
+
+## Taxa level
+
+# import otu table
+# requires numeric matrix
+fishonly_taxa_otus <- only_2023 %>%
+  mutate(sample_lib = paste0(sample_id, '_', library)) %>%
+  select(sample_lib, found_taxa, reads_raw) %>%
+  pivot_wider(names_from = sample_lib,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('found_taxa') %>%
+  as.matrix()
+
+fishonly_taxa_sample <- only_2023 %>%
+  mutate(sample_lib = paste0(sample_id, '_', library)) %>%
+  select(sample_lib, library, region_name) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_lib') %>%
+  filter(rownames(.) %in% colnames(fishonly_taxa_otus)) 
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_taxa_otus = fishonly_taxa_otus + 1
+
+fishtaxa_dsdata = DESeqDataSetFromMatrix(countData = fishonly_taxa_otus, 
+                             colData=fishonly_taxa_sample, 
+                             design = ~ library)
+
+vsd_taxa <- varianceStabilizingTransformation(fishtaxa_dsdata)
+
+vst_taxa_tomerge <- as.data.frame(assay(vsd_taxa)) %>%
+  rownames_to_column('found_taxa') %>%
+  pivot_longer(cols = !found_taxa,
+               names_to = 'sample_lib',
+               values_to = 'relabund_vst_taxa') %>%
+  mutate(relabund_vst_taxa = ifelse(relabund_vst_taxa < 0, 0, relabund_vst_taxa)) %>%
+  separate(sample_lib, into = c('sample_id', 'library'), sep = '_')
+
+
+vst_otu_tomerge <- as.data.frame(assay(vsd_otu)) %>%
+  rownames_to_column('motu') %>%
+  pivot_longer(cols = !motu,
+               names_to = 'sample_lib',
+               values_to = 'relabund_vst_motu') %>%
+  mutate(relabund_vst_motu = ifelse(relabund_vst_motu < 0, 0, relabund_vst_motu))%>%
+  separate(sample_lib, into = c('sample_id', 'library'), sep = '_')
+
+
+only2023_relabund <- only_2023 %>%
+  left_join(vst_taxa_tomerge) %>%
+  left_join(vst_otu_tomerge)
+```
+
+
+
+```{r load in for thermal}
+region_environment <- read_csv(here('rawdata', 'temp', 'erddap', 
+                                   '20251212_mean-summer-sst_by-region.csv')) %>%
+  select(!avg_region_lat)
+
+site_environment <- read_csv(here('rawdata', 'temp', 'erddap',
+                                   '20251212_summer-sst-summary-stats_by-site.csv')) 
+
+site_temps <- site_environment %>%
+  select(!c(decimal_latitude, decimal_longitude, avg_region_lat, region_lat_name))
+
+sti_obis <- read_csv(here('rawdata', 'bigdata', 'obis_cti',
+                          '20251212_sti_errdap_pathfinder.csv')) %>%
+  dplyr::rename(found_taxa = scientific_name) 
+```
+
+```{r}
+cti_peco <- only2023_relabund %>%
+  left_join(sti_obis) %>%
+  filter(!is.na(max_temp)) %>%
+  # temporary until I merge [1]
+  janitor::remove_empty() %>%
+  group_by(site_code, year, index_type) %>%
+  # weighted mean and SD from matrixStats package
+  summarise(cti = weightedMean(sti_value, relabund_vst_taxa),
+            # 95th percentile
+            tbiasmax = weightedMean(temp_95, relabund_vst_taxa),
+            tbiasmin = weightedMean(temp_05, relabund_vst_taxa)) %>%
+  ungroup() %>%
+  left_join(regions) %>%
+  select(!c(decimal_latitude, decimal_longitude, samples)) %>%
+  distinct() %>%
+  mutate(region_name2 = factor(region_name, levels = region_order$region_name)) %>%
+  left_join(site_order)
+
+
+cti_environment_site <- cti_peco %>%
+  left_join(site_temps) %>%
+  group_by(region_name) %>%
+  mutate(region_last5_meansst = mean(sst_mean, na.rm = TRUE),
+         region_last5_maxsst = max(sst_max, na.rm = TRUE),
+         region_last5_minsst = min(sst_min, na.rm = TRUE),
+         region_last5_temp95 = mean(site_temp95, na.rm = TRUE),
+         region_last5_temp75 = mean(site_temp75, na.rm = TRUE)) %>%
+  ungroup() %>%
+  group_by(site_code) %>%
+  mutate(site_last5_meansst = mean(sst_mean, na.rm = TRUE),
+         site_last5_maxsst = max(sst_max, na.rm = TRUE),
+         site_last5_minsst = min(sst_min, na.rm = TRUE),
+         site_last5_temp95 = mean(site_temp95, na.rm = TRUE),
+         site_last5_temp75 = mean(site_temp75, na.rm = TRUE))%>%
+  ungroup()
+
+ggplot(cti_peco) +
+  geom_boxplot(aes(y = cti, fill = as.factor(index_type))) +
+  scale_fill_manual(values = c('#015B58FF',  '#89689DFF','#2C6184FF', '#BA7999FF')) +
+  facet_wrap(~region_name2) +
+  labs(fill = NULL, y = 'Degrees C', title = 'Thermal affinity of the community, by region') +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = 'bottom',
+        panel.grid.minor = element_blank())
+
+ggsave(here(plot_out, paste0(datefield, 'cti_indextype-region.png')))
+
+# STI
+sti_peco <- only2023_relabund %>%
+  left_join(sti_obis) %>%
+  filter(!is.na(max_temp)) %>%
+  left_join(region_2023) %>%
+  distinct() %>%
+  relocate(sti_value, region_label)
+  
+sti_environment <- sti_peco %>%
+  left_join(site_temps) %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+    # fill in with means if NA
+  group_by(region_label, year) %>%
+  mutate(region_mean = mean(sst_mean, na.rm = TRUE),
+         region_95 = mean(site_temp95, na.rm = TRUE),
+         region_75 = mean(site_temp75, na.rm = TRUE),
+         region_05 = mean(site_temp05, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(sst_mean = coalesce(sst_mean, region_mean),
+         site_temp95 = coalesce(site_temp95, region_95),
+         site_temp75 = coalesce(site_temp75, region_75),
+         site_temp05 = coalesce(site_temp05, region_05)) %>%
+  select(!c(region_95, region_75, region_05, region_mean,
+            site_temp90, site_temp25, site_temp10))
+
+ggplot()+
+  geom_point(data = sti_peco,
+               aes(x=sti_value,
+                   y= factor(site_code, levels = site_order$site_code),
+                  color = region_label,
+                  alpha = relabund_vst_taxa)) +
+    geom_point(data = cti_environment_site,
+             aes(y = factor(site_code, levels = site_order$site_code),
+                x = cti),
+             shape = 23,
+             size = 2,
+             fill = 'red') +
+  scale_color_manual(values = pal_peco) +
+  facet_wrap('index_type', nrow = 1) +
+  labs(color = NULL,x = NULL, y = 'Thermal affinity | of the community') +
+  theme_bw() +
+  theme(axis.text.y = element_blank(),
+        legend.position = 'none',
+        panel.grid.minor = element_blank())
+
+
+ggsave(here(plot_out, paste0(datefield, 'sticti_bysite_facet-index-type_scatter-alpha.pdf')),
+        height = 8,
+       width = 6,
+       unit = 'in')
+
+ggsave(here(plot_out, paste0(datefield, 'sticti_bysite_facet-index-type_scatter-alpha.png')),
+        height = 1800,
+       width = 1200,
+       unit = 'px')
+
+```
+
+
+# motu sq
+semiquantitative
+
+
+# species site
+
+```{r}
+
+
+set.seed(2023)
+
+site_pa <- only2023_relabund %>%
+  filter(library == '2023first') %>%
+  # for some reason this one isn't showing up as a species
+  # region name clumps nearby partners, region code does not
+  select(found_taxa, motu_pa, site_code) %>%
+  filter(!(is.na(site_code))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = site_code,
+              names_from = found_taxa, 
+              values_from = motu_pa) %>%
+  column_to_rownames('site_code') %>%
+  # make binary
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0)))
+
+#distance matrix
+mifish_site_jaccard <- as.matrix(vegdist(site_pa, method = 'jaccard', binary = T))
+
+#pcoa
+mifish_site_pcoa <- pcoa(mifish_site_jaccard)
+#vectors for plotting
+mifish_site_pcoa_plot <- as.data.frame(mifish_site_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('site')
+
+
+# basic clustering
+
+
+# note most of these settings are default
+# consensus tree of 100 trees
+mifish_site_upgma <- recluster.cons(site_pa, 
+                              dist = 'jaccard', 
+                              method = 'average',
+                              tr = 100,
+                              p = .5)
+
+# looking at cuts
+# expldiss shows cluster attribution for each cut, 
+## explained dissimilarity, and resulting clusters, so we can pick:
+# pick cut that represents > 90% dissimilarity ($expl.div)
+#NOTE: identical before and after polytomies
+mifish_site_expldiss <- recluster.expl.diss(mifish_site_upgma$cons, mifish_site_jaccard)
+mifish_site_expldiss
+
+# extracting group identities from matrix at chosen cut (column)
+mifish_site_clusters <- mifish_site_expldiss$matrix[,13] %>%
+  as.data.frame()
+
+
+# prepare to plot
+# combine cluster identities with PCoA axes and metadata
+mifish_site_plot <- mifish_site_clusters %>%
+  dplyr::rename(cluster = '.') %>%
+  rownames_to_column('site') %>%
+  left_join(mifish_site_pcoa_plot) %>%
+  left_join(only2023_relabund, by = c('site' = 'site_code')) %>%
+  select(site, cluster, axis_1, axis_2,
+         region_name, region_label) %>%
+  distinct()
+
+# MB only has 2 points
+mb_site_line <- mifish_site_plot %>%
+  filter(region_name == "CA_MB")
+
+
+ggplot(mifish_site_plot, aes(x = axis_1, y = axis_2)) +
+  geom_convexhull(aes(fill = as.factor(region_label)),
+                  alpha=0.4) +
+          # line between morro bay dots
+  geom_line(data = mb_site_line, 
+            aes(x = axis_1, y = axis_2),
+            color = "#E56512",
+            alpha = 0.4,
+            size =3) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label)+
+  geom_point(aes(x = axis_1, y = axis_2, 
+                 col = as.factor(region_label)
+                 ))+
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label)+
+  theme_bw()+
+  #labs(title = 'Mifish PECO partners') +
+  theme(#legend.position = 'bottom',
+    legend.position = 'none',
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        title = element_blank())
+
+ggsave(filename = here(plot_out, paste0(datefield, 'dual_pcoa-site-sp.png')),
+       device = 'png', dpi=300, height = 8, width= 13,  units = "in")
+
+ggsave(filename = here(plot_out, paste0(datefield, 'dual_pcoa-site-sp.pdf')),
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
+```
+
+```{r}
+
+
+set.seed(2023)
+
+site_pa_re <- only2023_relabund %>%
+  filter(library == '2023redone') %>%
+  # for some reason this one isn't showing up as a species
+  # region name clumps nearby partners, region code does not
+  select(found_taxa, motu_pa, site_code) %>%
+  filter(!(is.na(site_code))) %>%
+  distinct() %>%
+  pivot_wider(id_cols = site_code,
+              names_from = found_taxa, 
+              values_from = motu_pa) %>%
+  column_to_rownames('site_code') %>%
+  # make binary
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0)))
+
+#distance matrix
+mifish_site_jaccard_re <- as.matrix(vegdist(site_pa_re, method = 'jaccard', binary = T))
+
+#pcoa
+mifish_site_pcoa_re <- pcoa(mifish_site_jaccard_re)
+#vectors for plotting
+mifish_site_pcoa_plot_re <- as.data.frame(mifish_site_pcoa_re$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('site')
+
+
+# basic clustering
+
+
+# note most of these settings are default
+# consensus tree of 100 trees
+mifish_site_upgma_re <- recluster.cons(site_pa_re, 
+                              dist = 'jaccard', 
+                              method = 'average',
+                              tr = 100,
+                              p = .5)
+
+# looking at cuts
+# expldiss shows cluster attribution for each cut, 
+## explained dissimilarity, and resulting clusters, so we can pick:
+# pick cut that represents > 90% dissimilarity ($expl.div)
+#NOTE: identical before and after polytomies
+mifish_site_expldiss_re <- recluster.expl.diss(mifish_site_upgma_re$cons, mifish_site_jaccard_re)
+mifish_site_expldiss_re
+
+# extracting group identities from matrix at chosen cut (column)
+mifish_site_clusters_re <- mifish_site_expldiss$matrix[,11] %>%
+  as.data.frame()
+
+
+# prepare to plot
+# combine cluster identities with PCoA axes and metadata
+mifish_site_plot_re <- mifish_site_clusters_re %>%
+  dplyr::rename(cluster = '.') %>%
+  rownames_to_column('site') %>%
+  left_join(mifish_site_pcoa_plot_re) %>%
+  left_join(only2023_relabund, by = c('site' = 'site_code')) %>%
+  select(site, cluster, axis_1, axis_2,
+         region_name, region_label) %>%
+  distinct()
+
+# MB only has 2 points
+mb_site_line_re <- mifish_site_plot_re %>%
+  filter(region_name == "CA_MB")
+
+
+ggplot(mifish_site_plot_re, aes(x = axis_1, y = axis_2)) +
+  geom_convexhull(aes(fill = as.factor(region_label)),
+                  alpha=0.4) +
+          # line between morro bay dots
+  geom_line(data = mb_site_line_re, 
+            aes(x = axis_1, y = axis_2),
+            color = "#E56512",
+            alpha = 0.4,
+            size =3) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label)+
+  geom_point(aes(x = axis_1, y = axis_2, 
+                 col = as.factor(region_label)
+                 ))+
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label)+
+  theme_bw()+
+  #labs(title = 'Mifish PECO partners') +
+  theme(#legend.position = 'bottom',
+    legend.position = 'none',
+        axis.text = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        title = element_blank())
+
+ggsave(filename = here(plot_out, paste0(datefield, 'unique_pcoa-site-sp.png')),
+       device = 'png', dpi=300, height = 8, width= 13,  units = "in")
+
+ggsave(filename = here(plot_out, paste0(datefield, 'unique_pcoa-site-sp.pdf')),
+       device = 'pdf', dpi=300, height = 8, width= 8,  units = "in")
+```
+
+
+
+## presentation versions
+
+```{r}
+mifish_site_plot %>%
+  ggplot() +
+  geom_point(aes(y = axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+             shape = 21,
+             colour = 'black',
+             alpha = .8,
+             size = 1) +
+  geom_boxplot(aes(y = axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+               colour = 'black',
+               alpha = .6) +
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  # horizontal!
+  coord_flip() +
+  labs(x = NULL, y = 'PC1') +
+  theme_bw()+
+    theme(legend.position = 'none',
+        panel.grid = element_blank()
+        )
+
+ggsave(filename = here(plot_out, paste0(datefield, 
+                                    'peco_pc1xlat-dual_boxplot-site_presentation.pdf')),
+       device = 'pdf', height = 10, width= 10,  units = "in")
+ggsave(filename = here(plot_out, paste0(datefield, 
+                                    'peco_pc1xlat-dual_boxplot-site_presentation.png')),
+       device = 'png', height = 1500, width= 2000,  units = "px")
+
+
+mifish_site_plot_re %>%
+  ggplot() +
+  geom_point(aes(y = axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+             shape = 21,
+             colour = 'black',
+             alpha = .8,
+             size = 1) +
+  geom_boxplot(aes(y = axis_1, 
+                 x = factor(region_label, levels = region_order2$region_label),
+                 fill = region_label),
+               colour = 'black',
+               alpha = .6) +
+  scale_color_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  scale_fill_manual(values = pal_peco,
+                    limits = region_order$region_label,
+                    labels = region_order$region_label) +
+  # horizontal!
+  coord_flip() +
+  labs(x = NULL, y = 'PC1') +
+  theme_bw()+
+    theme(legend.position = 'none',
+        panel.grid = element_blank()
+        )
+
+ggsave(filename = here(plot_out, paste0(datefield, 
+                                    'peco_pc1xlat-unique_boxplot-site_presentation.pdf')),
+       device = 'pdf', height = 10, width= 10,  units = "in")
+ggsave(filename = here(plot_out, paste0(datefield, 
+                                    'peco_pc1xlat-unique_boxplot-site_presentation.png')),
+       device = 'png', height = 1500, width= 2000,  units = "px")
+```

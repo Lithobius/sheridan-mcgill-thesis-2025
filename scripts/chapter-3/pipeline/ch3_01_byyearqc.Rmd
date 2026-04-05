@@ -108,7 +108,7 @@ motumatrix_metadata_2022 <- asvtable_2022_next %>%
                names_to = 'asv') %>%
   filter(value >= 1) %>% 
   mutate(sample = tolower(sample)) %>%
-  mutate(sample_id = str_remove(sample, '-miseq')) %>%
+  mutate(sample_id = str_remove(sample, '-nextseq')) %>%
   left_join(taxonomy) %>%
   mutate(motu_pa = 1) %>%
   rename(reads_raw = value) %>%
@@ -156,7 +156,8 @@ motumatrix_metadata_2023 <- asvtable_2023 %>%
     # remove columns that don't matter this year
   janitor::remove_empty() %>%
   mutate(library = '2023first') %>%
-  mutate(year = 2023)
+  mutate(year = 2023) %>%
+  mutate(seqmethod = 'nextseq')
 
 
 # 2023
@@ -669,90 +670,4 @@ ggsave(here('figures', 'controls',  paste0(datefield, 'vst_pcoa.png')))
 
 ```
 
-
-# Combined regions for plotting
-
-
-```{r set up for plotting}
-regions <- motumatrix_fish_range %>%                                                           
-  #regions with site code for organisation
-  select(site_code, region_code, region_name,  region_name_label, 
-         region_code_label, decimal_latitude, decimal_longitude) %>%
-  filter(!is.na(site_code)) %>%
-  distinct(site_code, .keep_all = TRUE) %>%
-  mutate(region_code = as.factor(region_code)) %>%
-  mutate(region_name = as.factor(region_name)) 
-
-
-
-# sort regions by latitude to direct color vector
-region_by_lat <- regions %>%                                                   
-  select(region_name,
-          decimal_latitude)%>%
-  distinct()%>%
-   #organising the region names by latitude
-  mutate(region_name = as.factor(region_name)) %>%
-  #temp removing NA
-  filter(!(is.na(region_name))) %>%
-  filter(!(is.na(decimal_latitude))) %>%
-  #requires calculating avg latitude of each 
-  group_by(region_name) %>%                                                     
-  summarise(avg_region_lat = mean(decimal_latitude))%>%                          
-  # arranging the region names in the data 
-  arrange(desc(avg_region_lat)) %>%
-  ungroup() %>%
-  # this gives them the numbers for the color vector
-  rowid_to_column('region_lat_name')
-
-# site + sample count
-# this is by partner, can be summed for total in region_name
-region_counts <- motumatrix_fish_range %>%                                                           
-  #regions with site code for organisation
-  select(site_code, region_code, 
-         sample_id)%>%
-  distinct() %>%
-  filter(!(is.na(site_code))) %>%
-  group_by(region_code) %>%
-  add_tally(name = 'samples') %>%
-  ungroup() %>% 
-  select(!(sample_id)) %>%
-  distinct() %>%
-  group_by(region_code) %>%
-  add_tally(name = 'sites') %>%
-  select(!(site_code)) %>%
-  distinct()
-
-regions <- regions %>%
-  left_join(region_by_lat) %>%
-  left_join(region_counts) %>%
-  filter(!(is.na(region_name))) %>%
-  arrange(-decimal_latitude)
-
-
-write.csv(regions, here(processededna, paste0(datefield,'peco_region-name-plotting.csv')))
-```
-
-# for data dictionary
-
-write out columns of each spreadsheet
-
-```{r}
-region_cols <- regions %>%
-  mutate(across(.cols = everything(), ~ as.character(.))) %>%
-  # this gives them the numbers for the color vector
-  rowid_to_column('temp_for_pivot') %>%
-  pivot_longer(cols = !temp_for_pivot) %>%
-  select(!c(value, temp_for_pivot)) %>%
-  distinct() %>%
-  mutate(year = 'region_cols')
-
-motu_cols <- fishonly_relabund %>%
-  mutate(across(.cols = everything(), ~ as.character(.))) %>%
-  pivot_longer(cols = !year) %>%
-  select(!c(value, year)) %>%
-  distinct() %>%
-  bind_rows(region_cols)
-
-write.csv(motu_cols, here(processededna, paste0(datefield,'peco_cols-for-dictionary.csv')))
-```
 

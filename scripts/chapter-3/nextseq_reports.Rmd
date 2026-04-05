@@ -1,0 +1,718 @@
+---
+title: "nextseq-reports"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Nextseq and Miseq both generate reports of reads and such.
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(here)
+
+datefield <- '20260404_'
+# In
+fastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq') 
+reports <- here('rawdata', 'peco', 'fastq', 'fastq_reports') 
+# Out
+processededna <- here('processeddata', 'peco', 'nextseq_miseq')
+
+metadata <- read_csv(here(processededna, '20260319_peco-2021-24_metadata.csv')) %>%
+  mutate(extraction_blank = str_replace_all(extraction_blank, '_', '-'))
+```
+
+# read retention
+
+```{r load in}
+
+# read retentions
+reads2021_ms1 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2021',
+              '20240611_12S_PECO_Run1_20220829_read-retention_12s_bysample.csv'))[-1]%>%
+      janitor::clean_names() %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'run1') %>%
+  mutate(seqmethod = 'miseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = case_when(sample_id == 'neg-pcr-peco' ~ 'negpcr-2021-bsa',
+                                                                str_detect(sample_id, 'pecoe1') ~ 
+                                 str_replace_all(sample_id, 'pecoe1', 'pecoe-01'),
+                               str_detect(sample_id, 'pecoe-1') ~ 
+                                 str_replace_all(sample_id, 'pecoe-1', 'pecoe-01'),
+                               TRUE ~ sample_id))
+
+reads2021_ms2 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2021',
+              '20240611_12S_PECO_2021_Lib2_Run20221108_read-retention_12s_bysample.csv'))[-1]%>%
+      janitor::clean_names() %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'miseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = case_when(sample_id == 'neg-pcr-peco' ~ 'negpcr-2021-bsa',
+                               str_detect(sample_id, 'pecoe1') ~ 
+                                 str_replace_all(sample_id, 'pecoe1', 'pecoe-01'),
+                               str_detect(sample_id, 'pecoe-1') ~ 
+                                 str_replace_all(sample_id, 'pecoe-1', 'pecoe-01'),
+                               TRUE ~ sample_id))
+
+reads2021_bsa <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2021',
+              '20240611_12s_peco_redos_run20230109_read-retention_12s_bysample.csv'))[-1]%>%
+      janitor::clean_names() %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'bsa') %>%
+  mutate(seqmethod = 'miseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '-BS.*$')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = case_when(sample_id == 'neg-pcr-peco' ~ 'negpcr-2021-bsa',
+                               str_detect(sample_id, 'pecoe-1') ~ 
+                                 str_replace_all(sample_id, 'pecoe-1', 'pecoe-01'),
+                               str_detect(sample_id, 'pecoe-1') ~ 
+                                 str_replace_all(sample_id, 'pecoe-1', 'pecoe-01'),
+                               TRUE ~ sample_id))
+
+reads2021_march <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2021',
+              '20250527_peco2021_12s_nextseq_read-retention_12s_bysample.csv'))[-1] %>%
+      janitor::clean_names() %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = str_remove_all(sample_id, 'filtered20250425_')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = case_when(sample_id == 'neg-pcr-peco' ~ 'negpcr-2021-bsa',
+                               str_detect(sample_id, 'pecoe-0') ~ 
+                                 str_replace_all(sample_id, 'pecoe-', 'pecoe-0'),
+                               str_detect(sample_id, 'pecoe-1') ~ 
+                                 str_replace_all(sample_id, 'pecoe-1', 'pecoe-01'),
+                               TRUE ~ sample_id))
+
+# need raw march
+# need 2021 sept
+
+
+reads2022_ms1 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2022',
+              '20221023_peco2022_12s_run1-20230523_read-retention_12s_bysample.csv'))[-1]%>%
+      janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run1') %>%
+  mutate(seqmethod = 'miseq') %>%
+    # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  select(!c(percent_retained_of_raw, percentraw_retainedby_cutadapt,
+            # add back in if i keep
+            cutadapt_f, cutadapt_r)) %>%
+  mutate(sample_id = case_when(sample_id == 'neg-pcr1' ~ 'negpcr-2022-1',
+                               TRUE ~ sample_id))
+
+reads2022_ms2 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2022',
+              '20221023_peco2022_12s_run2-20230629_read-retention_12s_bysample.csv'))[-1] %>%
+      janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'miseq') %>%
+    # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  select(!c(percent_retained_of_raw, percentraw_retainedby_cutadapt,
+            # add back in if i keep
+            cutadapt_f, cutadapt_r))
+
+
+
+reads2022 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2022',
+              '20250425_peco2022_12s_nextseq_read-retention_12s_bysample.csv'))[-1] %>%
+    janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = str_remove_all(sample_id, 'filtered20250430_')) 
+
+reads2022_raw <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2022',
+              '20250425_peco2022_12s_nextseq_read-retention_12s_bysample-rawonly.csv')) %>%
+      janitor::clean_names() %>%
+    mutate(sample_id = str_remove_all(x1, '/Users/katesheridan/Documents/GitHub/chapter2/rawdata/peco/fastq/12S_PECO_2022_Redos_Run20250301/Analysis/1/Data/fastq/fixed/20250430_')) %>%
+  select(!x1) %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$'))
+
+reads2022_all <- reads2022 %>%
+  left_join(reads2022_raw) %>%
+  mutate(sample_id = tolower(sample_id))
+
+
+reads2022_run2 <- read_csv(here(fastq, 
+                           'nextseq_2022_run2', 'fixed', 'qc_plots',
+                           '20260331_peco2022_nextseq-library2_read-retention_12s_bysample.csv'))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'nextseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = str_remove_all(sample_id, '20260331_')) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  select(!c(percent_retained_of_raw, percentraw_retainedby_cutadapt,
+            # add back in if i keep
+            cutadapt_f, cutadapt_r))
+
+
+
+
+reads2023_udi <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2023', 
+              '20250428_peco2023_12s_20240907_read-retention_12s_bysample.csv'))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2023) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = str_remove_all(sample_id, 'filtered20240923_')) 
+
+reads2023_raw_udi <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2023', 
+              '20250428_peco2023_12s_20240907_read-retention_12s_bysample-rawonly.csv')) %>%
+    janitor::clean_names() %>%
+    mutate(sample_id = str_remove_all(x1, '/Users/katesheridan/Documents/GitHub/chapter2/rawdata/peco/fastq/12S_PECO2023_Run20240907/Analysis/1/Data/fastq/fixed/20240923_')) %>%
+  select(!x1) %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$'))
+
+
+reads2023_udi_all <- reads2023_udi %>%
+  left_join(reads2023_raw_udi) %>%
+  mutate(sample_id = tolower(sample_id))
+
+
+reads2024 <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2024',
+              '20250527_peco2024_12s_read-retention_12s_bysample.csv'))[-1] %>%
+   mutate(year = 2024) %>%
+  mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq') %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  mutate(sample_id = str_remove_all(sample_id, 'filtered20250425_')) 
+
+reads2024_raw <- read_csv(here('rawdata', 'peco', 'fastq', 
+              '2024',
+              '20250527_peco2024_12s_read-retention_12s_bysample-rawonly.csv')) %>%
+      janitor::clean_names() %>%
+    mutate(sample_id = str_remove_all(x1, '/Users/katesheridan/Documents/GitHub/chapter2/rawdata/peco/fastq/12S_PECO2024_20250525/Analysis/1/Data/fastq/fixed/20250425_')) %>%
+  select(!x1) %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$'))
+
+
+reads2024_all <- reads2024 %>%
+  left_join(reads2024_raw) %>%
+  mutate(sample_id = tolower(sample_id))
+
+
+reads_combine <- reads2024_all %>%
+  rbind(reads2023_udi_all) %>%
+  rbind(reads2022_all) %>%
+  rbind(reads2022_run2) %>%
+  rbind(reads2022_ms2) %>%
+  rbind(reads2022_ms1) %>%
+  # oh yeah switch to this
+  bind_rows(reads2021_march) %>%
+  bind_rows(reads2021_bsa) %>%
+  bind_rows(reads2021_ms1) %>%
+  bind_rows(reads2022_ms2) %>%
+  select(!c(percent_retained_aftermerge, percent_notsingleton,
+            percent_notchimera)) %>%
+    # if NA, dropped out, 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  # match sample names
+  mutate(sample_id = tolower(sample_id)) %>%
+        mutate(sample_id = case_when(
+                                 str_detect(sample_id, 'pecoe-2') ~ 
+                                 str_replace_all(sample_id, 'pecoe-2', 'pecoe-02'),
+                                 str_detect(sample_id, 'pecoe-3') ~ 
+                                 str_replace_all(sample_id, 'pecoe-3', 'pecoe-03'),
+                                 str_detect(sample_id, 'pecoe-4') ~ 
+                                 str_replace_all(sample_id, 'pecoe-4', 'pecoe-04'),
+                                 str_detect(sample_id, 'pecoe-5') ~ 
+                                 str_replace_all(sample_id, 'pecoe-5', 'pecoe-05'),
+                                 str_detect(sample_id, 'pecoe-6') ~ 
+                                 str_replace_all(sample_id, 'pecoe-6', 'pecoe-06'),
+                                 str_detect(sample_id, 'pecoe-7') ~ 
+                                 str_replace_all(sample_id, 'pecoe-7', 'pecoe-07'),
+                                 str_detect(sample_id, 'pecoe-8') ~ 
+                                 str_replace_all(sample_id, 'pecoe-8', 'pecoe-08'),
+                                 str_detect(sample_id, 'pecoe-9') ~ 
+                                 str_replace_all(sample_id, 'pecoe-9', 'pecoe-09'),
+                                 # no dash
+                                 str_detect(sample_id, 'pecoe2') ~ 
+                                 str_replace_all(sample_id, 'pecoe2', 'pecoe-02'),
+                                 str_detect(sample_id, 'pecoe3') ~ 
+                                 str_replace_all(sample_id, 'pecoe3', 'pecoe-03'),
+                                 str_detect(sample_id, 'pecoe4') ~ 
+                                 str_replace_all(sample_id, 'pecoe4', 'pecoe-04'),
+                                 str_detect(sample_id, 'pecoe5') ~ 
+                                 str_replace_all(sample_id, 'pecoe5', 'pecoe-05'),
+                                 str_detect(sample_id, 'pecoe6') ~ 
+                                 str_replace_all(sample_id, 'pecoe6', 'pecoe-06'),
+                                 str_detect(sample_id, 'pecoe7') ~ 
+                                   str_replace_all(sample_id, 'pecoe7', 'pecoe-07'),
+                                 str_detect(sample_id, 'pecoe8') ~ 
+                                   str_replace_all(sample_id, 'pecoe8', 'pecoe-08'),
+                                 str_detect(sample_id, 'pecoe9') ~ 
+                                   str_replace_all(sample_id, 'pecoe9', 'pecoe-09'),
+                                 # controls
+                                 str_detect(sample_id, 'neg_pcr|negpcr') ~ str_replace_all(sample_id, 'neg_pcr', paste0('negpcr-', year, '-')),
+                                 str_detect(sample_id, 'pecoxn') ~ str_replace(sample_id, 'pecoxn', paste0('exblank-', year, '-')),
+                                 str_detect(sample_id, 'pecoe-xn') ~ str_replace(sample_id, 'pecoe-xn', paste0('exblank-', year, '-')),
+                                 str_detect(sample_id, 'xn') ~ str_replace(sample_id, 'xn', paste0('exblank-', year, '-')),
+                                 # undetermined
+                                 sample_id == 'undetermined' ~ paste0('undetermined-', year, '-', run),
+                                 TRUE ~ sample_id)) %>%
+  #a few updates
+  mutate(sample_id = case_when(str_detect(sample_id, 'exblank-2021') & run == 'march' ~ str_replace_all(sample_id, '21-', '21-0'),
+                               TRUE ~ sample_id))
+
+```
+
+
+# sample sheets
+
+```{r sample sheets}
+
+# sample sheets, just the names of what went in
+ss2021_march <- read_csv(here(reports,
+              '2021_nextseq_redo202504_SampleSheet.csv'),
+              skip = 26) %>%
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]"))) %>%
+  filter(!(index %in% c('PECO2021_redos'))) %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq')
+
+ss2021_sept <- read_csv(here(reports,
+              '2021_nextseq_redo202509_SampleSheet.csv'),
+              skip = 28) %>%
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]"))) %>%
+  filter(!(index %in% c('PECO2021_12S_redo_2'))) %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'sept') %>%
+  mutate(seqmethod = 'nextseq')
+
+ss2022 <- read_csv(here(reports,
+              "2022_nextseq_redos202503_SampleSheet.csv"),
+              skip = 26) %>%  
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]"))) %>%
+  filter(!(index %in% c('PECO 2022'))) %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+ss2022_ns2 <- read_csv(here(reports,
+              "2022_nextseq_run2_SampleSheet.csv"),
+              skip = 27) %>%  
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 'BsshApp',
+                            "[Cloud_Settings]", "[Cloud_Data]"))) %>%
+  filter(!(index %in% c('12S_PECO2022_Run2_Run20230725_2023-07-25T21_21_57_414b3c5'))) %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'nextseq')
+
+ss2023_cdi <- read_csv(here(reports,
+              "2023_cdi_SampleSheet.csv"),
+              skip = 27) %>%  
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]")))%>%
+  filter(!(index %in% c('12S_PECO2023_Run20240328_2024-03-28T15_16_01_4834684'))) %>%
+  mutate(year = 2023)%>%
+  mutate(run = 'cdi') %>%
+  mutate(seqmethod = 'nextseq')
+
+ss2023_udi <- read_csv(here(reports,
+              "2023_udi_SampleSheet.csv"),
+              skip = 27) %>%  
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]")))%>%
+  filter(!(index %in% c('PECO2023_redosAug2024'))) %>%
+  mutate(year = 2023)%>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+ss2024 <- read_csv(here(reports, "2024_SampleSheet.csv"),
+              skip = 28) %>%  
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]")))%>%
+  filter(!(index %in% c('PECO 2024'))) %>%
+  mutate(year = 2024)%>%
+  mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq')
+
+# list of samples that went through nextseq
+through_nextseq <- ss2021_march %>%
+  bind_rows(ss2021_sept) %>%
+  bind_rows(ss2022) %>%
+  bind_rows(ss2022_ns2) %>%
+  bind_rows(ss2023_cdi) %>%
+  bind_rows(ss2023_udi) %>%
+  bind_rows(ss2024) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+  mutate(sample_id = str_remove_all(sample_id, 'peco2023_redos_')) %>%
+  mutate(sample_id = case_when(str_detect(sample_id, 'coe[0-9]{3}$') ~ str_replace(sample_id, 'coe', 'coe-0'),
+                               str_detect(sample_id, 'coe_[0-9]{3}$') ~ str_replace(sample_id, 'coe_', 'coe-0'),
+                               str_detect(sample_id, 'coe_') ~ str_replace_all(sample_id, 'coe_', 'coe-'),
+                               str_detect(sample_id, 'neg_pcr|negpcr') ~ str_replace_all(sample_id, 'neg_pcr', paste0('negpcr-', year, '-')),
+                               str_detect(sample_id, 'pecoxn') ~ str_replace(sample_id, 'pecoxn', paste0('exblank-', year, '-')),
+                               str_detect(sample_id, 'pecoe-xn') ~ str_replace(sample_id, 'pecoe-xn', paste0('exblank-', year, '-')),
+                               str_detect(sample_id, 'xn') ~ str_replace(sample_id, 'xn', paste0('exblank-0', year, '-')),
+                               TRUE ~ sample_id)) %>%
+  # fix a few issues
+  mutate(sample_id = case_when(str_detect(sample_id, '02023') ~ str_replace(sample_id, '02023', '2023'),
+                               str_detect(sample_id, '_2021') ~ str_remove_all(sample_id, '_2021'),
+                               str_detect(sample_id, '_2022') ~ str_remove_all(sample_id, '_2022'),
+                               str_detect(sample_id, 'negpcr[0-9]{1}') ~ str_replace_all(sample_id, 'negpcr', paste0('negpcr-', year, '-')),
+                               TRUE ~ sample_id)) %>%
+  # still
+  mutate(sample_id = ifelse(str_detect(sample_id, 'negpcr[0-9]{1}'), str_replace_all(sample_id, 'negpcr', paste0('negpcr-', year, '-')),sample_id)) %>%
+  # make sure a few stragglers match format
+  mutate(sample_id = case_when(#sample_id == 'negpcr-2021-4' ~ 'negpcr-2021-p04',
+                               str_detect(sample_id, 'peco2022_neg') ~ str_remove_all(sample_id, 'peco2022_'),
+                               str_detect(sample_id, '_1_2023') ~ str_replace_all(sample_id, '_1_2023', '1'),
+                               str_detect(sample_id, '_3_2023') ~ str_replace_all(sample_id, '_3_2023', '3'),
+                               str_detect(sample_id, '_4_2023') ~ str_replace_all(sample_id, '_4_2023', '4'),
+                               str_detect(sample_id, '_2024$') ~ str_remove_all(sample_id, '_2024$'),
+                               str_detect(sample_id, '_redo2$') ~ str_remove_all(sample_id, '_redo2$'),
+                               str_detect(sample_id, 'pecoe-xn') ~ str_replace(sample_id, 'pecoe-xn', paste0('exblank-', year, '-')),
+                               TRUE ~ sample_id)) %>%
+  arrange(sample_id)
+```
+
+
+# demultiplex stats
+
+```{r demulti}
+demulti2021_march <- read_csv(here(reports, "2021_nextseq_redo202504_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index) %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq')
+
+demulti2021_sept <- read_csv(here(reports, "2021_nextseq_redo202509_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(sample_id = paste0('pecoe', sample_id))%>%
+  rename(index_combo = index)  %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'sept') %>%
+  mutate(seqmethod = 'nextseq')
+
+demulti2022_run2 <- read_csv(here(reports, "2022_nextseq_run2_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index) %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'nextseq')
+
+demulti2022_udi <- read_csv(here(reports, "2022_nextseq_redos202503_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index) %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+demulti2023_cdi <- read_csv(here(reports, "2023_cdi_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index)  %>%
+  mutate(year = 2023) %>%
+  mutate(run = 'cdi') %>%
+  mutate(seqmethod = 'nextseq')
+
+demulti2023_udi <- read_csv(here(reports, "2023_udi_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index) %>%
+    mutate(year = 2023) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+demulti2024 <- read_csv(here(reports, "2024_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index) %>%
+    mutate(year = 2024) %>%
+  mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq')
+  
+demulti_all <- demulti2021_march %>%
+  bind_rows(demulti2021_sept) %>%
+  bind_rows(demulti2022_run2) %>%
+  bind_rows(demulti2022_udi) %>%
+  bind_rows(demulti2023_cdi) %>%
+  bind_rows(demulti2023_udi) %>%
+  bind_rows(demulti2024)
+
+
+
+am2021_march <- read_csv(here(reports, "2021_nextseq_redo202504_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq')
+
+am2021_sept <- read_csv(here(reports, "2021_nextseq_redo202509_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(sample_id = paste0('pecoe', sample_id)) %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'sept') %>%
+  mutate(seqmethod = 'nextseq')
+
+am2022_run2 <- read_csv(here(reports, "2022_nextseq_run2_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'nextseq')
+
+am2022_udi <- read_csv(here(reports, "2022_nextseq_redos202503_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+am2023_cdi <- read_csv(here(reports, "2023_cdi_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  mutate(year = 2023) %>%
+  mutate(run = 'cdi') %>%
+  mutate(seqmethod = 'nextseq')
+
+am2023_udi <- read_csv(here(reports, "2023_udi_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+    mutate(year = 2023) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+am2024 <- read_csv(here(reports, "2024_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names()  %>%
+    mutate(year = 2024) %>%
+  mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq')
+
+am_all <- am2021_march %>%
+  bind_rows(am2021_sept) %>%
+  bind_rows(am2022_run2) %>%
+  bind_rows(am2022_udi) %>%
+  bind_rows(am2023_cdi) %>%
+  bind_rows(am2023_udi) %>%
+  bind_rows(am2024)
+
+
+qm2021_march <- read_csv(here(reports, "2021_nextseq_redo202504_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq')
+
+qm2021_sept <- read_csv(here(reports, "2021_nextseq_redo202509_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(sample_id = tolower(sample_id))%>%
+  mutate(year = 2021) %>%
+  mutate(run = 'sept') %>%
+  mutate(seqmethod = 'nextseq')
+
+qm2022_run2 <- read_csv(here(reports, "2022_nextseq_run2_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  mutate(year = 2022) %>%
+  mutate(run = 'run2') %>%
+  mutate(seqmethod = 'nextseq')
+
+qm2022_udi <- read_csv(here(reports, "2022_nextseq_redos202503_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+qm2023_cdi <- read_csv(here(reports, "2023_cdi_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  mutate(year = 2023) %>%
+  mutate(run = 'cdi') %>%
+  mutate(seqmethod = 'nextseq')
+
+qm2023_udi <- read_csv(here(reports, "2023_udi_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names() %>%
+    mutate(year = 2023) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+qm2024 <- read_csv(here(reports, "2024_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names()  %>%
+    mutate(year = 2024) %>%
+  mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq')
+
+
+qm_all <- qm2021_march %>%
+  bind_rows(qm2021_sept) %>%
+  bind_rows(qm2022_run2) %>%
+  bind_rows(qm2022_udi) %>%
+  bind_rows(qm2023_cdi) %>%
+  bind_rows(qm2023_udi) %>%
+  bind_rows(qm2024)
+
+nextseq_rep_all <- demulti_all %>%
+  left_join(am_all) %>%
+  left_join(qm_all) %>%
+  rename(index_report = index,
+         index2_report = index2) %>%
+  mutate(sample_id = tolower(sample_id)) %>%
+        mutate(sample_id = case_when(str_detect(sample_id, 'coe[0-9]{3}$') ~ str_replace(sample_id, 'coe', 'coe-0'),
+                               str_detect(sample_id, 'coe_[0-9]{3}$') ~ str_replace(sample_id, 'coe_', 'coe-0'),
+                               str_detect(sample_id, 'coe_') ~ str_replace_all(sample_id, 'coe_', 'coe-'),
+                                 str_detect(sample_id, 'pecoe-2') ~ 
+                                 str_replace_all(sample_id, 'pecoe-2', 'pecoe-02'),
+                                 str_detect(sample_id, 'pecoe-3') ~ 
+                                 str_replace_all(sample_id, 'pecoe-3', 'pecoe-03'),
+                                 str_detect(sample_id, 'pecoe-4') ~ 
+                                 str_replace_all(sample_id, 'pecoe-4', 'pecoe-04'),
+                                 str_detect(sample_id, 'pecoe-5') ~ 
+                                 str_replace_all(sample_id, 'pecoe-5', 'pecoe-05'),
+                                 str_detect(sample_id, 'pecoe-6') ~ 
+                                 str_replace_all(sample_id, 'pecoe-6', 'pecoe-06'),
+                                 str_detect(sample_id, 'pecoe-7') ~ 
+                                 str_replace_all(sample_id, 'pecoe-7', 'pecoe-07'),
+                                 str_detect(sample_id, 'pecoe-8') ~ 
+                                 str_replace_all(sample_id, 'pecoe-8', 'pecoe-08'),
+                                 str_detect(sample_id, 'pecoe-9') ~ 
+                                 str_replace_all(sample_id, 'pecoe-9', 'pecoe-09'),
+                                 # no dash
+                                 str_detect(sample_id, 'pecoe2') ~ 
+                                 str_replace_all(sample_id, 'pecoe2', 'pecoe-02'),
+                                 str_detect(sample_id, 'pecoe3') ~ 
+                                 str_replace_all(sample_id, 'pecoe3', 'pecoe-03'),
+                                 str_detect(sample_id, 'pecoe4') ~ 
+                                 str_replace_all(sample_id, 'pecoe4', 'pecoe-04'),
+                                 str_detect(sample_id, 'pecoe5') ~ 
+                                 str_replace_all(sample_id, 'pecoe5', 'pecoe-05'),
+                                 str_detect(sample_id, 'pecoe6') ~ 
+                                 str_replace_all(sample_id, 'pecoe6', 'pecoe-06'),
+                                 str_detect(sample_id, 'pecoe7') ~ 
+                                   str_replace_all(sample_id, 'pecoe7', 'pecoe-07'),
+                                 str_detect(sample_id, 'pecoe8') ~ 
+                                   str_replace_all(sample_id, 'pecoe8', 'pecoe-08'),
+                                 str_detect(sample_id, 'pecoe9') ~ 
+                                   str_replace_all(sample_id, 'pecoe9', 'pecoe-09'),
+                                 # controls
+                                 str_detect(sample_id, 'neg_pcr|negpcr') ~ str_replace_all(sample_id, 'neg_pcr', paste0('negpcr-', year, '-')),
+                                 str_detect(sample_id, 'pecoxn') ~ str_replace(sample_id, 'pecoxn', paste0('exblank-', year, '-')),
+                                 str_detect(sample_id, 'pecoe-xn') ~ str_replace(sample_id, 'pecoe-xn', paste0('exblank-', year, '-')),
+                               str_detect(sample_id, 'xn') ~ str_replace(sample_id, 'xn', paste0('exblank-', year, '-')),
+                               # undetermined
+                               sample_id == 'undetermined' ~ paste0('undetermined-', year, '-', run),
+                               TRUE ~ sample_id)) %>%
+  #a few updates
+  mutate(sample_id = case_when(#str_detect(sample_id, 'exblank-2021') & run == 'march' ~ str_replace_all(sample_id, '21-', '21-0'),
+                               str_detect(sample_id, 'pecoe-xn') ~ str_replace(sample_id, 'pecoe-xn', paste0('exblank-', year, '-')),
+                               str_detect(sample_id, 'coe0') ~ str_replace_all(sample_id, 'coe0', 'coe-0'),
+                               str_detect(sample_id, 'peco2022_neg') ~ str_remove_all(sample_id, 'peco2022_'),
+                               str_detect(sample_id, '_1_2023') ~ str_replace_all(sample_id, '_1_2023', '1'),
+                               str_detect(sample_id, '_3_2023') ~ str_replace_all(sample_id, '_3_2023', '3'),
+                               str_detect(sample_id, '_4_2023') ~ str_replace_all(sample_id, '_4_2023', '4'),
+                               str_detect(sample_id, '_2022$') ~ str_remove_all(sample_id, '_2022$'),
+                               str_detect(sample_id, '_2024$') ~ str_remove_all(sample_id, '_2024$'),
+                               str_detect(sample_id, '_2021$') ~ str_remove_all(sample_id, '_2021$'),
+                               str_detect(sample_id, 'peco2023_redos_negpcr') ~ str_replace_all(sample_id, 'peco2023_redos_negpcr', 'negpcr-2023-'),
+                               TRUE ~ sample_id)) %>%
+  mutate(sample_id = case_when(str_detect(sample_id, 'negpcr2') ~ str_replace_all(sample_id, 'negpcr2', paste0('negpcr-', year, '-2')),
+                               str_detect(sample_id, 'negpcr3') ~ str_replace_all(sample_id, 'negpcr3', paste0('negpcr-', year, '-3')),
+                               str_detect(sample_id, 'negpcr4') ~ str_replace_all(sample_id, 'negpcr4', paste0('negpcr-', year, '-4')),
+                               str_detect(sample_id, 'pecoeundetermined') ~ str_replace_all(sample_id, 'pecoeundetermined', 'undetermined-2021-sept'),
+                               TRUE ~ sample_id))
+```
+
+
+# combine sample-level stats
+
+
+```{r combining}
+undetermined_stats <- nextseq_rep_all %>%
+  filter(str_detect(sample_id, 'undetermined'))
+
+sample_stats_nextseq <- through_nextseq %>%
+  left_join(reads_combine) %>%
+  left_join(nextseq_rep_all) %>%
+  bind_rows(undetermined_stats)
+
+
+
+```
+
+
+
+# run level stats
+
+
+```{r index hopping}
+indhop2021_march <- read_csv(here(reports, "2021_nextseq_redo202504_Index_Hopping_Counts.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq')
+
+indhop2021_sept <- read_csv(here(reports, "2021_nextseq_redo202509_Index_Hopping_Counts.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(sample_id = paste0('pecoe', sample_id))%>%
+  mutate(year = 2021) %>%
+  mutate(run = 'sept') %>%
+  mutate(seqmethod = 'nextseq')
+
+indhop2022_udi <- read_csv(here(reports, "2022_nextseq_redos202503_Index_Hopping_Counts.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2022) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+indhop2023_udi <- read_csv(here(reports, "2023_udi_Index_Hopping_Counts.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2023) %>%
+  mutate(run = 'udi') %>%
+  mutate(seqmethod = 'nextseq')
+
+indhop2024 <- read_csv(here(reports, "2024_Index_Hopping_Counts.csv"))[-1] %>%
+  janitor::clean_names() %>%
+  mutate(year = 2024) %>%
+  mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq')
+
+indhop_all <- indhop2021_march %>%
+  bind_rows(indhop2021_sept)
+```
+

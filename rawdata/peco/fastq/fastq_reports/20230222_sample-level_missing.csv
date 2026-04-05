@@ -1,0 +1,16 @@
+region_name,site_code,sample_ID,collection_time,filter_time,control,notes_about_sample
+HG_BC_PECO,SB_HG,PECOe067,NA,10:06,yes,
+HG_BC_PECO,SB_HG,PECOe066,9:16,10:25,,~15 min per sample to filter
+HG_BC_PECO,SB_HG,PECOe068,9:19,10:47-11:01,no,~15 min per sample to filter
+HG_BC_PECO,SB_HG,PECOe069,9:22,11:09-11:25,no,~15 min per sample to filter
+HG_BC_PECO,SB_HG,PECOe070,9:25,11:35,no,~15 min per sample to filter
+HG_BC_PECO,RI_HG,PECOe059,NA,12:38,yes,day before. control sample filter came off and landed in plastic beaker
+HG_BC_PECO,RI_HG,PECOe056,NA,13:02,no,"lots of algae in water clogging up filter and making filtering slow, 20-25 min per sample"
+HG_BC_PECO,RI_HG,PECOe057,NA,13:32,no,
+HG_BC_PECO,RI_HG,PECOe058,NA,14:00,no,
+HG_BC_PECO,RI_HG,PECOe060,NA,14:26,no,
+PR_BC_PECO,MI_PP,PECOe100,NA,14:50-15:02,yes,1000ml filtered
+PR_BC_PECO,MI_PP,PECOe098,1330,15:07-15:21,no,1000ml filtered
+PR_BC_PECO,MI_PP,PECOe097,1330,15:26-15:42,no,1000ml filtered
+PR_BC_PECO,MI_PP,PECOe096,1330,15:49-16:05,no,1000ml filtered
+PR_BC_PECO,MI_PP,PECOe099,1330,16:08,no,1000ml filtered
