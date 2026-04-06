@@ -29,7 +29,7 @@ library(here)
 # here filepaths
 # combined
 fastq_combined <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi')
-datefield <- '20260331_'
+datefield <- '20260404_'
 runfield <- 'peco_next-mi-combined_'
 
 
@@ -44,6 +44,11 @@ pecofastq2022_next <- here('rawdata', 'peco', 'fastq',
                   'miseq_nextseq', 'nextseq_2022_run2',
                   'fixed', 'processed') 
 runfield2022 <- 'peco2022_nextseq-library2_'
+
+# nextseq
+pecofastq2022_udi <- here('rawdata', 'peco', 'fastq', 
+                  '2022') 
+runfield2022_udi <- 'peco2022_nextseq-udi_'
 
 
 # 2023 next-first
@@ -82,6 +87,13 @@ seqtab_2022_next <- read_delim(here(pecofastq2022_next,
   column_to_rownames('row_names') %>%
   as.matrix()
 
+# nextseq 2022 udi
+seqtab_2022_udi <- read_delim(here(pecofastq2022_udi, 
+                                 '20240210_peco2022_12s_nextseq_sequence-table.txt')) %>%
+  mutate(row_names = paste0(row_names, '-nextseq-udi')) %>%
+  column_to_rownames('row_names') %>%
+  as.matrix()
+
 
 
 # nextseq-first 2023
@@ -106,7 +118,8 @@ All sequence tables should be merged into one master table. This means that ever
 ```{r merge-all-tables}
 ####merge sequence tables####
 #ASVs are combined on sequence alone. exact matches are simply merged
-seqtab_all <- mergeSequenceTables(seqtab_2022_mi, seqtab_2022_next, seqtab_2023, seqtab_2023_re) 
+seqtab_all <- mergeSequenceTables(seqtab_2022_mi, seqtab_2022_next, seqtab_2022_udi,
+                                  seqtab_2023, seqtab_2023_re) 
 
 
 ####save sequences as fasta, give sequences human-readable names, save modified sequence table####
@@ -190,6 +203,24 @@ asvtab_2022_next <- seqtab_2022_next %>%
 write.table(asvtab_2022_next,
             here(pecofastq2022_next,
                  paste0(datefield, runfield, "sequence-table_asv-names_2022-nextseq.txt")), 
+            row.names=FALSE, quote=F, sep="\t")
+
+
+# 2022
+asvtab_2022_udi <- seqtab_2022_udi %>%
+  as.data.frame() %>%
+  rownames_to_column(var = 'sample') %>%
+  pivot_longer(cols = !sample,
+               names_to = 'seq') %>%
+  left_join(asv_map) %>%
+  select(!seq) %>%
+  pivot_wider(names_from = asv)
+
+# take seqtab 2022 and update to have the right names
+#re-save sequence table w updated names
+write.table(asvtab_2022_udi,
+            here(pecofastq2022_next,
+                 paste0(datefield, runfield, "sequence-table_asv-names_2022-nextseq-udi.txt")), 
             row.names=FALSE, quote=F, sep="\t")
 
 

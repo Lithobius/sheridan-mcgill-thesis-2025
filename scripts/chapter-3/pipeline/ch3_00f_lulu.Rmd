@@ -14,17 +14,17 @@ library(lulu)
 fastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi')
 edna_out <- here('processeddata', 'peco', 'nextseq_miseq')
 
-datefield <- '20260331_'
+datefield <- '20260404_'
 runfield <- 'peco_next-mi-combined_'
 ```
 
 # load in 
 ```{r loadin}
-motu2asv <- read_csv(here(fastq, '20260331_peco_next-mi-combined_motu2asv.csv'))%>%
+motu2asv <- read_csv(here(fastq, '20260404_peco_next-mi-combined_motu2asv.csv'))%>%
   distinct()
 
 asv_seq_table <- read_delim(here(fastq, 
-                                 "20260331_peco_next-mi-combined_sequence-table_asv-names.txt"))
+                                 "20260404_peco_next-mi-combined_sequence-table_asv-names.txt"))
 ```
 
 
@@ -60,7 +60,7 @@ blastn -db OTU_sequences.fasta -outfmt '6 qseqid sseqid pident' -out match_list.
 
 ```{r}
 otu_sequences <- file.path(fastq,
-                           '20260331_peco_next-mi-combined_swarm_clusterreps.fasta')
+                           '20260404_peco_next-mi-combined_swarm_clusterreps.fasta')
 blast_out <- file.path(fastq, paste0(datefield, runfield, 'lulu_matchlist.txt'))
 
 # check its working

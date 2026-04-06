@@ -18,7 +18,7 @@ library(here)
 
 # here filepaths
 pecofastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi')
-datefield <- '20260331_'
+datefield <- '20260404_'
 runfield <- 'peco_next-mi-combined_'
 ```
 
@@ -29,7 +29,7 @@ FASTA has been updated in python
 
 # filepath to fasta formatted for swarm
 swarmfasta <- file.path(here(pecofastq,
-                             "20260331_peco_next-mi-combined_sequence-table_swarm-format.fasta"))
+                             "20260404_peco_next-mi-combined_sequence-table_swarm-format.fasta"))
 #generate filenames for output
 swarmout <- file.path(here(pecofastq, paste0(datefield, runfield, 'swarm_outputfile.txt')))
 swarmstats <- file.path(here(pecofastq, paste0(datefield, runfield, 'swarm_statsfile.tsv')))
@@ -56,7 +56,7 @@ system2("swarm", args = c(swarmfasta,
 ```{r input swarm}
 
 swarm_stat <- read_delim(here(pecofastq, 
-                             '20260331_peco_next-mi-combined_swarm_statsfile.tsv'),
+                             '20260404_peco_next-mi-combined_swarm_statsfile.tsv'),
                          # give columns names
                         col_names = c('n_in_cluster', 'motu_reads', 
                                       'seed_asv', 'seed_reads', 'n_1readamplicon',
@@ -69,7 +69,7 @@ swarm_stat <- swarm_stat %>%
   mutate(swarm_reads = paste0(seed_asv, '_', motu_reads))
 
 swarm_out <- read_delim(here(pecofastq, 
-                             '20260331_peco_next-mi-combined_swarm_outputfile.txt'),
+                             '20260404_peco_next-mi-combined_swarm_outputfile.txt'),
                         col_names = FALSE, delim = " ")
 
 

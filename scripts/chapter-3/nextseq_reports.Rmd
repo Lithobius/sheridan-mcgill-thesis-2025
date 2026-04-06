@@ -126,10 +126,7 @@ reads2022_ms2 <- read_csv(here('rawdata', 'peco', 'fastq',
   mutate(seqmethod = 'miseq') %>%
     # remove tail of sample name
   mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
-  mutate(sample_id = tolower(sample_id)) %>%
-  select(!c(percent_retained_of_raw, percentraw_retainedby_cutadapt,
-            # add back in if i keep
-            cutadapt_f, cutadapt_r))
+  mutate(sample_id = tolower(sample_id)) 
 
 
 
@@ -168,10 +165,7 @@ reads2022_run2 <- read_csv(here(fastq,
   # remove tail of sample name
   mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
   mutate(sample_id = str_remove_all(sample_id, '20260331_')) %>%
-  mutate(sample_id = tolower(sample_id)) %>%
-  select(!c(percent_retained_of_raw, percentraw_retainedby_cutadapt,
-            # add back in if i keep
-            cutadapt_f, cutadapt_r))
+  mutate(sample_id = tolower(sample_id)) 
 
 
 
@@ -228,18 +222,17 @@ reads2024_all <- reads2024 %>%
 
 
 reads_combine <- reads2024_all %>%
-  rbind(reads2023_udi_all) %>%
-  rbind(reads2022_all) %>%
-  rbind(reads2022_run2) %>%
-  rbind(reads2022_ms2) %>%
-  rbind(reads2022_ms1) %>%
-  # oh yeah switch to this
+  bind_rows(reads2023_udi_all) %>%
+  bind_rows(reads2022_all) %>%
+  bind_rows(reads2022_run2) %>%
+  bind_rows(reads2022_ms2) %>%
+  bind_rows(reads2022_ms1) %>%
   bind_rows(reads2021_march) %>%
   bind_rows(reads2021_bsa) %>%
   bind_rows(reads2021_ms1) %>%
   bind_rows(reads2022_ms2) %>%
   select(!c(percent_retained_aftermerge, percent_notsingleton,
-            percent_notchimera)) %>%
+            percent_notchimera, percentraw_retainedby_cutadapt, percent_retained_of_raw)) %>%
     # if NA, dropped out, 0
   mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
   # match sample names
@@ -669,8 +662,69 @@ undetermined_stats <- nextseq_rep_all %>%
 sample_stats_nextseq <- through_nextseq %>%
   left_join(reads_combine) %>%
   left_join(nextseq_rep_all) %>%
-  bind_rows(undetermined_stats)
+  bind_rows(undetermined_stats) %>%
+  # note this isn't entirely accurate; index combo has reverse complement for reverse
+  mutate(index_combo = case_when(index_combo == 'ELIDED' ~ paste0(index, '-', index2),
+                                 is.na(index_combo) & !is.na(index) ~ paste0(index, '-', index2),
+                                 TRUE ~ index_combo)) %>%
+  mutate(fw_r = case_when(read_number == 1 ~ 'fw',
+                          read_number == 2 ~ 'r')) %>%
+  select(!c(index_report, index2_report, read_number))
 
+write_csv(sample_stats_nextseq, here(processededna, paste0(datefield, 'nextseq_sample-stats.csv')))
+
+```
+
+
+# dropouts
+
+```{r dropout}
+lowreads <- sample_stats_nextseq %>%
+  mutate(remove = case_when(number_reads > 100 ~ 'x',
+                            number_reads >= 50 & str_detect(sample_id, 'exblank') ~ 'x')) %>%
+  filter(is.na(remove)) %>%
+  select(year, run, sample_id, fw_r, index_combo, index, index2,
+         nochimeras, raw_f, raw_r, number_reads, percent_adapter_bases, 
+         percent_q30)
+
+
+dropout <- sample_stats_nextseq %>%
+  mutate(remove = case_when(nochimeras > 1 ~ 'x',
+                            number_reads > 100 ~ 'x')) %>%
+  filter(is.na(remove)) %>%
+  select(year, run, sample_id, fw_r, index_combo, index, index2,
+         nochimeras, raw_f, raw_r, number_reads, percent_adapter_bases, 
+         percent_q30)
+
+dropout_index <- dropout %>%
+  select(sample_id, index, year, run) %>%
+  filter(!str_detect(sample_id, 'exblank|negpcr')) %>%
+  distinct() %>%
+  add_count(index)%>%
+  select(!c(sample_id, year, run)) %>%
+  distinct()
+
+dropout_index2 <- dropout %>%
+  select(sample_id, index2, year, run) %>%
+  filter(!str_detect(sample_id, 'exblank|negpcr')) %>%
+  distinct() %>%
+  add_count(index2)%>%
+  select(!c(sample_id, year, run)) %>%
+  distinct()
+
+dropout_indexcombo <- dropout %>%
+  select(sample_id, index_combo, year, run) %>%
+  filter(!str_detect(sample_id, 'exblank|negpcr')) %>%
+  distinct() %>%
+  add_count(index_combo) %>%
+  select(!c(sample_id, year, run)) %>%
+  distinct()
+
+```
+
+```{r variability}
+next_variable <- sample_stats_nextseq %>%
+  select(sample_year)
 
 
 ```
@@ -679,6 +733,22 @@ sample_stats_nextseq <- through_nextseq %>%
 
 # run level stats
 
+```{r}
+# run level info ; this gives adapter info
+ss2021_march_run <- read_csv(here(reports,
+              '2021_nextseq_redo202504_SampleSheet.csv'),
+              skip = 410) %>%
+  janitor::clean_names() %>%
+  select(!c(sample_id, library_name)) %>%
+  distinct() %>%
+  mutate(year = 2021) %>%
+  mutate(run = 'march') %>%
+  mutate(seqmethod = 'nextseq')
+```
+
+## index hopping
+
+try to load in the common ones to identify 'mutation' rates
 
 ```{r index hopping}
 indhop2021_march <- read_csv(here(reports, "2021_nextseq_redo202504_Index_Hopping_Counts.csv"))[-1] %>%
@@ -713,6 +783,41 @@ indhop2024 <- read_csv(here(reports, "2024_Index_Hopping_Counts.csv"))[-1] %>%
   mutate(seqmethod = 'nextseq')
 
 indhop_all <- indhop2021_march %>%
-  bind_rows(indhop2021_sept)
+  bind_rows(indhop2021_sept) %>%
+  bind_rows(indhop2022_udi) %>%
+  bind_rows(indhop2023_udi) %>%
+  bind_rows(indhop2024)
+```
+
+```{r indhop plots}
+
+indhop_hoponly <- indhop_all %>%
+  mutate(remove = case_when(number_reads == 0 ~ 'x',
+                            is.na(percent_of_hopped_reads) ~ 'x')) %>%
+  filter(is.na(remove)) %>%
+  select(!c(sample_id, seqmethod, remove)) %>%
+  distinct() %>%
+  add_count(index, year, run) %>%
+  add_count(index2, year, run) %>%
+  group_by(year, run) %>%
+  mutate(perc_hopped = sum(percent_of_all_reads)) %>%
+  ungroup()
+
+# technically an underestimate because many show up as 0
+perc_hopped <- indhop_hoponly %>%
+  select(year, run, perc_hopped) %>%
+  distinct()
+
+
+ind_count <- indhop_hoponly %>%
+  select(index,year,run,n) %>%
+  distinct() %>%
+  group_by(index) %>%
+  mutate(total_n = sum(n)) %>%
+  ungroup()
+
+ind2_count <- indhop_hoponly %>%
+  select(index2,year,run,nn) %>%
+  distinct()
 ```
 

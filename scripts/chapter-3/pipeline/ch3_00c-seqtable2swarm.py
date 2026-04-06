@@ -73,12 +73,12 @@ if __name__ == "__main__":
 
     # sequence matrix; columns sequences rows samples values reads
     ## 12s
-    asvmatrix_in = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_sequence-table_asv-names.txt')
+    asvmatrix_in = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260404_peco_next-mi-combined_sequence-table_asv-names.txt')
     asv_values = asv_abund(asvmatrix_in)
     # input FASTA
-    fasta_in = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_asv-sequences.fasta')
+    fasta_in = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260404_peco_next-mi-combined_asv-sequences.fasta')
     # output FASTA
-    fasta_out = here("./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_sequence-table_swarm-format.fasta")
+    fasta_out = here("./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260404_peco_next-mi-combined_sequence-table_swarm-format.fasta")
     # run function to forat to swarm format.
     asv_toswarm(asv_values, fasta_in, fasta_out)
 

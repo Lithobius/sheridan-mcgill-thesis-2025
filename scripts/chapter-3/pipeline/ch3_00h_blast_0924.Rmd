@@ -16,10 +16,10 @@ library(here)
 
 # here filepaths
 pecofastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq', 'combined_next_mi') 
-datefield <- '20260331_'
-datefield_new <- '20260331_'
+datefield <- '20260404_'
+datefield_new <- '20260404_'
 # if different
-datefield_swarm <- '20260331_'
+datefield_swarm <- '20260404_'
 runfield <- 'peco_next-mi-combined_'
 
 # Destination folders
@@ -54,7 +54,7 @@ mifishdb <- file.path("/Users/katesheridan/Documents/GitHub/peco/database12s/cra
 
 
 edna_to_blast <- file.path(pecofastq,
-                           '20260331_peco_next-mi-combined_asv-sequences.fasta')
+                           '20260404_peco_next-mi-combined_asv-sequences.fasta')
 blast_out <- file.path(pecofastq, paste0(datefield_new, runfield, 'swarm_blastresults_asv.txt'))
 
 # check its working
@@ -95,7 +95,7 @@ asv_50blast <- read_delim(here(pecofastq, paste0(datefield_new, runfield, 'swarm
   mutate(across(kingdom:genus, ~ na_if(., "")))
 
 # motu numbers to join with the blast results
-motu_key <- read_csv(here(pecofastq, '20260331_peco_next-mi-combined_lulu_motu2asv.csv')) %>%
+motu_key <- read_csv(here(pecofastq, '20260404_peco_next-mi-combined_lulu_motu2asv.csv')) %>%
   rename(motu = motu_lulu)
 
 # load-in keys
@@ -658,7 +658,7 @@ taxonomy_assigned_asv <- motu_key %>%
   # some silliness
   mutate(found_taxa = case_when(found_taxa == 'Homo' ~ 'Homo sapiens',
                                 TRUE ~ found_taxa)) %>%
-  mutate(rank = case_when(class %in% c('Mammalia', 'Aves') ~ 'outgroup',
+  mutate(rank = case_when(class %in% c('Mammalia', 'Aves', 'Insecta') ~ 'outgroup',
                           common_name %in% c('Bacteria', 'Diatom', 'Foraminifera',
                                              'Unknown organism') ~ 'outgroup',
                           TRUE ~ rank)) %>%

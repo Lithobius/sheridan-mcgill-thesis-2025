@@ -34,7 +34,7 @@ fastq <- here('rawdata', 'peco', 'fastq', 'miseq_nextseq')
 # Out
 processededna <- here('processeddata', 'peco', 'nextseq_miseq')
 # fields
-datefield <- '20260331_'
+datefield <- '20260404_'
 runfield <- 'peco_next-mi-combined_'
 
 # Palette
@@ -63,10 +63,10 @@ metadata <- read_csv(here(processededna, '20260319_peco-2021-24_metadata.csv')) 
   mutate(extraction_blank = str_replace_all(extraction_blank, '_', '-'))
 
 
-taxonomy <- read_csv(here(processededna, '20260331_peco_next-mi-combined_taxonomy.csv'))
+taxonomy <- read_csv(here(processededna, '20260404_peco_next-mi-combined_taxonomy.csv'))
 
 motu2asvs <- read_csv(here(fastq, 'combined_next_mi',
-                           '20260331_peco_next-mi-combined_lulu_motu2asv.csv'))
+                           '20260404_peco_next-mi-combined_lulu_motu2asv.csv'))
 ```
 
 # load-in
@@ -76,7 +76,7 @@ We'll prep these to merge, then QC the merged files
 # 2022
 asvtable_2022_mi <- read_delim(here(fastq, 'miseq_2022_run2',
                                  'fixed', 'processed',
-                            '20260331_peco_next-mi-combined_sequence-table_asv-names_2022-miseq.txt'))
+                            '20260404_peco_next-mi-combined_sequence-table_asv-names_2022-miseq.txt'))
 
 motumatrix_metadata_2022_mi <- asvtable_2022_mi %>%
   # pivot to long so sequence can map to ASV
@@ -100,7 +100,7 @@ motumatrix_metadata_2022_mi <- asvtable_2022_mi %>%
 # 2022
 asvtable_2022_next <- read_delim(here(fastq, 'nextseq_2022_run2',
                                  'fixed', 'processed',
-                            '20260331_peco_next-mi-combined_sequence-table_asv-names_2022-nextseq.txt'))
+                            '20260404_peco_next-mi-combined_sequence-table_asv-names_2022-nextseq.txt'))
 
 motumatrix_metadata_2022 <- asvtable_2022_next %>%
   # pivot to long so sequence can map to ASV
@@ -118,6 +118,30 @@ motumatrix_metadata_2022 <- asvtable_2022_next %>%
   # check before removing
   select(!c(sample)) %>%
   mutate(library = '2022nextseq') %>%
+  mutate(year = 2022) %>%
+  mutate(seqmethod = 'nextseq')
+
+# 2022
+asvtable_2022_udi <- read_delim(here(fastq, 'nextseq_2022_run2',
+                                 'fixed', 'processed',
+                            '20260404_peco_next-mi-combined_sequence-table_asv-names_2022-nextseq-udi.txt'))
+
+motumatrix_metadata_2022_udi <- asvtable_2022_udi %>%
+  # pivot to long so sequence can map to ASV
+  pivot_longer(cols = !sample,
+               names_to = 'asv') %>%
+  filter(value >= 1) %>% 
+  mutate(sample = tolower(sample)) %>%
+  mutate(sample_id = str_remove(sample, '-nextseq-udi')) %>%
+  left_join(taxonomy) %>%
+  mutate(motu_pa = 1) %>%
+  rename(reads_raw = value) %>%
+  left_join(metadata) %>%
+  # remove columns that don't matter this year
+  janitor::remove_empty() %>%
+  # check before removing
+  select(!c(sample)) %>%
+  mutate(library = '2022nextseq_udi') %>%
   mutate(year = 2022) %>%
   mutate(seqmethod = 'nextseq')
 
@@ -196,6 +220,7 @@ motumatrix_metadata_2023_re <- asvtable_2023_re %>%
 ```{r}
 motumatrix_metadata_merged <- motumatrix_metadata_2022_mi %>%
   bind_rows(motumatrix_metadata_2022) %>%
+  bind_rows(motumatrix_metadata_2022_udi) %>%
   bind_rows(motumatrix_metadata_2023) %>%
   bind_rows(motumatrix_metadata_2023_re) %>%
   mutate(treatment = case_when(str_detect(sample_id, 'exblank') ~ 'Extraction blank',

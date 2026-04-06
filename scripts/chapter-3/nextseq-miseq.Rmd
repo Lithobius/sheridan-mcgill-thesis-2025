@@ -30,7 +30,7 @@ seqs_in <- here('processeddata', 'peco', 'nextseq_miseq')
 dataedna <- here('processeddata', 'peco', '2021-24_edna')
 plot_out <- here('output', 'chapter3')
 
-datefield <- '20260404_'
+datefield <- '20260405_'
 
 pal_peco <- c("Juneau Region, Alaska" = "#00496F",
              "Southeast Alaska" = "#03587B",
@@ -65,8 +65,7 @@ edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
   filter(!(sample_id %in% c('pecoe-0207')))
 
 edna_compare <- read.csv(here(seqs_in,
-                             '20260331_peco_next-mi-combined_asvmatrix_fish-novst.csv'))[-1] %>%
-  filter(!(class %in% c('Insecta'))) %>%
+                             '20260404_peco_next-mi-combined_asvmatrix_fish-novst.csv'))[-1] %>%
       select(!c(region_code_label, region_code, reads_adjust_fieldlab, curated, motu_swarm,
             reads_adjust_field,rain, extraction_blank, sample_richness, lab_richness_site,
             flag, bottom_depth_m, volume_filtered, collection_time, lulu_rank, filter_time,
@@ -79,6 +78,15 @@ edna_compare <- read.csv(here(seqs_in,
   #rename(found_taxa = found_taxa_asv,
   #       rank = rank_asv,
   #       common_name = common_name_asv)
+
+lib2 <- edna_compare %>% 
+  filter(seqmethod == 'miseq') %>%
+  select(sample_id) %>%
+  distinct()
+
+edna_compare <- edna_compare %>%
+  filter(!(library == '2022nextseq_udi' & !(sample_id %in% lib2$sample_id)))
+
 
 # set an order for plotting; here mean of range found
 # this is from the 'correct' data
@@ -153,20 +161,16 @@ region_2022 <- regions %>%
 # compare next and miseq
 
 ```{r 2022 nextseq miseq}
-miseqonly <- edna_compare %>%
-  filter(rank == "species") %>%
-  filter(seqmethod == 'miseq')
-
-nextseqonly <- edna_compare %>%
-  filter(year == 2022) %>%
-  filter(rank == "species") %>%
-  filter(seqmethod == 'nextseq')
-
 only_2022 <- edna_compare %>%
   filter(year == 2022) %>%
-  filter(rank == "species")
+  filter(rank == "species") %>%
+  mutate(seq_index = case_when(seqmethod == 'miseq' ~ 'MiSeq',
+                               library == '2022nextseq' ~ 'NextSeq CDI',
+                               library == '2022nextseq_udi' ~ 'NextSeq UDI'
+                               ))
 
 bubble_plot_data <- only_2022 %>%
+  filter(!library == '2022nextseq_udi') %>%
   select(found_taxa, common_name, region_name, site_code, seqmethod) %>%
   distinct() %>%
   add_count(region_name, found_taxa, seqmethod, name = 'n_sites') %>%
@@ -208,6 +212,52 @@ bubble2022 +
 
 ggsave(filename = here(plot_out, paste0(datefield, 'nextseq2022_comparision.png')),
        device = 'png', height = 2500, width = 5000, units = 'px', dpi = 300)
+
+
+
+
+bubble_plot_data_udi <- only_2022 %>%
+  select(found_taxa, common_name, region_name, site_code, seq_index) %>%
+  distinct() %>%
+  add_count(region_name, found_taxa, seq_index, name = 'n_sites') %>%
+  left_join(region_2022) 
+
+bubble2022_udi <- bubble_plot_data_udi %>%
+  ggplot() +
+  geom_point(aes(x = factor(common_name, levels = fish_order_2022$common_name), 
+             y = factor(region_label, levels = region_order$region_label),
+             size = 10 + n_sites,
+             color = region_label)) +
+  facet_wrap(~seq_index, ncol=1)+
+  scale_color_manual(values = pal_peco)+
+  # keeps wanting to put california at the top
+  scale_y_discrete(limits = rev) +
+  # coord_cartesian is what lets us add the labels later
+  coord_cartesian(clip = 'off') +
+  theme_bw() +
+  scale_x_discrete(drop=FALSE) +
+  scale_size(guide = 'none') +
+  scale_alpha(guide = 'none') +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        legend.position = 'none',
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 8, angle = 60, hjust=1),
+        plot.margin = unit(c(1,1,1,2), 'lines'),
+        panel.grid.minor = element_blank(),
+        axis.ticks.y = element_blank())
+
+
+
+ggsave(filename = here(plot_out, paste0(datefield, 'nextseq2022_comparision-udi.pdf')),
+       device = 'pdf', height = 8, width = 14, units = 'in')
+
+bubble2022_udi +
+  theme(axis.text.x = element_text(size = 12, angle = 60, hjust=1),
+        plot.margin = margin(1,1,1,2.25, "cm"))
+
+ggsave(filename = here(plot_out, paste0(datefield, 'nextseq2022_comparision-udi.png')),
+       device = 'png', height = 3000, width = 5000, units = 'px', dpi = 300)
 ```
 
 
@@ -216,6 +266,7 @@ ggsave(filename = here(plot_out, paste0(datefield, 'nextseq2022_comparision.png'
 index_compare <- edna_compare %>%
   filter(rank == 'species') %>%
   filter(year == 2022) %>%
+  filter(!(library == '2022nextseq_udi')) %>%
   left_join(region_2022) %>%
   select(sample_id, motu_pa, found_taxa, common_name, region_label, site_code, seqmethod) %>%
   distinct() %>%
@@ -340,6 +391,7 @@ species_select <- 'Girella nigricans'
 species_reads <- edna_compare %>%
   filter(found_taxa == species_select) %>%
   filter(year == 2022) %>%
+  filter(!(library == '2022nextseq_udi')) %>%
   select(sample_id, common_name, found_taxa, asv, motu, reads_raw, seqmethod) %>%
   distinct() 
 
