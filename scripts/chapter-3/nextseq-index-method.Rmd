@@ -7,6 +7,11 @@ output: html_document
 
 Here are plots comparing outputs of two indexing methods on nextseq, the same samples from 2023.
 
+combinatorial: '#015B58FF',  
+unique: '#89689DFF',
+miseq:  '#BA7999FF'
+nextseq: '#2C6184FF',
+
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(janitor)
@@ -43,9 +48,24 @@ pal_peco <- c("Juneau Region, Alaska" = "#00496F",
 ```
 
 ```{r load-in}
+# what we found
+edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
+                             '20260320_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+  filter(rank == 'species') %>%
+  #rename(region_label = region_name_label) %>%
+  # remove below threshold
+  filter(relabund_vst_taxa > 1) %>%
+  # problematic sample
+  filter(!(sample_id %in% c('pecoe-0207'))) 
+
+sp_ranges <- edna_peco %>%
+  select(found_taxa, taxa_mean) %>%
+  distinct() %>%
+  dplyr::rename(peco_taxa_mean = taxa_mean)
+
 # set up regions
 regions <- read_csv(here(dataedna, '20260320_peco_region-name-plotting.csv'))[-1] %>%
-  rename(region_label = region_name_label) 
+  dplyr::rename(region_label = region_name_label) 
 
 # why is this separate?
 region_2023 <- regions %>%
@@ -73,8 +93,8 @@ edna_compare <- read.csv(here(seqs_in,
 only_2023 <- edna_compare %>%
   filter(year == 2023) %>%
   filter(rank == "species") %>%
-  mutate(index_type = case_when(library == '2023first' ~ 'Dual',
-                                library == '2023redone' ~ 'Unique dual'))
+  mutate(index_type = case_when(library == '2023first' ~ 'Combinatorial dual indexing',
+                                library == '2023redone' ~ 'Unique dual indexing'))
 
 region_order <- regions %>%
   filter(region_name %in% only_2023$region_name) %>%
@@ -100,7 +120,8 @@ fish_order_all <- edna_compare %>%
   filter(rank == 'species') %>%
   select(found_taxa, common_name, taxa_mean) %>%
   distinct() %>%
-  arrange(taxa_mean) %>%
+  left_join(sp_ranges) %>%
+  arrange(peco_taxa_mean) %>%
   mutate(order_num = as.numeric(row.names(.)))
 
 
@@ -109,7 +130,8 @@ fish_order_2023 <- edna_compare %>%
   filter(year == 2023) %>%
   select(found_taxa, common_name, taxa_mean) %>%
   distinct() %>%
-  arrange(taxa_mean) %>%
+ left_join(sp_ranges) %>%
+  arrange(peco_taxa_mean) %>%
   mutate(order_num = as.numeric(row.names(.)))
 
 
@@ -657,7 +679,7 @@ mifish_site_plot %>%
 
 ggsave(filename = here(plot_out, paste0(datefield, 
                                     'peco_pc1xlat-dual_boxplot-site_presentation.pdf')),
-       device = 'pdf', height = 10, width= 10,  units = "in")
+       device = 'pdf', height = 6, width= 10,  units = "in")
 ggsave(filename = here(plot_out, paste0(datefield, 
                                     'peco_pc1xlat-dual_boxplot-site_presentation.png')),
        device = 'png', height = 1500, width= 2000,  units = "px")
@@ -693,7 +715,7 @@ mifish_site_plot_re %>%
 
 ggsave(filename = here(plot_out, paste0(datefield, 
                                     'peco_pc1xlat-unique_boxplot-site_presentation.pdf')),
-       device = 'pdf', height = 10, width= 10,  units = "in")
+       device = 'pdf', height = 6, width= 10,  units = "in")
 ggsave(filename = here(plot_out, paste0(datefield, 
                                     'peco_pc1xlat-unique_boxplot-site_presentation.png')),
        device = 'png', height = 1500, width= 2000,  units = "px")

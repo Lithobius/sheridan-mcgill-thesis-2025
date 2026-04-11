@@ -21,6 +21,10 @@ processededna <- here('processeddata', 'peco', 'nextseq_miseq')
 
 metadata <- read_csv(here(processededna, '20260319_peco-2021-24_metadata.csv')) %>%
   mutate(extraction_blank = str_replace_all(extraction_blank, '_', '-'))
+
+sampleyear <- metadata %>%
+  select(sample_id, year) %>%
+  distinct()
 ```
 
 # read retention
@@ -221,6 +225,14 @@ reads2024_all <- reads2024 %>%
   mutate(sample_id = tolower(sample_id))
 
 
+reads_multiyear <- read_csv(here(reports, '20260107_peco-mixedyears_12s_2025nextseq-redos_read-retention-by-sample.csv')) [-1] %>%
+  # remove tail of sample name
+  mutate(sample_id = str_remove_all(sample_id, '_S.*$')) %>%
+  left_join(sampleyear) %>%
+  mutate(run = 'multiyear-redos') %>%
+  mutate(seqmethod = 'nextseq')
+
+
 reads_combine <- reads2024_all %>%
   bind_rows(reads2023_udi_all) %>%
   bind_rows(reads2022_all) %>%
@@ -231,6 +243,7 @@ reads_combine <- reads2024_all %>%
   bind_rows(reads2021_bsa) %>%
   bind_rows(reads2021_ms1) %>%
   bind_rows(reads2022_ms2) %>%
+  bind_rows(reads_multiyear) %>%
   select(!c(percent_retained_aftermerge, percent_notsingleton,
             percent_notchimera, percentraw_retainedby_cutadapt, percent_retained_of_raw)) %>%
     # if NA, dropped out, 0
@@ -374,6 +387,20 @@ ss2024 <- read_csv(here(reports, "2024_SampleSheet.csv"),
   mutate(run = '2025march') %>%
   mutate(seqmethod = 'nextseq')
 
+
+ssmulti <- read_csv(here(reports, "multiyear_SampleSheet.csv"),
+              skip = 28) %>%  
+  janitor::clean_names() %>%
+  distinct() %>%
+  filter(!(sample_id %in% c("GeneratedVersion", "Sample_ID", 
+                            "[Cloud_Settings]", "[Cloud_Data]"))) %>%
+  filter(!(index %in% c('PECO_2024', 'PECO_2023', 
+                        'PECO_2022', 'PCR_NEG1_Redos-2022-2024',
+                        'PCR_NEG2_Redos-2022-2024'))) %>%
+  left_join(sampleyear) %>%
+  mutate(run = 'multiyear-redos') %>%
+  mutate(seqmethod = 'nextseq')
+
 # list of samples that went through nextseq
 through_nextseq <- ss2021_march %>%
   bind_rows(ss2021_sept) %>%
@@ -382,6 +409,7 @@ through_nextseq <- ss2021_march %>%
   bind_rows(ss2023_cdi) %>%
   bind_rows(ss2023_udi) %>%
   bind_rows(ss2024) %>%
+  bind_rows(ssmulti) %>%
   mutate(sample_id = tolower(sample_id)) %>%
   mutate(sample_id = str_remove_all(sample_id, 'peco2023_redos_')) %>%
   mutate(sample_id = case_when(str_detect(sample_id, 'coe[0-9]{3}$') ~ str_replace(sample_id, 'coe', 'coe-0'),
@@ -466,6 +494,13 @@ demulti2024 <- read_csv(here(reports, "2024_Demultiplex_Stats.csv"))[-1] %>%
     mutate(year = 2024) %>%
   mutate(run = '2025march') %>%
   mutate(seqmethod = 'nextseq')
+
+demultimulti <- read_csv(here(reports, "multiyear_Demultiplex_Stats.csv"))[-1] %>%
+  janitor::clean_names()%>%
+  rename(index_combo = index) %>%
+  left_join(sampleyear) %>%
+  mutate(run = 'multiyear-redos') %>%
+  mutate(seqmethod = 'nextseq')
   
 demulti_all <- demulti2021_march %>%
   bind_rows(demulti2021_sept) %>%
@@ -473,7 +508,8 @@ demulti_all <- demulti2021_march %>%
   bind_rows(demulti2022_udi) %>%
   bind_rows(demulti2023_cdi) %>%
   bind_rows(demulti2023_udi) %>%
-  bind_rows(demulti2024)
+  bind_rows(demulti2024) %>%
+  bind_rows(demultimulti)
 
 
 
@@ -520,13 +556,20 @@ am2024 <- read_csv(here(reports, "2024_Adapter_Metrics.csv"))[-1] %>%
   mutate(run = '2025march') %>%
   mutate(seqmethod = 'nextseq')
 
+ammulti <- read_csv(here(reports, "multiyear_Adapter_Metrics.csv"))[-1] %>%
+  janitor::clean_names()  %>%
+  left_join(sampleyear) %>%
+  mutate(run = 'multiyear-redos') %>%
+  mutate(seqmethod = 'nextseq')
+
 am_all <- am2021_march %>%
   bind_rows(am2021_sept) %>%
   bind_rows(am2022_run2) %>%
   bind_rows(am2022_udi) %>%
   bind_rows(am2023_cdi) %>%
   bind_rows(am2023_udi) %>%
-  bind_rows(am2024)
+  bind_rows(am2024) %>%
+  bind_rows(ammulti)
 
 
 qm2021_march <- read_csv(here(reports, "2021_nextseq_redo202504_Quality_Metrics.csv"))[-1] %>%
@@ -568,8 +611,14 @@ qm2023_udi <- read_csv(here(reports, "2023_udi_Quality_Metrics.csv"))[-1] %>%
 
 qm2024 <- read_csv(here(reports, "2024_Quality_Metrics.csv"))[-1] %>%
   janitor::clean_names()  %>%
-    mutate(year = 2024) %>%
+  mutate(year = 2024) %>%
   mutate(run = '2025march') %>%
+  mutate(seqmethod = 'nextseq')
+
+qmmulti <- read_csv(here(reports, "multiyear_Quality_Metrics.csv"))[-1] %>%
+  janitor::clean_names()  %>%
+  left_join(sampleyear) %>%
+  mutate(run = 'multiyear-redos') %>%
   mutate(seqmethod = 'nextseq')
 
 
@@ -579,7 +628,8 @@ qm_all <- qm2021_march %>%
   bind_rows(qm2022_udi) %>%
   bind_rows(qm2023_cdi) %>%
   bind_rows(qm2023_udi) %>%
-  bind_rows(qm2024)
+  bind_rows(qm2024) %>%
+  bind_rows(qmmulti)
 
 nextseq_rep_all <- demulti_all %>%
   left_join(am_all) %>%
@@ -720,9 +770,17 @@ dropout_indexcombo <- dropout %>%
   select(!c(sample_id, year, run)) %>%
   distinct()
 
+redo_test <- sample_stats_nextseq %>%
+  filter(sample_id %in% ssmulti$sample_id) %>%
+  select(sample_id, year, run, fw_r, index, index2, index_combo,
+         number_reads, nochimeras, percent_adapter_bases, percent_q30) %>%
+  distinct() %>%
+  add_count(sample_id, index)
+
 ```
 
 ```{r variability}
+
 next_variable <- sample_stats_nextseq %>%
   select(sample_year)
 

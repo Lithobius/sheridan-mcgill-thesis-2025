@@ -73,12 +73,12 @@ if __name__ == "__main__":
 
     # sequence matrix; columns sequences rows samples values reads
     ## 12s
-    asv2motu_key = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_swarm_statsfile-w-motunums.csv')
+    asv2motu_key = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260404_peco_next-mi-combined_swarm_statsfile-w-motunums.csv')
     motu_converted = asv2motu(asv2motu_key)
     # input FASTA
-    fasta_in = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_swarm_clusterreps.fasta')
+    fasta_in = here('./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260404_peco_next-mi-combined_swarm_clusterreps.fasta')
     # output FASTA
-    fasta_out = here("./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260331_peco_next-mi-combined_swarm_clusterreps-motus.fasta")
+    fasta_out = here("./rawdata/peco/fastq/miseq_nextseq/combined_next_mi/20260404_peco_next-mi-combined_swarm_clusterreps-motus.fasta")
     # run function to forat to swarm format.
     swarm2motu(motu_converted, fasta_in, fasta_out)
 

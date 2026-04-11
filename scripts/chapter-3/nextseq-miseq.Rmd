@@ -62,7 +62,12 @@ edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
   # remove below threshold
   filter(relabund_vst_taxa > 1) %>%
   # problematic sample
-  filter(!(sample_id %in% c('pecoe-0207')))
+  filter(!(sample_id %in% c('pecoe-0207'))) 
+
+sp_ranges <- edna_peco %>%
+  select(found_taxa, taxa_mean) %>%
+  distinct() %>%
+  rename(peco_taxa_mean = taxa_mean)
 
 edna_compare <- read.csv(here(seqs_in,
                              '20260404_peco_next-mi-combined_asvmatrix_fish-novst.csv'))[-1] %>%
@@ -90,11 +95,13 @@ edna_compare <- edna_compare %>%
 
 # set an order for plotting; here mean of range found
 # this is from the 'correct' data
+
 fish_order_all <- edna_compare %>%
   filter(rank == 'species') %>%
   select(found_taxa, common_name, taxa_mean) %>%
   distinct() %>%
-  arrange(taxa_mean) %>%
+  left_join(sp_ranges) %>%
+  arrange(peco_taxa_mean) %>%
   mutate(order_num = as.numeric(row.names(.)))
 
 fish_order_2022 <- edna_compare %>%
@@ -102,7 +109,8 @@ fish_order_2022 <- edna_compare %>%
   filter(year == 2022) %>%
   select(found_taxa, common_name, taxa_mean) %>%
   distinct() %>%
-  arrange(taxa_mean) %>%
+  left_join(sp_ranges) %>%
+  arrange(peco_taxa_mean) %>%
   mutate(order_num = as.numeric(row.names(.)))
 
 fish_order_2023 <- edna_compare %>%
@@ -110,7 +118,8 @@ fish_order_2023 <- edna_compare %>%
   filter(year == 2023) %>%
   select(found_taxa, common_name, taxa_mean) %>%
   distinct() %>%
-  arrange(taxa_mean) %>%
+  left_join(sp_ranges) %>%
+  arrange(peco_taxa_mean) %>%
   mutate(order_num = as.numeric(row.names(.)))
 
 peco_index <- read_csv(here(seqs_in, 'index_list.csv')) %>%

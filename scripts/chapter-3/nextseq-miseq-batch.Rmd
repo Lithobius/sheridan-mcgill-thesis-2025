@@ -1,0 +1,482 @@
+---
+title: "nextseq-miseq-batch"
+author: "Kate Sheridan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+combinatorial: '#015B58FF',  
+unique: '#89689DFF',
+miseq:  '#BA7999FF'
+nextseq: '#2C6184FF'
+
+
+ '#BA7999FF','#2C6184FF'
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(janitor)
+library(here)
+library(ggpubr)
+
+library(phyloseq)
+library(DESeq2)
+library(pheatmap)
+library(vsn)
+library(ape)
+
+#library(eulerr)
+#
+seqs_in <- here('processeddata', 'peco', 'nextseq_miseq')
+dataedna <- here('processeddata', 'peco', '2021-24_edna')
+plot_out <- here('output', 'chapter3')
+
+datefield <- '20260405_'
+
+pal_peco <- c("Juneau Region, Alaska" = "#00496F",
+             "Southeast Alaska" = "#03587B",
+             "Haida Gwaii, British Columbia" = "#076787",
+             "Central Coast British Columbia" = "#0B7693",
+             "North Vancouver Island, British Columbia" = "#0F85A0",
+             "Inner Coast, British Columbia" = "#469989",
+             "Pacific Rim Park, British Columbia" = "#7EAE73",
+             "Puget Sound & Padilla Bay, Washington" = "#B5C25C",
+             "Willapa Bay, Washington" = "#EDD746",
+             "Yaquina Bay, Oregon" = "#EDC334",
+             "Coos Bay, Oregon" = "#EDB123",
+             "Humboldt Bay, California" = "#ED9E11",
+             "Bodega Bay, California" = "#ED8B00",
+             "San Francisco Bay, California" = "#E97809",
+             "Morro Bay, California" = "#E56512",
+             "Los Angeles, California" = "#E1531B",
+             "San Diego region, California" = "#DD4124")
+```
+
+```{r}
+# what we found
+edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
+                             '20260320_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
+  filter(rank == 'species') %>%
+  rename(region_label = region_name_label) %>%
+  # remove below threshold
+  filter(relabund_vst_taxa > 1) %>%
+  # problematic sample
+  filter(!(sample_id %in% c('pecoe-0207'))) 
+
+edna_compare <- read.csv(here(seqs_in,
+                             '20260404_peco_next-mi-combined_asvmatrix_fish-novst.csv'))[-1] %>%
+      select(!c(region_code_label, region_code, reads_adjust_fieldlab, curated, motu_swarm,
+            reads_adjust_field,rain, extraction_blank, sample_richness, lab_richness_site,
+            flag, bottom_depth_m, volume_filtered, collection_time, lulu_rank, filter_time,
+            seagrass_presence, seagrass_notes, describe_transect, wind, temperature_c,
+            notes, sample_box, sample_notes, personnel, swell_m, tide, salinity_psu,
+            collection_method, treatment, any_ctrl, field_blank_richness_site, field_blank_regional_max,
+            reads_adjust_lab, richness_site_avs_anyctrl, richness_sample_avs_in_labblank,
+            richness_sample_avs_anyctrl, richness_sample_avs_in_fieldblank, richness_proportion_in_fieldblank,
+            richness_proportion_in_labblank, richness_proportion_in_anyblank))
+
+lib2 <- edna_compare %>% 
+  filter(seqmethod == 'miseq') %>%
+  select(sample_id) %>%
+  distinct()
+
+
+```
+
+# raw read plots
+
+```{r}
+peco_rawreads <- edna_peco %>% 
+  select(found_taxa, reads_raw, year, sample_id, seq_method) %>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq'))
+
+
+peco_rawreads %>%
+  group_by(sample_id) %>%
+  mutate(sample_reads = sum(reads_raw)) %>%
+  ungroup() %>%
+  select(!c(reads_raw, found_taxa)) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = sample_id, 
+               y = sample_reads,
+               fill = platform)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = 'Samples', y = "Raw Reads") +
+  scale_fill_manual(values = c('#BA7999FF','#2C6184FF'))+
+  geom_vline(xintercept = c('pecoe-0457', 'pecoe-0877', 'pecoe-1342'),
+             linetype = 'dashed') +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = 'bottom',
+        legend.title = element_blank(),
+        panel.grid = element_blank())
+
+ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.png')),
+       height = 1500, width = 2500, units = 'px')
+
+ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.pdf')),
+       height = 7, width = 13, units = 'in')
+```
+
+```{r}
+read2022_compare <- edna_compare %>%
+  filter(library %in% c('2022nextseq_udi', '2022miseq')) %>%
+  filter(sample_id %in% lib2$sample_id) %>%
+  select(found_taxa, reads_raw, year, sample_id, seqmethod, region_name_label) %>%
+  mutate(platform = case_when(str_detect(seqmethod, 'miseq') ~ 'MiSeq',
+                              str_detect(seqmethod, 'nextseq') ~ 'NextSeq')) %>%
+  distinct()
+
+read2022_compare %>%
+  group_by(sample_id, platform) %>%
+  mutate(sample_reads = sum(reads_raw)) %>%
+  ungroup() %>%
+  group_by(sample_id) %>%
+  mutate(total_reads = sum(reads_raw)) %>%
+  ungroup() %>%
+  select(!c(reads_raw, found_taxa)) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = reorder(factor(sample_id), -total_reads), 
+               y = sample_reads,
+               fill = platform),
+           position = 'dodge'
+           ) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = '2022 Matched Samples', y = "Raw Fish Reads") +
+  scale_fill_manual(values = c('#BA7999FF','#2C6184FF'))+
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = 'bottom',
+        legend.title = element_blank(),
+        panel.grid = element_blank())
+
+ggsave(here(plot_out, paste0(datefield, 'peco2022_readsxsamples.png')),
+       height = 1500, width = 2500, units = 'px')
+
+ggsave(here(plot_out, paste0(datefield, 'peco2022_readsxsamples.pdf')),
+       height = 7, width = 13, units = 'in')
+
+read2022_compare %>%
+  group_by(sample_id, platform) %>%
+  mutate(sample_reads = sum(reads_raw)) %>%
+  ungroup() %>%
+  select(!c(reads_raw, found_taxa, year, seqmethod)) %>%
+  distinct() %>%
+  pivot_wider(names_from = platform,
+              values_from = sample_reads) %>%    
+  # if NA, dropped out, 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  ggplot() +
+  geom_point(aes(x = MiSeq, y = NextSeq,
+                 color = region_name_label)) +
+  scale_color_manual(values = pal_peco) +
+  geom_abline() +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(labels = scales::comma) +
+  theme_bw() +
+  theme(legend.position = 'none',
+        legend.title = element_blank(),
+        panel.grid = element_blank())
+
+
+ggsave(here(plot_out, paste0(datefield, 'peco2022_nextxmi.png')),
+       height = 1500, width = 2500, units = 'px')
+
+ggsave(here(plot_out, paste0(datefield, 'peco2022_nextxmi.pdf')),
+       height = 7, width = 9, units = 'in')
+
+
+next_mi <-read2022_compare %>%
+  group_by(sample_id, platform) %>%
+  mutate(sample_reads = sum(reads_raw)) %>%
+  ungroup() %>%
+  select(!c(reads_raw, found_taxa, year, seqmethod)) %>%
+  distinct() %>%
+  pivot_wider(names_from = platform,
+              values_from = sample_reads) %>%    
+  # if NA, dropped out, 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0)))
+
+
+summary(lm(NextSeq ~ MiSeq, next_mi))
+
+#store the residuals from the linear model
+nextmi_residuals = resid(lm(NextSeq ~ MiSeq, next_mi)) #store the predicted RFFT scores from the linear model
+nextmi_predicted = predict(lm(NextSeq ~ MiSeq, next_mi))
+#create residual plot
+plot(nextmi_residuals ~ nextmi_predicted) 
+abline(h = 0, col = "red", lty = 2)
+
+hist(nextmi_residuals, freq = FALSE)
+
+qqnorm(nextmi_residuals)
+qqline(nextmi_residuals)
+```
+
+```{r}
+
+```
+
+```{r phyloseq motus}
+
+
+# import otu table
+# requires numeric matrix
+fishonly_otus <- edna_peco %>%
+  filter(treatment %in% c('Sample')) %>%
+  select(sample_id, motu, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('motu') %>%
+  as.matrix()
+
+fishonly_sample <- edna_peco %>%
+  select(sample_id, year, region_code, seq_method) %>% 
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_otus)) %>%
+  #mutate(seq_method = ifelse(year == 2023, 'nextseq', 'miseq')) %>%
+  mutate(year = as.factor(year)) %>%
+  # NOTE factor CANNOT include special characters
+  mutate(seq_method = as.factor(str_remove_all(seq_method, '-')))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_otus = fishonly_otus + 1
+
+fishotu_dsdata = DESeqDataSetFromMatrix(countData = fishonly_otus, 
+                             colData=fishonly_sample, 
+                             #design = ~ treatment_deseq + seq_method
+                             design = ~ seq_method
+                             )
+
+vsd_otu <- varianceStabilizingTransformation(fishotu_dsdata)
+
+wis_otu <- vegan::wisconsin(fishonly_otus)
+
+## Taxa level
+
+# import otu table
+# requires numeric matrix
+fishonly_taxa_otus <- edna_peco %>%
+  filter(treatment == 'Sample') %>%
+  select(sample_id, found_taxa, reads_raw) %>%
+  pivot_wider(names_from = sample_id,
+              values_from = reads_raw,
+              values_fn = sum) %>%
+  # NA to 0
+  mutate(across(.cols = everything(), ~replace(., is.na(.), 0))) %>%
+  column_to_rownames('found_taxa') %>%
+  as.matrix()
+
+fishonly_taxa_sample <- edna_peco %>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
+  select(sample_id, seq_method, platform, year, region_code) %>%
+  distinct() %>%
+  # make sure sample names match otu table
+  column_to_rownames('sample_id') %>%
+  filter(rownames(.) %in% colnames(fishonly_taxa_otus)) %>%
+  mutate(year = as.factor(year))
+
+# this is from the deseq function, 
+# if we want to keep in the "bad" samples we need to add a pseudocount of 1 to all,
+# and tbh we might need this simply because eDNA is not RNAseq 
+# and every species will fail to show up in at least one sample.
+# The same tweak as for edgeR to avoid NaN problems
+# that cause the workflow to stall/crash.
+fishonly_taxa_otus = fishonly_taxa_otus + 1
+
+fishtaxa_dsdata = DESeqDataSetFromMatrix(countData = fishonly_taxa_otus, 
+                             colData=fishonly_taxa_sample, 
+                             design = ~ seq_method)
+
+vsd_taxa <- varianceStabilizingTransformation(fishtaxa_dsdata)
+
+wis_taxa <- vegan::wisconsin(fishonly_taxa_otus)
+
+# plots
+meanSdPlot(fishonly_otus)
+meanSdPlot(assay(vsd_otu))
+
+motu_ur <- pheatmap(fishonly_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized MOTUs') 
+
+ggsave(here(plot_out, paste0(datefield, 'unrelative-motu.pdf')), plot = motu_ur)
+
+motu_vst <- pheatmap(assay(vsd_otu), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'MOTUs with VST, DESeq2')
+
+ggsave(here(plot_out, paste0(datefield, 'vst-motu.pdf')), plot = motu_vst)
+
+otu_wis <- pheatmap(wis_otu, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Wisconsin with vegan')
+
+ggsave(here(plot_out, paste0(datefield, 'wis-otu.pdf')), plot = otu_wis)
+
+meanSdPlot(fishonly_taxa_otus)
+meanSdPlot(assay(vsd_taxa))
+
+taxa_ur <- pheatmap(fishonly_taxa_otus, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Un-relativized taxa')
+
+ggsave(here(plot_out, paste0(datefield, 'unrelative-taxa.pdf')), plot = taxa_ur)
+
+taxa_vst <- pheatmap(assay(vsd_taxa), 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'Taxa with VST, DESeq2')
+
+ggsave(here(plot_out, paste0(datefield, 'vst-taxa.pdf')), plot = taxa_vst)
+
+taxa_wis <- pheatmap(wis_taxa, 
+         show_rownames = FALSE, show_colnames = FALSE,
+         cluster_cols = FALSE, cluster_rows = FALSE,
+         main = 'wisconsin with vegan')
+
+ggsave(here(plot_out, paste0(datefield, 'wis-taxa.pdf')), plot = taxa_wis)
+
+```
+
+
+
+```{r}
+sample_data <- fishonly_sample %>%
+  rownames_to_column('sample_id')%>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq'))
+
+fishonly_taxa_dist <- dist(t(fishonly_taxa_otus))
+vsd_taxa_dist <- dist(t(assay(vsd_taxa)))
+wis_taxa_dist <- dist(t(wis_taxa))
+
+fishonly_taxa_dist2 <- as.matrix(fishonly_taxa_dist)
+vsd_taxa_dist2 <- as.matrix(vsd_taxa_dist)
+wis_taxa_dist2 <- as.matrix(wis_taxa_dist)
+
+
+colors <- colorRampPalette( rev(RColorBrewer::brewer.pal(9, "Blues")) )(255)
+pheatmap(fishonly_taxa_dist2,
+         col = colors)
+pheatmap(vsd_taxa_dist2,
+         col = colors)
+pheatmap(wis_taxa_dist2,
+         col = colors)
+
+fishonly_pcoa <- pcoa(fishonly_taxa_dist2)
+fishonly_pcoa_plot <- as.data.frame(fishonly_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('sample_id') %>%
+  left_join(sample_data)
+
+vsd_taxa_pcoa <- pcoa(vsd_taxa_dist2)
+vsd_taxa_pcoa_plot <- as.data.frame(vsd_taxa_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('sample_id') %>%
+  left_join(sample_data)
+
+wis_taxa_pcoa <- pcoa(wis_taxa_dist2)
+wis_taxa_pcoa_plot <- as.data.frame(wis_taxa_pcoa$vectors) %>% 
+  janitor::clean_names() %>%
+  select(axis_1, axis_2) %>%
+  rownames_to_column('sample_id') %>%
+  left_join(sample_data)
+  
+
+ggplot(fishonly_pcoa_plot, aes(x = axis_1, y = axis_2)) +
+  geom_point(aes(x = axis_1, y = axis_2,
+                 color = as.factor(platform))) +
+  scale_color_manual(values = c('#BA7999FF','#2C6184FF'))+
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(labels = scales::comma) +
+  labs(title = 'Unadjusted, by taxa') +
+  theme_bw()
+
+ggsave(here(plot_out,  'unadjusted_pcoa.png'))
+ggsave(here(plot_out, 'unadjusted_pcoa.pdf'))
+
+ggplot(vsd_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
+  geom_point(aes(x = axis_1, y = axis_2,
+                 color = as.factor(platform))) +
+  scale_color_manual(values = c('#BA7999FF','#2C6184FF'))+
+  labs(title = 'VST with DESeq2, by taxa') +
+  theme_bw()
+
+ggsave(here(plot_out, 'vst_pcoa.png'))
+ggsave(here(plot_out, 'vst_pcoa.pdf'))
+
+ggplot(wis_taxa_pcoa_plot, aes(x = axis_1, y = axis_2)) +
+  geom_point(aes(x = axis_1, y = axis_2,
+                 color = as.factor(platform))) +
+  scale_color_manual(values = c('#BA7999FF','#2C6184FF'))+
+  labs(title = 'Wisconsin with vegan, by taxa') +
+  theme_bw()
+
+ggsave(here(plot_out, 'wisconsin_pcoa.png'))
+ggsave(here(plot_out, 'wisconsin_pcoa.pdf'))
+```
+
+```{r}
+vst_taxa_tomerge <- as.data.frame(assay(vsd_taxa)) %>%
+  rownames_to_column('found_taxa') %>%
+  pivot_longer(cols = !found_taxa,
+               names_to = 'sample_id',
+               values_to = 'relabund_vst_taxa') %>%
+  mutate(relabund_vst_taxa = ifelse(relabund_vst_taxa < 0, 0, relabund_vst_taxa))
+
+peco_vst <- edna_peco %>% 
+  select(found_taxa, reads_raw, year, sample_id, seq_method) %>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
+  left_join(vst_taxa_tomerge)
+
+
+peco_vst %>%
+  group_by(sample_id) %>%
+  mutate(sample_reads = sum(relabund_vst_taxa)) %>%
+  ungroup() %>%
+  select(!c(relabund_vst_taxa, found_taxa)) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = sample_id, 
+               y = sample_reads,
+               fill = platform)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = 'Samples', y = "Raw Reads") +
+  scale_fill_manual(values = c('#BA7999FF','#2C6184FF'))+
+  geom_vline(xintercept = c('pecoe-0457', 'pecoe-0877', 'pecoe-1342'),
+             linetype = 'dashed') +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = 'bottom',
+        legend.title = element_blank(),
+        panel.grid = element_blank())
+
+ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.png')),
+       height = 1500, width = 2500, units = 'px')
+
+ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.pdf')),
+       height = 7, width = 13, units = 'in')
+```
+
