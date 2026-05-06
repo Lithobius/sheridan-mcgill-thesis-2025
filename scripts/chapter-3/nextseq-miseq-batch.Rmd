@@ -57,9 +57,9 @@ pal_peco <- c("Juneau Region, Alaska" = "#00496F",
 edna_peco <- read_csv(here('processeddata', 'peco', '2021-24_edna',
                              '20260320_peco-combined_12s_asvmatrix_fish.csv'))[-1] %>%
   filter(rank == 'species') %>%
-  rename(region_label = region_name_label) %>%
+  #rename(region_label = region_name_label) %>%
   # remove below threshold
-  filter(relabund_vst_taxa > 1) %>%
+  #filter(relabund_vst_taxa > 1) %>%
   # problematic sample
   filter(!(sample_id %in% c('pecoe-0207'))) 
 
@@ -89,7 +89,8 @@ lib2 <- edna_compare %>%
 peco_rawreads <- edna_peco %>% 
   select(found_taxa, reads_raw, year, sample_id, seq_method) %>%
   mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
-                              str_detect(seq_method, 'nextseq') ~ 'NextSeq'))
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
+  distinct()
 
 
 peco_rawreads %>%
@@ -117,6 +118,39 @@ ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.png')),
        height = 1500, width = 2500, units = 'px')
 
 ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.pdf')),
+       height = 7, width = 13, units = 'in')
+
+peco_rawreads_motu <- edna_peco %>% 
+  select(motu, reads_raw, year, sample_id, seq_method) %>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
+  distinct()
+
+peco_rawreads_motu %>%
+  group_by(sample_id) %>%
+  mutate(sample_reads = sum(reads_raw)) %>%
+  ungroup() %>%
+  select(!c(reads_raw, motu)) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = sample_id, 
+               y = sample_reads,
+               fill = platform)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = 'Samples', y = "Raw Reads") +
+  scale_fill_manual(values = c('#BA7999FF','#2C6184FF'))+
+  geom_vline(xintercept = c('pecoe-0457', 'pecoe-0877', 'pecoe-1342'),
+             linetype = 'dashed') +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = 'bottom',
+        legend.title = element_blank(),
+        panel.grid = element_blank())
+
+ggsave(here(plot_out, paste0(datefield, 'peco_motureadsxsamples.png')),
+       height = 1500, width = 2500, units = 'px')
+
+ggsave(here(plot_out, paste0(datefield, 'peco_motureadsxsamples.pdf')),
        height = 7, width = 13, units = 'in')
 ```
 
@@ -449,7 +483,8 @@ peco_vst <- edna_peco %>%
   select(found_taxa, reads_raw, year, sample_id, seq_method) %>%
   mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
                               str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
-  left_join(vst_taxa_tomerge)
+  left_join(vst_taxa_tomerge) %>%
+  distinct()
 
 
 peco_vst %>%
@@ -477,6 +512,46 @@ ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.png')),
        height = 1500, width = 2500, units = 'px')
 
 ggsave(here(plot_out, paste0(datefield, 'peco_readsxsamples.pdf')),
+       height = 7, width = 13, units = 'in')
+
+
+peco_vst <- edna_peco %>% 
+  select(found_taxa, reads_raw, year, sample_id, seq_method) %>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
+  left_join(vst_taxa_tomerge) %>%
+  distinct()
+
+
+edna_peco %>%
+  group_by(sample_id) %>%
+  select(motu, year, sample_id, seq_method, relabund_vst_motu) %>%
+  mutate(platform = case_when(str_detect(seq_method, 'miseq') ~ 'MiSeq',
+                              str_detect(seq_method, 'nextseq') ~ 'NextSeq')) %>%
+  distinct() %>%
+  mutate(sample_reads = sum(relabund_vst_motu)) %>%
+  ungroup() %>%
+  select(!c(relabund_vst_motu, motu)) %>%
+  distinct() %>%
+  ggplot() +
+  geom_col(aes(x = sample_id, 
+               y = sample_reads,
+               fill = platform)) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(x = 'Samples', y = "Raw Reads") +
+  scale_fill_manual(values = c('#BA7999FF','#2C6184FF'))+
+  geom_vline(xintercept = c('pecoe-0457', 'pecoe-0877', 'pecoe-1342'),
+             linetype = 'dashed') +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        legend.position = 'bottom',
+        legend.title = element_blank(),
+        panel.grid = element_blank())
+
+ggsave(here(plot_out, paste0(datefield, 'peco_motuvstxsamples.png')),
+       height = 1500, width = 2500, units = 'px')
+
+ggsave(here(plot_out, paste0(datefield, 'peco_motuvstxsamples.pdf')),
        height = 7, width = 13, units = 'in')
 ```
 
